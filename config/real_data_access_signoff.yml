@@ -1,0 +1,35 @@
+# HR Command Center - Role Access Signoff Matrix
+# Configures active role approvals for live dashboard modules.
+
+role_approvals:
+  - role_name: "admin_system"
+    approved_modules: ["*"]
+    employee_level_access: true
+    salary_access: true
+    er_legal_access: true
+    signoff_owner: "CISO"
+    status: "Approved"
+
+  - role_name: "hr_executive"
+    approved_modules: ["*"]
+    employee_level_access: true
+    salary_access: true
+    er_legal_access: true
+    signoff_owner: "VP of HR Operations"
+    status: "Approved"
+
+  - role_name: "payroll_manager"
+    approved_modules: ["payroll"]
+    employee_level_access: true
+    salary_access: true
+    er_legal_access: false
+    signoff_owner: "Finance Director"
+    status: "Approved"
+
+  - role_name: "employee_relations_manager"
+    approved_modules: ["er"]
+    employee_level_access: true
+    salary_access: false
+    er_legal_access: true
+    signoff_owner: "VP of HR Operations"
+    status: "Approved"

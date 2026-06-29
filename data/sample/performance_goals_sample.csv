@@ -1,0 +1,7 @@
+goal_id,employee_id,title,status,due_date,completed_date
+GOL001,EMP001,Deliver dashboard,Completed,2026-06-15,2026-06-14
+GOL002,EMP002,Refactor api,In Progress,2026-06-30,
+GOL003,EMP003,Complete audit,Cancelled,2026-06-20,
+GOL004,EMP004,Run campaign,Overdue,2026-06-10,
+GOL005,EMP999,Unknown goal,Completed,2026-06-15,2026-06-15
+GOL006,EMP005,No status goal,,2026-06-25,

@@ -1,0 +1,1153 @@
+{
+  "summary": {
+    "report_month": "2026-06",
+    "kpis": [
+      {
+        "key": "saudization_pct",
+        "label": "Saudization %",
+        "value": 50.0,
+        "unit": "%",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "healthy"
+      },
+      {
+        "key": "saudi_headcount",
+        "label": "Saudi Headcount",
+        "value": 9.0,
+        "unit": "employees",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "neutral"
+      },
+      {
+        "key": "non_saudi_headcount",
+        "label": "Non-Saudi Headcount",
+        "value": 9.0,
+        "unit": "employees",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "neutral"
+      },
+      {
+        "key": "employees_missing_nationality",
+        "label": "Employees Missing Nationality",
+        "value": 1.0,
+        "unit": "employees",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "critical"
+      },
+      {
+        "key": "iqamas_expiring_30",
+        "label": "Iqamas Expiring in 30 Days",
+        "value": 0.0,
+        "unit": "documents",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "healthy"
+      },
+      {
+        "key": "work_permits_expiring_30",
+        "label": "Work Permits Expiring in 30 Days",
+        "value": 0.0,
+        "unit": "documents",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "healthy"
+      },
+      {
+        "key": "iqamas_expired",
+        "label": "Expired Iqamas",
+        "value": 0.0,
+        "unit": "documents",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "healthy"
+      },
+      {
+        "key": "work_permits_expired",
+        "label": "Expired Work Permits",
+        "value": 0.0,
+        "unit": "documents",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "healthy"
+      },
+      {
+        "key": "gosi_missing_count",
+        "label": "GOSI Missing / Not Registered Count",
+        "value": 15.0,
+        "unit": "employees",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "critical"
+      },
+      {
+        "key": "wps_exception_count",
+        "label": "WPS Exception Count",
+        "value": 15.0,
+        "unit": "employees",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "critical"
+      },
+      {
+        "key": "compliance_exception_count",
+        "label": "Compliance Exception Count",
+        "value": 109.0,
+        "unit": "issues",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "critical"
+      }
+    ]
+  },
+  "saudization": {
+    "trends": [
+      {
+        "period": "2026-04",
+        "saudi_headcount": 8,
+        "non_saudi_headcount": 10,
+        "employees_missing_nationality": 0,
+        "saudization_pct": 44.44
+      },
+      {
+        "period": "2026-05",
+        "saudi_headcount": 9,
+        "non_saudi_headcount": 10,
+        "employees_missing_nationality": 0,
+        "saudization_pct": 47.37
+      },
+      {
+        "period": "2026-06",
+        "saudi_headcount": 9,
+        "non_saudi_headcount": 9,
+        "employees_missing_nationality": 1,
+        "saudization_pct": 50.0
+      }
+    ]
+  },
+  "saudization-by-project": {
+    "projects": [
+      {
+        "project": "PROJ-ALPHA",
+        "saudi_headcount": 6,
+        "non_saudi_headcount": 2,
+        "employees_missing_nationality": 1,
+        "total_headcount": 9,
+        "saudization_pct": 66.67
+      },
+      {
+        "project": "PROJ-BETA",
+        "saudi_headcount": 0,
+        "non_saudi_headcount": 3,
+        "employees_missing_nationality": 0,
+        "total_headcount": 3,
+        "saudization_pct": 0.0
+      },
+      {
+        "project": "PROJ-GAMMA",
+        "saudi_headcount": 3,
+        "non_saudi_headcount": 3,
+        "employees_missing_nationality": 0,
+        "total_headcount": 6,
+        "saudization_pct": 50.0
+      },
+      {
+        "project": "Unassigned",
+        "saudi_headcount": 0,
+        "non_saudi_headcount": 1,
+        "employees_missing_nationality": 0,
+        "total_headcount": 1,
+        "saudization_pct": 0.0
+      }
+    ]
+  },
+  "saudization-by-department": {
+    "departments": [
+      {
+        "department": "Engineering",
+        "saudi_headcount": 0,
+        "non_saudi_headcount": 4,
+        "employees_missing_nationality": 0,
+        "total_headcount": 4,
+        "saudization_pct": 0.0
+      },
+      {
+        "department": "Executive",
+        "saudi_headcount": 1,
+        "non_saudi_headcount": 0,
+        "employees_missing_nationality": 0,
+        "total_headcount": 1,
+        "saudization_pct": 100.0
+      },
+      {
+        "department": "Finance",
+        "saudi_headcount": 1,
+        "non_saudi_headcount": 0,
+        "employees_missing_nationality": 1,
+        "total_headcount": 2,
+        "saudization_pct": 50.0
+      },
+      {
+        "department": "HR",
+        "saudi_headcount": 3,
+        "non_saudi_headcount": 1,
+        "employees_missing_nationality": 0,
+        "total_headcount": 4,
+        "saudization_pct": 75.0
+      },
+      {
+        "department": "Marketing",
+        "saudi_headcount": 0,
+        "non_saudi_headcount": 3,
+        "employees_missing_nationality": 0,
+        "total_headcount": 3,
+        "saudization_pct": 0.0
+      },
+      {
+        "department": "Operations",
+        "saudi_headcount": 4,
+        "non_saudi_headcount": 1,
+        "employees_missing_nationality": 0,
+        "total_headcount": 5,
+        "saudization_pct": 80.0
+      }
+    ]
+  },
+  "document-expiry": {
+    "buckets": [
+      {
+        "expiry_bucket": "expired",
+        "iqama_count": 0,
+        "work_permit_count": 0
+      },
+      {
+        "expiry_bucket": "0_30",
+        "iqama_count": 0,
+        "work_permit_count": 0
+      },
+      {
+        "expiry_bucket": "31_60",
+        "iqama_count": 0,
+        "work_permit_count": 0
+      },
+      {
+        "expiry_bucket": "61_90",
+        "iqama_count": 0,
+        "work_permit_count": 0
+      },
+      {
+        "expiry_bucket": "90_plus",
+        "iqama_count": 2,
+        "work_permit_count": 2
+      },
+      {
+        "expiry_bucket": "missing_date",
+        "iqama_count": 7,
+        "work_permit_count": 7
+      }
+    ]
+  },
+  "gosi": {
+    "statuses": [
+      {
+        "gosi_status": "Missing Source / Unknown",
+        "employee_count": 15
+      },
+      {
+        "gosi_status": "Registered",
+        "employee_count": 4
+      }
+    ]
+  },
+  "wps": {
+    "statuses": [
+      {
+        "wps_status": "Compliant",
+        "headcount": 4
+      },
+      {
+        "wps_status": "Missing Source / No WPS Record",
+        "headcount": 15
+      }
+    ]
+  },
+  "exceptions": {
+    "exceptions": [
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing GOSI Status Record",
+        "description": "Active employee has no record in GOSI registration field",
+        "severity": "Critical",
+        "recommended_action": "Check GOSI enrollment status"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Missing GOSI Status Record",
+        "description": "Active employee has no record in GOSI registration field",
+        "severity": "Critical",
+        "recommended_action": "Check GOSI enrollment status"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing GOSI Status Record",
+        "description": "Active employee has no record in GOSI registration field",
+        "severity": "Critical",
+        "recommended_action": "Check GOSI enrollment status"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing GOSI Status Record",
+        "description": "Active employee has no record in GOSI registration field",
+        "severity": "Critical",
+        "recommended_action": "Check GOSI enrollment status"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Missing GOSI Status Record",
+        "description": "Active employee has no record in GOSI registration field",
+        "severity": "Critical",
+        "recommended_action": "Check GOSI enrollment status"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing GOSI Status Record",
+        "description": "Active employee has no record in GOSI registration field",
+        "severity": "Critical",
+        "recommended_action": "Check GOSI enrollment status"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Missing GOSI Status Record",
+        "description": "Active employee has no record in GOSI registration field",
+        "severity": "Critical",
+        "recommended_action": "Check GOSI enrollment status"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing GOSI Status Record",
+        "description": "Active employee has no record in GOSI registration field",
+        "severity": "Critical",
+        "recommended_action": "Check GOSI enrollment status"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing GOSI Status Record",
+        "description": "Active employee has no record in GOSI registration field",
+        "severity": "Critical",
+        "recommended_action": "Check GOSI enrollment status"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Missing GOSI Status Record",
+        "description": "Active employee has no record in GOSI registration field",
+        "severity": "Critical",
+        "recommended_action": "Check GOSI enrollment status"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing GOSI Status Record",
+        "description": "Active employee has no record in GOSI registration field",
+        "severity": "Critical",
+        "recommended_action": "Check GOSI enrollment status"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Missing GOSI Status Record",
+        "description": "Active employee has no record in GOSI registration field",
+        "severity": "Critical",
+        "recommended_action": "Check GOSI enrollment status"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Missing GOSI Status Record",
+        "description": "Active employee has no record in GOSI registration field",
+        "severity": "Critical",
+        "recommended_action": "Check GOSI enrollment status"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Missing GOSI Status Record",
+        "description": "Active employee has no record in GOSI registration field",
+        "severity": "Critical",
+        "recommended_action": "Check GOSI enrollment status"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing GOSI Status Record",
+        "description": "Active employee has no record in GOSI registration field",
+        "severity": "Critical",
+        "recommended_action": "Check GOSI enrollment status"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Missing WPS Record",
+        "description": "Active employee has no record in WPS (Mudad) portal",
+        "severity": "Critical",
+        "recommended_action": "Add employee to WPS payroll files"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing WPS Record",
+        "description": "Active employee has no record in WPS (Mudad) portal",
+        "severity": "Critical",
+        "recommended_action": "Add employee to WPS payroll files"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Missing WPS Record",
+        "description": "Active employee has no record in WPS (Mudad) portal",
+        "severity": "Critical",
+        "recommended_action": "Add employee to WPS payroll files"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing WPS Record",
+        "description": "Active employee has no record in WPS (Mudad) portal",
+        "severity": "Critical",
+        "recommended_action": "Add employee to WPS payroll files"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Missing WPS Record",
+        "description": "Active employee has no record in WPS (Mudad) portal",
+        "severity": "Critical",
+        "recommended_action": "Add employee to WPS payroll files"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing WPS Record",
+        "description": "Active employee has no record in WPS (Mudad) portal",
+        "severity": "Critical",
+        "recommended_action": "Add employee to WPS payroll files"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Missing WPS Record",
+        "description": "Active employee has no record in WPS (Mudad) portal",
+        "severity": "Critical",
+        "recommended_action": "Add employee to WPS payroll files"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing WPS Record",
+        "description": "Active employee has no record in WPS (Mudad) portal",
+        "severity": "Critical",
+        "recommended_action": "Add employee to WPS payroll files"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing WPS Record",
+        "description": "Active employee has no record in WPS (Mudad) portal",
+        "severity": "Critical",
+        "recommended_action": "Add employee to WPS payroll files"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Missing WPS Record",
+        "description": "Active employee has no record in WPS (Mudad) portal",
+        "severity": "Critical",
+        "recommended_action": "Add employee to WPS payroll files"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing WPS Record",
+        "description": "Active employee has no record in WPS (Mudad) portal",
+        "severity": "Critical",
+        "recommended_action": "Add employee to WPS payroll files"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Missing WPS Record",
+        "description": "Active employee has no record in WPS (Mudad) portal",
+        "severity": "Critical",
+        "recommended_action": "Add employee to WPS payroll files"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing WPS Record",
+        "description": "Active employee has no record in WPS (Mudad) portal",
+        "severity": "Critical",
+        "recommended_action": "Add employee to WPS payroll files"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Missing WPS Record",
+        "description": "Active employee has no record in WPS (Mudad) portal",
+        "severity": "Critical",
+        "recommended_action": "Add employee to WPS payroll files"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing WPS Record",
+        "description": "Active employee has no record in WPS (Mudad) portal",
+        "severity": "Critical",
+        "recommended_action": "Add employee to WPS payroll files"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Missing Project assignment",
+        "description": "Active employee is missing project code assignment",
+        "severity": "Warning",
+        "recommended_action": "Update project mapping in master file"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Cost Center assignment",
+        "description": "Active employee is missing cost center assignment",
+        "severity": "Warning",
+        "recommended_action": "Update cost center in master file"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing Qiwa Contract",
+        "description": "Active employee has no contract registered in Qiwa",
+        "severity": "Critical",
+        "recommended_action": "Register digital contract in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Missing Qiwa Contract",
+        "description": "Active employee has no contract registered in Qiwa",
+        "severity": "Critical",
+        "recommended_action": "Register digital contract in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing Qiwa Contract",
+        "description": "Active employee has no contract registered in Qiwa",
+        "severity": "Critical",
+        "recommended_action": "Register digital contract in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing Qiwa Contract",
+        "description": "Active employee has no contract registered in Qiwa",
+        "severity": "Critical",
+        "recommended_action": "Register digital contract in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Missing Qiwa Contract",
+        "description": "Active employee has no contract registered in Qiwa",
+        "severity": "Critical",
+        "recommended_action": "Register digital contract in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Missing Qiwa Contract",
+        "description": "Active employee has no contract registered in Qiwa",
+        "severity": "Critical",
+        "recommended_action": "Register digital contract in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing Qiwa Contract",
+        "description": "Active employee has no contract registered in Qiwa",
+        "severity": "Critical",
+        "recommended_action": "Register digital contract in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Missing Qiwa Contract",
+        "description": "Active employee has no contract registered in Qiwa",
+        "severity": "Critical",
+        "recommended_action": "Register digital contract in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Qiwa Contract",
+        "description": "Active employee has no contract registered in Qiwa",
+        "severity": "Critical",
+        "recommended_action": "Register digital contract in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Missing Qiwa Contract",
+        "description": "Active employee has no contract registered in Qiwa",
+        "severity": "Critical",
+        "recommended_action": "Register digital contract in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing Qiwa Contract",
+        "description": "Active employee has no contract registered in Qiwa",
+        "severity": "Critical",
+        "recommended_action": "Register digital contract in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Missing Qiwa Contract",
+        "description": "Active employee has no contract registered in Qiwa",
+        "severity": "Critical",
+        "recommended_action": "Register digital contract in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing Qiwa Contract",
+        "description": "Active employee has no contract registered in Qiwa",
+        "severity": "Critical",
+        "recommended_action": "Register digital contract in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing Qiwa Contract",
+        "description": "Active employee has no contract registered in Qiwa",
+        "severity": "Critical",
+        "recommended_action": "Register digital contract in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Missing Qiwa Contract",
+        "description": "Active employee has no contract registered in Qiwa",
+        "severity": "Critical",
+        "recommended_action": "Register digital contract in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Contract Not Authenticated",
+        "description": "Digital contract is pending employee authentication",
+        "severity": "Warning",
+        "recommended_action": "Request employee to log into Qiwa and approve contract"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Salary Info",
+        "description": "Active employee has null salary values in GOSI or payroll base",
+        "severity": "Warning",
+        "recommended_action": "Update salary values in GOSI/payroll database"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Missing Salary Info",
+        "description": "Active employee has null salary values in GOSI or payroll base",
+        "severity": "Warning",
+        "recommended_action": "Update salary values in GOSI/payroll database"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing Salary Info",
+        "description": "Active employee has null salary values in GOSI or payroll base",
+        "severity": "Warning",
+        "recommended_action": "Update salary values in GOSI/payroll database"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing Salary Info",
+        "description": "Active employee has null salary values in GOSI or payroll base",
+        "severity": "Warning",
+        "recommended_action": "Update salary values in GOSI/payroll database"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing Salary Info",
+        "description": "Active employee has null salary values in GOSI or payroll base",
+        "severity": "Warning",
+        "recommended_action": "Update salary values in GOSI/payroll database"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Missing Salary Info",
+        "description": "Active employee has null salary values in GOSI or payroll base",
+        "severity": "Warning",
+        "recommended_action": "Update salary values in GOSI/payroll database"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing Salary Info",
+        "description": "Active employee has null salary values in GOSI or payroll base",
+        "severity": "Warning",
+        "recommended_action": "Update salary values in GOSI/payroll database"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Missing Salary Info",
+        "description": "Active employee has null salary values in GOSI or payroll base",
+        "severity": "Warning",
+        "recommended_action": "Update salary values in GOSI/payroll database"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing Salary Info",
+        "description": "Active employee has null salary values in GOSI or payroll base",
+        "severity": "Warning",
+        "recommended_action": "Update salary values in GOSI/payroll database"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Missing Salary Info",
+        "description": "Active employee has null salary values in GOSI or payroll base",
+        "severity": "Warning",
+        "recommended_action": "Update salary values in GOSI/payroll database"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing Salary Info",
+        "description": "Active employee has null salary values in GOSI or payroll base",
+        "severity": "Warning",
+        "recommended_action": "Update salary values in GOSI/payroll database"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Missing Salary Info",
+        "description": "Active employee has null salary values in GOSI or payroll base",
+        "severity": "Warning",
+        "recommended_action": "Update salary values in GOSI/payroll database"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Missing Salary Info",
+        "description": "Active employee has null salary values in GOSI or payroll base",
+        "severity": "Warning",
+        "recommended_action": "Update salary values in GOSI/payroll database"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Missing Salary Info",
+        "description": "Active employee has null salary values in GOSI or payroll base",
+        "severity": "Warning",
+        "recommended_action": "Update salary values in GOSI/payroll database"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing Salary Info",
+        "description": "Active employee has null salary values in GOSI or payroll base",
+        "severity": "Warning",
+        "recommended_action": "Update salary values in GOSI/payroll database"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Occupation Mismatch",
+        "description": "Qiwa occupational code does not match active role description",
+        "severity": "Warning",
+        "recommended_action": "Correct occupational designation code in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Occupation Mismatch",
+        "description": "Qiwa occupational code does not match active role description",
+        "severity": "Warning",
+        "recommended_action": "Correct occupational designation code in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Occupation Mismatch",
+        "description": "Qiwa occupational code does not match active role description",
+        "severity": "Warning",
+        "recommended_action": "Correct occupational designation code in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Occupation Mismatch",
+        "description": "Qiwa occupational code does not match active role description",
+        "severity": "Warning",
+        "recommended_action": "Correct occupational designation code in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Occupation Mismatch",
+        "description": "Qiwa occupational code does not match active role description",
+        "severity": "Warning",
+        "recommended_action": "Correct occupational designation code in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Occupation Mismatch",
+        "description": "Qiwa occupational code does not match active role description",
+        "severity": "Warning",
+        "recommended_action": "Correct occupational designation code in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Occupation Mismatch",
+        "description": "Qiwa occupational code does not match active role description",
+        "severity": "Warning",
+        "recommended_action": "Correct occupational designation code in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Occupation Mismatch",
+        "description": "Qiwa occupational code does not match active role description",
+        "severity": "Warning",
+        "recommended_action": "Correct occupational designation code in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Occupation Mismatch",
+        "description": "Qiwa occupational code does not match active role description",
+        "severity": "Warning",
+        "recommended_action": "Correct occupational designation code in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Occupation Mismatch",
+        "description": "Qiwa occupational code does not match active role description",
+        "severity": "Warning",
+        "recommended_action": "Correct occupational designation code in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Occupation Mismatch",
+        "description": "Qiwa occupational code does not match active role description",
+        "severity": "Warning",
+        "recommended_action": "Correct occupational designation code in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Occupation Mismatch",
+        "description": "Qiwa occupational code does not match active role description",
+        "severity": "Warning",
+        "recommended_action": "Correct occupational designation code in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Occupation Mismatch",
+        "description": "Qiwa occupational code does not match active role description",
+        "severity": "Warning",
+        "recommended_action": "Correct occupational designation code in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Occupation Mismatch",
+        "description": "Qiwa occupational code does not match active role description",
+        "severity": "Warning",
+        "recommended_action": "Correct occupational designation code in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Occupation Mismatch",
+        "description": "Qiwa occupational code does not match active role description",
+        "severity": "Warning",
+        "recommended_action": "Correct occupational designation code in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Occupation Mismatch",
+        "description": "Qiwa occupational code does not match active role description",
+        "severity": "Warning",
+        "recommended_action": "Correct occupational designation code in Qiwa portal"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Insurance Inactive",
+        "description": "Medical insurance coverage status is not active",
+        "severity": "Critical",
+        "recommended_action": "Activate insurance profile in provider database"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Insurance Inactive",
+        "description": "Medical insurance coverage status is not active",
+        "severity": "Critical",
+        "recommended_action": "Activate insurance profile in provider database"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Insurance Inactive",
+        "description": "Medical insurance coverage status is not active",
+        "severity": "Critical",
+        "recommended_action": "Activate insurance profile in provider database"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Insurance Inactive",
+        "description": "Medical insurance coverage status is not active",
+        "severity": "Critical",
+        "recommended_action": "Activate insurance profile in provider database"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Insurance Inactive",
+        "description": "Medical insurance coverage status is not active",
+        "severity": "Critical",
+        "recommended_action": "Activate insurance profile in provider database"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Insurance Inactive",
+        "description": "Medical insurance coverage status is not active",
+        "severity": "Critical",
+        "recommended_action": "Activate insurance profile in provider database"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Insurance Inactive",
+        "description": "Medical insurance coverage status is not active",
+        "severity": "Critical",
+        "recommended_action": "Activate insurance profile in provider database"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Insurance Inactive",
+        "description": "Medical insurance coverage status is not active",
+        "severity": "Critical",
+        "recommended_action": "Activate insurance profile in provider database"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Insurance Inactive",
+        "description": "Medical insurance coverage status is not active",
+        "severity": "Critical",
+        "recommended_action": "Activate insurance profile in provider database"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Insurance Inactive",
+        "description": "Medical insurance coverage status is not active",
+        "severity": "Critical",
+        "recommended_action": "Activate insurance profile in provider database"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Insurance Inactive",
+        "description": "Medical insurance coverage status is not active",
+        "severity": "Critical",
+        "recommended_action": "Activate insurance profile in provider database"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Insurance Inactive",
+        "description": "Medical insurance coverage status is not active",
+        "severity": "Critical",
+        "recommended_action": "Activate insurance profile in provider database"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Insurance Inactive",
+        "description": "Medical insurance coverage status is not active",
+        "severity": "Critical",
+        "recommended_action": "Activate insurance profile in provider database"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Insurance Inactive",
+        "description": "Medical insurance coverage status is not active",
+        "severity": "Critical",
+        "recommended_action": "Activate insurance profile in provider database"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Insurance Inactive",
+        "description": "Medical insurance coverage status is not active",
+        "severity": "Critical",
+        "recommended_action": "Activate insurance profile in provider database"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Missing Nationality",
+        "description": "Active employee has null/missing nationality or Saudization status",
+        "severity": "Warning",
+        "recommended_action": "Update employee nationality records in master file"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing Iqama Expiry Date",
+        "description": "Non-Saudi employee is missing an Iqama expiry date",
+        "severity": "Warning",
+        "recommended_action": "Update compliance records with Iqama expiry date"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Iqama Expiry Date",
+        "description": "Non-Saudi employee is missing an Iqama expiry date",
+        "severity": "Warning",
+        "recommended_action": "Update compliance records with Iqama expiry date"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing Iqama Expiry Date",
+        "description": "Non-Saudi employee is missing an Iqama expiry date",
+        "severity": "Warning",
+        "recommended_action": "Update compliance records with Iqama expiry date"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing Iqama Expiry Date",
+        "description": "Non-Saudi employee is missing an Iqama expiry date",
+        "severity": "Warning",
+        "recommended_action": "Update compliance records with Iqama expiry date"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing Iqama Expiry Date",
+        "description": "Non-Saudi employee is missing an Iqama expiry date",
+        "severity": "Warning",
+        "recommended_action": "Update compliance records with Iqama expiry date"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing Iqama Expiry Date",
+        "description": "Non-Saudi employee is missing an Iqama expiry date",
+        "severity": "Warning",
+        "recommended_action": "Update compliance records with Iqama expiry date"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing Iqama Expiry Date",
+        "description": "Non-Saudi employee is missing an Iqama expiry date",
+        "severity": "Warning",
+        "recommended_action": "Update compliance records with Iqama expiry date"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing Work Permit Expiry Date",
+        "description": "Non-Saudi employee is missing a Work Permit expiry date",
+        "severity": "Warning",
+        "recommended_action": "Update compliance records with Work Permit expiry date"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing Work Permit Expiry Date",
+        "description": "Non-Saudi employee is missing a Work Permit expiry date",
+        "severity": "Warning",
+        "recommended_action": "Update compliance records with Work Permit expiry date"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing Work Permit Expiry Date",
+        "description": "Non-Saudi employee is missing a Work Permit expiry date",
+        "severity": "Warning",
+        "recommended_action": "Update compliance records with Work Permit expiry date"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing Work Permit Expiry Date",
+        "description": "Non-Saudi employee is missing a Work Permit expiry date",
+        "severity": "Warning",
+        "recommended_action": "Update compliance records with Work Permit expiry date"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Work Permit Expiry Date",
+        "description": "Non-Saudi employee is missing a Work Permit expiry date",
+        "severity": "Warning",
+        "recommended_action": "Update compliance records with Work Permit expiry date"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing Work Permit Expiry Date",
+        "description": "Non-Saudi employee is missing a Work Permit expiry date",
+        "severity": "Warning",
+        "recommended_action": "Update compliance records with Work Permit expiry date"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing Work Permit Expiry Date",
+        "description": "Non-Saudi employee is missing a Work Permit expiry date",
+        "severity": "Warning",
+        "recommended_action": "Update compliance records with Work Permit expiry date"
+      }
+    ]
+  }
+}

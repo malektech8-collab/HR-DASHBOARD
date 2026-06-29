@@ -1,0 +1,31 @@
+# HR Command Center - Authorized Real Data Source Registry
+# Registers allowed source systems, formats, and latency limits.
+
+authorized_sources:
+  - source_system: "Metadata Audit Engine"
+    source_category: "Data Quality / Command Center Metadata"
+    allowed_format: "CSV"
+    delivery_method: "SFTP Secure Drop"
+    latency_limit_hours: 24
+    status: "Approved"
+
+  - source_system: "Jisr HRIS"
+    source_category: "HRIS / Employee Master"
+    allowed_format: "CSV"
+    delivery_method: "SFTP Secure Drop"
+    latency_limit_hours: 24
+    status: "Under Review"
+
+  - source_system: "NetSuite Payroll Ledger"
+    source_category: "Payroll"
+    allowed_format: "XLSX"
+    delivery_method: "SFTP Secure Drop"
+    latency_limit_hours: 720 # Monthly
+    status: "Under Review"
+
+  - source_system: "ZK Attendance Controller"
+    source_category: "Attendance"
+    allowed_format: "CSV"
+    delivery_method: "SFTP Secure Drop"
+    latency_limit_hours: 12
+    status: "Under Review"

@@ -1,0 +1,13 @@
+# HR Command Center - Controlled Load Decision Status Registry
+# Set to one of: Go for Controlled Load Scheduling, Conditional Go, Hold, No-Go.
+
+decision_status:
+  current_decision: "Conditional Go"
+  decision_date: "2026-06-29T12:12:00Z"
+  justification: "Staged directories clean, but CISO written signature pending."
+  owner_role: "Chief HR Officer"
+  status_log:
+    - timestamp: "2026-06-29T10:00:00Z"
+      previous_status: "Hold"
+      new_status: "Conditional Go"
+      reason: "All 11 authorization stages mapped successfully."

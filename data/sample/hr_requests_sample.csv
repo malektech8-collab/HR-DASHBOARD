@@ -1,0 +1,5 @@
+request_id,employee_id,request_type,request_status,created_at,closed_at,owner,sla_hours,actual_hours,sla_breached,project
+REQ001,EMP001,Employment Certificate,Closed,2026-06-01 09:00:00,2026-06-01 11:30:00,HR Operations,24,2,False,PROJ-ALPHA
+REQ002,EMP002,Salary Transfer Letter,Closed,2026-06-02 10:00:00,2026-06-04 15:00:00,HR Payroll,24,53,True,PROJ-BETA
+REQ003,EMP003,Leave Request,Closed,2026-06-03 08:30:00,2026-06-03 14:00:00,HR Shared Services,48,5,False,PROJ-ALPHA
+REQ004,EMP004,Business Card Request,Open,2026-06-05 13:00:00,,HR Operations,72,12,False,PROJ-ALPHA

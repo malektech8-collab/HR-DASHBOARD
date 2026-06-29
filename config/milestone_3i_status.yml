@@ -1,0 +1,32 @@
+# HR Command Center - Milestone 3I Status
+# Overall status for the Final Authorization Review & Go/No-Go Meeting milestone.
+
+milestone_3i_status:
+  milestone: "3I"
+  milestone_name: "Final Authorization Review & Controlled Load Go/No-Go Meeting"
+  current_status: "Authorization Evidence Pending"
+  allowed_statuses:
+    - "Authorization Evidence Pending"
+    - "Ready for Go/No-Go Meeting"
+    - "Go to Controlled Load Scheduling Review"
+    - "Conditional Go to Scheduling Review"
+    - "Hold"
+    - "No-Go"
+  prohibited_statuses:
+    - "Approved for Actual Load"
+    - "Approved for Production Ingestion"
+    - "Live Load Enabled"
+    - "Real Data Loaded"
+    - "Load Scheduled"
+    - "Load Completed"
+    - "Pilot Executed"
+    - "Controlled Load Executed"
+  decision_recommendation: "Hold"
+  authorization_evidence_supplied: false
+  go_no_go_meeting_held: false
+  actual_load_authorized: false
+  actual_load_scheduled: false
+  real_data_used: false
+  credentials_added: false
+  live_connections_made: false
+  notes: "Milestone 3I prepares the Go/No-Go meeting package only. No actual meeting, load, or scheduling performed. Decision defaults to Hold."

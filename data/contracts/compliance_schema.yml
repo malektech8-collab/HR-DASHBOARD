@@ -1,0 +1,40 @@
+columns:
+  - name: employee_id
+    type: VARCHAR
+    required: true
+  - name: period
+    type: VARCHAR
+    required: true
+  - name: qiwa_status
+    type: VARCHAR
+    required: true
+  - name: gosi_status
+    type: VARCHAR
+    required: true
+  - name: mudad_status
+    type: VARCHAR
+    required: true
+  - name: contract_authenticated
+    type: BOOLEAN
+    required: true
+  - name: gosi_salary
+    type: DECIMAL
+    required: true
+  - name: payroll_basic_salary
+    type: DECIMAL
+    required: true
+  - name: occupation_code
+    type: VARCHAR
+    required: true
+  - name: occupation_match_status
+    type: VARCHAR
+    required: true
+  - name: work_permit_expiry
+    type: DATE
+    required: false
+  - name: iqama_expiry
+    type: DATE
+    required: false
+  - name: insurance_status
+    type: VARCHAR
+    required: true

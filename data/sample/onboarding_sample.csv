@@ -1,0 +1,3 @@
+onboarding_id,candidate_id,start_date,status,employee_id
+ONB001,CAN001,2026-06-20,Completed,EMP002
+ONB002,CAN002,2026-07-01,In Progress,EMP999

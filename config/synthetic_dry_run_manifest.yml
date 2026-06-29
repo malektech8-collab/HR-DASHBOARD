@@ -1,0 +1,89 @@
+# HR Command Center - Synthetic Dry-Run File Manifest
+# Defines the expected mock files, columns, and record counts for validation testing.
+
+manifest:
+  - source_category: "HRIS / Employee Master"
+    file_name: "jisr_employee_master_dryrun.csv"
+    expected_format: "CSV"
+    encoding: "UTF-8"
+    delimiter: ","
+    expected_columns: ["emp_id", "emp_num", "full_name", "status", "joining_date", "nationality"]
+    valid_record_count: 19
+    invalid_record_count: 3
+    owner: "HR Director"
+    status: "Approved"
+
+  - source_category: "Payroll"
+    file_name: "netsuite_payroll_ledger_dryrun.xlsx"
+    expected_format: "XLSX"
+    sheet_name: "Payroll Details"
+    expected_columns: ["netsuite_emp_id", "pay_period", "salary_basic", "gross_salary", "net_salary"]
+    valid_record_count: 20
+    invalid_record_count: 2
+    owner: "Finance Director"
+    status: "Approved"
+
+  - source_category: "Attendance"
+    file_name: "zk_attendance_logs_dryrun.csv"
+    expected_format: "CSV"
+    encoding: "UTF-8"
+    delimiter: ","
+    expected_columns: ["badge_emp_id", "punch_date", "first_punch_in", "last_punch_out"]
+    valid_record_count: 494
+    invalid_record_count: 10
+    owner: "HR Operations Manager"
+    status: "Approved"
+
+  - source_category: "Government / Compliance"
+    file_name: "gosi_compliance_status_dryrun.csv"
+    expected_format: "CSV"
+    encoding: "UTF-8"
+    delimiter: ","
+    expected_columns: ["portal_emp_id", "gosi_active", "wps_compliance", "iqama_expiry"]
+    valid_record_count: 19
+    invalid_record_count: 2
+    owner: "Government Relations Officer"
+    status: "Approved"
+
+  - source_category: "Employee Relations / Case Management"
+    file_name: "er_sharepoint_log_dryrun.csv"
+    expected_format: "CSV"
+    encoding: "UTF-8"
+    delimiter: ","
+    expected_columns: ["sp_case_id", "sp_subject_emp_id", "sp_case_category", "sp_status"]
+    valid_record_count: 11
+    invalid_record_count: 2
+    owner: "Employee Relations Manager"
+    status: "Approved"
+
+  - source_category: "Recruitment / Workforce Planning"
+    file_name: "lever_recruitment_reqs_dryrun.csv"
+    expected_format: "CSV"
+    encoding: "UTF-8"
+    delimiter: ","
+    expected_columns: ["ats_req_id", "ats_title", "ats_status"]
+    valid_record_count: 7
+    invalid_record_count: 1
+    owner: "Head of Talent Acquisition"
+    status: "Approved"
+
+  - source_category: "Talent / Performance / Learning"
+    file_name: "successfactors_talent_dryrun.xlsx"
+    expected_format: "XLSX"
+    sheet_name: "Talent Metrics"
+    expected_columns: ["sf_emp_id", "sf_perf_rating", "sf_status"]
+    valid_record_count: 16
+    invalid_record_count: 2
+    owner: "Talent & Development Director"
+    status: "Approved"
+
+  - source_category: "Data Quality / Command Center Metadata"
+    file_name: "command_center_audit_dryrun.csv"
+    expected_format: "CSV"
+    encoding: "UTF-8"
+    delimiter: ","
+    expected_columns: ["module_key", "api_health_status", "reconciliation_status"]
+    valid_record_count: 9
+    invalid_record_count: 0
+    owner: "HR Systems Lead"
+    status: "Approved"

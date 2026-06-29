@@ -1,0 +1,27 @@
+# HR Command Center - Authorization Evidence Register
+# Lists critical evidence required to satisfy pre-load signoffs.
+
+evidence:
+  - id: "EVD-001"
+    description: "Dry-run validation logs check"
+    required: true
+    status: "Verified"
+    document_ref: "docs/qa/reports/milestone_3e_synthetic_dry_run_validation_qa_report.md"
+
+  - id: "EVD-002"
+    description: "AES-256 encrypted staging partition confirm"
+    required: true
+    status: "Verified"
+    document_ref: "docs/ENCRYPTED_STORAGE_REQUIREMENTS.md"
+
+  - id: "EVD-003"
+    description: "CISO safety audit token"
+    required: true
+    status: "Pending"
+    document_ref: null
+
+  - id: "EVD-004"
+    description: "Pre-load DuckDB snapshot recovery verification"
+    required: true
+    status: "Verified"
+    document_ref: "docs/REAL_DATA_ROLLBACK_AND_PURGE_PLAN.md"

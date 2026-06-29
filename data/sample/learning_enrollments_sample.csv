@@ -1,0 +1,6 @@
+enrollment_id,employee_id,course_id,status,enrollment_date,completion_date
+ENR001,EMP001,CRS001,Completed,2026-06-01,2026-06-10
+ENR002,EMP002,CRS002,Completed,2026-06-02,
+ENR003,EMP999,CRS001,Completed,2026-06-05,2026-06-12
+ENR004,EMP004,CRS003,In Progress,2026-06-05,
+ENR005,EMP005,CRS004,Cancelled,2026-06-01,

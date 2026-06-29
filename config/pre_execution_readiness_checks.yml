@@ -1,0 +1,38 @@
+# HR Command Center - Pre-Execution Readiness Checks Config
+# Configures the exact checks run immediately prior to starting a load window.
+
+checks:
+  - check_id: "PRE-001"
+    name: "Final written approval verified"
+    owner: "CISO"
+    status: "Pending"
+
+  - check_id: "PRE-002"
+    name: "Source business owner available"
+    owner: "HRIS Director"
+    status: "Ready"
+
+  - check_id: "PRE-003"
+    name: "Technical owner available"
+    owner: "IT Operations Director"
+    status: "Ready"
+
+  - check_id: "PRE-004"
+    name: "Data steward available"
+    owner: "Data Quality Steward"
+    status: "Ready"
+
+  - check_id: "PRE-005"
+    name: "Rollback owner available"
+    owner: "Systems Architect"
+    status: "Ready"
+
+  - check_id: "PRE-006"
+    name: "Staging partition AES-256 active"
+    owner: "Security Architect"
+    status: "Ready"
+
+  - check_id: "PRE-007"
+    name: "Audit logging index verified"
+    owner: "Systems Architect"
+    status: "Ready"

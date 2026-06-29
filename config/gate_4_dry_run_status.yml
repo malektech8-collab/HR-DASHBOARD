@@ -1,0 +1,59 @@
+# HR Command Center - Gate 4 Dry-Run Ingestion Verification Status
+# Tracks dry-run completion and approvals for all 8 categories.
+
+dry_run_status:
+  - source_category: "HRIS / Employee Master"
+    dry_run_manifested: true
+    schema_validation_passed: true
+    reconciliation_passed: true
+    status: "Ready"
+    reviewed_at: "2026-06-29T10:00:00Z"
+
+  - source_category: "Payroll"
+    dry_run_manifested: true
+    schema_validation_passed: true
+    reconciliation_passed: true
+    status: "Ready"
+    reviewed_at: "2026-06-29T10:15:00Z"
+
+  - source_category: "Attendance"
+    dry_run_manifested: true
+    schema_validation_passed: true
+    reconciliation_passed: true
+    status: "Ready"
+    reviewed_at: "2026-06-29T10:20:00Z"
+
+  - source_category: "Government / Compliance"
+    dry_run_manifested: true
+    schema_validation_passed: true
+    reconciliation_passed: true
+    status: "Ready"
+    reviewed_at: "2026-06-29T10:30:00Z"
+
+  - source_category: "Employee Relations / Case Management"
+    dry_run_manifested: true
+    schema_validation_passed: true
+    reconciliation_passed: true
+    status: "Ready"
+    reviewed_at: "2026-06-29T10:40:00Z"
+
+  - source_category: "Recruitment / Workforce Planning"
+    dry_run_manifested: true
+    schema_validation_passed: true
+    reconciliation_passed: true
+    status: "Ready"
+    reviewed_at: "2026-06-29T10:45:00Z"
+
+  - source_category: "Talent / Performance / Learning"
+    dry_run_manifested: true
+    schema_validation_passed: true
+    reconciliation_passed: true
+    status: "Ready"
+    reviewed_at: "2026-06-29T11:00:00Z"
+
+  - source_category: "Data Quality / Command Center Metadata"
+    dry_run_manifested: true
+    schema_validation_passed: true
+    reconciliation_passed: true
+    status: "Ready"
+    reviewed_at: "2026-06-29T11:15:00Z"

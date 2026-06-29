@@ -1,0 +1,16 @@
+# HR Command Center - Final Ingestion Authorization Requirements
+# Parameters required for any written load approvals.
+
+authorization_parameters:
+  written_format_required: true
+  source_category_reference_required: true
+  file_name_regex_check_required: true
+  date_range_limit_required: true
+  included_fields_explicit: true
+  excluded_fields_explicit: true
+  masking_rules_checked: true
+  rollback_verification_checked: true
+  post_load_validation_checked: true
+  expiry_limit_days: 7
+  authorized_execution_owner_required: true
+  approval_authority_role: "Chief HR Officer"

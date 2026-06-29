@@ -1,0 +1,35 @@
+# HR Command Center - Controlled Load Command and Control Model
+# Registers roles responsible for load operations. Role names only (no personal names).
+
+roles:
+  execution_owner:
+    role_title: "System Architect"
+    responsibility: "Starts the controlled load after final CHRO authorization."
+
+  source_owner:
+    role_title: "HRIS Director"
+    responsibility: "Confirms file correctness and source system metadata health."
+
+  technical_owner:
+    role_title: "IT Operations Director"
+    responsibility: "Monitors staging container status and network connections."
+
+  data_steward:
+    role_title: "Data Quality Steward"
+    responsibility: "Verifies column mappings and executes post-load audits."
+
+  privacy_security_owner:
+    role_title: "Security Lead (CISO)"
+    responsibility: "Conducts data masking audit and handles incident escalation."
+
+  rollback_owner:
+    role_title: "Systems Architect (Rollback Owner)"
+    responsibility: "Triggers and signs off on DuckDB snapshot purges."
+
+  incident_response_owner:
+    role_title: "Data Privacy Officer"
+    responsibility: "Contains data privacy anomalies or unmasked exposures."
+
+  stop_authority:
+    role_title: "Chief HR Officer"
+    responsibility: "Issues immediate halt directive if any stop criteria trigger."

@@ -1,0 +1,35 @@
+columns:
+  - name: request_id
+    type: VARCHAR
+    required: true
+    unique: true
+  - name: employee_id
+    type: VARCHAR
+    required: true
+  - name: request_type
+    type: VARCHAR
+    required: true
+  - name: request_status
+    type: VARCHAR
+    required: true
+  - name: created_at
+    type: TIMESTAMP
+    required: true
+  - name: closed_at
+    type: TIMESTAMP
+    required: false
+  - name: owner
+    type: VARCHAR
+    required: true
+  - name: sla_hours
+    type: INTEGER
+    required: true
+  - name: actual_hours
+    type: INTEGER
+    required: false
+  - name: sla_breached
+    type: BOOLEAN
+    required: true
+  - name: project
+    type: VARCHAR
+    required: true

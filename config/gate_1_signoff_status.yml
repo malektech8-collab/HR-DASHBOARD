@@ -1,0 +1,254 @@
+# HR Command Center - Gate 1 Signoff Status Registry
+# Tracks the detailed progress, reviewers, and approval timelines for each ingestion source category.
+
+gate_1_signoff_status:
+  - source_category: "HRIS / Employee Master"
+    approval_status: "Approved by Business Owner"
+    readiness_score: 90
+    checklist:
+      source_inventory_registered: true
+      source_owners_assigned: true
+      data_stewards_assigned: true
+      delivery_methods_documented: true
+      formats_documented: true
+      frequencies_documented: true
+      lineage_traced: true
+      privacy_classification_complete: true
+      masking_rules_approved: true
+    approvals:
+      business_owner:
+        role: "HR Director"
+        decision: "Approved"
+        timestamp: "2026-06-20T14:30:00Z"
+        comments: "Staging mapping and fields verified."
+      technical_owner:
+        role: "IT Operations Lead"
+        decision: "Approved with Conditions"
+        timestamp: "2026-06-20T16:15:00Z"
+        comments: "Approved pending SFTP directory firewall exceptions."
+      data_steward:
+        role: "HR Operations Administrator"
+        decision: "Approved"
+        timestamp: "2026-06-20T11:00:00Z"
+        comments: "All standard fields mapped."
+    critical_blockers: []
+
+  - source_category: "Payroll"
+    approval_status: "Submitted for Review"
+    readiness_score: 75
+    checklist:
+      source_inventory_registered: true
+      source_owners_assigned: true
+      data_stewards_assigned: true
+      delivery_methods_documented: true
+      formats_documented: true
+      frequencies_documented: true
+      lineage_traced: false
+      privacy_classification_complete: true
+      masking_rules_approved: false
+    approvals:
+      business_owner:
+        role: "Finance Director"
+        decision: "Needs Clarification"
+        timestamp: "2026-06-21T09:45:00Z"
+        comments: "Needs verification on deductions calculation transformations."
+      technical_owner:
+        role: "ERP Systems Administrator"
+        decision: "Approved"
+        timestamp: "2026-06-21T11:20:00Z"
+        comments: "Export configuration matches canonical fields."
+      data_steward:
+        role: "Payroll Manager"
+        decision: "Approved"
+        timestamp: "2026-06-21T08:30:00Z"
+        comments: "Net/gross calculations mapped."
+    critical_blockers:
+      - "Pending final masking approval for salaries by legal."
+
+  - source_category: "Attendance"
+    approval_status: "Fully Approved"
+    readiness_score: 95
+    checklist:
+      source_inventory_registered: true
+      source_owners_assigned: true
+      data_stewards_assigned: true
+      delivery_methods_documented: true
+      formats_documented: true
+      frequencies_documented: true
+      lineage_traced: true
+      privacy_classification_complete: true
+      masking_rules_approved: true
+    approvals:
+      business_owner:
+        role: "HR Operations Manager"
+        decision: "Approved"
+        timestamp: "2026-06-19T13:40:00Z"
+        comments: "Approved for local CSV staging uploads."
+      technical_owner:
+        role: "Facilities Network Engineer"
+        decision: "Approved"
+        timestamp: "2026-06-19T14:10:00Z"
+        comments: "ZKTeco automated export verified."
+      data_steward:
+        role: "Attendance Clerk"
+        decision: "Approved"
+        timestamp: "2026-06-19T10:00:00Z"
+        comments: "Punch logs matched to employee IDs."
+    critical_blockers: []
+
+  - source_category: "Government / Compliance"
+    approval_status: "Approved by Data Steward"
+    readiness_score: 85
+    checklist:
+      source_inventory_registered: true
+      source_owners_assigned: true
+      data_stewards_assigned: true
+      delivery_methods_documented: true
+      formats_documented: true
+      frequencies_documented: true
+      lineage_traced: true
+      privacy_classification_complete: false
+      masking_rules_approved: true
+    approvals:
+      business_owner:
+        role: "Government Relations Officer"
+        decision: "Submitted for Review"
+        timestamp: "2026-06-22T10:15:00Z"
+        comments: "Awaiting legal signature on Qiwa contract metadata exposure."
+      technical_owner:
+        role: "G2B Integration Architect"
+        decision: "Approved"
+        timestamp: "2026-06-22T11:40:00Z"
+        comments: "API formats mapped."
+      data_steward:
+        role: "Compliance Manager"
+        decision: "Approved"
+        timestamp: "2026-06-22T09:00:00Z"
+        comments: "GOSI and WPS checks match synthetic schemas."
+    critical_blockers: []
+
+  - source_category: "Employee Relations / Case Management"
+    approval_status: "Approved by Technical Owner"
+    readiness_score: 80
+    checklist:
+      source_inventory_registered: true
+      source_owners_assigned: true
+      data_stewards_assigned: true
+      delivery_methods_documented: true
+      formats_documented: true
+      frequencies_documented: true
+      lineage_traced: false
+      privacy_classification_complete: true
+      masking_rules_approved: true
+    approvals:
+      business_owner:
+        role: "Employee Relations Manager"
+        decision: "Submitted for Review"
+        timestamp: "2026-06-23T15:00:00Z"
+        comments: "Awaiting final review on NLP scrubbing rules."
+      technical_owner:
+        role: "SharePoint Administrator"
+        decision: "Approved"
+        timestamp: "2026-06-23T16:30:00Z"
+        comments: "Flow-based CSV extraction verified."
+      data_steward:
+        role: "ER Coordinator"
+        decision: "Approved"
+        timestamp: "2026-06-23T11:00:00Z"
+        comments: "Normalized exception views verified."
+    critical_blockers: []
+
+  - source_category: "Recruitment / Workforce Planning"
+    approval_status: "Fully Approved"
+    readiness_score: 100
+    checklist:
+      source_inventory_registered: true
+      source_owners_assigned: true
+      data_stewards_assigned: true
+      delivery_methods_documented: true
+      formats_documented: true
+      frequencies_documented: true
+      lineage_traced: true
+      privacy_classification_complete: true
+      masking_rules_approved: true
+    approvals:
+      business_owner:
+        role: "Head of Talent Acquisition"
+        decision: "Approved"
+        timestamp: "2026-06-20T09:30:00Z"
+        comments: "Lever ATS fields mapped successfully."
+      technical_owner:
+        role: "ATS Integration Engineer"
+        decision: "Approved"
+        timestamp: "2026-06-20T10:15:00Z"
+        comments: "SFTP scheduler enabled in test mode."
+      data_steward:
+        role: "Recruitment Coordinator"
+        decision: "Approved"
+        timestamp: "2026-06-20T08:00:00Z"
+        comments: "All requisitions and pipelines reconciled."
+    critical_blockers: []
+
+  - source_category: "Talent / Performance / Learning"
+    approval_status: "Draft"
+    readiness_score: 50
+    checklist:
+      source_inventory_registered: true
+      source_owners_assigned: false
+      data_stewards_assigned: true
+      delivery_methods_documented: false
+      formats_documented: false
+      frequencies_documented: false
+      lineage_traced: false
+      privacy_classification_complete: false
+      masking_rules_approved: false
+    approvals:
+      business_owner:
+        role: "Talent & Development Director"
+        decision: "Needs Clarification"
+        timestamp: "2026-06-18T10:30:00Z"
+        comments: "Still reviewing rating scales mappings."
+      technical_owner:
+        role: "LMS Systems Lead"
+        decision: "Needs Clarification"
+        timestamp: "2026-06-18T11:00:00Z"
+        comments: "Need export specifications for successor table."
+      data_steward:
+        role: "L&D Coordinator"
+        decision: "Needs Clarification"
+        timestamp: "2026-06-18T09:00:00Z"
+        comments: "Mapping SuccessFactors data fields is ongoing."
+    critical_blockers:
+      - "T&D Director role not officially signed off on stewardship."
+      - "Successor data security clearance pending."
+
+  - source_category: "Data Quality / Command Center Metadata"
+    approval_status: "Fully Approved"
+    readiness_score: 100
+    checklist:
+      source_inventory_registered: true
+      source_owners_assigned: true
+      data_stewards_assigned: true
+      delivery_methods_documented: true
+      formats_documented: true
+      frequencies_documented: true
+      lineage_traced: true
+      privacy_classification_complete: true
+      masking_rules_approved: true
+    approvals:
+      business_owner:
+        role: "HR Systems Lead"
+        decision: "Approved"
+        timestamp: "2026-06-24T14:30:00Z"
+        comments: "Overview and checks verified."
+      technical_owner:
+        role: "Antigravity Systems Architect"
+        decision: "Approved"
+        timestamp: "2026-06-24T15:00:00Z"
+        comments: "All views successfully compiled and checked."
+      data_steward:
+        role: "Data Quality Engineer"
+        decision: "Approved"
+        timestamp: "2026-06-24T13:00:00Z"
+        comments: "Reconciliation runs pass."
+    critical_blockers: []

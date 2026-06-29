@@ -1,0 +1,22 @@
+employee_id,employee_name,nationality,is_saudi,company,department,project,job_title,job_family,grade,manager_id,cost_center,employment_type,contract_type,joining_date,termination_date,contract_end_date,status,basic_salary,housing_allowance,transport_allowance
+EMP001,Ahmad Al-Sudairy,Saudi,True,Company A,HR,PROJ-ALPHA,HR Specialist,HR,G3,EMP011,CC-HR,Full-time,Unlimited,2024-01-15,,,Active,12000,3000,1000
+EMP002,John Doe,British,False,Company A,Engineering,PROJ-BETA,Software Engineer,IT,G4,EMP012,CC-ENG,Full-time,Limited,2024-03-01,,2026-03-01,Active,15000,3750,1000
+EMP003,Fahad Al-Otaibi,Saudi,True,Company A,Finance,PROJ-ALPHA,Financial Analyst,Finance,G3,,CC-FIN,Full-time,Unlimited,2024-05-10,,,Active,11000,2750,1000
+EMP004,Jane Smith,American,False,Company A,Marketing,,Marketing Manager,Marketing,G5,EMP013,CC-MKT,Full-time,Limited,2023-11-01,,2025-11-01,Active,18000,4500,1500
+EMP005,Khalid Al-Ghamdi,Saudi,True,Company B,Operations,PROJ-GAMMA,Operations Supervisor,Operations,G4,EMP014,CC-OPS,Full-time,Unlimited,2024-02-01,,,Active,14000,3500,1000
+EMP005,Khalid Al-Ghamdi Duplicate,Saudi,True,Company B,Operations,PROJ-GAMMA,Operations Supervisor,Operations,G4,EMP014,CC-OPS,Full-time,Unlimited,2024-02-01,,,Active,14000,3500,1000
+EMP006,Youssef Mansour,Egyptian,False,Company A,Engineering,PROJ-BETA,QA Engineer,IT,G2,EMP012,CC-ENG,Full-time,Limited,2023-01-01,2026-05-31,2025-01-01,Terminated,8000,2000,1000
+EMP007,Sarah Jenkins,Canadian,False,Company B,HR,PROJ-GAMMA,Recruiter,HR,G2,EMP011,CC-HR,Full-time,Limited,2025-02-15,,2027-02-15,Active,0,2000,1000
+EMP008,Mohammed Al-Qahtani,Saudi,True,Company A,Operations,PROJ-ALPHA,Operations Specialist,Operations,G3,EMP014,CC-OPS,Full-time,Unlimited,2024-06-01,,,Active,-5000,-1250,1000
+EMP009,Ali Al-Harbi,,True,Company A,Finance,PROJ-ALPHA,Accountant,Finance,G2,EMP003,CC-FIN,Full-time,Unlimited,2025-01-10,,,Active,9000,2250,1000
+EMP010,David Vance,Australian,False,Company B,Engineering,PROJ-GAMMA,Solutions Architect,IT,G6,EMP012,,Full-time,Limited,2024-08-01,,2026-08-01,Active,25000,6250,2000
+EMP011,Sultan Al-Otaibi,Saudi,True,Company A,HR,PROJ-ALPHA,HR Manager,HR,G6,EMP015,CC-HR,Full-time,Unlimited,2020-01-01,,,Active,25000,6250,2000
+EMP012,Robert Martin,American,False,Company A,Engineering,PROJ-BETA,Engineering Director,IT,G7,EMP015,CC-ENG,Full-time,Limited,2021-06-01,,2026-06-01,Active,35000,8750,2500
+EMP013,Clara Oswald,British,False,Company A,Marketing,PROJ-ALPHA,Marketing Director,Marketing,G6,EMP015,CC-MKT,Full-time,Limited,2022-03-15,,2026-03-15,Active,22000,5500,2000
+EMP014,Faisal Al-Jabre,Saudi,True,Company B,Operations,PROJ-GAMMA,Operations Director,Operations,G7,EMP015,CC-OPS,Full-time,Unlimited,2019-05-01,,,Active,32000,8000,2500
+EMP015,CEO Office,Saudi,True,Company A,Executive,PROJ-ALPHA,CEO,Executive,G8,,CC-EXEC,Full-time,Unlimited,2015-01-01,,,Active,60000,15000,3000
+EMP016,Noura Al-Dosari,Saudi,True,Company A,HR,PROJ-ALPHA,HR Assistant,HR,G1,EMP011,CC-HR,Full-time,Unlimited,2025-03-01,,,Active,6000,1500,500
+EMP017,Thomas Miller,German,False,Company A,Engineering,PROJ-BETA,Backend Developer,IT,G3,EMP012,CC-ENG,Full-time,Limited,2024-10-01,,2026-10-01,Active,13000,3250,1000
+EMP018,Laila Hassan,Jordanian,False,Company A,Marketing,PROJ-ALPHA,Content Writer,Marketing,G2,EMP013,CC-MKT,Full-time,Limited,2024-12-01,,2025-12-01,Active,8500,2125,1000
+EMP019,Bandar Al-Harbi,Saudi,True,Company B,Operations,PROJ-GAMMA,Logistics Coordinator,Operations,G2,EMP014,CC-OPS,Full-time,Unlimited,2025-01-15,,,Active,9500,2375,1000
+EMP020,Omar Al-Masri,Syrian,False,Company B,Operations,PROJ-GAMMA,Operations Admin,Operations,G1,EMP014,CC-OPS,Full-time,Limited,2025-04-01,,2026-04-01,Active,5500,1375,500

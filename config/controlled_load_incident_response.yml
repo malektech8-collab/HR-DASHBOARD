@@ -1,0 +1,31 @@
+# HR Command Center - Incident Response Containment Protocol
+# Defines incident severities, containment actions, and escalations.
+
+incidents:
+  - incident_type: "Real data in wrong folder"
+    severity: "High"
+    containment_action: "Immediately delete the file; run disk wipe on sector"
+    owner: "System Architect"
+    escalation_route: "Notify CISO"
+    notification_within_hours: 1
+
+  - incident_type: "Unmasked government ID exposed"
+    severity: "Critical"
+    containment_action: "Temporarily disable access to affected dashboard module"
+    owner: "Data Privacy Officer"
+    escalation_route: "Notify DPO and legal counsel"
+    notification_within_hours: 1
+
+  - incident_type: "Unmasked payroll details exposed"
+    severity: "Critical"
+    containment_action: "Disable all non-payroll role log sessions"
+    owner: "Information Security Lead"
+    escalation_route: "Notify Finance VP and CISO"
+    notification_within_hours: 2
+
+  - incident_type: "Raw successor ID exposed"
+    severity: "Critical"
+    containment_action: "Roll back affected table views; restore pseudonymous key hashing"
+    owner: "Data Privacy Officer"
+    escalation_route: "Notify Talent Lead and DPO"
+    notification_within_hours: 4

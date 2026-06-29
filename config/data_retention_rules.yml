@@ -1,0 +1,52 @@
+# HR Command Center - Data Retention & Archiving Rules
+# Configures required storage periods and deletion parameters.
+
+retention_rules:
+  - data_category: "raw_intake_files"
+    retention_period_days: 90
+    deletion_trigger: "AUTOMATED_TIMED_CLEANUP"
+    archiving_method: "Move to secure cold-storage"
+    owner: "HR Systems Lead"
+    legal_hold_condition: "Case-by-case corporate hold"
+
+  - data_category: "quarantine_files"
+    retention_period_days: 30
+    deletion_trigger: "AUTOMATED_TIMED_CLEANUP"
+    archiving_method: "None - Permanent deletion"
+    owner: "Data Quality Engineer"
+    legal_hold_condition: "None"
+
+  - data_category: "approved_synthetic_test_files"
+    retention_period_days: 365
+    deletion_trigger: "MANUAL_ARCHIVE"
+    archiving_method: "Git versioned storage"
+    owner: "System Architect"
+    legal_hold_condition: "None"
+
+  - data_category: "transformed_canonical_tables"
+    retention_period_days: 1825 # 5 years
+    deletion_trigger: "AUTOMATED_TIMED_CLEANUP"
+    archiving_method: "Database snapshot backup"
+    owner: "HR Systems Lead"
+    legal_hold_condition: "Active labor disputes"
+
+  - data_category: "dashboard_marts"
+    retention_period_days: 1825
+    deletion_trigger: "AUTOMATED_TIMED_CLEANUP"
+    archiving_method: "Database snapshot backup"
+    owner: "HR Systems Lead"
+    legal_hold_condition: "Active audits"
+
+  - data_category: "QA_reports"
+    retention_period_days: 365
+    deletion_trigger: "MANUAL_ARCHIVE"
+    archiving_method: "PDF backup vault"
+    owner: "Data Quality Engineer"
+    legal_hold_condition: "None"
+
+  - data_category: "audit_logs"
+    retention_period_days: 365
+    deletion_trigger: "AUTOMATED_TIMED_CLEANUP"
+    archiving_method: "Immutable write-once log archive"
+    owner: "Information Security Lead"
+    legal_hold_condition: "Active security incidents"

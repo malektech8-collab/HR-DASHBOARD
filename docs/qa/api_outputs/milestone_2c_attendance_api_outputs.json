@@ -1,0 +1,3897 @@
+{
+  "GET /api/attendance/summary": {
+    "report_month": "2026-06",
+    "kpis": [
+      {
+        "key": "attendance_compliance_pct",
+        "label": "Attendance Compliance %",
+        "value": 14.78,
+        "unit": "%",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "critical"
+      },
+      {
+        "key": "absence_days",
+        "label": "Absence Days",
+        "value": 419.0,
+        "unit": "days",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "warning"
+      },
+      {
+        "key": "late_minutes",
+        "label": "Late Minutes",
+        "value": 30.0,
+        "unit": "min",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "healthy"
+      },
+      {
+        "key": "excused_late_minutes",
+        "label": "Excused Late Minutes",
+        "value": 15.0,
+        "unit": "min",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "neutral"
+      },
+      {
+        "key": "net_late_minutes",
+        "label": "Net Late Minutes",
+        "value": 15.0,
+        "unit": "min",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "healthy"
+      },
+      {
+        "key": "early_leave_minutes",
+        "label": "Early Leave Minutes",
+        "value": 0.0,
+        "unit": "min",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "healthy"
+      },
+      {
+        "key": "missing_punch_count",
+        "label": "Missing Punch Count",
+        "value": 1.0,
+        "unit": "punches",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "critical"
+      },
+      {
+        "key": "overtime_hours",
+        "label": "Overtime Hours",
+        "value": 2.5,
+        "unit": "hrs",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "neutral"
+      },
+      {
+        "key": "overtime_cost",
+        "label": "Overtime Cost",
+        "value": 2900.0,
+        "unit": "SAR",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "neutral"
+      },
+      {
+        "key": "attendance_exception_count",
+        "label": "Attendance Exception Count",
+        "value": 430.0,
+        "unit": "issues",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "critical"
+      }
+    ]
+  },
+  "GET /api/attendance/trends": {
+    "trends": [
+      {
+        "month": "2026-04",
+        "attendance_compliance_pct": 96.5,
+        "absence_days": 2.0,
+        "late_minutes": 180.0,
+        "net_late_minutes": 120.0,
+        "missing_punch_count": 1.0,
+        "overtime_hours": 8.0
+      },
+      {
+        "month": "2026-05",
+        "attendance_compliance_pct": 95.0,
+        "absence_days": 3.0,
+        "late_minutes": 240.0,
+        "net_late_minutes": 180.0,
+        "missing_punch_count": 2.0,
+        "overtime_hours": 12.5
+      },
+      {
+        "month": "2026-06",
+        "attendance_compliance_pct": 14.78,
+        "absence_days": 419.0,
+        "late_minutes": 30.0,
+        "net_late_minutes": 15.0,
+        "missing_punch_count": 1.0,
+        "overtime_hours": 2.5
+      }
+    ]
+  },
+  "GET /api/attendance/by-project": {
+    "projects": [
+      {
+        "project": "PROJ-GAMMA",
+        "headcount": 6,
+        "attendance_compliance_pct": 15.38,
+        "absence_days": 132.0,
+        "late_minutes": 0.0,
+        "missing_punches": 0,
+        "overtime_hours": 2.5,
+        "overtime_cost": 900.0
+      },
+      {
+        "project": "PROJ-BETA",
+        "headcount": 3,
+        "attendance_compliance_pct": 14.1,
+        "absence_days": 66.0,
+        "late_minutes": 0.0,
+        "missing_punches": 1,
+        "overtime_hours": 0.0,
+        "overtime_cost": 1100.0
+      },
+      {
+        "project": "Missing Project",
+        "headcount": 1,
+        "attendance_compliance_pct": 11.54,
+        "absence_days": 23.0,
+        "late_minutes": 0.0,
+        "missing_punches": 0,
+        "overtime_hours": 0.0,
+        "overtime_cost": 0.0
+      },
+      {
+        "project": "PROJ-ALPHA",
+        "headcount": 9,
+        "attendance_compliance_pct": 14.96,
+        "absence_days": 198.0,
+        "late_minutes": 30.0,
+        "missing_punches": 0,
+        "overtime_hours": 0.0,
+        "overtime_cost": 900.0
+      }
+    ]
+  },
+  "GET /api/attendance/by-department": {
+    "departments": [
+      {
+        "department": "Finance",
+        "headcount": 2,
+        "attendance_compliance_pct": 13.46,
+        "absence_days": 44.0,
+        "late_minutes": 30.0,
+        "net_late_minutes": 15.0,
+        "missing_punches": 0,
+        "overtime_hours": 0.0,
+        "overtime_cost": 300.0
+      },
+      {
+        "department": "Engineering",
+        "headcount": 4,
+        "attendance_compliance_pct": 14.42,
+        "absence_days": 88.0,
+        "late_minutes": 0.0,
+        "net_late_minutes": 0.0,
+        "missing_punches": 1,
+        "overtime_hours": 0.0,
+        "overtime_cost": 1100.0
+      },
+      {
+        "department": "HR",
+        "headcount": 4,
+        "attendance_compliance_pct": 15.38,
+        "absence_days": 88.0,
+        "late_minutes": 0.0,
+        "net_late_minutes": 0.0,
+        "missing_punches": 0,
+        "overtime_hours": 0.0,
+        "overtime_cost": 1100.0
+      },
+      {
+        "department": "Executive",
+        "headcount": 1,
+        "attendance_compliance_pct": 15.38,
+        "absence_days": 22.0,
+        "late_minutes": 0.0,
+        "net_late_minutes": 0.0,
+        "missing_punches": 0,
+        "overtime_hours": 0.0,
+        "overtime_cost": 0.0
+      },
+      {
+        "department": "Marketing",
+        "headcount": 3,
+        "attendance_compliance_pct": 14.1,
+        "absence_days": 67.0,
+        "late_minutes": 0.0,
+        "net_late_minutes": 0.0,
+        "missing_punches": 0,
+        "overtime_hours": 0.0,
+        "overtime_cost": 0.0
+      },
+      {
+        "department": "Operations",
+        "headcount": 5,
+        "attendance_compliance_pct": 15.38,
+        "absence_days": 110.0,
+        "late_minutes": 0.0,
+        "net_late_minutes": 0.0,
+        "missing_punches": 0,
+        "overtime_hours": 2.5,
+        "overtime_cost": 400.0
+      }
+    ]
+  },
+  "GET /api/attendance/late-arrival": {
+    "late_arrivals": [
+      {
+        "employee_id": "EMP003",
+        "employee_name": "Fahad Al-Otaibi",
+        "department": "Finance",
+        "project": "PROJ-ALPHA",
+        "total_late_minutes": 30,
+        "total_excused_minutes": 15,
+        "total_net_late_minutes": 15,
+        "late_arrival_incidents_count": 1
+      }
+    ]
+  },
+  "GET /api/attendance/overtime": {
+    "overtime_records": [
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "department": "Operations",
+        "project": "PROJ-GAMMA",
+        "attendance_ot_hours": 2.5,
+        "payroll_ot_cost": 0.0,
+        "reconciliation_status": "OT in Attendance only"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "Ahmad Al-Sudairy",
+        "department": "HR",
+        "project": "PROJ-ALPHA",
+        "attendance_ot_hours": 0.0,
+        "payroll_ot_cost": 450.0,
+        "reconciliation_status": "OT in Payroll only"
+      },
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "department": "Engineering",
+        "project": "PROJ-BETA",
+        "attendance_ot_hours": 0.0,
+        "payroll_ot_cost": 600.0,
+        "reconciliation_status": "OT in Payroll only"
+      },
+      {
+        "employee_id": "EMP003",
+        "employee_name": "Fahad Al-Otaibi",
+        "department": "Finance",
+        "project": "PROJ-ALPHA",
+        "attendance_ot_hours": 0.0,
+        "payroll_ot_cost": 0.0,
+        "reconciliation_status": "No Overtime"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "department": "Marketing",
+        "project": null,
+        "attendance_ot_hours": 0.0,
+        "payroll_ot_cost": 0.0,
+        "reconciliation_status": "No Overtime"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "department": "HR",
+        "project": "PROJ-GAMMA",
+        "attendance_ot_hours": 0.0,
+        "payroll_ot_cost": 500.0,
+        "reconciliation_status": "OT in Payroll only"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "department": "Operations",
+        "project": "PROJ-ALPHA",
+        "attendance_ot_hours": 0.0,
+        "payroll_ot_cost": 0.0,
+        "reconciliation_status": "No Overtime"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "department": "Finance",
+        "project": "PROJ-ALPHA",
+        "attendance_ot_hours": 0.0,
+        "payroll_ot_cost": 300.0,
+        "reconciliation_status": "OT in Payroll only"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "department": "Engineering",
+        "project": "PROJ-GAMMA",
+        "attendance_ot_hours": 0.0,
+        "payroll_ot_cost": 0.0,
+        "reconciliation_status": "No Overtime"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "department": "HR",
+        "project": "PROJ-ALPHA",
+        "attendance_ot_hours": 0.0,
+        "payroll_ot_cost": 0.0,
+        "reconciliation_status": "No Overtime"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "department": "Engineering",
+        "project": "PROJ-BETA",
+        "attendance_ot_hours": 0.0,
+        "payroll_ot_cost": 0.0,
+        "reconciliation_status": "No Overtime"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "department": "Marketing",
+        "project": "PROJ-ALPHA",
+        "attendance_ot_hours": 0.0,
+        "payroll_ot_cost": 0.0,
+        "reconciliation_status": "No Overtime"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "department": "Operations",
+        "project": "PROJ-GAMMA",
+        "attendance_ot_hours": 0.0,
+        "payroll_ot_cost": 0.0,
+        "reconciliation_status": "No Overtime"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "department": "Executive",
+        "project": "PROJ-ALPHA",
+        "attendance_ot_hours": 0.0,
+        "payroll_ot_cost": 0.0,
+        "reconciliation_status": "No Overtime"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "department": "HR",
+        "project": "PROJ-ALPHA",
+        "attendance_ot_hours": 0.0,
+        "payroll_ot_cost": 150.0,
+        "reconciliation_status": "OT in Payroll only"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "department": "Engineering",
+        "project": "PROJ-BETA",
+        "attendance_ot_hours": 0.0,
+        "payroll_ot_cost": 500.0,
+        "reconciliation_status": "OT in Payroll only"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "department": "Operations",
+        "project": "PROJ-GAMMA",
+        "attendance_ot_hours": 0.0,
+        "payroll_ot_cost": 400.0,
+        "reconciliation_status": "OT in Payroll only"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "department": "Operations",
+        "project": "PROJ-GAMMA",
+        "attendance_ot_hours": 0.0,
+        "payroll_ot_cost": 0.0,
+        "reconciliation_status": "No Overtime"
+      },
+      {
+        "employee_id": "EMP006",
+        "employee_name": "Youssef Mansour",
+        "department": "Engineering",
+        "project": "PROJ-BETA",
+        "attendance_ot_hours": 0.0,
+        "payroll_ot_cost": 0.0,
+        "reconciliation_status": "No Overtime"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "department": "Marketing",
+        "project": "PROJ-ALPHA",
+        "attendance_ot_hours": 0.0,
+        "payroll_ot_cost": 0.0,
+        "reconciliation_status": "No Overtime"
+      }
+    ]
+  },
+  "GET /api/attendance/missing-punches": {
+    "missing_punches": [
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "department": "Engineering",
+        "project": "PROJ-BETA",
+        "missing_check_in_count": 0,
+        "missing_check_out_count": 1,
+        "total_missing_punches": 1
+      }
+    ]
+  },
+  "GET /api/attendance/exceptions": {
+    "exceptions": [
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "issue_type": "Missing Check-out",
+        "description": "Employee has actual check-in but actual check-out is missing on 2026-06-02",
+        "severity": "Warning",
+        "recommended_action": "Request employee to provide check-out time"
+      },
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "issue_type": "One Punch Only",
+        "description": "Only one punch recorded on 2026-06-02",
+        "severity": "Warning",
+        "recommended_action": "Reconcile check-in or check-out time"
+      },
+      {
+        "employee_id": "EMP003",
+        "employee_name": "Fahad Al-Otaibi",
+        "issue_type": "Source Late Minutes Mismatch",
+        "description": "Source late minutes (45) does not match calculated (30) on 2026-06-03",
+        "severity": "Warning",
+        "recommended_action": "Verify source system lateness logic and parameters"
+      },
+      {
+        "employee_id": "EMP003",
+        "employee_name": "Fahad Al-Otaibi",
+        "issue_type": "Source Net Late Minutes Mismatch",
+        "description": "Source net late minutes (30) does not match calculated (15) on 2026-06-03",
+        "severity": "Warning",
+        "recommended_action": "Verify source system net lateness calculations"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Overtime Amount Missing",
+        "description": "Employee has approved overtime hours (2.5) but payroll overtime amount is zero",
+        "severity": "Critical",
+        "recommended_action": "Process overtime payment in monthly payroll"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "Ahmad Al-Sudairy",
+        "issue_type": "Overtime Hours Missing",
+        "description": "Employee has payroll overtime payment (450.0 SAR) but approved overtime hours are zero",
+        "severity": "Critical",
+        "recommended_action": "Investigate overtime validation or manual entry error"
+      },
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "issue_type": "Overtime Hours Missing",
+        "description": "Employee has payroll overtime payment (600.0 SAR) but approved overtime hours are zero",
+        "severity": "Critical",
+        "recommended_action": "Investigate overtime validation or manual entry error"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Overtime Hours Missing",
+        "description": "Employee has payroll overtime payment (500.0 SAR) but approved overtime hours are zero",
+        "severity": "Critical",
+        "recommended_action": "Investigate overtime validation or manual entry error"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Overtime Hours Missing",
+        "description": "Employee has payroll overtime payment (300.0 SAR) but approved overtime hours are zero",
+        "severity": "Critical",
+        "recommended_action": "Investigate overtime validation or manual entry error"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Overtime Hours Missing",
+        "description": "Employee has payroll overtime payment (150.0 SAR) but approved overtime hours are zero",
+        "severity": "Critical",
+        "recommended_action": "Investigate overtime validation or manual entry error"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Overtime Hours Missing",
+        "description": "Employee has payroll overtime payment (500.0 SAR) but approved overtime hours are zero",
+        "severity": "Critical",
+        "recommended_action": "Investigate overtime validation or manual entry error"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Overtime Hours Missing",
+        "description": "Employee has payroll overtime payment (400.0 SAR) but approved overtime hours are zero",
+        "severity": "Critical",
+        "recommended_action": "Investigate overtime validation or manual entry error"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "Ahmad Al-Sudairy",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-11",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "Ahmad Al-Sudairy",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-18",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-08",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-07",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-08",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-08",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-11",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-13",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-16",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-17",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-18",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-27",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-27",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-06",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-09",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-10",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-14",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-20",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-20",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-23",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-24",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-24",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-25",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-25",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-28",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-28",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "Ahmad Al-Sudairy",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-08",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-11",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-18",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-06",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-08",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-09",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-10",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-11",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-11",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-14",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-15",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-16",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-16",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP003",
+        "employee_name": "Fahad Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-17",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-18",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-18",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-22",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-23",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-27",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-29",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-06",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-09",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-10",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-14",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-17",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-21",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-21",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-23",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-30",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "Ahmad Al-Sudairy",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-17",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-06",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-07",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-07",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP003",
+        "employee_name": "Fahad Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-08",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-09",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-10",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-11",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-14",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-15",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-17",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-18",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-22",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-23",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-27",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-29",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-08",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-13",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-15",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-20",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-24",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-25",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-28",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-17",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-07",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-08",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP003",
+        "employee_name": "Fahad Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-11",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-13",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-16",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-17",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-17",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP003",
+        "employee_name": "Fahad Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-18",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-22",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-22",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-29",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-29",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-11",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-13",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-15",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-18",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-21",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-30",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-30",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-06",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-09",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-10",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-14",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-23",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-06",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-06",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-09",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-09",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-10",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-10",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-11",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP003",
+        "employee_name": "Fahad Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-13",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-14",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-14",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-15",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-18",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-20",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-21",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-21",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-23",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-23",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-24",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-25",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-28",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-30",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-08",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-11",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-13",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-16",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-16",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-18",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-22",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-29",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "Ahmad Al-Sudairy",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-06",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "Ahmad Al-Sudairy",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-09",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "Ahmad Al-Sudairy",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-10",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "Ahmad Al-Sudairy",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-14",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "Ahmad Al-Sudairy",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-23",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-06",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-08",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-09",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-10",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-13",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-14",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP003",
+        "employee_name": "Fahad Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-15",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-17",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-20",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-20",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-21",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-23",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-24",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-24",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-25",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-25",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-28",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-28",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-07",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-08",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-11",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-15",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-18",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-27",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-27",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "Ahmad Al-Sudairy",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-15",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-13",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP003",
+        "employee_name": "Fahad Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-06",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-08",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP003",
+        "employee_name": "Fahad Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-09",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP003",
+        "employee_name": "Fahad Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-10",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-13",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-13",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP003",
+        "employee_name": "Fahad Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-14",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-15",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-17",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-21",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP003",
+        "employee_name": "Fahad Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-23",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-30",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-30",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-06",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-09",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-10",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-14",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-16",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-17",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-22",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-22",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-23",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-29",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-29",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "Ahmad Al-Sudairy",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-13",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-15",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-06",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-09",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-10",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-11",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-13",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-14",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-15",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-15",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-18",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-20",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-23",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-24",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-25",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-28",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-30",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-07",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-07",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-17",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-27",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "Ahmad Al-Sudairy",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-07",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-22",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-29",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-07",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-11",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP003",
+        "employee_name": "Fahad Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-16",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-17",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-17",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-18",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-20",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-22",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-22",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-24",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-25",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-27",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-28",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-29",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-29",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-30",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-06",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-09",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-10",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-13",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-13",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-14",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-16",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-23",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-30",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "Ahmad Al-Sudairy",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-22",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "Ahmad Al-Sudairy",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-29",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-07",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-07",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-07",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-08",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-16",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-17",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-21",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-22",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP003",
+        "employee_name": "Fahad Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-27",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-29",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-15",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-15",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-27",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-30",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "Ahmad Al-Sudairy",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-27",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-16",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-07",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-08",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-11",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-11",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-16",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-16",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-17",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-18",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-18",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-21",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP003",
+        "employee_name": "Fahad Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-22",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-27",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP003",
+        "employee_name": "Fahad Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-29",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-06",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-06",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-09",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-09",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-10",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-10",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-13",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-14",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-14",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-20",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-21",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-22",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-23",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-23",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-24",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-25",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-28",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-29",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "Ahmad Al-Sudairy",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-16",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-27",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP003",
+        "employee_name": "Fahad Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-07",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-08",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-08",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-11",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-16",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-18",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-20",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-22",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-24",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-25",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-27",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-27",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-28",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-29",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-30",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-07",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-15",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-20",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-21",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-24",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-25",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-28",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "Ahmad Al-Sudairy",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-30",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-07",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-13",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-15",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-15",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-16",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP003",
+        "employee_name": "Fahad Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-20",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-21",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP003",
+        "employee_name": "Fahad Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-24",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP003",
+        "employee_name": "Fahad Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-25",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP003",
+        "employee_name": "Fahad Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-28",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-30",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-07",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-08",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-20",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-22",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-24",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-25",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-28",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-29",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-30",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-06",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-09",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-10",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-13",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-13",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-14",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-15",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-20",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP003",
+        "employee_name": "Fahad Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-21",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-22",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-23",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-24",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-25",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-27",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-28",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-29",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-30",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-30",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-07",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-11",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-17",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-17",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-18",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-21",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-22",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-29",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "Ahmad Al-Sudairy",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-21",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-20",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-24",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-25",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-28",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-06",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-09",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-10",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-14",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-15",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-20",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-20",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-21",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-22",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-23",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-24",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-24",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-25",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-25",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-27",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-28",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-28",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-29",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-30",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-08",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-08",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-16",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-27",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "Ahmad Al-Sudairy",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-20",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "Ahmad Al-Sudairy",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-24",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "Ahmad Al-Sudairy",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-25",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "Ahmad Al-Sudairy",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-28",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-21",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-06",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-06",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-07",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-09",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-09",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-10",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-10",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-13",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-14",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-14",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-16",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-20",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-21",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-21",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-23",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-23",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-24",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-25",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-28",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP003",
+        "employee_name": "Fahad Al-Otaibi",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-30",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-11",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-11",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-16",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-17",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-18",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-18",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-27",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing Workday Attendance",
+        "description": "Active employee has no attendance record for expected workday on 2026-06-30",
+        "severity": "Warning",
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch"
+      }
+    ]
+  }
+}

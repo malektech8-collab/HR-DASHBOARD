@@ -1,0 +1,68 @@
+# HR Command Center - Gate 3 Privacy and Security Ingestion Status
+# Tracks privacy and security compliance approvals for each operational category.
+
+privacy_security_status:
+  - source_category: "HRIS / Employee Master"
+    classification_complete: true
+    masking_rules_approved: true
+    rbac_verified: true
+    status: "Ready"
+    last_review_date: "2026-06-29T10:00:00Z"
+    reviewer: "Data Privacy Officer"
+
+  - source_category: "Payroll"
+    classification_complete: true
+    masking_rules_approved: true
+    rbac_verified: true
+    status: "Ready"
+    last_review_date: "2026-06-29T10:15:00Z"
+    reviewer: "Information Security Lead"
+
+  - source_category: "Attendance"
+    classification_complete: true
+    masking_rules_approved: true
+    rbac_verified: true
+    status: "Ready"
+    last_review_date: "2026-06-29T10:20:00Z"
+    reviewer: "Data Privacy Officer"
+
+  - source_category: "Government / Compliance"
+    classification_complete: true
+    masking_rules_approved: true
+    rbac_verified: true
+    status: "Ready"
+    last_review_date: "2026-06-29T10:30:00Z"
+    reviewer: "Information Security Lead"
+
+  - source_category: "Employee Relations / Case Management"
+    classification_complete: true
+    masking_rules_approved: true
+    rbac_verified: true
+    status: "Ready"
+    last_review_date: "2026-06-29T10:40:00Z"
+    reviewer: "Data Privacy Officer"
+
+  - source_category: "Recruitment / Workforce Planning"
+    classification_complete: true
+    masking_rules_approved: true
+    rbac_verified: true
+    status: "Ready"
+    last_review_date: "2026-06-29T10:45:00Z"
+    reviewer: "Information Security Lead"
+
+  - source_category: "Talent / Performance / Learning"
+    classification_complete: true
+    masking_rules_approved: true
+    rbac_verified: true
+    status: "Ready"
+    last_review_date: "2026-06-29T11:00:00Z"
+    reviewer: "Data Privacy Officer"
+    notes: "Opaque successor keys successfully validated."
+
+  - source_category: "Data Quality / Command Center Metadata"
+    classification_complete: true
+    masking_rules_approved: true
+    rbac_verified: true
+    status: "Ready"
+    last_review_date: "2026-06-29T11:15:00Z"
+    reviewer: "Information Security Lead"

@@ -1,0 +1,537 @@
+{
+  "GET /api/recruitment/summary": {
+    "report_month": "2026-06",
+    "kpis": [
+      {
+        "key": "open_requisitions",
+        "label": "Open Requisitions",
+        "value": 5.0,
+        "unit": "requisitions",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "neutral"
+      },
+      {
+        "key": "approved_vacancies",
+        "label": "Approved Vacancies",
+        "value": 2.0,
+        "unit": "vacancies",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "neutral"
+      },
+      {
+        "key": "candidates_in_pipeline",
+        "label": "Candidates in Pipeline",
+        "value": 6.0,
+        "unit": "candidates",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "healthy"
+      },
+      {
+        "key": "interviews_scheduled",
+        "label": "Interviews Scheduled",
+        "value": 2.0,
+        "unit": "interviews",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "neutral"
+      },
+      {
+        "key": "offers_extended",
+        "label": "Offers Extended",
+        "value": 3.0,
+        "unit": "offers",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "neutral"
+      },
+      {
+        "key": "offer_acceptance_pct",
+        "label": "Offer Acceptance %",
+        "value": 100.0,
+        "unit": "%",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "healthy"
+      },
+      {
+        "key": "hires_this_month",
+        "label": "Hires This Month",
+        "value": 1.0,
+        "unit": "hires",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "neutral"
+      },
+      {
+        "key": "average_time_to_fill",
+        "label": "Average Time to Fill",
+        "value": 40.0,
+        "unit": "days",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "healthy"
+      },
+      {
+        "key": "overdue_requisitions",
+        "label": "Overdue Requisitions",
+        "value": 1.0,
+        "unit": "requisitions",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "critical"
+      },
+      {
+        "key": "workforce_plan_fulfillment_pct",
+        "label": "Workforce Plan Fulfillment %",
+        "value": 77.78,
+        "unit": "%",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "warning"
+      },
+      {
+        "key": "recruitment_exception_count",
+        "label": "Recruitment Exception Count",
+        "value": 25.0,
+        "unit": "alerts",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "critical"
+      }
+    ]
+  },
+  "GET /api/recruitment/pipeline": {
+    "pipeline": [
+      {
+        "pipeline_stage": "Applied",
+        "candidate_count": 1
+      },
+      {
+        "pipeline_stage": "Applied",
+        "candidate_count": 1
+      },
+      {
+        "pipeline_stage": "Offer Extended",
+        "candidate_count": 1
+      },
+      {
+        "pipeline_stage": "Interview",
+        "candidate_count": 1
+      },
+      {
+        "pipeline_stage": "Offer Accepted",
+        "candidate_count": 1
+      },
+      {
+        "pipeline_stage": "Hired",
+        "candidate_count": 1
+      }
+    ]
+  },
+  "GET /api/recruitment/trends": {
+    "trends": [
+      {
+        "period": "2026-04",
+        "requisitions_opened": 5,
+        "hires": 3
+      },
+      {
+        "period": "2026-05",
+        "requisitions_opened": 6,
+        "hires": 4
+      },
+      {
+        "period": "2026-06",
+        "requisitions_opened": 6,
+        "hires": 1
+      }
+    ]
+  },
+  "GET /api/recruitment/by-project": {
+    "projects": [
+      {
+        "project": "PROJ-BETA",
+        "total_requisitions": 2,
+        "open_requisitions": 0,
+        "closed_requisitions": 2,
+        "overdue_requisitions": 0
+      },
+      {
+        "project": "PROJ-GAMMA",
+        "total_requisitions": 1,
+        "open_requisitions": 1,
+        "closed_requisitions": 0,
+        "overdue_requisitions": 1
+      },
+      {
+        "project": "PROJ-ALPHA",
+        "total_requisitions": 4,
+        "open_requisitions": 4,
+        "closed_requisitions": 0,
+        "overdue_requisitions": 0
+      }
+    ]
+  },
+  "GET /api/recruitment/by-department": {
+    "departments": [
+      {
+        "department": "Finance",
+        "total_requisitions": 1,
+        "open_requisitions": 1,
+        "closed_requisitions": 0,
+        "overdue_requisitions": 0
+      },
+      {
+        "department": "Marketing",
+        "total_requisitions": 1,
+        "open_requisitions": 1,
+        "closed_requisitions": 0,
+        "overdue_requisitions": 0
+      },
+      {
+        "department": "Engineering",
+        "total_requisitions": 2,
+        "open_requisitions": 0,
+        "closed_requisitions": 2,
+        "overdue_requisitions": 0
+      },
+      {
+        "department": "Operations",
+        "total_requisitions": 1,
+        "open_requisitions": 1,
+        "closed_requisitions": 0,
+        "overdue_requisitions": 1
+      },
+      {
+        "department": "HR",
+        "total_requisitions": 2,
+        "open_requisitions": 2,
+        "closed_requisitions": 0,
+        "overdue_requisitions": 0
+      }
+    ]
+  },
+  "GET /api/recruitment/time-to-fill": {
+    "time_to_fill": [
+      {
+        "department": "Engineering",
+        "project": "PROJ-BETA",
+        "average_time_to_fill": 19.0,
+        "hire_count": 1
+      },
+      {
+        "department": "Operations",
+        "project": "PROJ-GAMMA",
+        "average_time_to_fill": 61.0,
+        "hire_count": 1
+      }
+    ]
+  },
+  "GET /api/recruitment/source-effectiveness": {
+    "sources": [
+      {
+        "source": "LinkedIn",
+        "candidate_count": 2,
+        "hire_count": 1,
+        "conversion_pct": 50.0
+      },
+      {
+        "source": "Referral",
+        "candidate_count": 1,
+        "hire_count": 0,
+        "conversion_pct": 0.0
+      },
+      {
+        "source": "Other",
+        "candidate_count": 1,
+        "hire_count": 0,
+        "conversion_pct": 0.0
+      },
+      {
+        "source": "Indeed",
+        "candidate_count": 1,
+        "hire_count": 0,
+        "conversion_pct": 0.0
+      },
+      {
+        "source": "Agency",
+        "candidate_count": 1,
+        "hire_count": 0,
+        "conversion_pct": 0.0
+      }
+    ]
+  },
+  "GET /api/recruitment/offers": {
+    "offers": [
+      {
+        "offer_status": "Sent",
+        "offer_count": 1
+      },
+      {
+        "offer_status": "Accepted",
+        "offer_count": 2
+      }
+    ]
+  },
+  "GET /api/recruitment/onboarding": {
+    "onboarding": [
+      {
+        "onboarding_status": "Completed",
+        "hire_count": 1
+      }
+    ]
+  },
+  "GET /api/recruitment/workforce-plan": {
+    "plan": [
+      {
+        "project": "PROJ-ALPHA",
+        "department": "HR",
+        "planned_headcount": 4,
+        "actual_headcount": 3,
+        "fulfillment_pct": 75.0
+      },
+      {
+        "project": "PROJ-ALPHA",
+        "department": "Finance",
+        "planned_headcount": 3,
+        "actual_headcount": 2,
+        "fulfillment_pct": 66.67
+      },
+      {
+        "project": "PROJ-BETA",
+        "department": "Engineering",
+        "planned_headcount": 5,
+        "actual_headcount": 3,
+        "fulfillment_pct": 60.0
+      },
+      {
+        "project": "PROJ-GAMMA",
+        "department": "Operations",
+        "planned_headcount": 4,
+        "actual_headcount": 4,
+        "fulfillment_pct": 100.0
+      },
+      {
+        "project": "PROJ-ALPHA",
+        "department": "Marketing",
+        "planned_headcount": 0,
+        "actual_headcount": 2,
+        "fulfillment_pct": 0.0
+      },
+      {
+        "project": "Unassigned",
+        "department": "Finance",
+        "planned_headcount": 2,
+        "actual_headcount": 0,
+        "fulfillment_pct": 0.0
+      }
+    ]
+  },
+  "GET /api/recruitment/exceptions": {
+    "exceptions": [
+      {
+        "employee_id": "REQ003",
+        "employee_name": "N/A",
+        "issue_type": "Missing Recruiter",
+        "description": "Open requisition has no owner recruiter assigned",
+        "severity": "Critical",
+        "recommended_action": "Assign a recruiter"
+      },
+      {
+        "employee_id": "REQ005",
+        "employee_name": "N/A",
+        "issue_type": "Missing Target Hire Date",
+        "description": "Open requisition target hire date is blank",
+        "severity": "Warning",
+        "recommended_action": "Provide target hire date"
+      },
+      {
+        "employee_id": "REQ004",
+        "employee_name": "N/A",
+        "issue_type": "Overdue Requisition",
+        "description": "Open requisition has breached its effective target date: 2026-06-15",
+        "severity": "Critical",
+        "recommended_action": "Expedite sourcing and pipeline conversions"
+      },
+      {
+        "employee_id": "REQ002",
+        "employee_name": "N/A",
+        "issue_type": "Empty Candidate Pipeline",
+        "description": "Requisition is open but has 0 candidates linked",
+        "severity": "Warning",
+        "recommended_action": "Source and link candidates to requisition"
+      },
+      {
+        "employee_id": "REQ002",
+        "employee_name": "N/A",
+        "issue_type": "Empty Candidate Pipeline",
+        "description": "Requisition is open but has 0 candidates linked",
+        "severity": "Warning",
+        "recommended_action": "Source and link candidates to requisition"
+      },
+      {
+        "employee_id": "REQ003",
+        "employee_name": "N/A",
+        "issue_type": "Empty Candidate Pipeline",
+        "description": "Requisition is open but has 0 candidates linked",
+        "severity": "Warning",
+        "recommended_action": "Source and link candidates to requisition"
+      },
+      {
+        "employee_id": "CAN003",
+        "employee_name": "N/A",
+        "issue_type": "Missing Pipeline Stage",
+        "description": "Candidate application has no pipeline stage logged",
+        "severity": "Warning",
+        "recommended_action": "Assign current pipeline stage"
+      },
+      {
+        "employee_id": "CAN004",
+        "employee_name": "N/A",
+        "issue_type": "Unknown Requisition Link",
+        "description": "Candidate is linked to requisition ID REQ999 which does not exist in master requisitions table",
+        "severity": "Critical",
+        "recommended_action": "Link candidate to active requisition"
+      },
+      {
+        "employee_id": "INT002",
+        "employee_name": "N/A",
+        "issue_type": "Missing Interviewer",
+        "description": "Interview has no interviewer assigned",
+        "severity": "Warning",
+        "recommended_action": "Assign interviewer employee ID"
+      },
+      {
+        "employee_id": "INT003",
+        "employee_name": "N/A",
+        "issue_type": "Missing Interview Date",
+        "description": "Interview record has no scheduled date and time",
+        "severity": "Warning",
+        "recommended_action": "Set scheduled interview timestamp"
+      },
+      {
+        "employee_id": "OFF002",
+        "employee_name": "N/A",
+        "issue_type": "Offer Missing Salary",
+        "description": "Offer extended has no base salary details",
+        "severity": "Critical",
+        "recommended_action": "Enter base salary details"
+      },
+      {
+        "employee_id": "OFF003",
+        "employee_name": "N/A",
+        "issue_type": "Onboarding Not Triggered",
+        "description": "Offer status is Accepted but onboarding is not logged",
+        "severity": "Critical",
+        "recommended_action": "Create onboarding record"
+      },
+      {
+        "employee_id": "ONB002",
+        "employee_name": "N/A",
+        "issue_type": "Unknown Employee ID",
+        "description": "Onboarding record links to employee ID EMP999 which is missing from employee directory",
+        "severity": "Warning",
+        "recommended_action": "Verify active employee ID and link"
+      },
+      {
+        "employee_id": "REQ002",
+        "employee_name": "N/A",
+        "issue_type": "Duplicate Requisition ID",
+        "description": "Requisition ID is logged multiple times in source records",
+        "severity": "Critical",
+        "recommended_action": "Deduplicate requisition records"
+      },
+      {
+        "employee_id": "REQ002",
+        "employee_name": "N/A",
+        "issue_type": "Duplicate Requisition ID",
+        "description": "Requisition ID is logged multiple times in source records",
+        "severity": "Critical",
+        "recommended_action": "Deduplicate requisition records"
+      },
+      {
+        "employee_id": "CAN002",
+        "employee_name": "N/A",
+        "issue_type": "Duplicate Candidate ID",
+        "description": "Candidate ID is logged multiple times in source records",
+        "severity": "Critical",
+        "recommended_action": "Deduplicate candidate records"
+      },
+      {
+        "employee_id": "CAN002",
+        "employee_name": "N/A",
+        "issue_type": "Duplicate Candidate ID",
+        "description": "Candidate ID is logged multiple times in source records",
+        "severity": "Critical",
+        "recommended_action": "Deduplicate candidate records"
+      },
+      {
+        "employee_id": "Plan_Row",
+        "employee_name": "N/A",
+        "issue_type": "Missing Plan Dimension",
+        "description": "Workforce plan record has null project or department",
+        "severity": "Warning",
+        "recommended_action": "Specify project and department details"
+      },
+      {
+        "employee_id": "PROJ-ALPHA-Marketing",
+        "employee_name": "N/A",
+        "issue_type": "Plan Exceeded",
+        "description": "Actual headcount (2) exceeds planned headcount (0)",
+        "severity": "Warning",
+        "recommended_action": "Review project hiring plan"
+      },
+      {
+        "employee_id": "PROJ-ALPHA-HR",
+        "employee_name": "N/A",
+        "issue_type": "Plan Unfulfilled",
+        "description": "Planned headcount (4) has not been fulfilled (Actual: 3) by target date 2026-06-30",
+        "severity": "Warning",
+        "recommended_action": "Expedite hiring pipeline"
+      },
+      {
+        "employee_id": "PROJ-ALPHA-Finance",
+        "employee_name": "N/A",
+        "issue_type": "Plan Unfulfilled",
+        "description": "Planned headcount (3) has not been fulfilled (Actual: 2) by target date 2026-06-30",
+        "severity": "Warning",
+        "recommended_action": "Expedite hiring pipeline"
+      },
+      {
+        "employee_id": "PROJ-BETA-Engineering",
+        "employee_name": "N/A",
+        "issue_type": "Plan Unfulfilled",
+        "description": "Planned headcount (5) has not been fulfilled (Actual: 3) by target date 2026-06-30",
+        "severity": "Warning",
+        "recommended_action": "Expedite hiring pipeline"
+      },
+      {
+        "employee_id": "Unassigned-Finance",
+        "employee_name": "N/A",
+        "issue_type": "Plan Unfulfilled",
+        "description": "Planned headcount (2) has not been fulfilled (Actual: 0) by target date 2026-06-30",
+        "severity": "Warning",
+        "recommended_action": "Expedite hiring pipeline"
+      },
+      {
+        "employee_id": "VAC003",
+        "employee_name": "N/A",
+        "issue_type": "Invalid Vacancy Quantity",
+        "description": "Vacancy request Approved has invalid quantity: -1",
+        "severity": "Critical",
+        "recommended_action": "Enter positive quantity"
+      },
+      {
+        "employee_id": "CAN006",
+        "employee_name": "N/A",
+        "issue_type": "Unknown Source Channel",
+        "description": "Candidate has un-normalized source channel: Twitter",
+        "severity": "Warning",
+        "recommended_action": "Update to standard channel"
+      }
+    ]
+  }
+}

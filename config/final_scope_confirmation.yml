@@ -1,0 +1,39 @@
+# HR Command Center - Final Scope Confirmation
+# Confirms first-load scope for Milestone 3I.
+
+final_scope_confirmation:
+  milestone: "3I"
+  first_load_domain: "Data Quality / Command Center Metadata"
+  scope_validation_status: "Confirmed"
+  allowed_fields:
+    - "module_key"
+    - "module_name"
+    - "api_health_status"
+    - "reconciliation_status"
+    - "qa_artifact_status"
+    - "refresh_status"
+    - "freshness_timestamp"
+    - "dashboard_route_key"
+    - "exception_count_by_module"
+    - "owner_role"
+  allowed_field_count: 10
+  excluded_fields:
+    - "employee_name"
+    - "employee_number"
+    - "national_id"
+    - "iqama_number"
+    - "passport_number"
+    - "mobile_number"
+    - "email_address"
+    - "bank_iban_data"
+    - "salary_data"
+    - "payroll_components"
+    - "er_legal_case_text"
+    - "gosi_mudad_qiwa_muqeem_records"
+    - "medical_insurance_records"
+    - "recruitment_candidate_personal_data"
+    - "performance_talent_records"
+    - "free_text_employee_notes"
+  excluded_field_count: 16
+  scope_violation_action: "No-Go"
+  notes: "Scope confirmed. All excluded fields are absent from first-load scope. Any excluded field presence forces No-Go."

@@ -1,0 +1,7 @@
+period,project,department,planned_headcount
+2026-06,PROJ-ALPHA,HR,4
+2026-06,PROJ-ALPHA,Finance,3
+2026-06,PROJ-BETA,Engineering,5
+2026-06,PROJ-GAMMA,Operations,4
+2026-06,,Finance,2
+2026-06,PROJ-ALPHA,Marketing,0

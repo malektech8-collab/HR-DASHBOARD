@@ -1,0 +1,12 @@
+# HR Command Center - Controlled Load Scheduling Config
+# Defines rules for scheduling load windows.
+
+scheduling_rules:
+  allowed_days: ["Friday", "Saturday"]
+  allowed_time_range_utc: "20:00:00 to 02:00:00"
+  release_buffer_hours: 48
+  fallback_offset_hours: 24
+  proposed_window: "2026-07-03T21:00:00Z"
+  fallback_window: "2026-07-04T21:00:00Z"
+  stop_condition: "Any validation failure or data privacy override warning"
+  success_criteria: "100% post-load validation checklist passed"

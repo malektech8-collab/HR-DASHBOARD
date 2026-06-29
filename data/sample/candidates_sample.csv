@@ -1,0 +1,9 @@
+candidate_id,candidate_name,source,pipeline_stage,requisition_id,applied_date
+CAN001,Alice Smith,LinkedIn,Hired,REQ001,2026-06-02
+CAN002,Bob Jones,Indeed,Interview,REQ004,2026-06-05
+CAN002,Bob Jones duplicate log,Indeed,Interview,REQ004,2026-06-05
+CAN003,Charlie Brown,Referral,,REQ004,2026-06-06
+CAN004,Diana Prince,Direct,Applied,REQ999,2026-06-07
+CAN005,Evan Wright,Agency,Offer Extended,REQ004,2026-06-08
+CAN006,Fiona Gallagher,Twitter,Applied,REQ005,2026-06-09
+CAN007,George Costanza,LinkedIn,Offer Accepted,REQ006,2026-06-02

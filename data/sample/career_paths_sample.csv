@@ -1,0 +1,3 @@
+path_id,employee_id,current_role,next_role,readiness_months
+PTH001,EMP001,HR Specialist,HR Specialist Senior,12
+PTH002,EMP002,Software Engineer,,24

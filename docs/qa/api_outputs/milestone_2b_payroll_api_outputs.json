@@ -1,0 +1,581 @@
+{
+  "summary": {
+    "report_month": "2026-06",
+    "kpis": [
+      {
+        "key": "total_payroll_cost",
+        "label": "Total Payroll Cost",
+        "value": 446175.0,
+        "unit": "SAR",
+        "trend_value": 0.05,
+        "trend_direction": "flat",
+        "status": "neutral"
+      },
+      {
+        "key": "net_payroll",
+        "label": "Net Payroll",
+        "value": 437475.0,
+        "unit": "SAR",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "healthy"
+      },
+      {
+        "key": "employees_paid",
+        "label": "Employees Paid",
+        "value": 20.0,
+        "unit": "employees",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "healthy"
+      },
+      {
+        "key": "avg_cost_per_employee",
+        "label": "Average Cost per Employee",
+        "value": 22308.75,
+        "unit": "SAR",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "neutral"
+      },
+      {
+        "key": "payroll_variance_pct",
+        "label": "Payroll Variance vs Previous Month",
+        "value": -0.05,
+        "unit": "%",
+        "trend_value": 0.05,
+        "trend_direction": "flat",
+        "status": "healthy"
+      },
+      {
+        "key": "basic_salary_cost",
+        "label": "Basic Salary Cost",
+        "value": 323500.0,
+        "unit": "SAR",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "neutral"
+      },
+      {
+        "key": "allowances_cost",
+        "label": "Allowances Cost",
+        "value": 120275.0,
+        "unit": "SAR",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "neutral"
+      },
+      {
+        "key": "overtime_cost",
+        "label": "Overtime Cost",
+        "value": 2900.0,
+        "unit": "SAR",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "healthy"
+      },
+      {
+        "key": "deductions",
+        "label": "Deductions",
+        "value": 8700.0,
+        "unit": "SAR",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "neutral"
+      },
+      {
+        "key": "payroll_exception_count",
+        "label": "Payroll Exception Count",
+        "value": 15.0,
+        "unit": "issues",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "critical"
+      }
+    ],
+    "reconciliation": {
+      "total_gross_payroll": 446175.0,
+      "sum_displayed_components": 446675.0,
+      "unreconciled_component_difference": -500.0,
+      "net_payroll": 437475.0,
+      "gross_minus_deductions": 437475.0,
+      "net_unreconciled_difference": 0.0,
+      "project_payroll_total": 446175.0,
+      "department_payroll_total": 446175.0,
+      "employees_paid_count": 20,
+      "payroll_exception_count": 15
+    }
+  },
+  "components": {
+    "components": [
+      {
+        "component": "Basic Salary",
+        "amount": 323500.0
+      },
+      {
+        "component": "Housing Allowance",
+        "amount": 82875.0
+      },
+      {
+        "component": "Transport Allowance",
+        "amount": 27500.0
+      },
+      {
+        "component": "Other Allowances",
+        "amount": 9900.0
+      },
+      {
+        "component": "Overtime",
+        "amount": 2900.0
+      },
+      {
+        "component": "Deductions",
+        "amount": 8700.0
+      },
+      {
+        "component": "Unreconciled / Exception Amount",
+        "amount": -500.0
+      }
+    ]
+  },
+  "trends": {
+    "trends": [
+      {
+        "month": "2026-04",
+        "total_payroll_cost": 435385.0,
+        "basic_salary": 315500.0,
+        "allowances": 117275.0,
+        "overtime": 2610.0,
+        "deductions": 8700.0,
+        "net_payroll": 426685.0,
+        "headcount": 19
+      },
+      {
+        "month": "2026-05",
+        "total_payroll_cost": 446385.0,
+        "basic_salary": 323500.0,
+        "allowances": 120275.0,
+        "overtime": 2610.0,
+        "deductions": 8700.0,
+        "net_payroll": 437685.0,
+        "headcount": 20
+      },
+      {
+        "month": "2026-06",
+        "total_payroll_cost": 446175.0,
+        "basic_salary": 323500.0,
+        "allowances": 120275.0,
+        "overtime": 2900.0,
+        "deductions": 8700.0,
+        "net_payroll": 437475.0,
+        "headcount": 20
+      }
+    ]
+  },
+  "by-project": {
+    "projects": [
+      {
+        "project": "PROJ-BETA",
+        "headcount": 4,
+        "total_payroll_cost": 95350.0,
+        "overtime_cost": 1100.0
+      },
+      {
+        "project": "PROJ-GAMMA",
+        "headcount": 6,
+        "total_payroll_cost": 121300.0,
+        "overtime_cost": 900.0
+      },
+      {
+        "project": "CC-HR",
+        "headcount": 1,
+        "total_payroll_cost": 33250.0,
+        "overtime_cost": 0.0
+      },
+      {
+        "project": "PROJ-ALPHA",
+        "headcount": 9,
+        "total_payroll_cost": 196275.0,
+        "overtime_cost": 900.0
+      }
+    ]
+  },
+  "by-department": {
+    "departments": [
+      {
+        "department": "Operations",
+        "headcount": 5,
+        "total_payroll_cost": 76800.0,
+        "overtime_cost": 400.0
+      },
+      {
+        "department": "Marketing",
+        "headcount": 3,
+        "total_payroll_cost": 66125.0,
+        "overtime_cost": 0.0
+      },
+      {
+        "department": "HR",
+        "headcount": 4,
+        "total_payroll_cost": 62350.0,
+        "overtime_cost": 1100.0
+      },
+      {
+        "department": "Finance",
+        "headcount": 2,
+        "total_payroll_cost": 27300.0,
+        "overtime_cost": 300.0
+      },
+      {
+        "department": "Executive",
+        "headcount": 1,
+        "total_payroll_cost": 83000.0,
+        "overtime_cost": 0.0
+      },
+      {
+        "department": "Engineering",
+        "headcount": 4,
+        "total_payroll_cost": 119600.0,
+        "overtime_cost": 1100.0
+      },
+      {
+        "department": "Missing Department",
+        "headcount": 1,
+        "total_payroll_cost": 11000.0,
+        "overtime_cost": 0.0
+      }
+    ]
+  },
+  "variance": {
+    "components": [
+      {
+        "component": "Basic Salary",
+        "prev_amount": 323500.0,
+        "curr_amount": 323500.0,
+        "change_amount": 0.0,
+        "change_pct": 0.0
+      },
+      {
+        "component": "Housing Allowance",
+        "prev_amount": 82875.0,
+        "curr_amount": 82875.0,
+        "change_amount": 0.0,
+        "change_pct": 0.0
+      },
+      {
+        "component": "Transport Allowance",
+        "prev_amount": 27500.0,
+        "curr_amount": 27500.0,
+        "change_amount": 0.0,
+        "change_pct": 0.0
+      },
+      {
+        "component": "Other Allowances",
+        "prev_amount": 9900.0,
+        "curr_amount": 9900.0,
+        "change_amount": 0.0,
+        "change_pct": 0.0
+      },
+      {
+        "component": "Overtime",
+        "prev_amount": 2610.0,
+        "curr_amount": 2900.0,
+        "change_amount": 290.0,
+        "change_pct": 0.1111111111111111
+      },
+      {
+        "component": "Deductions",
+        "prev_amount": 8700.0,
+        "curr_amount": 8700.0,
+        "change_amount": 0.0,
+        "change_pct": 0.0
+      }
+    ],
+    "employees": [
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "prev_amount": 4450.0,
+        "curr_amount": 4000.0,
+        "change_amount": -450.0,
+        "change_pct": -0.10112359550561797
+      },
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "prev_amount": 20290.0,
+        "curr_amount": 20350.0,
+        "change_amount": 60.0,
+        "change_pct": 0.002957121734844751
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "prev_amount": 17700.0,
+        "curr_amount": 17750.0,
+        "change_amount": 50.0,
+        "change_pct": 0.002824858757062147
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "Ahmad Al-Sudairy",
+        "prev_amount": 16905.0,
+        "curr_amount": 16950.0,
+        "change_amount": 45.0,
+        "change_pct": 0.0026619343389529724
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "prev_amount": 13435.0,
+        "curr_amount": 13475.0,
+        "change_amount": 40.0,
+        "change_pct": 0.00297729810197246
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "prev_amount": 12520.0,
+        "curr_amount": 12550.0,
+        "change_amount": 30.0,
+        "change_pct": 0.0023961661341853034
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "prev_amount": 8135.0,
+        "curr_amount": 8150.0,
+        "change_amount": 15.0,
+        "change_pct": 0.0018438844499078057
+      },
+      {
+        "employee_id": "EMP003",
+        "employee_name": "Fahad Al-Otaibi",
+        "prev_amount": 14750.0,
+        "curr_amount": 14750.0,
+        "change_amount": 0.0,
+        "change_pct": 0.0
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "prev_amount": 25000.0,
+        "curr_amount": 25000.0,
+        "change_amount": 0.0,
+        "change_pct": 0.0
+      },
+      {
+        "employee_id": "EMP005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "prev_amount": 18700.0,
+        "curr_amount": 18700.0,
+        "change_amount": 0.0,
+        "change_pct": 0.0
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "prev_amount": -5250.0,
+        "curr_amount": -5250.0,
+        "change_amount": 0.0,
+        "change_pct": -0.0
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "prev_amount": 35250.0,
+        "curr_amount": 35250.0,
+        "change_amount": 0.0,
+        "change_pct": 0.0
+      },
+      {
+        "employee_id": "EMP011",
+        "employee_name": "Sultan Al-Otaibi",
+        "prev_amount": 33250.0,
+        "curr_amount": 33250.0,
+        "change_amount": 0.0,
+        "change_pct": 0.0
+      },
+      {
+        "employee_id": "EMP012",
+        "employee_name": "Robert Martin",
+        "prev_amount": 46250.0,
+        "curr_amount": 46250.0,
+        "change_amount": 0.0,
+        "change_pct": 0.0
+      },
+      {
+        "employee_id": "EMP013",
+        "employee_name": "Clara Oswald",
+        "prev_amount": 29500.0,
+        "curr_amount": 29500.0,
+        "change_amount": 0.0,
+        "change_pct": 0.0
+      },
+      {
+        "employee_id": "EMP014",
+        "employee_name": "Faisal Al-Jabre",
+        "prev_amount": 42500.0,
+        "curr_amount": 42500.0,
+        "change_amount": 0.0,
+        "change_pct": 0.0
+      },
+      {
+        "employee_id": "EMP015",
+        "employee_name": "CEO Office",
+        "prev_amount": 83000.0,
+        "curr_amount": 83000.0,
+        "change_amount": 0.0,
+        "change_pct": 0.0
+      },
+      {
+        "employee_id": "EMP020",
+        "employee_name": "Omar Al-Masri",
+        "prev_amount": 7375.0,
+        "curr_amount": 7375.0,
+        "change_amount": 0.0,
+        "change_pct": 0.0
+      },
+      {
+        "employee_id": "EMP006",
+        "employee_name": null,
+        "prev_amount": 11000.0,
+        "curr_amount": 11000.0,
+        "change_amount": 0.0,
+        "change_pct": 0.0
+      },
+      {
+        "employee_id": "EMP018",
+        "employee_name": "Laila Hassan",
+        "prev_amount": 11625.0,
+        "curr_amount": 11625.0,
+        "change_amount": 0.0,
+        "change_pct": 0.0
+      }
+    ]
+  },
+  "exceptions": {
+    "exceptions": [
+      {
+        "employee_id": "EMP006",
+        "employee_name": "Unknown Employee",
+        "issue_type": "Inactive Employee Payroll",
+        "description": "Employee has status Inactive/Terminated/Unknown but appeared in active payroll run",
+        "severity": "Critical",
+        "recommended_action": "Hold payroll and verify termination status"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Negative Gross Pay",
+        "description": "Employee has negative gross pay: -5250.0",
+        "severity": "Critical",
+        "recommended_action": "Correct payroll calculation"
+      },
+      {
+        "employee_id": "EMP008",
+        "employee_name": "Mohammed Al-Qahtani",
+        "issue_type": "Negative Net Pay",
+        "description": "Employee has negative net pay: -5350.0",
+        "severity": "Critical",
+        "recommended_action": "Correct payroll deductions"
+      },
+      {
+        "employee_id": "EMP010",
+        "employee_name": "David Vance",
+        "issue_type": "Missing Cost Center",
+        "description": "Payroll record is missing a cost center code",
+        "severity": "Warning",
+        "recommended_action": "Assign cost center in profile"
+      },
+      {
+        "employee_id": "EMP006",
+        "employee_name": "Unknown Employee",
+        "issue_type": "Missing Cost Center",
+        "description": "Payroll record is missing a cost center code",
+        "severity": "Warning",
+        "recommended_action": "Assign cost center in profile"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Missing Project",
+        "description": "Payroll record is missing a project assignment",
+        "severity": "Warning",
+        "recommended_action": "Assign project to employee"
+      },
+      {
+        "employee_id": "EMP006",
+        "employee_name": "Unknown Employee",
+        "issue_type": "Missing Project",
+        "description": "Payroll record is missing a project assignment",
+        "severity": "Warning",
+        "recommended_action": "Assign project to employee"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "Ahmad Al-Sudairy",
+        "issue_type": "Overtime Cost Without Hours",
+        "description": "Employee paid overtime (450.0) but has 0 overtime hours in attendance",
+        "severity": "Warning",
+        "recommended_action": "Verify attendance punches and overtime logs"
+      },
+      {
+        "employee_id": "EMP017",
+        "employee_name": "Thomas Miller",
+        "issue_type": "Overtime Cost Without Hours",
+        "description": "Employee paid overtime (500.0) but has 0 overtime hours in attendance",
+        "severity": "Warning",
+        "recommended_action": "Verify attendance punches and overtime logs"
+      },
+      {
+        "employee_id": "EMP002",
+        "employee_name": "John Doe",
+        "issue_type": "Overtime Cost Without Hours",
+        "description": "Employee paid overtime (600.0) but has 0 overtime hours in attendance",
+        "severity": "Warning",
+        "recommended_action": "Verify attendance punches and overtime logs"
+      },
+      {
+        "employee_id": "EMP016",
+        "employee_name": "Noura Al-Dosari",
+        "issue_type": "Overtime Cost Without Hours",
+        "description": "Employee paid overtime (150.0) but has 0 overtime hours in attendance",
+        "severity": "Warning",
+        "recommended_action": "Verify attendance punches and overtime logs"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Overtime Cost Without Hours",
+        "description": "Employee paid overtime (500.0) but has 0 overtime hours in attendance",
+        "severity": "Warning",
+        "recommended_action": "Verify attendance punches and overtime logs"
+      },
+      {
+        "employee_id": "EMP019",
+        "employee_name": "Bandar Al-Harbi",
+        "issue_type": "Overtime Cost Without Hours",
+        "description": "Employee paid overtime (400.0) but has 0 overtime hours in attendance",
+        "severity": "Warning",
+        "recommended_action": "Verify attendance punches and overtime logs"
+      },
+      {
+        "employee_id": "EMP009",
+        "employee_name": "Ali Al-Harbi",
+        "issue_type": "Overtime Cost Without Hours",
+        "description": "Employee paid overtime (300.0) but has 0 overtime hours in attendance",
+        "severity": "Warning",
+        "recommended_action": "Verify attendance punches and overtime logs"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Payroll Component Mismatch",
+        "description": "Gross pay (4000.0) does not equal sum of components (4500.0)",
+        "severity": "Critical",
+        "recommended_action": "Recalculate gross salary components"
+      }
+    ]
+  }
+}

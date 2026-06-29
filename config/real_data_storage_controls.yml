@@ -1,0 +1,30 @@
+# HR Command Center - Staged Real Data Storage Controls
+# Outlines folder volume permissions and encryption targets.
+
+storage_requirements:
+  encryption_standard: "AES-256 at-rest"
+  git_exclusion_rules:
+    - "*.csv"
+    - "*.xlsx"
+    - "*.db"
+    - "data/real_*"
+  sensitive_fields_block:
+    - "bank_account_iban"
+    - "passport_number"
+
+directory_controls:
+  - folder_path: "data/real_inbox/"
+    allowed_access_roles: ["admin_system"]
+    retention_period_days: 90
+
+  - folder_path: "data/real_quarantine/"
+    allowed_access_roles: ["admin_system"]
+    retention_period_days: 30
+
+  - folder_path: "data/real_approved/"
+    allowed_access_roles: ["admin_system"]
+    retention_period_days: 90
+
+  - folder_path: "data/real_rejected/"
+    allowed_access_roles: ["admin_system"]
+    retention_period_days: 30

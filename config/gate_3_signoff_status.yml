@@ -1,0 +1,59 @@
+# HR Command Center - Gate 3 Privacy and Security Signoff Status
+# Tracks completeness of security approvals and access controls.
+
+gate_3_signoff_rules:
+  required_thresholds:
+    matrix_completeness_pct: 100
+    export_rules_approved: true
+    logging_specs_defined: true
+    retention_policy_approved: true
+    critical_unmitigated_risks_allowed: 0
+
+gate_3_scores:
+  - source_category: "HRIS / Employee Master"
+    matrix_completed: true
+    export_rules_set: true
+    logging_specs_set: true
+    readiness_status: "Ready"
+
+  - source_category: "Payroll"
+    matrix_completed: true
+    export_rules_set: true
+    logging_specs_set: true
+    readiness_status: "Ready"
+
+  - source_category: "Attendance"
+    matrix_completed: true
+    export_rules_set: true
+    logging_specs_set: true
+    readiness_status: "Ready"
+
+  - source_category: "Government / Compliance"
+    matrix_completed: true
+    export_rules_set: true
+    logging_specs_set: true
+    readiness_status: "Ready"
+
+  - source_category: "Employee Relations / Case Management"
+    matrix_completed: true
+    export_rules_set: true
+    logging_specs_set: true
+    readiness_status: "Ready"
+
+  - source_category: "Recruitment / Workforce Planning"
+    matrix_completed: true
+    export_rules_set: true
+    logging_specs_set: true
+    readiness_status: "Ready"
+
+  - source_category: "Talent / Performance / Learning"
+    matrix_completed: true
+    export_rules_set: true
+    logging_specs_set: true
+    readiness_status: "Ready"
+
+  - source_category: "Data Quality / Command Center Metadata"
+    matrix_completed: true
+    export_rules_set: true
+    logging_specs_set: true
+    readiness_status: "Ready"

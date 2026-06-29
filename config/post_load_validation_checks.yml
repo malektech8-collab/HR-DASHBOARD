@@ -1,0 +1,33 @@
+# HR Command Center - Post-Load Validation Check Configuration
+# Registers mandatory checks that must run after any controlled real-data load.
+
+validation_checks:
+  - check_id: "VAL-001"
+    name: "File manifest verification"
+    run_frequency: "Every load"
+    failure_severity: "Reject"
+
+  - check_id: "VAL-002"
+    name: "Naming standard check"
+    run_frequency: "Every load"
+    failure_severity: "Reject"
+
+  - check_id: "VAL-003"
+    name: "Schema type validation"
+    run_frequency: "Every load"
+    failure_severity: "Reject"
+
+  - check_id: "VAL-004"
+    name: "Privacy compliance scan"
+    run_frequency: "Every load"
+    failure_severity: "Reject"
+
+  - check_id: "VAL-005"
+    name: "Control total reconciliation"
+    run_frequency: "Every load"
+    failure_severity: "Reject"
+
+  - check_id: "VAL-006"
+    name: "Row count validation"
+    run_frequency: "Every load"
+    failure_severity: "Quarantine"

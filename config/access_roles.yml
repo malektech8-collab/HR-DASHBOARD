@@ -1,0 +1,124 @@
+# HR Command Center - Role-Based Access Control configuration
+# Maps roles to operational modules, visibility levels, and governance actions.
+
+roles:
+  - role_key: "admin_system"
+    allowed_modules: ["*"]
+    metric_level: "Row-Level"
+    employee_level_access: true
+    salary_visibility: true
+    er_case_visibility: true
+    talent_visibility: true
+    export_permission: true
+    data_refresh_permission: true
+    approval_permission: true
+
+  - role_key: "hr_executive"
+    allowed_modules: ["*"]
+    metric_level: "Row-Level"
+    employee_level_access: true
+    salary_visibility: true
+    er_case_visibility: true
+    talent_visibility: true
+    export_permission: true
+    data_refresh_permission: true
+    approval_permission: true
+
+  - role_key: "hr_operations_manager"
+    allowed_modules: ["executive", "data-quality", "workforce", "attendance", "compliance"]
+    metric_level: "Row-Level"
+    employee_level_access: true
+    salary_visibility: false
+    er_case_visibility: false
+    talent_visibility: true
+    export_permission: true
+    data_refresh_permission: true
+    approval_permission: false
+
+  - role_key: "payroll_manager"
+    allowed_modules: ["executive", "payroll"]
+    metric_level: "Row-Level"
+    employee_level_access: true
+    salary_visibility: true
+    er_case_visibility: false
+    talent_visibility: false
+    export_permission: true
+    data_refresh_permission: true
+    approval_permission: true
+
+  - role_key: "employee_relations_manager"
+    allowed_modules: ["executive", "er"]
+    metric_level: "Row-Level"
+    employee_level_access: true
+    salary_visibility: false
+    er_case_visibility: true
+    talent_visibility: false
+    export_permission: true
+    data_refresh_permission: true
+    approval_permission: true
+
+  - role_key: "recruitment_manager"
+    allowed_modules: ["executive", "recruitment"]
+    metric_level: "Row-Level"
+    employee_level_access: true
+    salary_visibility: false
+    er_case_visibility: false
+    talent_visibility: false
+    export_permission: true
+    data_refresh_permission: true
+    approval_permission: true
+
+  - role_key: "talent_manager"
+    allowed_modules: ["executive", "talent"]
+    metric_level: "Row-Level"
+    employee_level_access: true
+    salary_visibility: false
+    er_case_visibility: false
+    talent_visibility: true
+    export_permission: true
+    data_refresh_permission: true
+    approval_permission: true
+
+  - role_key: "compliance_manager"
+    allowed_modules: ["executive", "compliance"]
+    metric_level: "Row-Level"
+    employee_level_access: true
+    salary_visibility: false
+    er_case_visibility: false
+    talent_visibility: false
+    export_permission: true
+    data_refresh_permission: true
+    approval_permission: true
+
+  - role_key: "project_manager"
+    allowed_modules: ["workforce", "attendance"]
+    metric_level: "Aggregate-Project"
+    employee_level_access: false
+    salary_visibility: false
+    er_case_visibility: false
+    talent_visibility: false
+    export_permission: false
+    data_refresh_permission: false
+    approval_permission: false
+
+  - role_key: "viewer_executive_aggregate_only"
+    allowed_modules: ["executive"]
+    metric_level: "Aggregate-System"
+    employee_level_access: false
+    salary_visibility: false
+    er_case_visibility: false
+    talent_visibility: false
+    export_permission: false
+    data_refresh_permission: false
+    approval_permission: false
+
+  - role_key: "auditor_read_only"
+    allowed_modules: ["*"]
+    metric_level: "Row-Level"
+    employee_level_access: true
+    salary_visibility: true
+    er_case_visibility: true
+    talent_visibility: true
+    export_permission: false
+    data_refresh_permission: false
+    approval_permission: false

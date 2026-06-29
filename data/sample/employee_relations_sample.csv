@@ -1,0 +1,12 @@
+case_id,employee_id,case_type,case_status,priority,created_date,target_due_date,closed_date,owner_id,escalated,escalation_reason,legal_reference,case_number,description
+ER001,EMP001,Disciplinary,Closed,High,2026-06-01,2026-06-15,2026-06-10,EMP003,False,,,,Workplace dispute resolved
+ER002,EMP002,Grievance,Open,Medium,2026-06-02,2026-06-12,,EMP003,False,,,,Salary review request
+ER002,EMP002,Grievance,Open,Medium,2026-06-02,2026-06-12,,EMP003,False,,,,Salary review duplicate log entry
+ER003,EMP003,Labor Case,Open,High,2026-05-15,2026-06-15,,EMP001,True,Escalated to legal department,LR-8877,CASE-123,Contract dispute in court
+ER004,EMP004,Disciplinary,Open,Low,2026-06-10,,,EMP001,False,,,,Unexcused absence check
+ER005,EMP005,Labor Case,Open,High,2026-05-01,2026-06-01,,EMP003,True,,,,Severance pay dispute
+ER006,EMP007,Grievance,Closed,Low,2026-06-05,2026-06-15,,EMP003,False,,,,Equipment escalation
+ER007,EMP010,Disciplinary,Closed,Medium,2026-06-10,2026-06-24,2026-06-05,EMP003,False,,,,Policy breach
+ER008,EMP006,Disciplinary,Open,Low,2026-06-01,2026-06-15,,EMP003,False,,,,Exit checklist disciplinary log
+ER009,EMP001,Grievance,Open,Low,2026-06-02,2026-06-12,,EMP006,False,,,,Grievance assigned to exited investigator
+ER010,EMP999,Grievance,Open,Medium,2026-06-02,2026-06-12,,EMP003,False,,,,Unknown employee grievance log entry

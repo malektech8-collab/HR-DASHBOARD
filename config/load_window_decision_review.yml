@@ -1,0 +1,16 @@
+# HR Command Center - Load Window Decision Review
+# Tracks load window scheduling readiness review.
+
+load_window_decision_review:
+  milestone: "3I"
+  review_status: "Pending Authorization Evidence"
+  scheduling_package_confirmed: false
+  owner_availability_confirmed: false
+  stop_authority_confirmed: false
+  rollback_owner_confirmed: false
+  incident_response_owner_confirmed: false
+  all_confirmed: false
+  scheduling_blocked_reason: "Authorization evidence not yet provided. Decision is Hold."
+  review_date: "TBD"
+  reviewer_role: "IT Operations Director"
+  notes: "Load window decision review cannot proceed until authorization evidence is supplied and Go/No-Go decision is made. No actual load window scheduled."

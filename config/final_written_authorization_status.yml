@@ -1,0 +1,49 @@
+# HR Command Center - Final Written Ingestion Authorization Registry
+# Set to one of: Pending, Approved, Approved with Conditions, Rejected, Expired.
+
+authorizations:
+  - authorization_id: "AUTH-3H-001"
+    approving_authority_role: "Chief HR Officer"
+    approval_status: "Pending"
+    approval_date: null
+    expiry_date: null
+    approved_source_category: "Data Quality / Command Center Metadata"
+    approved_file_pattern: "^dq_metadata_refresh_\\d{8}\\.csv$"
+    approved_date_range: "2026-06-01 to 2026-06-30"
+    approved_fields:
+      - "module_key"
+      - "module_name"
+      - "api_health_status"
+      - "reconciliation_status"
+      - "qa_artifact_status"
+      - "refresh_status"
+      - "freshness_timestamp"
+      - "dashboard_route_key"
+      - "exception_count_by_module"
+      - "owner_role"
+    excluded_fields:
+      - "employee_name"
+      - "employee_number"
+      - "national_id"
+      - "iqama_number"
+      - "passport_number"
+      - "mobile_number"
+      - "email_address"
+      - "bank_iban"
+      - "salary_data"
+      - "payroll_components"
+      - "er_legal_case_text"
+      - "gosi_mudad_qiwa_muqeem"
+      - "medical_insurance_records"
+      - "candidate_personal_data"
+      - "performance_talent_records"
+      - "free_text_employee_notes"
+    masking_requirements: "All PII explicitly excluded from pilot scope"
+    access_restrictions: "Limited to Command Center Admin role only"
+    rollback_acknowledgement: true
+    incident_response_acknowledgement: true
+    post_load_validation_acknowledgement: true
+    execution_owner: "System Architect"
+    stop_authority: "Chief HR Officer"
+    evidence_reference: null
+    comments: "Awaiting final CISO security validation token before signoff."

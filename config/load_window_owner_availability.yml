@@ -1,0 +1,33 @@
+# HR Command Center - Load Window Owner Availability Matrix
+# Registers role-based availability flags for load execution windows.
+
+owners:
+  - role: "HRIS Director"
+    name: "Role Assigned"
+    available: true
+    contact: "hris@company.local"
+
+  - role: "IT Operations Director"
+    name: "Role Assigned"
+    available: true
+    contact: "itops@company.local"
+
+  - role: "Data Quality Steward"
+    name: "Role Assigned"
+    available: true
+    contact: "dq@company.local"
+
+  - role: "Data Privacy Officer"
+    name: "Role Assigned"
+    available: true
+    contact: "privacy@company.local"
+
+  - role: "Security Lead (CISO)"
+    name: "Role Assigned"
+    available: true
+    contact: "security@company.local"
+
+  - role: "Systems Architect (Rollback Owner)"
+    name: "Role Assigned"
+    available: true
+    contact: "sysarch@company.local"

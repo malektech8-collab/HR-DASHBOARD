@@ -1,0 +1,38 @@
+attendance_rules:
+  report_month_source: "max_attendance_date" # Dynamically find maximum date in attendance table
+  weekly_working_days: 6
+  weekend_days:
+    - "Friday"
+  grace_period_minutes: 15 # Approved grace period in minutes
+
+compliance_rules:
+  report_month_source: "max_compliance_period" # Dynamically find maximum period in compliance table
+  has_gosi_source_for_period: true
+  has_wps_source_for_period: true
+
+er_rules:
+  report_month_source: "max_case_date" # Dynamically find maximum date in employee_relations table
+  default_report_month: "2026-06"
+  sla_days:
+    Disciplinary: 14
+    Grievance: 10
+    Labor Case: 30
+
+recruitment_rules:
+  report_month_source: "max_requisition_date"
+  default_report_month: "2026-06"
+  default_sla_days: 45
+
+talent_rules:
+  report_month_source: "max_review_period"
+  default_report_month: "2026-06"
+  min_rating_value: 1.0
+  max_rating_value: 5.0
+  critical_job_titles:
+    - "Chief Executive Officer"
+    - "Engineering Director"
+    - "Finance Director"
+    - "HR Manager"
+
+
+

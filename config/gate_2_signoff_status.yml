@@ -1,0 +1,83 @@
+# HR Command Center - Gate 2 Mapping Readiness and Scorecard Rules
+# Validates readiness to close Gate 2 (Field Mapping Approved) across all categories.
+
+gate_2_signoff_rules:
+  required_thresholds:
+    mapping_completeness_pct: 100
+    exception_approval_required: true
+    steward_signoff_required: true
+    owner_signoff_required: true
+    critical_blockers_allowed: 0
+
+gate_2_scores:
+  - source_category: "HRIS / Employee Master"
+    fields_mapped_count: 13
+    fields_exceptioned_count: 0
+    total_required_fields: 13
+    steward_signed: true
+    owner_signed: true
+    synthetic_contract_approved: true
+    readiness_status: "Ready"
+
+  - source_category: "Payroll"
+    fields_mapped_count: 9
+    fields_exceptioned_count: 1
+    total_required_fields: 10
+    steward_signed: true
+    owner_signed: true
+    synthetic_contract_approved: true
+    readiness_status: "Ready"
+
+  - source_category: "Attendance"
+    fields_mapped_count: 10
+    fields_exceptioned_count: 0
+    total_required_fields: 10
+    steward_signed: true
+    owner_signed: true
+    synthetic_contract_approved: true
+    readiness_status: "Ready"
+
+  - source_category: "Government / Compliance"
+    fields_mapped_count: 7
+    fields_exceptioned_count: 0
+    total_required_fields: 7
+    steward_signed: true
+    owner_signed: true
+    synthetic_contract_approved: true
+    readiness_status: "Ready"
+
+  - source_category: "Employee Relations / Case Management"
+    fields_mapped_count: 9
+    fields_exceptioned_count: 0
+    total_required_fields: 9
+    steward_signed: true
+    owner_signed: true
+    synthetic_contract_approved: true
+    readiness_status: "Ready"
+
+  - source_category: "Recruitment / Workforce Planning"
+    fields_mapped_count: 10
+    fields_exceptioned_count: 0
+    total_required_fields: 10
+    steward_signed: true
+    owner_signed: true
+    synthetic_contract_approved: true
+    readiness_status: "Ready"
+
+  - source_category: "Talent / Performance / Learning"
+    fields_mapped_count: 8
+    fields_exceptioned_count: 2
+    total_required_fields: 10
+    steward_signed: true
+    owner_signed: true
+    synthetic_contract_approved: true
+    readiness_status: "Ready"
+
+  - source_category: "Data Quality / Command Center Metadata"
+    fields_mapped_count: 9
+    fields_exceptioned_count: 0
+    total_required_fields: 9
+    steward_signed: true
+    owner_signed: true
+    synthetic_contract_approved: true
+    readiness_status: "Ready"

@@ -1,0 +1,43 @@
+columns:
+  - name: payroll_period
+    type: VARCHAR
+    required: true
+  - name: employee_id
+    type: VARCHAR
+    required: true
+  - name: basic_salary
+    type: DECIMAL
+    required: true
+    min_value: 0
+  - name: housing_allowance
+    type: DECIMAL
+    required: true
+  - name: transport_allowance
+    type: DECIMAL
+    required: true
+  - name: other_allowances
+    type: DECIMAL
+    required: true
+  - name: overtime_amount
+    type: DECIMAL
+    required: true
+  - name: deductions
+    type: DECIMAL
+    required: true
+  - name: gross_pay
+    type: DECIMAL
+    required: true
+    min_value: 0
+  - name: net_pay
+    type: DECIMAL
+    required: true
+    min_value: 0
+  - name: project
+    type: VARCHAR
+    required: true
+  - name: cost_center
+    type: VARCHAR
+    required: true
+  - name: payroll_status
+    type: VARCHAR
+    required: true

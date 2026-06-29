@@ -1,0 +1,30 @@
+# HR Command Center - Go/No-Go Decision Configuration
+# Records the controlled load Go/No-Go decision.
+
+controlled_load_go_no_go_decision:
+  milestone: "3I"
+  current_decision: "Hold"
+  allowed_decisions:
+    - "Go to Controlled Load Scheduling Review"
+    - "Conditional Go to Scheduling Review"
+    - "Hold"
+    - "No-Go"
+  decision_date: "TBD"
+  decision_owner: "TBD - Pending Authorization Evidence"
+  decision_rationale: "No authorization evidence has been supplied. Decision defaults to Hold until CHRO and CISO provide signed written authorization."
+  no_go_triggers:
+    - "Final written authorization is missing"
+    - "Source domain is not Data Quality / Command Center Metadata"
+    - "Excluded fields appear in scope"
+    - "Actual personal employee data appears"
+    - "Payroll, ER/legal, government ID, bank/IBAN, or talent/performance fields appear"
+    - "Owner availability is incomplete"
+    - "Stop authority is not assigned"
+    - "Rollback owner is not available"
+    - "Incident response owner is not available"
+    - "No-real-data audit fails"
+    - "Credentials or live connection strings are detected"
+    - "data/real_* folders contain anything except .gitkeep"
+  no_go_trigger_count: 12
+  conditions_for_go: "All authorization evidence items must have status Valid or Valid with Conditions. All No-Go triggers must be clear."
+  notes: "Decision is Hold. No actual meeting held. No actual load authorized."

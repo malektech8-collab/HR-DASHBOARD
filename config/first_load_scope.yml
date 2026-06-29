@@ -1,0 +1,31 @@
+# HR Command Center - First Real Data Load Scope (Controlled Load)
+# Restricts ingestion strictly to low-risk metadata to verify pipeline connection.
+
+first_load_scope:
+  source_category: "Data Quality / Command Center Metadata"
+  source_system_name: "Metadata Audit Engine"
+  business_owner: "VP of HR Operations"
+  technical_owner: "IT Operations Director"
+  data_steward: "Data Quality Engineer"
+  approved_file_format: "CSV"
+  approved_delivery_method: "SFTP Secure Drop"
+  expected_record_count: 9
+  approved_date_range: "2026-06-01 to 2026-06-30"
+  approved_company_scope: "Enterprise Wide"
+  included_fields:
+    - "module_key"
+    - "api_health_status"
+    - "reconciliation_status"
+  excluded_fields:
+    - "employee_name"
+    - "basic_salary"
+    - "national_id_number"
+    - "disciplinary_cases_description"
+  sensitive_fields_included: []
+  masking_treatment: "None required (Metadata only)"
+  control_totals_required:
+    - "expected_rows: 9"
+  access_restrictions:
+    - "Restricted strictly to admin_system role"
+  approval_status: "Ready for Approval Package Review"
+  notes: "Contains zero PII, salary details, or government IDs. Safest domain for validation."

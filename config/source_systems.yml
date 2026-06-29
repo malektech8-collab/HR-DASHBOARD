@@ -1,0 +1,141 @@
+# HR Command Center - Source System Registry
+# Configures delivery details and owners for future controlled ingestion.
+
+source_systems:
+  - source_system_id: "src_hris_employee"
+    source_system_name: "Jisr HR Portal"
+    source_category: "HRIS / Employee Master"
+    business_owner: "HR Director"
+    technical_owner: "IT Operations Lead"
+    data_steward: "HR Operations Administrator"
+    refresh_frequency: "Daily"
+    expected_file_format: "CSV"
+    delivery_method: "Secure File Transfer Protocol (SFTP)"
+    contains_personal_data: true
+    contains_sensitive_data: true
+    approval_required: true
+    source_of_truth_priority: 1
+    downstream_modules:
+      - "executive"
+      - "workforce"
+      - "compliance"
+      - "talent"
+    known_data_quality_risks: "Manual input typos in Iqama, duplicate entries during hires"
+    readiness_status: "Ready for Test Load"
+    notes: "Main record of truth for employee active state."
+
+  - source_system_id: "src_payroll_netsuite"
+    source_system_name: "NetSuite ERP Financials"
+    source_category: "Payroll Source"
+    business_owner: "Finance Director"
+    technical_owner: "ERP Systems Administrator"
+    data_steward: "Payroll Manager"
+    refresh_frequency: "Monthly"
+    expected_file_format: "Excel (XLSX)"
+    delivery_method: "Secure File Transfer Protocol (SFTP)"
+    contains_personal_data: true
+    contains_sensitive_data: true
+    approval_required: true
+    source_of_truth_priority: 1
+    downstream_modules:
+      - "executive"
+      - "payroll"
+      - "compliance"
+    known_data_quality_risks: "Off-cycle compensation adjustments not matching base salaries"
+    readiness_status: "Ready for Test Load"
+    notes: "Provides official monthly gross/net payouts."
+
+  - source_system_id: "src_attendance_biometric"
+    source_system_name: "ZK Teco Biometric Attendance Portal"
+    source_category: "Attendance Source"
+    business_owner: "HR Operations Manager"
+    technical_owner: "Facilities Network Engineer"
+    data_steward: "Attendance Clerk"
+    refresh_frequency: "Daily"
+    expected_file_format: "CSV"
+    delivery_method: "Local Upload"
+    contains_personal_data: true
+    contains_sensitive_data: false
+    approval_required: false
+    source_of_truth_priority: 2
+    downstream_modules:
+      - "attendance"
+    known_data_quality_risks: "Missing punches from network outages or faulty badges"
+    readiness_status: "Ready for Test Load"
+    notes: "Provides daily punch in/out timestamps."
+
+  - source_system_id: "src_gov_compliance"
+    source_system_name: "GOSI / Qiwa Government Portals"
+    source_category: "Government / Compliance Sources"
+    business_owner: "Government Relations Officer"
+    technical_owner: "G2B Integration Architect"
+    data_steward: "Compliance Manager"
+    refresh_frequency: "Weekly"
+    expected_file_format: "CSV"
+    delivery_method: "SFTP / Manual Portal Download"
+    contains_personal_data: true
+    contains_sensitive_data: true
+    approval_required: true
+    source_of_truth_priority: 1
+    downstream_modules:
+      - "compliance"
+    known_data_quality_risks: "Synchronization delays between Qiwa platform and GOSI registration"
+    readiness_status: "Ready for Test Load"
+    notes: "Official verification source for Saudization, Qiwa contracts, and WPS status."
+
+  - source_system_id: "src_er_case_tracker"
+    source_system_name: "SharePoint Employee Relations Tracker"
+    source_category: "Employee Relations / Case Management"
+    business_owner: "Employee Relations Manager"
+    technical_owner: "SharePoint Administrator"
+    data_steward: "ER Coordinator"
+    refresh_frequency: "Daily"
+    expected_file_format: "CSV"
+    delivery_method: "SFTP"
+    contains_personal_data: true
+    contains_sensitive_data: true
+    approval_required: true
+    source_of_truth_priority: 1
+    downstream_modules:
+      - "er"
+    known_data_quality_risks: "Free-text fields containing unmasked sensitive legal details"
+    readiness_status: "Ready for Test Load"
+    notes: "Log of labor cases, complaints, and SLA performance."
+
+  - source_system_id: "src_recruitment_ats"
+    source_system_name: "Lever ATS"
+    source_category: "Recruitment / Workforce Planning"
+    business_owner: "Head of Talent Acquisition"
+    technical_owner: "ATS Integration Engineer"
+    data_steward: "Recruitment Coordinator"
+    refresh_frequency: "Daily"
+    expected_file_format: "CSV"
+    delivery_method: "SFTP"
+    contains_personal_data: true
+    contains_sensitive_data: false
+    approval_required: false
+    source_of_truth_priority: 1
+    downstream_modules:
+      - "recruitment"
+    known_data_quality_risks: "Stale requisition statuses or delayed offer rejection details"
+    readiness_status: "Ready for Test Load"
+    notes: "Provides recruiting pipelines, time to fill, and source effectiveness statistics."
+
+  - source_system_id: "src_talent_lms"
+    source_system_name: "Coursera LMS / SAP SuccessFactors Talent"
+    source_category: "Talent / Performance / Learning"
+    business_owner: "Talent & Development Director"
+    technical_owner: "LMS Systems Lead"
+    data_steward: "L&D Coordinator"
+    refresh_frequency: "Weekly"
+    expected_file_format: "Excel (XLSX)"
+    delivery_method: "SFTP"
+    contains_personal_data: true
+    contains_sensitive_data: true
+    approval_required: true
+    source_of_truth_priority: 1
+    downstream_modules:
+      - "talent"
+    known_data_quality_risks: "Manual competency assessment scores missing reviewer flags"
+    readiness_status: "Ready for Test Load"
+    notes: "Performance ratings, successor readiness, competency reviews, and learning counts."

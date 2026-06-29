@@ -1,0 +1,59 @@
+# HR Command Center - Gate 4 Synthetic Dry-Run Readiness Scorecard
+# Verifies all dry-run criteria are met prior to closing Gate 4.
+
+gate_4_signoff_rules:
+  required_thresholds:
+    dry_run_passed_pct: 100
+    control_totals_matched: true
+    no_real_data_audit_passed: true
+    staged_directories_clean: true
+    critical_blockers_allowed: 0
+
+gate_4_scores:
+  - source_category: "HRIS / Employee Master"
+    dry_run_passed: true
+    reconciliation_matched: true
+    no_real_data: true
+    readiness_status: "Ready"
+
+  - source_category: "Payroll"
+    dry_run_passed: true
+    reconciliation_matched: true
+    no_real_data: true
+    readiness_status: "Ready"
+
+  - source_category: "Attendance"
+    dry_run_passed: true
+    reconciliation_matched: true
+    no_real_data: true
+    readiness_status: "Ready"
+
+  - source_category: "Government / Compliance"
+    dry_run_passed: true
+    reconciliation_matched: true
+    no_real_data: true
+    readiness_status: "Ready"
+
+  - source_category: "Employee Relations / Case Management"
+    dry_run_passed: true
+    reconciliation_matched: true
+    no_real_data: true
+    readiness_status: "Ready"
+
+  - source_category: "Recruitment / Workforce Planning"
+    dry_run_passed: true
+    reconciliation_matched: true
+    no_real_data: true
+    readiness_status: "Ready"
+
+  - source_category: "Talent / Performance / Learning"
+    dry_run_passed: true
+    reconciliation_matched: true
+    no_real_data: true
+    readiness_status: "Ready"
+
+  - source_category: "Data Quality / Command Center Metadata"
+    dry_run_passed: true
+    reconciliation_matched: true
+    no_real_data: true
+    readiness_status: "Ready"

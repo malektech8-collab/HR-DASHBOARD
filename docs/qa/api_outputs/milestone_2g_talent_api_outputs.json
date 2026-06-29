@@ -1,0 +1,728 @@
+{
+  "GET /api/talent/summary": {
+    "report_month": "2026-06",
+    "kpis": [
+      {
+        "key": "employees_reviewed",
+        "label": "Employees Reviewed",
+        "value": 16.0,
+        "unit": "employees",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "healthy"
+      },
+      {
+        "key": "review_completion_pct",
+        "label": "Review Completion %",
+        "value": 84.21,
+        "unit": "%",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "healthy"
+      },
+      {
+        "key": "average_performance_rating",
+        "label": "Average Performance Rating",
+        "value": 3.39,
+        "unit": "rating",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "warning"
+      },
+      {
+        "key": "high_performers",
+        "label": "High Performers",
+        "value": 8.0,
+        "unit": "employees",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "healthy"
+      },
+      {
+        "key": "low_performers",
+        "label": "Low / At-Risk Performers",
+        "value": 3.0,
+        "unit": "employees",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "critical"
+      },
+      {
+        "key": "goal_completion_pct",
+        "label": "Goal Completion %",
+        "value": 33.33,
+        "unit": "%",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "warning"
+      },
+      {
+        "key": "training_completion_pct",
+        "label": "Training Completion %",
+        "value": 66.67,
+        "unit": "%",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "warning"
+      },
+      {
+        "key": "average_training_hours",
+        "label": "Avg Training Hours / Employee",
+        "value": 10.0,
+        "unit": "hours",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "neutral"
+      },
+      {
+        "key": "critical_roles_covered_pct",
+        "label": "Critical Roles Covered %",
+        "value": 66.67,
+        "unit": "%",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "critical"
+      },
+      {
+        "key": "ready_successors",
+        "label": "Ready Now Successors",
+        "value": 1.0,
+        "unit": "employees",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "healthy"
+      },
+      {
+        "key": "talent_exception_count",
+        "label": "Talent Data Exceptions",
+        "value": 28.0,
+        "unit": "alerts",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "critical"
+      }
+    ]
+  },
+  "GET /api/talent/performance-distribution": {
+    "distribution": [
+      {
+        "performance_category": "Exceeds Expectations",
+        "employee_count": 5
+      },
+      {
+        "performance_category": "Meets Expectations",
+        "employee_count": 5
+      },
+      {
+        "performance_category": "Needs Improvement",
+        "employee_count": 2
+      },
+      {
+        "performance_category": "Outstanding",
+        "employee_count": 3
+      },
+      {
+        "performance_category": "Unsatisfactory",
+        "employee_count": 1
+      }
+    ]
+  },
+  "GET /api/talent/trends": {
+    "trends": [
+      {
+        "period": "2026-04",
+        "total_reviewed": 12,
+        "completed_reviews": 10,
+        "completion_pct": 85.0,
+        "avg_rating": 3.6
+      },
+      {
+        "period": "2026-05",
+        "total_reviewed": 14,
+        "completed_reviews": 12,
+        "completion_pct": 88.0,
+        "avg_rating": 3.7
+      },
+      {
+        "period": "2026-06",
+        "total_reviewed": 19,
+        "completed_reviews": 16,
+        "completion_pct": 1900.0,
+        "avg_rating": 3.39
+      }
+    ]
+  },
+  "GET /api/talent/by-project": {
+    "projects": [
+      {
+        "project": "PROJ-ALPHA",
+        "reviewed_count": 8,
+        "average_rating": 3.54,
+        "high_performers": 4,
+        "low_performers": 2
+      },
+      {
+        "project": "PROJ-BETA",
+        "reviewed_count": 3,
+        "average_rating": 3.9,
+        "high_performers": 3,
+        "low_performers": 0
+      },
+      {
+        "project": "PROJ-GAMMA",
+        "reviewed_count": 5,
+        "average_rating": 2.84,
+        "high_performers": 1,
+        "low_performers": 1
+      }
+    ]
+  },
+  "GET /api/talent/by-department": {
+    "departments": [
+      {
+        "department": "Engineering",
+        "reviewed_count": 4,
+        "average_rating": 3.97,
+        "high_performers": 4,
+        "low_performers": 0
+      },
+      {
+        "department": "Executive",
+        "reviewed_count": 1,
+        "average_rating": 4.5,
+        "high_performers": 1,
+        "low_performers": 0
+      },
+      {
+        "department": "Finance",
+        "reviewed_count": 1,
+        "average_rating": 3.5,
+        "high_performers": 1,
+        "low_performers": 0
+      },
+      {
+        "department": "HR",
+        "reviewed_count": 3,
+        "average_rating": 4.0,
+        "high_performers": 2,
+        "low_performers": 1
+      },
+      {
+        "department": "Marketing",
+        "reviewed_count": 2,
+        "average_rating": 3.15,
+        "high_performers": 0,
+        "low_performers": 0
+      },
+      {
+        "department": "Operations",
+        "reviewed_count": 5,
+        "average_rating": 2.4,
+        "high_performers": 0,
+        "low_performers": 2
+      }
+    ]
+  },
+  "GET /api/talent/goals": {
+    "goals": [
+      {
+        "department": "Engineering",
+        "completed_goals": 0,
+        "in_progress_goals": 1,
+        "overdue_goals": 0,
+        "not_started_goals": 0,
+        "cancelled_goals": 0,
+        "eligible_goals": 1
+      },
+      {
+        "department": "Finance",
+        "completed_goals": 0,
+        "in_progress_goals": 0,
+        "overdue_goals": 0,
+        "not_started_goals": 0,
+        "cancelled_goals": 1,
+        "eligible_goals": 0
+      },
+      {
+        "department": "HR",
+        "completed_goals": 1,
+        "in_progress_goals": 0,
+        "overdue_goals": 0,
+        "not_started_goals": 0,
+        "cancelled_goals": 0,
+        "eligible_goals": 1
+      },
+      {
+        "department": "Marketing",
+        "completed_goals": 0,
+        "in_progress_goals": 0,
+        "overdue_goals": 1,
+        "not_started_goals": 0,
+        "cancelled_goals": 0,
+        "eligible_goals": 1
+      }
+    ]
+  },
+  "GET /api/talent/competency-gaps": {
+    "gaps": [
+      {
+        "competency_name": "Python Coding",
+        "avg_required": 4.0,
+        "avg_actual": 3.0,
+        "avg_gap": 1.0
+      },
+      {
+        "competency_name": "SQL Fundamentals",
+        "avg_required": 4.0,
+        "avg_actual": 4.5,
+        "avg_gap": -0.5
+      }
+    ]
+  },
+  "GET /api/talent/learning": {
+    "completion": [
+      {
+        "category": "Data Engineering",
+        "completed_enrollments": 1,
+        "eligible_enrollments": 1,
+        "total_hours": 12.0
+      },
+      {
+        "category": "Management",
+        "completed_enrollments": 0,
+        "eligible_enrollments": 0,
+        "total_hours": 0.0
+      },
+      {
+        "category": "Marketing",
+        "completed_enrollments": 0,
+        "eligible_enrollments": 1,
+        "total_hours": 0.0
+      },
+      {
+        "category": "Uncategorized",
+        "completed_enrollments": 1,
+        "eligible_enrollments": 1,
+        "total_hours": 8.0
+      }
+    ]
+  },
+  "GET /api/talent/succession": {
+    "coverage": [
+      {
+        "critical_role_id": "ROLE002",
+        "role_title": "Engineering Director",
+        "valid_successor_count": 1,
+        "coverage_status": "Covered"
+      },
+      {
+        "critical_role_id": "ROLE003",
+        "role_title": "Finance Director",
+        "valid_successor_count": 0,
+        "coverage_status": "Not Covered"
+      },
+      {
+        "critical_role_id": "ROLE001",
+        "role_title": "HR Manager",
+        "valid_successor_count": 1,
+        "coverage_status": "Covered"
+      }
+    ]
+  },
+  "GET /api/talent/succession-readiness": {
+    "readiness": [
+      {
+        "readiness": "Missing",
+        "successor_count": 1
+      },
+      {
+        "readiness": "Ready Now",
+        "successor_count": 2
+      },
+      {
+        "readiness": "Ready in 1 Year",
+        "successor_count": 1
+      },
+      {
+        "readiness": "Ready in 2+ Years",
+        "successor_count": 1
+      }
+    ]
+  },
+  "GET /api/talent/risk": {
+    "risks": [
+      {
+        "employee_id": "EMP001",
+        "department": "HR",
+        "project": "PROJ-ALPHA",
+        "performance_category": "Outstanding",
+        "potential_rating": "High",
+        "flight_risk": "High",
+        "risk_category": "High Risk"
+      },
+      {
+        "employee_id": "EMP017",
+        "department": "Engineering",
+        "project": "PROJ-BETA",
+        "performance_category": "Exceeds Expectations",
+        "potential_rating": "Unknown",
+        "flight_risk": "Unknown",
+        "risk_category": "Low Risk"
+      },
+      {
+        "employee_id": "EMP012",
+        "department": "Engineering",
+        "project": "PROJ-BETA",
+        "performance_category": "Exceeds Expectations",
+        "potential_rating": "Medium",
+        "flight_risk": "Low",
+        "risk_category": "Low Risk"
+      },
+      {
+        "employee_id": "EMP010",
+        "department": "Engineering",
+        "project": "PROJ-GAMMA",
+        "performance_category": "Exceeds Expectations",
+        "potential_rating": "Unknown",
+        "flight_risk": "Unknown",
+        "risk_category": "Low Risk"
+      },
+      {
+        "employee_id": "EMP015",
+        "department": "Executive",
+        "project": "PROJ-ALPHA",
+        "performance_category": "Outstanding",
+        "potential_rating": "Unknown",
+        "flight_risk": "Unknown",
+        "risk_category": "Low Risk"
+      },
+      {
+        "employee_id": "EMP009",
+        "department": "Finance",
+        "project": "PROJ-ALPHA",
+        "performance_category": "Exceeds Expectations",
+        "potential_rating": "Unknown",
+        "flight_risk": "Unknown",
+        "risk_category": "Low Risk"
+      },
+      {
+        "employee_id": "EMP016",
+        "department": "HR",
+        "project": "PROJ-ALPHA",
+        "performance_category": "Needs Improvement",
+        "potential_rating": "Unknown",
+        "flight_risk": "Unknown",
+        "risk_category": "Low Risk"
+      },
+      {
+        "employee_id": "EMP011",
+        "department": "HR",
+        "project": "PROJ-ALPHA",
+        "performance_category": "Outstanding",
+        "potential_rating": "High",
+        "flight_risk": "Low",
+        "risk_category": "Low Risk"
+      },
+      {
+        "employee_id": "EMP013",
+        "department": "Marketing",
+        "project": "PROJ-ALPHA",
+        "performance_category": "Meets Expectations",
+        "potential_rating": "Unknown",
+        "flight_risk": "Unknown",
+        "risk_category": "Low Risk"
+      },
+      {
+        "employee_id": "EMP018",
+        "department": "Marketing",
+        "project": "PROJ-ALPHA",
+        "performance_category": "Meets Expectations",
+        "potential_rating": "Unknown",
+        "flight_risk": "Unknown",
+        "risk_category": "Low Risk"
+      },
+      {
+        "employee_id": "EMP019",
+        "department": "Operations",
+        "project": "PROJ-GAMMA",
+        "performance_category": "Meets Expectations",
+        "potential_rating": "Unknown",
+        "flight_risk": "Unknown",
+        "risk_category": "Low Risk"
+      },
+      {
+        "employee_id": "EMP014",
+        "department": "Operations",
+        "project": "PROJ-GAMMA",
+        "performance_category": "Meets Expectations",
+        "potential_rating": "Unknown",
+        "flight_risk": "Unknown",
+        "risk_category": "Low Risk"
+      },
+      {
+        "employee_id": "EMP005",
+        "department": "Operations",
+        "project": "PROJ-GAMMA",
+        "performance_category": "Meets Expectations",
+        "potential_rating": "Unknown",
+        "flight_risk": "Unknown",
+        "risk_category": "Low Risk"
+      },
+      {
+        "employee_id": "EMP008",
+        "department": "Operations",
+        "project": "PROJ-ALPHA",
+        "performance_category": "Needs Improvement",
+        "potential_rating": "Unknown",
+        "flight_risk": "Unknown",
+        "risk_category": "Low Risk"
+      },
+      {
+        "employee_id": "EMP020",
+        "department": "Operations",
+        "project": "PROJ-GAMMA",
+        "performance_category": "Unsatisfactory",
+        "potential_rating": "Unknown",
+        "flight_risk": "Unknown",
+        "risk_category": "Low Risk"
+      },
+      {
+        "employee_id": "EMP002",
+        "department": "Engineering",
+        "project": "PROJ-BETA",
+        "performance_category": "Exceeds Expectations",
+        "potential_rating": "Medium",
+        "flight_risk": "Medium",
+        "risk_category": "Medium Risk"
+      }
+    ]
+  },
+  "GET /api/talent/exceptions": {
+    "exceptions": [
+      {
+        "employee_id": "EMP002",
+        "employee_name": "N/A",
+        "issue_type": "Career Path Missing Next Role",
+        "description": "Career path for employee EMP002 has no next_role defined",
+        "severity": "Warning",
+        "recommended_action": "Define the next_role for this career path entry"
+      },
+      {
+        "employee_id": "ROLE003",
+        "employee_name": "N/A",
+        "issue_type": "Critical Role Missing Successor",
+        "description": "Critical role Finance Director (ROLE003) has no nominated successor",
+        "severity": "Warning",
+        "recommended_action": "Nominate a successor for this critical role"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "N/A",
+        "issue_type": "Duplicate Skill Record",
+        "description": "Employee EMP001 has duplicate entry for skill: SQL",
+        "severity": "Warning",
+        "recommended_action": "Deduplicate employee skill records"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "N/A",
+        "issue_type": "Duplicate Skill Record",
+        "description": "Employee EMP001 has duplicate entry for skill: SQL",
+        "severity": "Warning",
+        "recommended_action": "Deduplicate employee skill records"
+      },
+      {
+        "employee_id": "GOL006",
+        "employee_name": "N/A",
+        "issue_type": "Goal Missing Status",
+        "description": "Goal GOL006 for employee EMP005 has no status",
+        "severity": "Warning",
+        "recommended_action": "Set goal status (Completed/In Progress/Overdue etc.)"
+      },
+      {
+        "employee_id": "GOL004",
+        "employee_name": "N/A",
+        "issue_type": "Goal Overdue",
+        "description": "Goal GOL004 for employee EMP004 is past due date 2026-06-10",
+        "severity": "Warning",
+        "recommended_action": "Resolve or update overdue goal"
+      },
+      {
+        "employee_id": "EMP001",
+        "employee_name": "N/A",
+        "issue_type": "High Performer With High Flight Risk",
+        "description": "Employee EMP001 is rated Outstanding but has high flight risk",
+        "severity": "Warning",
+        "recommended_action": "Engage retention measures for this high-performer"
+      },
+      {
+        "employee_id": "CRS002",
+        "employee_name": "N/A",
+        "issue_type": "Learning Course Missing Category",
+        "description": "Course React Performance Optimization has no category assigned",
+        "severity": "Warning",
+        "recommended_action": "Assign a category to this training course"
+      },
+      {
+        "employee_id": "EMP003",
+        "employee_name": "N/A",
+        "issue_type": "Missing Performance Review",
+        "description": "Active employee EMP003 has no completed review for 2026-06",
+        "severity": "Warning",
+        "recommended_action": "Assign and complete a performance review"
+      },
+      {
+        "employee_id": "EMP007",
+        "employee_name": "N/A",
+        "issue_type": "Missing Performance Review",
+        "description": "Active employee EMP007 has no completed review for 2026-06",
+        "severity": "Warning",
+        "recommended_action": "Assign and complete a performance review"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "N/A",
+        "issue_type": "Missing Performance Review",
+        "description": "Active employee EMP004 has no completed review for 2026-06",
+        "severity": "Warning",
+        "recommended_action": "Assign and complete a performance review"
+      },
+      {
+        "employee_id": "EMP006",
+        "employee_name": "N/A",
+        "issue_type": "Successor Assigned to Inactive Employee",
+        "description": "Succession plan PLN005 successor EMP006 is inactive or terminated",
+        "severity": "Warning",
+        "recommended_action": "Reassign succession to an active employee"
+      },
+      {
+        "employee_id": "COM003",
+        "employee_name": "N/A",
+        "issue_type": "Competency Linked to Unknown Employee",
+        "description": "Assessment COM003 links to employee EMP999 not in master directory",
+        "severity": "Critical",
+        "recommended_action": "Correct employee_id on competency assessment"
+      },
+      {
+        "employee_id": "COM004",
+        "employee_name": "N/A",
+        "issue_type": "Competency Score Outside Range",
+        "description": "Assessment COM004 has score outside 1\u20135 (required=4.0, actual=6.0)",
+        "severity": "Critical",
+        "recommended_action": "Correct competency scores to 1.0\u20135.0 range"
+      },
+      {
+        "employee_id": "REV001",
+        "employee_name": "N/A",
+        "issue_type": "Duplicate Performance Review ID",
+        "description": "Review ID REV001 appears more than once in source records",
+        "severity": "Critical",
+        "recommended_action": "Deduplicate performance review records"
+      },
+      {
+        "employee_id": "REV001",
+        "employee_name": "N/A",
+        "issue_type": "Duplicate Performance Review ID",
+        "description": "Review ID REV001 appears more than once in source records",
+        "severity": "Critical",
+        "recommended_action": "Deduplicate performance review records"
+      },
+      {
+        "employee_id": "ENR003",
+        "employee_name": "N/A",
+        "issue_type": "Enrollment Linked to Unknown Employee",
+        "description": "Enrollment ENR003 links to employee EMP999 not in master directory",
+        "severity": "Critical",
+        "recommended_action": "Correct employee_id on enrollment record"
+      },
+      {
+        "employee_id": "GOL005",
+        "employee_name": "N/A",
+        "issue_type": "Goal Linked to Unknown Employee",
+        "description": "Goal GOL005 links to employee EMP999 not in master directory",
+        "severity": "Critical",
+        "recommended_action": "Correct employee_id on goal record"
+      },
+      {
+        "employee_id": "REV005",
+        "employee_name": "N/A",
+        "issue_type": "Rating Outside Allowed Range",
+        "description": "Review REV005 has rating 6.0 which is outside allowed range 1.0\u20135.0",
+        "severity": "Critical",
+        "recommended_action": "Correct rating to within 1.0\u20135.0 scale"
+      },
+      {
+        "employee_id": "REV003",
+        "employee_name": "N/A",
+        "issue_type": "Review Completed Without Rating",
+        "description": "Review REV003 for employee EMP004 is Completed but has no rating",
+        "severity": "Critical",
+        "recommended_action": "Enter rating before marking review Completed"
+      },
+      {
+        "employee_id": "EMP999",
+        "employee_name": "N/A",
+        "issue_type": "Review Linked to Unknown Employee",
+        "description": "Review ID REV099 links to employee_id EMP999 not in master directory",
+        "severity": "Critical",
+        "recommended_action": "Correct employee_id on review record"
+      },
+      {
+        "employee_id": "REV006",
+        "employee_name": "N/A",
+        "issue_type": "Review Missing Reviewer",
+        "description": "Review REV006 has no reviewer_id assigned",
+        "severity": "Critical",
+        "recommended_action": "Assign a reviewer before finalizing review"
+      },
+      {
+        "employee_id": "EMP888",
+        "employee_name": "N/A",
+        "issue_type": "Successor Linked to Unknown Employee",
+        "description": "Succession plan PLN004 successor EMP888 is not in employee master directory",
+        "severity": "Critical",
+        "recommended_action": "Correct successor_employee_id in succession plan"
+      },
+      {
+        "employee_id": "EMP006",
+        "employee_name": "N/A",
+        "issue_type": "Successor Linked to Unknown Employee",
+        "description": "Succession plan PLN005 successor EMP006 is not in employee master directory",
+        "severity": "Critical",
+        "recommended_action": "Correct successor_employee_id in succession plan"
+      },
+      {
+        "employee_id": "PLN006",
+        "employee_name": "N/A",
+        "issue_type": "Successor Readiness Missing",
+        "description": "Succession plan PLN006 for role Engineering Director has no readiness value",
+        "severity": "Critical",
+        "recommended_action": "Set readiness status for this successor nomination"
+      },
+      {
+        "employee_id": "EMP004",
+        "employee_name": "N/A",
+        "issue_type": "Talent Review Missing Potential Rating",
+        "description": "Talent review for employee EMP004 is missing the potential_rating field",
+        "severity": "Critical",
+        "recommended_action": "Enter potential rating on talent review record"
+      },
+      {
+        "employee_id": "ENR002",
+        "employee_name": "N/A",
+        "issue_type": "Training Completed Without Date",
+        "description": "Enrollment ENR002 has status Completed but no completion_date",
+        "severity": "Critical",
+        "recommended_action": "Set completion_date on completed enrollment"
+      },
+      {
+        "employee_id": "CRS003",
+        "employee_name": "N/A",
+        "issue_type": "Training Hours Missing or Invalid",
+        "description": "Course Strategic Marketing 101 has invalid/zero duration hours: 0.0",
+        "severity": "Critical",
+        "recommended_action": "Enter valid positive training hours for this course"
+      }
+    ]
+  }
+}

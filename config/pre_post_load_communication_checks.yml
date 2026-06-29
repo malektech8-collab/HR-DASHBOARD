@@ -1,0 +1,24 @@
+# HR Command Center - Pre/Post Load Communication Checklists
+# Lists the communication checkpoints for scheduling windows.
+
+pre_load_communication:
+  - id: "COM-PRE-001"
+    description: "Publish proposed scheduling window notice"
+    status: "Pending"
+  - id: "COM-PRE-002"
+    description: "Verify on-call owner availability checklist"
+    status: "Pending"
+  - id: "COM-PRE-003"
+    description: "Send dashboard freeze freeze warning"
+    status: "Pending"
+
+post_load_communication:
+  - id: "COM-PST-001"
+    description: "Send post-load validation success notice"
+    status: "Pending"
+  - id: "COM-PST-002"
+    description: "Publish exceptions report details"
+    status: "Pending"
+  - id: "COM-PST-003"
+    description: "Confirm target release window close signoff"
+    status: "Pending"

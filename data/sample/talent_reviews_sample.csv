@@ -1,0 +1,6 @@
+review_id,employee_id,performance_rating,potential_rating,flight_risk,retention_risk
+TLR001,EMP001,5.0,High,High,Low
+TLR002,EMP002,4.0,Medium,Medium,Medium
+TLR003,EMP004,3.0,,Low,High
+TLR004,EMP011,4.8,High,Low,Low
+TLR005,EMP012,3.8,Medium,Low,Low

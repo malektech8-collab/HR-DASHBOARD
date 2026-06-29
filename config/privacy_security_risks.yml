@@ -1,0 +1,59 @@
+# HR Command Center - Privacy & Security Risks
+# Catalog of corporate data integration risks and planned mitigations.
+
+risks:
+  - risk_id: "RSK-SEC-001"
+    risk_category: "Excessive Access"
+    risk_description: "Non-HR managers accessing detailed salary fields or ER cases."
+    affected_fields: ["basic_salary", "disciplinary_cases_description"]
+    affected_modules: ["payroll", "er"]
+    privacy_impact: "High"
+    security_impact: "High"
+    likelihood: 2
+    severity: 15
+    owner: "Information Security Lead"
+    mitigation: "Strict role-based module block and column redactions."
+    status: "Mitigation Planned"
+    target_resolution_date: "2026-07-05"
+
+  - risk_id: "RSK-SEC-002"
+    risk_category: "Re-identification Risk"
+    risk_description: "Identities derived from small demographic groups in project stats."
+    affected_fields: ["nationality", "gender"]
+    affected_modules: ["workforce", "compliance"]
+    privacy_impact: "Medium"
+    security_impact: "Low"
+    likelihood: 3
+    severity: 12
+    owner: "Data Privacy Officer"
+    mitigation: "Implement minimum sample size checks to suppress groups of size < 5."
+    status: "Accepted"
+    target_resolution_date: "2026-06-29"
+
+  - risk_id: "RSK-SEC-003"
+    risk_category: "Salary Leakage"
+    risk_description: "Drilldown tables exposing individual payouts."
+    affected_fields: ["gross_salary", "net_salary"]
+    affected_modules: ["payroll"]
+    privacy_impact: "High"
+    security_impact: "High"
+    likelihood: 2
+    severity: 16
+    owner: "Information Security Lead"
+    mitigation: "Disable row-level list expansions for non-payroll authorized roles."
+    status: "Mitigation Planned"
+    target_resolution_date: "2026-07-05"
+
+  - risk_id: "RSK-SEC-004"
+    risk_category: "Successor Identity Exposure"
+    risk_description: "Leak of high-potential successor names or numbers."
+    affected_fields: ["successor_employee_key"]
+    affected_modules: ["talent"]
+    privacy_impact: "Critical"
+    security_impact: "High"
+    likelihood: 2
+    severity: 18
+    owner: "Data Privacy Officer"
+    mitigation: "Enforce opaque successor tokens (SUCC-0001) in canonical schemas."
+    status: "Resolved"
+    target_resolution_date: "2026-06-29"

@@ -1,0 +1,51 @@
+# HR Command Center - Ingest File Naming & Delivery Standards
+# Enforces exact regex patterns and folders for drop-offs.
+
+file_naming_standards:
+  - source_category: "HRIS / Employee Master"
+    regex_pattern: "^jisr_employee_master_\\d{8}\\.csv$"
+    target_inbox_folder: "data/real_inbox/"
+    error_action: "Quarantine File"
+    notes: "Requires standard CSV drop with YYYYMMDD suffix."
+
+  - source_category: "Payroll"
+    regex_pattern: "^netsuite_payroll_ledger_\\d{6}\\.xlsx$"
+    target_inbox_folder: "data/real_inbox/"
+    error_action: "Quarantine File"
+    notes: "Requires XLSX with YYYYMM suffix."
+
+  - source_category: "Attendance"
+    regex_pattern: "^zk_attendance_logs_\\d{8}\\.csv$"
+    target_inbox_folder: "data/real_inbox/"
+    error_action: "Quarantine File"
+    notes: "Requires CSV with YYYYMMDD suffix."
+
+  - source_category: "Government / Compliance"
+    regex_pattern: "^gosi_compliance_status_\\d{8}\\.csv$"
+    target_inbox_folder: "data/real_inbox/"
+    error_action: "Quarantine File"
+    notes: "Requires CSV with YYYYMMDD suffix."
+
+  - source_category: "Employee Relations / Case Management"
+    regex_pattern: "^er_sharepoint_log_\\d{8}\\.csv$"
+    target_inbox_folder: "data/real_inbox/"
+    error_action: "Quarantine File"
+    notes: "Requires CSV with YYYYMMDD suffix."
+
+  - source_category: "Recruitment / Workforce Planning"
+    regex_pattern: "^lever_recruitment_reqs_\\d{8}\\.csv$"
+    target_inbox_folder: "data/real_inbox/"
+    error_action: "Quarantine File"
+    notes: "Requires CSV with YYYYMMDD suffix."
+
+  - source_category: "Talent / Performance / Learning"
+    regex_pattern: "^successfactors_talent_\\d{8}\\.xlsx$"
+    target_inbox_folder: "data/real_inbox/"
+    error_action: "Quarantine File"
+    notes: "Requires XLSX with YYYYMMDD suffix."
+
+  - source_category: "Data Quality / Command Center Metadata"
+    regex_pattern: "^command_center_audit_\\d{8}\\.csv$"
+    target_inbox_folder: "data/real_inbox/"
+    error_action: "Quarantine File"
+    notes: "Requires CSV with YYYYMMDD suffix."

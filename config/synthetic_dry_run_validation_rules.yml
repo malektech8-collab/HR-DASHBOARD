@@ -1,0 +1,59 @@
+# HR Command Center - Synthetic Dry-Run Validation Rules
+# Declares specific syntax, logical, and safety rules for dry-run validation testing.
+
+validation_rules:
+  schema_checks:
+    - rule_id: "SCH-001"
+      description: "File format must match expected contract format (CSV/XLSX)"
+      fail_action: "Reject"
+    - rule_id: "SCH-002"
+      description: "Delimiter must match contract delimiter specification"
+      fail_action: "Reject"
+    - rule_id: "SCH-003"
+      description: "All required columns must be present in the raw header"
+      fail_action: "Reject"
+
+  integrity_checks:
+    - rule_id: "INT-001"
+      description: "Primary key ID cannot be null or blank"
+      fail_action: "Quarantine"
+    - rule_id: "INT-002"
+      description: "Primary key ID must be unique (no duplicates allowed)"
+      fail_action: "Quarantine"
+
+  logic_checks:
+    - rule_id: "LOG-001"
+      description: "Joining/hiring dates must be valid calendar dates (not in future)"
+      fail_action: "Quarantine"
+    - rule_id: "LOG-002"
+      description: "Payroll gross pay must match equation: gross = basic + allowances + overtime"
+      fail_action: "Reject"
+    - rule_id: "LOG-003"
+      description: "Payroll net pay must match equation: net = gross - deductions"
+      fail_action: "Reject"
+    - rule_id: "LOG-004"
+      description: "Salary and allowance fields cannot be negative numbers"
+      fail_action: "Reject"
+    - rule_id: "LOG-005"
+      description: "Attendance check-out timestamp must be after check-in timestamp"
+      fail_action: "Quarantine"
+    - rule_id: "LOG-006"
+      description: "ER case closed date must be after created date"
+      fail_action: "Quarantine"
+    - rule_id: "LOG-007"
+      description: "Talent performance rating must be an integer between 1 and 5"
+      fail_action: "Quarantine"
+
+  safety_checks:
+    - rule_id: "SAF-001"
+      description: "Successor employee key must be pseudonymized (no raw IDs or initials allowed)"
+      fail_action: "Reject"
+    - rule_id: "SAF-002"
+      description: "No real-looking government ID/Iqama pattern allowed (must use synthetic prefix)"
+      fail_action: "Reject"
+    - rule_id: "SAF-003"
+      description: "No real-looking bank account/IBAN patterns allowed"
+      fail_action: "Reject"
+    - rule_id: "SAF-004"
+      description: "No live system credentials or connection strings allowed in payload"
+      fail_action: "Reject"

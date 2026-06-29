@@ -1,0 +1,67 @@
+# HR Command Center - Masking and Redaction Policy Config
+# Specifies technical masking algorithms to be applied at view or API level.
+
+masking_rules:
+  - rule_id: "mask_national_id"
+    field_name: "national_id_number"
+    masking_method: "REDACT_PARTIAL"
+    parameters:
+      visible_characters: 4
+      padding_character: "*"
+      side: "right"
+    example_input: "1098765432"
+    example_output: "1098******"
+
+  - rule_id: "mask_employee_name"
+    field_name: "employee_name"
+    masking_method: "PSEUDONYMIZE"
+    parameters:
+      format: "INITIALS_AND_ID"
+    example_input: "Khalid Al-Mansoori"
+    example_output: "K.A. (EMP-0019)"
+
+  - rule_id: "mask_iban"
+    field_name: "bank_account_iban"
+    masking_method: "REDACT_FULL"
+    parameters:
+      replacement_value: "[REDACTED_FINANCIAL_DETAIL]"
+    example_input: "SA8000000123456789012345"
+    example_output: "[REDACTED_FINANCIAL_DETAIL]"
+
+  - rule_id: "mask_salary"
+    field_name: "gross_salary"
+    masking_method: "AGGREGATE_ONLY"
+    parameters:
+      minimum_sample_size: 5
+      allow_row_level_display: false
+    example_input: "15500.00"
+    example_output: "Sum cost for department: 77500.00 (Row-level hidden)"
+
+  - rule_id: "redact_legal_narrative"
+    field_name: "disciplinary_cases_description"
+    masking_method: "NLP_REDACTION"
+    parameters:
+      redact_entities:
+        - "PERSON"
+        - "MONEY"
+        - "EMAIL"
+    example_input: "Disputed late deduction of 500 SAR with manager Khalid."
+    example_output: "Disputed late deduction of [MONEY] with manager [PERSON]."
+
+  - rule_id: "mask_successor_key"
+    field_name: "successor_employee_key"
+    masking_method: "OPAQUE_TOKEN"
+    parameters:
+      prefix: "SUCC-"
+      padding_digits: 4
+      deterministic: true
+    example_input: "EMP-0020"
+    example_output: "SUCC-0001"
+
+  - rule_id: "redact_investigation_notes"
+    field_name: "investigation_notes"
+    masking_method: "REDACT_FULL"
+    parameters:
+      replacement_value: "[RESTRICTED_LEGAL_NARRATIVE]"
+    example_input: "Employee Khalid confessed to leaking ledger details."
+    example_output: "[RESTRICTED_LEGAL_NARRATIVE]"

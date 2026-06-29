@@ -1,0 +1,75 @@
+# HR Command Center - Gate 1 Source Readiness & Data Integration Risk Register
+# Logs identified risks, severity assessments, and technical mitigation actions.
+
+risks:
+  - risk_id: "RSK-001"
+    source_category: "Talent / Performance / Learning"
+    risk_type: "Missing Owner"
+    risk_description: "Talent & Development Director has not formally accepted data ownership responsibilities."
+    impact: 4
+    likelihood: 3
+    severity: "High"
+    owner: "HR Systems Lead"
+    mitigation_action: "Schedule formal briefing to clarify duties and obtain official signoff."
+    target_resolution_date: "2026-07-10"
+    status: "Awaiting Owner"
+
+  - risk_id: "RSK-002"
+    source_category: "Payroll"
+    risk_type: "Sensitive Field Without Masking Rule"
+    risk_description: "Salary component details lack approved masking rules from the legal team."
+    impact: 5
+    likelihood: 2
+    severity: "High"
+    owner: "Finance Director"
+    mitigation_action: "Enforce strict column-level database masking (redacting names and Iqamas) until signed off."
+    target_resolution_date: "2026-07-05"
+    status: "Mitigation Planned"
+
+  - risk_id: "RSK-003"
+    source_category: "Attendance"
+    risk_type: "Manual Excel Dependency"
+    risk_description: "Biometric clock data requires manual export to CSV by the attendance clerk."
+    impact: 3
+    likelihood: 4
+    severity: "Medium"
+    owner: "HR Operations Manager"
+    mitigation_action: "Configure direct automated SFTP push from the Teco server to data/real_inbox/."
+    target_resolution_date: "2026-07-25"
+    status: "Mitigation Planned"
+
+  - risk_id: "RSK-004"
+    source_category: "Government / Compliance"
+    risk_type: "Conflicting Source of Truth"
+    risk_description: "Saudization statistics might conflict between external GOSI reports and internal active payroll records."
+    impact: 3
+    likelihood: 3
+    severity: "Medium"
+    owner: "Government Relations Officer"
+    mitigation_action: "Establish GOSI registry status as the primary legal source of truth for Saudization metrics."
+    target_resolution_date: "2026-07-15"
+    status: "Open"
+
+  - risk_id: "RSK-005"
+    source_category: "Talent / Performance / Learning"
+    risk_type: "Unmapped Required Field"
+    risk_description: "Successor employee ID mappings are in draft state pending classification of legal successor agreements."
+    impact: 4
+    likelihood: 2
+    severity: "Medium"
+    owner: "Talent & Development Director"
+    mitigation_action: "Work with data steward to document the schema and map to sf_successor_emp_id."
+    target_resolution_date: "2026-07-20"
+    status: "Open"
+
+  - risk_id: "RSK-006"
+    source_category: "Employee Relations / Case Management"
+    risk_type: "Legal / Privacy Risk"
+    risk_description: "Case descriptions may contain raw names or sensitive internal investigation details."
+    impact: 5
+    likelihood: 4
+    severity: "High"
+    owner: "Employee Relations Manager"
+    mitigation_action: "Run regex-based redaction parser on the description field at ingestion stage."
+    target_resolution_date: "2026-07-08"
+    status: "Mitigation Planned"

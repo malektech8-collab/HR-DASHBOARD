@@ -1,0 +1,43 @@
+# HR Command Center - Ingest Data Export Control Rules
+# Configures the exact allowed export types and security requirements.
+
+export_rules:
+  general_restrictions:
+    government_id_export_allowed: false
+    bank_iban_export_allowed: false
+    free_text_redaction_required: true
+    small_group_suppression_size: 5
+    audit_logging_required: true
+
+  role_permissions:
+    admin_system:
+      allowed_export_scope: "Full Export"
+      restricted_domains: ["bank_account_iban", "passport_number"]
+    hr_executive:
+      allowed_export_scope: "Full Export"
+      restricted_domains: ["bank_account_iban", "passport_number"]
+    hr_operations_manager:
+      allowed_export_scope: "Masked Export"
+      restricted_domains: ["gross_salary", "disciplinary_cases_description"]
+    payroll_manager:
+      allowed_export_scope: "Restricted Employee-Level Export"
+      restricted_domains: ["disciplinary_cases_description", "successor_employee_key"]
+    employee_relations_manager:
+      allowed_export_scope: "Restricted Employee-Level Export"
+      restricted_domains: ["gross_salary", "successor_employee_key"]
+    recruitment_manager:
+      allowed_export_scope: "Department/Project Export"
+      restricted_domains: ["gross_salary", "disciplinary_cases_description"]
+    talent_manager:
+      allowed_export_scope: "Restricted Employee-Level Export"
+      restricted_domains: ["gross_salary", "disciplinary_cases_description"]
+    compliance_manager:
+      allowed_export_scope: "Department/Project Export"
+      restricted_domains: ["gross_salary", "disciplinary_cases_description"]
+    project_manager:
+      allowed_export_scope: "No Export"
+    viewer_executive_aggregate_only:
+      allowed_export_scope: "Aggregate Export Only"
+    auditor_read_only:
+      allowed_export_scope: "Masked Export"
+      restricted_domains: ["bank_account_iban", "passport_number"]

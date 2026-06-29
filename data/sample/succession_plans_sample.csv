@@ -1,0 +1,7 @@
+plan_id,critical_role_id,role_title,current_employee_id,successor_employee_id,readiness,flight_risk,is_critical
+PLN001,ROLE001,HR Manager,EMP011,EMP001,Ready Now,Low,True
+PLN002,ROLE002,Engineering Director,EMP012,EMP002,Ready in 1 Year,Medium,True
+PLN003,ROLE003,Finance Director,EMP003,,,,True
+PLN004,ROLE001,HR Manager,EMP011,EMP888,Ready Now,Low,True
+PLN005,ROLE001,HR Manager,EMP011,EMP006,Ready in 2+ Years,Low,True
+PLN006,ROLE002,Engineering Director,EMP012,EMP017,,Low,True

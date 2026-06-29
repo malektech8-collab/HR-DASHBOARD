@@ -1,0 +1,39 @@
+# HR Command Center - Pre-Execution Risk Assessment Configuration
+# Catalog of active pre-execution risks and mitigation mappings.
+
+risks:
+  - risk_id: "RSK-PRE-001"
+    risk_description: "Source file not received on time during scheduled window"
+    severity: "Medium"
+    likelihood: "Medium"
+    owner: "IT Operations Director"
+    mitigation: "Fallback window scheduled 24 hours later; notify source owner 48 hours pre-load."
+    decision_impact: "Conditional Go"
+    status: "Mitigated"
+
+  - risk_id: "RSK-PRE-002"
+    risk_description: "Unexpected column or schema modification in raw drop file"
+    severity: "High"
+    likelihood: "Low"
+    owner: "Data Quality Steward"
+    mitigation: "Ingest scripts reject file; move to rejected folder."
+    decision_impact: "No-Go"
+    status: "Mitigated"
+
+  - risk_id: "RSK-PRE-003"
+    risk_description: "Real sensitive payroll or ER column included in folderDrop"
+    severity: "Critical"
+    likelihood: "Low"
+    owner: "Data Privacy Officer"
+    mitigation: "Disk wipe sector, reject file transfer immediately."
+    decision_impact: "No-Go"
+    status: "Mitigated"
+
+  - risk_id: "RSK-PRE-004"
+    risk_description: "Rollback snapshot failure during transaction test"
+    severity: "High"
+    likelihood: "Low"
+    owner: "Systems Architect"
+    mitigation: "Validate backup restoration path before starting import window."
+    decision_impact: "No-Go"
+    status: "Mitigated"

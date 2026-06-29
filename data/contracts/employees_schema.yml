@@ -1,0 +1,66 @@
+columns:
+  - name: employee_id
+    type: VARCHAR
+    required: true
+    unique: true
+  - name: employee_name
+    type: VARCHAR
+    required: true
+  - name: nationality
+    type: VARCHAR
+    required: true
+  - name: is_saudi
+    type: BOOLEAN
+    required: true
+  - name: company
+    type: VARCHAR
+    required: true
+  - name: department
+    type: VARCHAR
+    required: true
+  - name: project
+    type: VARCHAR
+    required: true
+  - name: job_title
+    type: VARCHAR
+    required: true
+  - name: job_family
+    type: VARCHAR
+    required: true
+  - name: grade
+    type: VARCHAR
+    required: true
+  - name: manager_id
+    type: VARCHAR
+    required: false
+  - name: cost_center
+    type: VARCHAR
+    required: true
+  - name: employment_type
+    type: VARCHAR
+    required: true
+  - name: contract_type
+    type: VARCHAR
+    required: true
+  - name: joining_date
+    type: DATE
+    required: true
+  - name: termination_date
+    type: DATE
+    required: false
+  - name: contract_end_date
+    type: DATE
+    required: false
+  - name: status
+    type: VARCHAR
+    required: true
+    allowed_values: ["Active", "Inactive", "Terminated", "On Leave"]
+  - name: basic_salary
+    type: DECIMAL
+    required: true
+  - name: housing_allowance
+    type: DECIMAL
+    required: true
+  - name: transport_allowance
+    type: DECIMAL
+    required: true

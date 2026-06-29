@@ -1,0 +1,34 @@
+# HR Command Center - Ingest Mapping Exception Resolution
+# Registers the final approved treatments and validation logic for EXP-001 and EXP-002.
+
+resolutions:
+  - exception_id: "EXP-001"
+    canonical_table: "base_succession_plans"
+    canonical_field: "successor_employee_key"
+    resolution_status: "Resolved - Opaque Successor Key"
+    resolution_details:
+      treatment_type: "Pseudonymization via Opaque Token"
+      canonical_analytics_field: "successor_employee_key"
+      allowed_display_value: "Opaque token (e.g., SUCC-0001) or a salted deterministic hash/token"
+      initials_allowed: false
+      employee_number_allowed: false
+      raw_id_allowed: false
+      dashboard_default_behavior: "Aggregate-only succession coverage stats"
+      authorized_role_behavior: "Row-level pseudonymous successor key only"
+      reidentification_scope: "Outside analytics dashboard scope; requires separate security approvals"
+    approval_date: "2026-06-29T10:00:00Z"
+    approved_by: "Information Security Lead & Legal Counsel"
+
+  - exception_id: "EXP-002"
+    canonical_table: "base_payroll_records"
+    canonical_field: "deductions"
+    resolution_status: "Resolved - Aggregate Deductions Mapping"
+    resolution_details:
+      treatment_type: "Aggregate Deduction Amount"
+      canonical_field: "deductions"
+      detailed_deduction_lines_ingested: false
+      deduction_categories_ingested: false
+      dashboard_default_behavior: "Display aggregate deductions totals"
+      row_level_visibility_restriction: "Restricted to payroll-authorized roles only"
+    approval_date: "2026-06-29T10:30:00Z"
+    approved_by: "Finance Director & Data Steward"

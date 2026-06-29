@@ -1,0 +1,35 @@
+# HR Command Center - Controlled Load Rollback & Purge Mappings
+# Configures triggers, detection actions, and owners for load failures.
+
+rollback_scenarios:
+  - scenario_id: "ROL-001"
+    trigger: "Wrong file loaded"
+    detection_method: "File manifest mismatch check"
+    responsible_owner: "Data Quality Engineer"
+    rollback_action: "Restore database snapshot; purge data/real_approved/ folder"
+    communication_required: "Alert tech team"
+    restart_approval_required: true
+
+  - scenario_id: "ROL-002"
+    trigger: "Mapping error detected"
+    detection_method: "Post-load schema query failures"
+    responsible_owner: "System Architect"
+    rollback_action: "Roll back transaction; restore snapshot"
+    communication_required: "Alert all stakeholders"
+    restart_approval_required: true
+
+  - scenario_id: "ROL-003"
+    trigger: "PII masking failure"
+    detection_method: "Automated compliance scan"
+    responsible_owner: "Data Privacy Officer"
+    rollback_action: "Immediate db purge; restore backup snapshot"
+    communication_required: "Escalate to DPO and CISO"
+    restart_approval_required: true
+
+  - scenario_id: "ROL-004"
+    trigger: "Control totals mismatch"
+    detection_method: "Reconciliation script check"
+    responsible_owner: "Data Quality Engineer"
+    rollback_action: "Discard transaction; move source file to rejected/"
+    communication_required: "Notify source owner"
+    restart_approval_required: false

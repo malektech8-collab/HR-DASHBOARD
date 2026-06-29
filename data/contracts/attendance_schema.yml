@@ -1,0 +1,48 @@
+columns:
+  - name: attendance_date
+    type: DATE
+    required: true
+  - name: employee_id
+    type: VARCHAR
+    required: true
+  - name: shift_name
+    type: VARCHAR
+    required: true
+  - name: scheduled_start
+    type: TIMESTAMP
+    required: true
+  - name: scheduled_end
+    type: TIMESTAMP
+    required: true
+  - name: actual_check_in
+    type: TIMESTAMP
+    required: false
+  - name: actual_check_out
+    type: TIMESTAMP
+    required: false
+  - name: late_minutes
+    type: INTEGER
+    required: true
+    min_value: 0
+  - name: excused_late_minutes
+    type: INTEGER
+    required: true
+  - name: net_late_minutes
+    type: INTEGER
+    required: true
+    min_value: 0
+  - name: absence_days
+    type: DECIMAL
+    required: true
+  - name: overtime_hours
+    type: DECIMAL
+    required: true
+  - name: overtime_approved
+    type: BOOLEAN
+    required: true
+  - name: missing_punch_count
+    type: INTEGER
+    required: true
+  - name: project
+    type: VARCHAR
+    required: true

@@ -1,0 +1,137 @@
+# HR Command Center - Real Data Schema and Quality Validation Rules
+# Configures validation constraints for incoming CSV/Excel files before staging into DuckDB.
+
+validation_categories:
+  employee_master:
+    description: "Validation rules for core employee database records"
+    rules:
+      - rule_name: "employee_id_present"
+        field: "employee_id"
+        check_type: "NOT_NULL"
+        remediation_action: "Reject file; notify HR Operations"
+      - rule_name: "employee_id_format"
+        field: "employee_id"
+        check_type: "REGEX"
+        value: "^EMP-[0-9]{4}$"
+        remediation_action: "Quarantine row; flag invalid ID schema"
+      - rule_name: "joining_date_valid"
+        field: "joining_date"
+        check_type: "DATE_VALID"
+        remediation_action: "Quarantine row; check format YYYY-MM-DD"
+      - rule_name: "termination_date_logical"
+        field: "termination_date"
+        check_type: "EXPRESSION"
+        value: "termination_date IS NULL OR termination_date >= joining_date"
+        remediation_action: "Reject file; historical error"
+      - rule_name: "status_allowed"
+        field: "status"
+        check_type: "IN_LIST"
+        value: ["Active", "Terminated", "Suspended", "On Leave"]
+        remediation_action: "Quarantine row; flag unrecognized status"
+
+  payroll:
+    description: "Validation rules for monthly payroll exports"
+    rules:
+      - rule_name: "payroll_period_present"
+        field: "payroll_period"
+        check_type: "NOT_NULL"
+        remediation_action: "Reject file; missing date context"
+      - rule_name: "employee_id_exists"
+        field: "employee_id"
+        check_type: "FOREIGN_KEY"
+        reference: "base_workforce_records.employee_id"
+        remediation_action: "Quarantine row; record orphan payroll row"
+      - rule_name: "gross_payout_positive"
+        field: "gross_salary"
+        check_type: "GREATER_THAN_EQUAL"
+        value: 0
+        remediation_action: "Reject row; negative financial numbers"
+      - rule_name: "net_payout_reconciles"
+        field: "net_salary"
+        check_type: "EXPRESSION"
+        value: "gross_salary - total_deductions = net_salary"
+        remediation_action: "Flag warning; possible calculation discrepancy"
+      - rule_name: "duplicate_payroll_records"
+        field: "employee_id"
+        check_type: "UNIQUE_PER_PERIOD"
+        remediation_action: "Reject file; double payout detected"
+
+  attendance:
+    description: "Validation rules for attendance logs and clock cycles"
+    rules:
+      - rule_name: "attendance_date_valid"
+        field: "attendance_date"
+        check_type: "DATE_VALID"
+        remediation_action: "Quarantine row"
+      - rule_name: "employee_id_exists"
+        field: "employee_id"
+        check_type: "FOREIGN_KEY"
+        reference: "base_workforce_records.employee_id"
+        remediation_action: "Quarantine row"
+      - rule_name: "clock_times_logical"
+        field: "check_out"
+        check_type: "EXPRESSION"
+        value: "check_out IS NULL OR check_out >= check_in"
+        remediation_action: "Flag warning; duration negative"
+      - rule_name: "duplicate_punches"
+        field: ["employee_id", "attendance_date", "check_in"]
+        check_type: "UNIQUE"
+        remediation_action: "De-duplicate automatically"
+
+  compliance:
+    description: "Validation rules for government platforms and legal statuses"
+    rules:
+      - rule_name: "employee_id_exists"
+        field: "employee_id"
+        check_type: "FOREIGN_KEY"
+        reference: "base_workforce_records.employee_id"
+        remediation_action: "Quarantine row"
+      - rule_name: "gosi_status_allowed"
+        field: "gosi_status"
+        check_type: "IN_LIST"
+        value: ["Active", "Not Registered"]
+        remediation_action: "Quarantine row; flag compliance gap"
+      - rule_name: "iqama_expiry_logical"
+        field: "iqama_expiry_date"
+        check_type: "DATE_VALID"
+        remediation_action: "Quarantine row"
+
+  employee_relations:
+    description: "Validation rules for employee cases and disputes"
+    rules:
+      - rule_name: "case_id_present"
+        field: "case_id"
+        check_type: "NOT_NULL"
+        remediation_action: "Reject file"
+      - rule_name: "case_dates_logical"
+        field: "closed_date"
+        check_type: "EXPRESSION"
+        value: "closed_date IS NULL OR closed_date >= created_date"
+        remediation_action: "Flag warning"
+
+  recruitment:
+    description: "Validation rules for recruitment ATS logs and vacancies"
+    rules:
+      - rule_name: "requisition_id_present"
+        field: "requisition_id"
+        check_type: "NOT_NULL"
+        remediation_action: "Reject file"
+      - rule_name: "vacancy_quantity_positive"
+        field: "target_headcount"
+        check_type: "GREATER_THAN"
+        value: 0
+        remediation_action: "Flag warning"
+
+  talent:
+    description: "Validation rules for performance, LMS logs, and succession"
+    rules:
+      - rule_name: "performance_rating_range"
+        field: "performance_rating"
+        check_type: "IN_RANGE"
+        value: [1, 5]
+        remediation_action: "Quarantine row; rating must be 1 to 5"
+      - rule_name: "successor_exists"
+        field: "successor_employee_id"
+        check_type: "FOREIGN_KEY"
+        reference: "base_workforce_records.employee_id"
+        remediation_action: "Quarantine row; orphan successor record"

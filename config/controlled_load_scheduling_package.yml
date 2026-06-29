@@ -1,0 +1,23 @@
+# HR Command Center - Controlled Load Scheduling Package
+# Allowed statuses: Draft, Pending Authorization, Ready for Scheduling Review, Conditional Scheduling Ready, Hold, Rejected.
+
+scheduling_package:
+  proposed_load_window_id: "SCHED-3H-001"
+  proposed_date: "2026-07-03"
+  proposed_start_time: "21:00:00"
+  proposed_end_time: "23:00:00"
+  timezone: "UTC"
+  freeze_period: "2026-07-03T20:00:00Z to 2026-07-04T02:00:00Z"
+  fallback_window: "2026-07-04T21:00:00Z"
+  business_owner_available: true
+  technical_owner_available: true
+  data_steward_available: true
+  privacy_security_owner_available: true
+  rollback_owner_available: true
+  incident_response_owner_available: true
+  communication_owner_available: true
+  dashboard_validation_owner_available: true
+  execution_owner: "System Architect"
+  stop_authority: "Chief HR Officer"
+  status: "Pending Authorization"
+  notes: "Draft window prepared; awaiting written signoff on AUTH-3H-001 before transitioning to Ready."

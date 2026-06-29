@@ -1,0 +1,487 @@
+{
+  "summary": {
+    "report_month": "2026-06",
+    "kpis": [
+      {
+        "key": "total_open_er_cases",
+        "label": "Total Open ER Cases",
+        "value": 8.0,
+        "unit": "cases",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "critical"
+      },
+      {
+        "key": "new_cases_this_month",
+        "label": "New Cases This Month",
+        "value": 9.0,
+        "unit": "cases",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "neutral"
+      },
+      {
+        "key": "closed_cases_this_month",
+        "label": "Closed Cases This Month",
+        "value": 2.0,
+        "unit": "cases",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "neutral"
+      },
+      {
+        "key": "average_case_aging_days",
+        "label": "Average Case Aging Days",
+        "value": 26.9,
+        "unit": "days",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "warning"
+      },
+      {
+        "key": "overdue_cases",
+        "label": "Overdue Cases",
+        "value": 8.0,
+        "unit": "cases",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "critical"
+      },
+      {
+        "key": "sla_compliance_pct",
+        "label": "SLA Compliance %",
+        "value": 18.18,
+        "unit": "%",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "critical"
+      },
+      {
+        "key": "disciplinary_cases",
+        "label": "Disciplinary Cases",
+        "value": 4.0,
+        "unit": "cases",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "neutral"
+      },
+      {
+        "key": "grievance_cases",
+        "label": "Grievance Cases",
+        "value": 5.0,
+        "unit": "cases",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "neutral"
+      },
+      {
+        "key": "labor_cases",
+        "label": "Labor Cases",
+        "value": 2.0,
+        "unit": "cases",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "neutral"
+      },
+      {
+        "key": "escalated_cases",
+        "label": "Escalated Cases",
+        "value": 2.0,
+        "unit": "cases",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "warning"
+      },
+      {
+        "key": "er_exception_count",
+        "label": "ER Exception Count",
+        "value": 20.0,
+        "unit": "issues",
+        "trend_value": null,
+        "trend_direction": null,
+        "status": "critical"
+      }
+    ]
+  },
+  "trends": {
+    "trends": [
+      {
+        "period": "2026-04",
+        "new_cases": 4,
+        "closed_cases": 3
+      },
+      {
+        "period": "2026-05",
+        "new_cases": 5,
+        "closed_cases": 4
+      },
+      {
+        "period": "2026-06",
+        "new_cases": 9,
+        "closed_cases": 2
+      }
+    ]
+  },
+  "by-project": {
+    "projects": [
+      {
+        "project": "PROJ-ALPHA",
+        "total_cases": 3,
+        "open_cases": 2,
+        "closed_cases": 1,
+        "escalated_cases": 1,
+        "compliant_cases": 1,
+        "compliance_pct": 33.33
+      },
+      {
+        "project": "PROJ-BETA",
+        "total_cases": 3,
+        "open_cases": 3,
+        "closed_cases": 0,
+        "escalated_cases": 0,
+        "compliant_cases": 0,
+        "compliance_pct": 0.0
+      },
+      {
+        "project": "PROJ-GAMMA",
+        "total_cases": 3,
+        "open_cases": 1,
+        "closed_cases": 2,
+        "escalated_cases": 1,
+        "compliant_cases": 1,
+        "compliance_pct": 33.33
+      },
+      {
+        "project": "Unassigned",
+        "total_cases": 2,
+        "open_cases": 2,
+        "closed_cases": 0,
+        "escalated_cases": 0,
+        "compliant_cases": 0,
+        "compliance_pct": 0.0
+      }
+    ]
+  },
+  "by-department": {
+    "departments": [
+      {
+        "department": "Engineering",
+        "total_cases": 4,
+        "open_cases": 3,
+        "closed_cases": 1,
+        "escalated_cases": 0,
+        "compliant_cases": 1,
+        "compliance_pct": 25.0
+      },
+      {
+        "department": "Finance",
+        "total_cases": 1,
+        "open_cases": 1,
+        "closed_cases": 0,
+        "escalated_cases": 1,
+        "compliant_cases": 0,
+        "compliance_pct": 0.0
+      },
+      {
+        "department": "HR",
+        "total_cases": 3,
+        "open_cases": 1,
+        "closed_cases": 2,
+        "escalated_cases": 0,
+        "compliant_cases": 1,
+        "compliance_pct": 33.33
+      },
+      {
+        "department": "Marketing",
+        "total_cases": 1,
+        "open_cases": 1,
+        "closed_cases": 0,
+        "escalated_cases": 0,
+        "compliant_cases": 0,
+        "compliance_pct": 0.0
+      },
+      {
+        "department": "Operations",
+        "total_cases": 1,
+        "open_cases": 1,
+        "closed_cases": 0,
+        "escalated_cases": 1,
+        "compliant_cases": 0,
+        "compliance_pct": 0.0
+      },
+      {
+        "department": "Unassigned",
+        "total_cases": 1,
+        "open_cases": 1,
+        "closed_cases": 0,
+        "escalated_cases": 0,
+        "compliant_cases": 0,
+        "compliance_pct": 0.0
+      }
+    ]
+  },
+  "case-types": {
+    "case_types": [
+      {
+        "case_type": "Disciplinary",
+        "case_count": 4
+      },
+      {
+        "case_type": "Grievance",
+        "case_count": 5
+      },
+      {
+        "case_type": "Labor Case",
+        "case_count": 2
+      }
+    ]
+  },
+  "status": {
+    "statuses": [
+      {
+        "case_status": "Closed",
+        "case_count": 3
+      },
+      {
+        "case_status": "Open",
+        "case_count": 8
+      }
+    ]
+  },
+  "sla": {
+    "performance": [
+      {
+        "category_type": "ER",
+        "category": "Disciplinary",
+        "eligible_count": 4,
+        "compliant_count": 2,
+        "breached_count": 2,
+        "compliance_pct": 50.0
+      },
+      {
+        "category_type": "ER",
+        "category": "Grievance",
+        "eligible_count": 5,
+        "compliant_count": 0,
+        "breached_count": 5,
+        "compliance_pct": 0.0
+      },
+      {
+        "category_type": "ER",
+        "category": "Labor Case",
+        "eligible_count": 2,
+        "compliant_count": 0,
+        "breached_count": 2,
+        "compliance_pct": 0.0
+      },
+      {
+        "category_type": "HR_REQ",
+        "category": "Business Card Request",
+        "eligible_count": 1,
+        "compliant_count": 1,
+        "breached_count": 0,
+        "compliance_pct": 100.0
+      },
+      {
+        "category_type": "HR_REQ",
+        "category": "Employment Certificate",
+        "eligible_count": 1,
+        "compliant_count": 1,
+        "breached_count": 0,
+        "compliance_pct": 100.0
+      },
+      {
+        "category_type": "HR_REQ",
+        "category": "Leave Request",
+        "eligible_count": 1,
+        "compliant_count": 1,
+        "breached_count": 0,
+        "compliance_pct": 100.0
+      },
+      {
+        "category_type": "HR_REQ",
+        "category": "Salary Transfer Letter",
+        "eligible_count": 1,
+        "compliant_count": 0,
+        "breached_count": 1,
+        "compliance_pct": 0.0
+      }
+    ]
+  },
+  "aging": {
+    "buckets": [
+      {
+        "aging_bucket": "30_plus_days",
+        "case_count": 2
+      },
+      {
+        "aging_bucket": "15_30_days",
+        "case_count": 6
+      }
+    ]
+  },
+  "exceptions": {
+    "exceptions": [
+      {
+        "employee_id": "ER004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Missing Project",
+        "description": "Open case has no project link",
+        "severity": "Warning",
+        "recommended_action": "Update subject employee project assignment"
+      },
+      {
+        "employee_id": "ER010",
+        "employee_name": "Unknown Employee",
+        "issue_type": "Missing Project",
+        "description": "Open case has no project link",
+        "severity": "Warning",
+        "recommended_action": "Update subject employee project assignment"
+      },
+      {
+        "employee_id": "ER010",
+        "employee_name": "Unknown Employee",
+        "issue_type": "Missing Department",
+        "description": "Open case has no department link",
+        "severity": "Warning",
+        "recommended_action": "Update subject employee department assignment"
+      },
+      {
+        "employee_id": "ER004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Missing Target Due Date",
+        "description": "Target due date is blank in source records",
+        "severity": "Critical",
+        "recommended_action": "Set target due date based on SLA rules"
+      },
+      {
+        "employee_id": "ER002",
+        "employee_name": "John Doe",
+        "issue_type": "Overdue Open Case",
+        "description": "Open case has breached its effective target due date: 2026-06-12",
+        "severity": "Critical",
+        "recommended_action": "Expedite investigation and case resolution"
+      },
+      {
+        "employee_id": "ER002",
+        "employee_name": "John Doe",
+        "issue_type": "Overdue Open Case",
+        "description": "Open case has breached its effective target due date: 2026-06-12",
+        "severity": "Critical",
+        "recommended_action": "Expedite investigation and case resolution"
+      },
+      {
+        "employee_id": "ER003",
+        "employee_name": "Fahad Al-Otaibi",
+        "issue_type": "Overdue Open Case",
+        "description": "Open case has breached its effective target due date: 2026-06-15",
+        "severity": "Critical",
+        "recommended_action": "Expedite investigation and case resolution"
+      },
+      {
+        "employee_id": "ER004",
+        "employee_name": "Jane Smith",
+        "issue_type": "Overdue Open Case",
+        "description": "Open case has breached its effective target due date: 2026-06-24",
+        "severity": "Critical",
+        "recommended_action": "Expedite investigation and case resolution"
+      },
+      {
+        "employee_id": "ER005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Overdue Open Case",
+        "description": "Open case has breached its effective target due date: 2026-06-01",
+        "severity": "Critical",
+        "recommended_action": "Expedite investigation and case resolution"
+      },
+      {
+        "employee_id": "ER008",
+        "employee_name": "Youssef Mansour",
+        "issue_type": "Overdue Open Case",
+        "description": "Open case has breached its effective target due date: 2026-06-15",
+        "severity": "Critical",
+        "recommended_action": "Expedite investigation and case resolution"
+      },
+      {
+        "employee_id": "ER009",
+        "employee_name": "Ahmad Al-Sudairy",
+        "issue_type": "Overdue Open Case",
+        "description": "Open case has breached its effective target due date: 2026-06-12",
+        "severity": "Critical",
+        "recommended_action": "Expedite investigation and case resolution"
+      },
+      {
+        "employee_id": "ER010",
+        "employee_name": "Unknown Employee",
+        "issue_type": "Overdue Open Case",
+        "description": "Open case has breached its effective target due date: 2026-06-12",
+        "severity": "Critical",
+        "recommended_action": "Expedite investigation and case resolution"
+      },
+      {
+        "employee_id": "ER006",
+        "employee_name": "Sarah Jenkins",
+        "issue_type": "Missing Closure Date",
+        "description": "Case is status Closed but has no closed_date",
+        "severity": "Critical",
+        "recommended_action": "Fill closed_date in log"
+      },
+      {
+        "employee_id": "ER007",
+        "employee_name": "David Vance",
+        "issue_type": "Invalid Date Range",
+        "description": "Case closed_date (2026-06-05) is before created_date (2026-06-10)",
+        "severity": "Critical",
+        "recommended_action": "Correct date entries"
+      },
+      {
+        "employee_id": "ER009",
+        "employee_name": "Youssef Mansour",
+        "issue_type": "Inactive Case Owner",
+        "description": "Case investigator owner is classified as: Terminated Employee",
+        "severity": "Warning",
+        "recommended_action": "Reassign case owner to active employee"
+      },
+      {
+        "employee_id": "ER008",
+        "employee_name": "Youssef Mansour",
+        "issue_type": "Inactive Case Subject",
+        "description": "Case subject employee is classified as: Terminated Employee",
+        "severity": "Warning",
+        "recommended_action": "Check if case is archive or needs resolution closure"
+      },
+      {
+        "employee_id": "ER002",
+        "employee_name": "John Doe",
+        "issue_type": "Duplicate Case ID",
+        "description": "Case ID is logged more than once",
+        "severity": "Critical",
+        "recommended_action": "Deduplicate ER logs"
+      },
+      {
+        "employee_id": "ER002",
+        "employee_name": "John Doe",
+        "issue_type": "Duplicate Case ID",
+        "description": "Case ID is logged more than once",
+        "severity": "Critical",
+        "recommended_action": "Deduplicate ER logs"
+      },
+      {
+        "employee_id": "ER005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing Escalation Reason",
+        "description": "Case is flagged escalated but reason is blank",
+        "severity": "Warning",
+        "recommended_action": "Document reason for case escalation"
+      },
+      {
+        "employee_id": "ER005",
+        "employee_name": "Khalid Al-Ghamdi",
+        "issue_type": "Missing Legal Reference",
+        "description": "Labor case is missing court case number or reference log",
+        "severity": "Warning",
+        "recommended_action": "Enter legal case details"
+      }
+    ]
+  }
+}

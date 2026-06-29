@@ -1,0 +1,58 @@
+# HR Command Center - Real Data Ingestion Onboarding Gates
+# Sets structural check gates to transition from synthetic model to real data loads.
+
+gates:
+  - gate_id: 0
+    gate_name: "No Real Data Staging"
+    objective: "Operate purely on synthetic data to design interfaces, models, and API endpoints."
+    signoff_required_from: []
+    status: "Completed"
+    verification_artifacts:
+      - "synthetic_test_pipeline_run"
+      - "milestone_2h_regression_report"
+
+  - gate_id: 1
+    gate_name: "Source Inventory Registration"
+    objective: "Assign business/technical owners and define delivery channels for all incoming sources."
+    signoff_required_from: ["HR Director", "IT Director"]
+    status: "In Progress (Milestone 3A)"
+    verification_artifacts:
+      - "docs/SOURCE_SYSTEM_INVENTORY.md"
+      - "config/source_systems.yml"
+
+  - gate_id: 2
+    gate_name: "Field Mapping Approval"
+    objective: "Establish data contract mapping source columns to database columns."
+    signoff_required_from: ["HR Operations Lead", "Data Steward"]
+    status: "Pending"
+    verification_artifacts:
+      - "docs/REAL_DATA_FIELD_MAPPING.md"
+      - "config/real_data_mapping.yml"
+
+  - gate_id: 3
+    gate_name: "Privacy & Masking Rule Approval"
+    objective: "Classify all sensitive data fields and secure legal signoff on masking policies."
+    signoff_required_from: ["Legal Counsel", "Data Privacy Officer"]
+    status: "Pending"
+    verification_artifacts:
+      - "docs/PRIVACY_AND_MASKING_POLICY.md"
+      - "config/masking_rules.yml"
+
+  - gate_id: 4
+    gate_name: "Dry-Run Ingestion Validation"
+    objective: "Test the automated scripts using non-personal synthetic-like files to verify schema rules."
+    signoff_required_from: ["Technical Architect", "QA Engineer"]
+    status: "Pending"
+    verification_artifacts:
+      - "dry_run_validation_report"
+      - "quarantine_logs"
+
+  - gate_id: 5
+    gate_name: "Controlled Pilot Load Approval"
+    objective: "Authorize controlled real-data load of selected departments with encrypted storage and full audits."
+    signoff_required_from: ["CEO", "CIO", "HR VP"]
+    status: "Blocked"
+    verification_artifacts:
+      - "encryption_audit_keys"
+      - "penetration_test_signoff"
+      - "controlled_rollout_approval"

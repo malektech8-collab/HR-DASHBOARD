@@ -1,0 +1,2409 @@
+{
+  "overview": {
+    "active_headcount": 19,
+    "payroll_cost": 446175.0,
+    "attendance_compliance_pct": 0.14777327935222673,
+    "saudization_pct": 50.0,
+    "open_er_cases": 8,
+    "open_requisitions": 5,
+    "review_completion_pct": 84.21,
+    "total_active_exceptions": 667,
+    "modules_healthy": 0,
+    "last_data_refresh": "2026-06-28T15:58:47.640000",
+    "latest_source_business_date": "2026-06-26",
+    "data_quality_score": 0.90625
+  },
+  "module_health": {
+    "modules": [
+      {
+        "module_key": "executive",
+        "module_label": "Executive Summary",
+        "route_path": "/executive",
+        "owner_domain": "Executive",
+        "api_health_status": "Healthy",
+        "reconciliation_status": "Passed",
+        "required_marts_present": true,
+        "stale_flag": true,
+        "critical_exception_count": 0,
+        "warning_exception_count": 0,
+        "status": "Warning",
+        "primary_kpi_count": 8,
+        "screenshot_path": "docs/qa/screenshots/milestone_1_executive_summary.png",
+        "qa_report_path": "docs/qa/reports/executive_summary_qa_report.md"
+      },
+      {
+        "module_key": "data-quality",
+        "module_label": "Data Quality",
+        "route_path": "/data-quality",
+        "owner_domain": "Data Quality",
+        "api_health_status": "Healthy",
+        "reconciliation_status": "Passed",
+        "required_marts_present": true,
+        "stale_flag": false,
+        "critical_exception_count": 8,
+        "warning_exception_count": 7,
+        "status": "Critical",
+        "primary_kpi_count": 7,
+        "screenshot_path": "docs/qa/screenshots/milestone_1_data_quality.png",
+        "qa_report_path": "docs/qa/reports/qa_report.md"
+      },
+      {
+        "module_key": "workforce",
+        "module_label": "Workforce",
+        "route_path": "/workforce",
+        "owner_domain": "Workforce",
+        "api_health_status": "Healthy",
+        "reconciliation_status": "Passed",
+        "required_marts_present": true,
+        "stale_flag": false,
+        "critical_exception_count": 3,
+        "warning_exception_count": 22,
+        "status": "Critical",
+        "primary_kpi_count": 5,
+        "screenshot_path": "docs/qa/screenshots/milestone_2a_workforce_dashboard.png",
+        "qa_report_path": "docs/qa/reports/workforce_qa_report.md"
+      },
+      {
+        "module_key": "payroll",
+        "module_label": "Payroll & Cost",
+        "route_path": "/payroll",
+        "owner_domain": "Payroll",
+        "api_health_status": "Healthy",
+        "reconciliation_status": "Passed",
+        "required_marts_present": true,
+        "stale_flag": false,
+        "critical_exception_count": 4,
+        "warning_exception_count": 11,
+        "status": "Critical",
+        "primary_kpi_count": 5,
+        "screenshot_path": "docs/qa/screenshots/milestone_2b_payroll_dashboard.png",
+        "qa_report_path": "docs/qa/reports/milestone_2b_payroll_qa_report.md"
+      },
+      {
+        "module_key": "attendance",
+        "module_label": "Attendance",
+        "route_path": "/attendance",
+        "owner_domain": "Attendance",
+        "api_health_status": "Healthy",
+        "reconciliation_status": "Passed",
+        "required_marts_present": true,
+        "stale_flag": true,
+        "critical_exception_count": 8,
+        "warning_exception_count": 422,
+        "status": "Critical",
+        "primary_kpi_count": 5,
+        "screenshot_path": "docs/qa/screenshots/milestone_2c_attendance_dashboard.png",
+        "qa_report_path": "docs/qa/reports/milestone_2c_attendance_qa_report.md"
+      },
+      {
+        "module_key": "compliance",
+        "module_label": "Saudization & Compliance",
+        "route_path": "/compliance",
+        "owner_domain": "Compliance",
+        "api_health_status": "Healthy",
+        "reconciliation_status": "Passed",
+        "required_marts_present": true,
+        "stale_flag": false,
+        "critical_exception_count": 60,
+        "warning_exception_count": 49,
+        "status": "Critical",
+        "primary_kpi_count": 6,
+        "screenshot_path": "docs/qa/screenshots/milestone_2d_compliance_dashboard.png",
+        "qa_report_path": "docs/qa/reports/milestone_2d_compliance_qa_report.md"
+      },
+      {
+        "module_key": "er",
+        "module_label": "Employee Relations",
+        "route_path": "/er",
+        "owner_domain": "Employee Relations",
+        "api_health_status": "Healthy",
+        "reconciliation_status": "Passed",
+        "required_marts_present": true,
+        "stale_flag": false,
+        "critical_exception_count": 13,
+        "warning_exception_count": 7,
+        "status": "Critical",
+        "primary_kpi_count": 6,
+        "screenshot_path": "docs/qa/screenshots/milestone_2e_er_dashboard.png",
+        "qa_report_path": "docs/qa/reports/milestone_2e_er_qa_report.md"
+      },
+      {
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "route_path": "/recruitment",
+        "owner_domain": "Recruitment",
+        "api_health_status": "Healthy",
+        "reconciliation_status": "Passed",
+        "required_marts_present": true,
+        "stale_flag": false,
+        "critical_exception_count": 10,
+        "warning_exception_count": 15,
+        "status": "Critical",
+        "primary_kpi_count": 7,
+        "screenshot_path": "docs/qa/screenshots/milestone_2f_recruitment_dashboard.png",
+        "qa_report_path": "docs/qa/reports/milestone_2f_recruitment_qa_report.md"
+      },
+      {
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "route_path": "/talent",
+        "owner_domain": "Talent",
+        "api_health_status": "Healthy",
+        "reconciliation_status": "Passed",
+        "required_marts_present": true,
+        "stale_flag": false,
+        "critical_exception_count": 16,
+        "warning_exception_count": 12,
+        "status": "Critical",
+        "primary_kpi_count": 11,
+        "screenshot_path": "docs/qa/screenshots/milestone_2g_talent_dashboard.png",
+        "qa_report_path": "docs/qa/reports/milestone_2g_talent_qa_report.md"
+      }
+    ]
+  },
+  "priority_alerts": {
+    "alerts": [
+      {
+        "alert_id": "compliance_Missing WPS Record",
+        "module_key": "compliance",
+        "module_label": "Saudization & Compliance",
+        "severity": "Critical",
+        "issue_type": "Missing WPS Record",
+        "issue_count": 15,
+        "recommended_action": "Add employee to WPS payroll files",
+        "source_mart": "mart_compliance_exceptions",
+        "route_path": "/compliance"
+      },
+      {
+        "alert_id": "compliance_Insurance Inactive",
+        "module_key": "compliance",
+        "module_label": "Saudization & Compliance",
+        "severity": "Critical",
+        "issue_type": "Insurance Inactive",
+        "issue_count": 15,
+        "recommended_action": "Activate insurance profile in provider database",
+        "source_mart": "mart_compliance_exceptions",
+        "route_path": "/compliance"
+      },
+      {
+        "alert_id": "compliance_Missing Qiwa Contract",
+        "module_key": "compliance",
+        "module_label": "Saudization & Compliance",
+        "severity": "Critical",
+        "issue_type": "Missing Qiwa Contract",
+        "issue_count": 15,
+        "recommended_action": "Register digital contract in Qiwa portal",
+        "source_mart": "mart_compliance_exceptions",
+        "route_path": "/compliance"
+      },
+      {
+        "alert_id": "compliance_Missing GOSI Status Record",
+        "module_key": "compliance",
+        "module_label": "Saudization & Compliance",
+        "severity": "Critical",
+        "issue_type": "Missing GOSI Status Record",
+        "issue_count": 15,
+        "recommended_action": "Check GOSI enrollment status",
+        "source_mart": "mart_compliance_exceptions",
+        "route_path": "/compliance"
+      },
+      {
+        "alert_id": "er_Overdue Open Case",
+        "module_key": "er",
+        "module_label": "Employee Relations",
+        "severity": "Critical",
+        "issue_type": "Overdue Open Case",
+        "issue_count": 8,
+        "recommended_action": "Expedite investigation and case resolution",
+        "source_mart": "mart_er_exceptions",
+        "route_path": "/er"
+      },
+      {
+        "alert_id": "attendance_Overtime Hours Missing",
+        "module_key": "attendance",
+        "module_label": "Attendance",
+        "severity": "Critical",
+        "issue_type": "Overtime Hours Missing",
+        "issue_count": 7,
+        "recommended_action": "Investigate overtime validation or manual entry error",
+        "source_mart": "mart_attendance_exceptions",
+        "route_path": "/attendance"
+      },
+      {
+        "alert_id": "data-quality_Negative or Abnormal Payroll Value",
+        "module_key": "data-quality",
+        "module_label": "Data Quality",
+        "severity": "Critical",
+        "issue_type": "Negative or Abnormal Payroll Value",
+        "issue_count": 3,
+        "recommended_action": "Review monthly payroll worksheet calculations for adjustments",
+        "source_mart": "mart_data_quality_exceptions",
+        "route_path": "/data-quality"
+      },
+      {
+        "alert_id": "talent_Successor Linked to Unknown Employee",
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Successor Linked to Unknown Employee",
+        "issue_count": 2,
+        "recommended_action": "Correct successor_employee_id in succession plan",
+        "source_mart": "mart_talent_exceptions",
+        "route_path": "/talent"
+      },
+      {
+        "alert_id": "recruitment_Duplicate Requisition ID",
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Critical",
+        "issue_type": "Duplicate Requisition ID",
+        "issue_count": 2,
+        "recommended_action": "Deduplicate requisition records",
+        "source_mart": "mart_recruitment_exceptions",
+        "route_path": "/recruitment"
+      },
+      {
+        "alert_id": "workforce_Duplicate Employee ID",
+        "module_key": "workforce",
+        "module_label": "Workforce",
+        "severity": "Critical",
+        "issue_type": "Duplicate Employee ID",
+        "issue_count": 2,
+        "recommended_action": "Merge or delete duplicate employee record in ERP",
+        "source_mart": "mart_workforce_exceptions",
+        "route_path": "/workforce"
+      },
+      {
+        "alert_id": "talent_Duplicate Performance Review ID",
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Duplicate Performance Review ID",
+        "issue_count": 2,
+        "recommended_action": "Deduplicate performance review records",
+        "source_mart": "mart_talent_exceptions",
+        "route_path": "/talent"
+      },
+      {
+        "alert_id": "recruitment_Duplicate Candidate ID",
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Critical",
+        "issue_type": "Duplicate Candidate ID",
+        "issue_count": 2,
+        "recommended_action": "Deduplicate candidate records",
+        "source_mart": "mart_recruitment_exceptions",
+        "route_path": "/recruitment"
+      },
+      {
+        "alert_id": "er_Duplicate Case ID",
+        "module_key": "er",
+        "module_label": "Employee Relations",
+        "severity": "Critical",
+        "issue_type": "Duplicate Case ID",
+        "issue_count": 2,
+        "recommended_action": "Deduplicate ER logs",
+        "source_mart": "mart_er_exceptions",
+        "route_path": "/er"
+      },
+      {
+        "alert_id": "data-quality_Inactive Employee with Payroll Record",
+        "module_key": "data-quality",
+        "module_label": "Data Quality",
+        "severity": "Critical",
+        "issue_type": "Inactive Employee with Payroll Record",
+        "issue_count": 2,
+        "recommended_action": "Hold payroll run and check termination status/period logic",
+        "source_mart": "mart_data_quality_exceptions",
+        "route_path": "/data-quality"
+      },
+      {
+        "alert_id": "recruitment_Invalid Vacancy Quantity",
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Critical",
+        "issue_type": "Invalid Vacancy Quantity",
+        "issue_count": 1,
+        "recommended_action": "Enter positive quantity",
+        "source_mart": "mart_recruitment_exceptions",
+        "route_path": "/recruitment"
+      },
+      {
+        "alert_id": "recruitment_Offer Missing Salary",
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Critical",
+        "issue_type": "Offer Missing Salary",
+        "issue_count": 1,
+        "recommended_action": "Enter base salary details",
+        "source_mart": "mart_recruitment_exceptions",
+        "route_path": "/recruitment"
+      },
+      {
+        "alert_id": "talent_Talent Review Missing Potential Rating",
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Talent Review Missing Potential Rating",
+        "issue_count": 1,
+        "recommended_action": "Enter potential rating on talent review record",
+        "source_mart": "mart_talent_exceptions",
+        "route_path": "/talent"
+      },
+      {
+        "alert_id": "workforce_Inactive Employee Payroll",
+        "module_key": "workforce",
+        "module_label": "Workforce",
+        "severity": "Critical",
+        "issue_type": "Inactive Employee Payroll",
+        "issue_count": 1,
+        "recommended_action": "Hold payroll run and check termination status/period logic",
+        "source_mart": "mart_workforce_exceptions",
+        "route_path": "/workforce"
+      },
+      {
+        "alert_id": "talent_Competency Linked to Unknown Employee",
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Competency Linked to Unknown Employee",
+        "issue_count": 1,
+        "recommended_action": "Correct employee_id on competency assessment",
+        "source_mart": "mart_talent_exceptions",
+        "route_path": "/talent"
+      },
+      {
+        "alert_id": "talent_Goal Linked to Unknown Employee",
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Goal Linked to Unknown Employee",
+        "issue_count": 1,
+        "recommended_action": "Correct employee_id on goal record",
+        "source_mart": "mart_talent_exceptions",
+        "route_path": "/talent"
+      },
+      {
+        "alert_id": "er_Missing Closure Date",
+        "module_key": "er",
+        "module_label": "Employee Relations",
+        "severity": "Critical",
+        "issue_type": "Missing Closure Date",
+        "issue_count": 1,
+        "recommended_action": "Fill closed_date in log",
+        "source_mart": "mart_er_exceptions",
+        "route_path": "/er"
+      },
+      {
+        "alert_id": "er_Invalid Date Range",
+        "module_key": "er",
+        "module_label": "Employee Relations",
+        "severity": "Critical",
+        "issue_type": "Invalid Date Range",
+        "issue_count": 1,
+        "recommended_action": "Correct date entries",
+        "source_mart": "mart_er_exceptions",
+        "route_path": "/er"
+      },
+      {
+        "alert_id": "talent_Training Hours Missing or Invalid",
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Training Hours Missing or Invalid",
+        "issue_count": 1,
+        "recommended_action": "Enter valid positive training hours for this course",
+        "source_mart": "mart_talent_exceptions",
+        "route_path": "/talent"
+      },
+      {
+        "alert_id": "data-quality_Active Employee with Missing Salary",
+        "module_key": "data-quality",
+        "module_label": "Data Quality",
+        "severity": "Critical",
+        "issue_type": "Active Employee with Missing Salary",
+        "issue_count": 1,
+        "recommended_action": "Input basic salary details in contract record",
+        "source_mart": "mart_data_quality_exceptions",
+        "route_path": "/data-quality"
+      },
+      {
+        "alert_id": "talent_Enrollment Linked to Unknown Employee",
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Enrollment Linked to Unknown Employee",
+        "issue_count": 1,
+        "recommended_action": "Correct employee_id on enrollment record",
+        "source_mart": "mart_talent_exceptions",
+        "route_path": "/talent"
+      },
+      {
+        "alert_id": "talent_Rating Outside Allowed Range",
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Rating Outside Allowed Range",
+        "issue_count": 1,
+        "recommended_action": "Correct rating to within 1.0\u20135.0 scale",
+        "source_mart": "mart_talent_exceptions",
+        "route_path": "/talent"
+      },
+      {
+        "alert_id": "payroll_Payroll Component Mismatch",
+        "module_key": "payroll",
+        "module_label": "Payroll & Cost",
+        "severity": "Critical",
+        "issue_type": "Payroll Component Mismatch",
+        "issue_count": 1,
+        "recommended_action": "Recalculate gross salary components",
+        "source_mart": "mart_payroll_exceptions",
+        "route_path": "/payroll"
+      },
+      {
+        "alert_id": "payroll_Negative Gross Pay",
+        "module_key": "payroll",
+        "module_label": "Payroll & Cost",
+        "severity": "Critical",
+        "issue_type": "Negative Gross Pay",
+        "issue_count": 1,
+        "recommended_action": "Correct payroll calculation",
+        "source_mart": "mart_payroll_exceptions",
+        "route_path": "/payroll"
+      },
+      {
+        "alert_id": "recruitment_Onboarding Not Triggered",
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Critical",
+        "issue_type": "Onboarding Not Triggered",
+        "issue_count": 1,
+        "recommended_action": "Create onboarding record",
+        "source_mart": "mart_recruitment_exceptions",
+        "route_path": "/recruitment"
+      },
+      {
+        "alert_id": "recruitment_Missing Recruiter",
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Critical",
+        "issue_type": "Missing Recruiter",
+        "issue_count": 1,
+        "recommended_action": "Assign a recruiter",
+        "source_mart": "mart_recruitment_exceptions",
+        "route_path": "/recruitment"
+      },
+      {
+        "alert_id": "talent_Review Missing Reviewer",
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Review Missing Reviewer",
+        "issue_count": 1,
+        "recommended_action": "Assign a reviewer before finalizing review",
+        "source_mart": "mart_talent_exceptions",
+        "route_path": "/talent"
+      },
+      {
+        "alert_id": "talent_Review Linked to Unknown Employee",
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Review Linked to Unknown Employee",
+        "issue_count": 1,
+        "recommended_action": "Correct employee_id on review record",
+        "source_mart": "mart_talent_exceptions",
+        "route_path": "/talent"
+      },
+      {
+        "alert_id": "er_Missing Target Due Date",
+        "module_key": "er",
+        "module_label": "Employee Relations",
+        "severity": "Critical",
+        "issue_type": "Missing Target Due Date",
+        "issue_count": 1,
+        "recommended_action": "Set target due date based on SLA rules",
+        "source_mart": "mart_er_exceptions",
+        "route_path": "/er"
+      },
+      {
+        "alert_id": "attendance_Overtime Amount Missing",
+        "module_key": "attendance",
+        "module_label": "Attendance",
+        "severity": "Critical",
+        "issue_type": "Overtime Amount Missing",
+        "issue_count": 1,
+        "recommended_action": "Process overtime payment in monthly payroll",
+        "source_mart": "mart_attendance_exceptions",
+        "route_path": "/attendance"
+      },
+      {
+        "alert_id": "talent_Review Completed Without Rating",
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Review Completed Without Rating",
+        "issue_count": 1,
+        "recommended_action": "Enter rating before marking review Completed",
+        "source_mart": "mart_talent_exceptions",
+        "route_path": "/talent"
+      },
+      {
+        "alert_id": "talent_Training Completed Without Date",
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Training Completed Without Date",
+        "issue_count": 1,
+        "recommended_action": "Set completion_date on completed enrollment",
+        "source_mart": "mart_talent_exceptions",
+        "route_path": "/talent"
+      },
+      {
+        "alert_id": "talent_Competency Score Outside Range",
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Competency Score Outside Range",
+        "issue_count": 1,
+        "recommended_action": "Correct competency scores to 1.0\u20135.0 range",
+        "source_mart": "mart_talent_exceptions",
+        "route_path": "/talent"
+      },
+      {
+        "alert_id": "data-quality_Duplicate Employee ID",
+        "module_key": "data-quality",
+        "module_label": "Data Quality",
+        "severity": "Critical",
+        "issue_type": "Duplicate Employee ID",
+        "issue_count": 1,
+        "recommended_action": "Merge or delete duplicate employee record in ERP",
+        "source_mart": "mart_data_quality_exceptions",
+        "route_path": "/data-quality"
+      },
+      {
+        "alert_id": "payroll_Negative Net Pay",
+        "module_key": "payroll",
+        "module_label": "Payroll & Cost",
+        "severity": "Critical",
+        "issue_type": "Negative Net Pay",
+        "issue_count": 1,
+        "recommended_action": "Correct payroll deductions",
+        "source_mart": "mart_payroll_exceptions",
+        "route_path": "/payroll"
+      },
+      {
+        "alert_id": "payroll_Inactive Employee Payroll",
+        "module_key": "payroll",
+        "module_label": "Payroll & Cost",
+        "severity": "Critical",
+        "issue_type": "Inactive Employee Payroll",
+        "issue_count": 1,
+        "recommended_action": "Hold payroll and verify termination status",
+        "source_mart": "mart_payroll_exceptions",
+        "route_path": "/payroll"
+      },
+      {
+        "alert_id": "data-quality_Abnormal Payroll Value",
+        "module_key": "data-quality",
+        "module_label": "Data Quality",
+        "severity": "Critical",
+        "issue_type": "Abnormal Payroll Value",
+        "issue_count": 1,
+        "recommended_action": "Review contract salary figures for input errors",
+        "source_mart": "mart_data_quality_exceptions",
+        "route_path": "/data-quality"
+      },
+      {
+        "alert_id": "recruitment_Overdue Requisition",
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Critical",
+        "issue_type": "Overdue Requisition",
+        "issue_count": 1,
+        "recommended_action": "Expedite sourcing and pipeline conversions",
+        "source_mart": "mart_recruitment_exceptions",
+        "route_path": "/recruitment"
+      },
+      {
+        "alert_id": "talent_Successor Readiness Missing",
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Successor Readiness Missing",
+        "issue_count": 1,
+        "recommended_action": "Set readiness status for this successor nomination",
+        "source_mart": "mart_talent_exceptions",
+        "route_path": "/talent"
+      },
+      {
+        "alert_id": "recruitment_Unknown Requisition Link",
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Critical",
+        "issue_type": "Unknown Requisition Link",
+        "issue_count": 1,
+        "recommended_action": "Link candidate to active requisition",
+        "source_mart": "mart_recruitment_exceptions",
+        "route_path": "/recruitment"
+      },
+      {
+        "alert_id": "attendance_Missing Workday Attendance",
+        "module_key": "attendance",
+        "module_label": "Attendance",
+        "severity": "Warning",
+        "issue_type": "Missing Workday Attendance",
+        "issue_count": 418,
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch",
+        "source_mart": "mart_attendance_exceptions",
+        "route_path": "/attendance"
+      },
+      {
+        "alert_id": "compliance_Occupation Mismatch",
+        "module_key": "compliance",
+        "module_label": "Saudization & Compliance",
+        "severity": "Warning",
+        "issue_type": "Occupation Mismatch",
+        "issue_count": 16,
+        "recommended_action": "Correct occupational designation code in Qiwa portal",
+        "source_mart": "mart_compliance_exceptions",
+        "route_path": "/compliance"
+      },
+      {
+        "alert_id": "compliance_Missing Salary Info",
+        "module_key": "compliance",
+        "module_label": "Saudization & Compliance",
+        "severity": "Warning",
+        "issue_type": "Missing Salary Info",
+        "issue_count": 15,
+        "recommended_action": "Update salary values in GOSI/payroll database",
+        "source_mart": "mart_compliance_exceptions",
+        "route_path": "/compliance"
+      },
+      {
+        "alert_id": "workforce_Missing Contract End Date",
+        "module_key": "workforce",
+        "module_label": "Workforce",
+        "severity": "Warning",
+        "issue_type": "Missing Contract End Date",
+        "issue_count": 10,
+        "recommended_action": "Update contract records with end date",
+        "source_mart": "mart_workforce_exceptions",
+        "route_path": "/workforce"
+      },
+      {
+        "alert_id": "compliance_Missing Work Permit Expiry Date",
+        "module_key": "compliance",
+        "module_label": "Saudization & Compliance",
+        "severity": "Warning",
+        "issue_type": "Missing Work Permit Expiry Date",
+        "issue_count": 7,
+        "recommended_action": "Update compliance records with Work Permit expiry date",
+        "source_mart": "mart_compliance_exceptions",
+        "route_path": "/compliance"
+      },
+      {
+        "alert_id": "compliance_Missing Iqama Expiry Date",
+        "module_key": "compliance",
+        "module_label": "Saudization & Compliance",
+        "severity": "Warning",
+        "issue_type": "Missing Iqama Expiry Date",
+        "issue_count": 7,
+        "recommended_action": "Update compliance records with Iqama expiry date",
+        "source_mart": "mart_compliance_exceptions",
+        "route_path": "/compliance"
+      },
+      {
+        "alert_id": "workforce_Missing Iqama Expiry Date",
+        "module_key": "workforce",
+        "module_label": "Workforce",
+        "severity": "Warning",
+        "issue_type": "Missing Iqama Expiry Date",
+        "issue_count": 7,
+        "recommended_action": "Update compliance records with Iqama expiry date",
+        "source_mart": "mart_workforce_exceptions",
+        "route_path": "/workforce"
+      },
+      {
+        "alert_id": "payroll_Overtime Cost Without Hours",
+        "module_key": "payroll",
+        "module_label": "Payroll & Cost",
+        "severity": "Warning",
+        "issue_type": "Overtime Cost Without Hours",
+        "issue_count": 7,
+        "recommended_action": "Verify attendance punches and overtime logs",
+        "source_mart": "mart_payroll_exceptions",
+        "route_path": "/payroll"
+      },
+      {
+        "alert_id": "recruitment_Plan Unfulfilled",
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Warning",
+        "issue_type": "Plan Unfulfilled",
+        "issue_count": 4,
+        "recommended_action": "Expedite hiring pipeline",
+        "source_mart": "mart_recruitment_exceptions",
+        "route_path": "/recruitment"
+      },
+      {
+        "alert_id": "recruitment_Empty Candidate Pipeline",
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Warning",
+        "issue_type": "Empty Candidate Pipeline",
+        "issue_count": 3,
+        "recommended_action": "Source and link candidates to requisition",
+        "source_mart": "mart_recruitment_exceptions",
+        "route_path": "/recruitment"
+      },
+      {
+        "alert_id": "talent_Missing Performance Review",
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Warning",
+        "issue_type": "Missing Performance Review",
+        "issue_count": 3,
+        "recommended_action": "Assign and complete a performance review",
+        "source_mart": "mart_talent_exceptions",
+        "route_path": "/talent"
+      },
+      {
+        "alert_id": "payroll_Missing Cost Center",
+        "module_key": "payroll",
+        "module_label": "Payroll & Cost",
+        "severity": "Warning",
+        "issue_type": "Missing Cost Center",
+        "issue_count": 2,
+        "recommended_action": "Assign cost center in profile",
+        "source_mart": "mart_payroll_exceptions",
+        "route_path": "/payroll"
+      },
+      {
+        "alert_id": "talent_Duplicate Skill Record",
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Warning",
+        "issue_type": "Duplicate Skill Record",
+        "issue_count": 2,
+        "recommended_action": "Deduplicate employee skill records",
+        "source_mart": "mart_talent_exceptions",
+        "route_path": "/talent"
+      },
+      {
+        "alert_id": "er_Missing Project",
+        "module_key": "er",
+        "module_label": "Employee Relations",
+        "severity": "Warning",
+        "issue_type": "Missing Project",
+        "issue_count": 2,
+        "recommended_action": "Update subject employee project assignment",
+        "source_mart": "mart_er_exceptions",
+        "route_path": "/er"
+      },
+      {
+        "alert_id": "data-quality_Missing Manager",
+        "module_key": "data-quality",
+        "module_label": "Data Quality",
+        "severity": "Warning",
+        "issue_type": "Missing Manager",
+        "issue_count": 2,
+        "recommended_action": "Assign supervisor/manager in employee profile",
+        "source_mart": "mart_data_quality_exceptions",
+        "route_path": "/data-quality"
+      },
+      {
+        "alert_id": "workforce_Missing Manager",
+        "module_key": "workforce",
+        "module_label": "Workforce",
+        "severity": "Warning",
+        "issue_type": "Missing Manager",
+        "issue_count": 2,
+        "recommended_action": "Assign supervisor/manager in employee profile",
+        "source_mart": "mart_workforce_exceptions",
+        "route_path": "/workforce"
+      },
+      {
+        "alert_id": "payroll_Missing Project",
+        "module_key": "payroll",
+        "module_label": "Payroll & Cost",
+        "severity": "Warning",
+        "issue_type": "Missing Project",
+        "issue_count": 2,
+        "recommended_action": "Assign project to employee",
+        "source_mart": "mart_payroll_exceptions",
+        "route_path": "/payroll"
+      },
+      {
+        "alert_id": "er_Missing Escalation Reason",
+        "module_key": "er",
+        "module_label": "Employee Relations",
+        "severity": "Warning",
+        "issue_type": "Missing Escalation Reason",
+        "issue_count": 1,
+        "recommended_action": "Document reason for case escalation",
+        "source_mart": "mart_er_exceptions",
+        "route_path": "/er"
+      },
+      {
+        "alert_id": "data-quality_HR Request Breaching SLA",
+        "module_key": "data-quality",
+        "module_label": "Data Quality",
+        "severity": "Warning",
+        "issue_type": "HR Request Breaching SLA",
+        "issue_count": 1,
+        "recommended_action": "Escalate request status and allocate to alternate agent",
+        "source_mart": "mart_data_quality_exceptions",
+        "route_path": "/data-quality"
+      },
+      {
+        "alert_id": "recruitment_Missing Interview Date",
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Warning",
+        "issue_type": "Missing Interview Date",
+        "issue_count": 1,
+        "recommended_action": "Set scheduled interview timestamp",
+        "source_mart": "mart_recruitment_exceptions",
+        "route_path": "/recruitment"
+      },
+      {
+        "alert_id": "recruitment_Unknown Source Channel",
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Warning",
+        "issue_type": "Unknown Source Channel",
+        "issue_count": 1,
+        "recommended_action": "Update to standard channel",
+        "source_mart": "mart_recruitment_exceptions",
+        "route_path": "/recruitment"
+      },
+      {
+        "alert_id": "compliance_Contract Not Authenticated",
+        "module_key": "compliance",
+        "module_label": "Saudization & Compliance",
+        "severity": "Warning",
+        "issue_type": "Contract Not Authenticated",
+        "issue_count": 1,
+        "recommended_action": "Request employee to log into Qiwa and approve contract",
+        "source_mart": "mart_compliance_exceptions",
+        "route_path": "/compliance"
+      },
+      {
+        "alert_id": "talent_Learning Course Missing Category",
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Warning",
+        "issue_type": "Learning Course Missing Category",
+        "issue_count": 1,
+        "recommended_action": "Assign a category to this training course",
+        "source_mart": "mart_talent_exceptions",
+        "route_path": "/talent"
+      },
+      {
+        "alert_id": "recruitment_Missing Plan Dimension",
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Warning",
+        "issue_type": "Missing Plan Dimension",
+        "issue_count": 1,
+        "recommended_action": "Specify project and department details",
+        "source_mart": "mart_recruitment_exceptions",
+        "route_path": "/recruitment"
+      },
+      {
+        "alert_id": "talent_Goal Missing Status",
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Warning",
+        "issue_type": "Goal Missing Status",
+        "issue_count": 1,
+        "recommended_action": "Set goal status (Completed/In Progress/Overdue etc.)",
+        "source_mart": "mart_talent_exceptions",
+        "route_path": "/talent"
+      },
+      {
+        "alert_id": "talent_Critical Role Missing Successor",
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Warning",
+        "issue_type": "Critical Role Missing Successor",
+        "issue_count": 1,
+        "recommended_action": "Nominate a successor for this critical role",
+        "source_mart": "mart_talent_exceptions",
+        "route_path": "/talent"
+      },
+      {
+        "alert_id": "er_Missing Legal Reference",
+        "module_key": "er",
+        "module_label": "Employee Relations",
+        "severity": "Warning",
+        "issue_type": "Missing Legal Reference",
+        "issue_count": 1,
+        "recommended_action": "Enter legal case details",
+        "source_mart": "mart_er_exceptions",
+        "route_path": "/er"
+      },
+      {
+        "alert_id": "data-quality_Missing Cost Center",
+        "module_key": "data-quality",
+        "module_label": "Data Quality",
+        "severity": "Warning",
+        "issue_type": "Missing Cost Center",
+        "issue_count": 1,
+        "recommended_action": "Assign financial cost center code in master profile",
+        "source_mart": "mart_data_quality_exceptions",
+        "route_path": "/data-quality"
+      },
+      {
+        "alert_id": "data-quality_Attendance Record with Missing Punch",
+        "module_key": "data-quality",
+        "module_label": "Data Quality",
+        "severity": "Warning",
+        "issue_type": "Attendance Record with Missing Punch",
+        "issue_count": 1,
+        "recommended_action": "Request employee punch reconciliation or supervisor approval",
+        "source_mart": "mart_data_quality_exceptions",
+        "route_path": "/data-quality"
+      },
+      {
+        "alert_id": "workforce_Missing Cost Center",
+        "module_key": "workforce",
+        "module_label": "Workforce",
+        "severity": "Warning",
+        "issue_type": "Missing Cost Center",
+        "issue_count": 1,
+        "recommended_action": "Assign financial cost center code in master profile",
+        "source_mart": "mart_workforce_exceptions",
+        "route_path": "/workforce"
+      },
+      {
+        "alert_id": "recruitment_Missing Pipeline Stage",
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Warning",
+        "issue_type": "Missing Pipeline Stage",
+        "issue_count": 1,
+        "recommended_action": "Assign current pipeline stage",
+        "source_mart": "mart_recruitment_exceptions",
+        "route_path": "/recruitment"
+      },
+      {
+        "alert_id": "er_Inactive Case Subject",
+        "module_key": "er",
+        "module_label": "Employee Relations",
+        "severity": "Warning",
+        "issue_type": "Inactive Case Subject",
+        "issue_count": 1,
+        "recommended_action": "Check if case is archive or needs resolution closure",
+        "source_mart": "mart_er_exceptions",
+        "route_path": "/er"
+      },
+      {
+        "alert_id": "talent_High Performer With High Flight Risk",
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Warning",
+        "issue_type": "High Performer With High Flight Risk",
+        "issue_count": 1,
+        "recommended_action": "Engage retention measures for this high-performer",
+        "source_mart": "mart_talent_exceptions",
+        "route_path": "/talent"
+      },
+      {
+        "alert_id": "talent_Goal Overdue",
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Warning",
+        "issue_type": "Goal Overdue",
+        "issue_count": 1,
+        "recommended_action": "Resolve or update overdue goal",
+        "source_mart": "mart_talent_exceptions",
+        "route_path": "/talent"
+      },
+      {
+        "alert_id": "attendance_Source Late Minutes Mismatch",
+        "module_key": "attendance",
+        "module_label": "Attendance",
+        "severity": "Warning",
+        "issue_type": "Source Late Minutes Mismatch",
+        "issue_count": 1,
+        "recommended_action": "Verify source system lateness logic and parameters",
+        "source_mart": "mart_attendance_exceptions",
+        "route_path": "/attendance"
+      },
+      {
+        "alert_id": "recruitment_Unknown Employee ID",
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Warning",
+        "issue_type": "Unknown Employee ID",
+        "issue_count": 1,
+        "recommended_action": "Verify active employee ID and link",
+        "source_mart": "mart_recruitment_exceptions",
+        "route_path": "/recruitment"
+      },
+      {
+        "alert_id": "data-quality_Missing Nationality",
+        "module_key": "data-quality",
+        "module_label": "Data Quality",
+        "severity": "Warning",
+        "issue_type": "Missing Nationality",
+        "issue_count": 1,
+        "recommended_action": "Update nationality field in employee record",
+        "source_mart": "mart_data_quality_exceptions",
+        "route_path": "/data-quality"
+      },
+      {
+        "alert_id": "workforce_Missing Nationality",
+        "module_key": "workforce",
+        "module_label": "Workforce",
+        "severity": "Warning",
+        "issue_type": "Missing Nationality",
+        "issue_count": 1,
+        "recommended_action": "Update nationality field in employee record",
+        "source_mart": "mart_workforce_exceptions",
+        "route_path": "/workforce"
+      },
+      {
+        "alert_id": "compliance_Missing Nationality",
+        "module_key": "compliance",
+        "module_label": "Saudization & Compliance",
+        "severity": "Warning",
+        "issue_type": "Missing Nationality",
+        "issue_count": 1,
+        "recommended_action": "Update employee nationality records in master file",
+        "source_mart": "mart_compliance_exceptions",
+        "route_path": "/compliance"
+      },
+      {
+        "alert_id": "recruitment_Missing Target Hire Date",
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Warning",
+        "issue_type": "Missing Target Hire Date",
+        "issue_count": 1,
+        "recommended_action": "Provide target hire date",
+        "source_mart": "mart_recruitment_exceptions",
+        "route_path": "/recruitment"
+      },
+      {
+        "alert_id": "attendance_Source Net Late Minutes Mismatch",
+        "module_key": "attendance",
+        "module_label": "Attendance",
+        "severity": "Warning",
+        "issue_type": "Source Net Late Minutes Mismatch",
+        "issue_count": 1,
+        "recommended_action": "Verify source system net lateness calculations",
+        "source_mart": "mart_attendance_exceptions",
+        "route_path": "/attendance"
+      },
+      {
+        "alert_id": "attendance_One Punch Only",
+        "module_key": "attendance",
+        "module_label": "Attendance",
+        "severity": "Warning",
+        "issue_type": "One Punch Only",
+        "issue_count": 1,
+        "recommended_action": "Reconcile check-in or check-out time",
+        "source_mart": "mart_attendance_exceptions",
+        "route_path": "/attendance"
+      },
+      {
+        "alert_id": "er_Inactive Case Owner",
+        "module_key": "er",
+        "module_label": "Employee Relations",
+        "severity": "Warning",
+        "issue_type": "Inactive Case Owner",
+        "issue_count": 1,
+        "recommended_action": "Reassign case owner to active employee",
+        "source_mart": "mart_er_exceptions",
+        "route_path": "/er"
+      },
+      {
+        "alert_id": "data-quality_Missing Project",
+        "module_key": "data-quality",
+        "module_label": "Data Quality",
+        "severity": "Warning",
+        "issue_type": "Missing Project",
+        "issue_count": 1,
+        "recommended_action": "Assign cost project code in master profile",
+        "source_mart": "mart_data_quality_exceptions",
+        "route_path": "/data-quality"
+      },
+      {
+        "alert_id": "talent_Career Path Missing Next Role",
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Warning",
+        "issue_type": "Career Path Missing Next Role",
+        "issue_count": 1,
+        "recommended_action": "Define the next_role for this career path entry",
+        "source_mart": "mart_talent_exceptions",
+        "route_path": "/talent"
+      },
+      {
+        "alert_id": "workforce_Missing Project",
+        "module_key": "workforce",
+        "module_label": "Workforce",
+        "severity": "Warning",
+        "issue_type": "Missing Project",
+        "issue_count": 1,
+        "recommended_action": "Assign cost project code in master profile",
+        "source_mart": "mart_workforce_exceptions",
+        "route_path": "/workforce"
+      },
+      {
+        "alert_id": "compliance_Missing Cost Center assignment",
+        "module_key": "compliance",
+        "module_label": "Saudization & Compliance",
+        "severity": "Warning",
+        "issue_type": "Missing Cost Center assignment",
+        "issue_count": 1,
+        "recommended_action": "Update cost center in master file",
+        "source_mart": "mart_compliance_exceptions",
+        "route_path": "/compliance"
+      },
+      {
+        "alert_id": "recruitment_Missing Interviewer",
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Warning",
+        "issue_type": "Missing Interviewer",
+        "issue_count": 1,
+        "recommended_action": "Assign interviewer employee ID",
+        "source_mart": "mart_recruitment_exceptions",
+        "route_path": "/recruitment"
+      },
+      {
+        "alert_id": "talent_Successor Assigned to Inactive Employee",
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Warning",
+        "issue_type": "Successor Assigned to Inactive Employee",
+        "issue_count": 1,
+        "recommended_action": "Reassign succession to an active employee",
+        "source_mart": "mart_talent_exceptions",
+        "route_path": "/talent"
+      },
+      {
+        "alert_id": "compliance_Missing Project assignment",
+        "module_key": "compliance",
+        "module_label": "Saudization & Compliance",
+        "severity": "Warning",
+        "issue_type": "Missing Project assignment",
+        "issue_count": 1,
+        "recommended_action": "Update project mapping in master file",
+        "source_mart": "mart_compliance_exceptions",
+        "route_path": "/compliance"
+      },
+      {
+        "alert_id": "attendance_Missing Check-out",
+        "module_key": "attendance",
+        "module_label": "Attendance",
+        "severity": "Warning",
+        "issue_type": "Missing Check-out",
+        "issue_count": 1,
+        "recommended_action": "Request employee to provide check-out time",
+        "source_mart": "mart_attendance_exceptions",
+        "route_path": "/attendance"
+      },
+      {
+        "alert_id": "recruitment_Plan Exceeded",
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Warning",
+        "issue_type": "Plan Exceeded",
+        "issue_count": 1,
+        "recommended_action": "Review project hiring plan",
+        "source_mart": "mart_recruitment_exceptions",
+        "route_path": "/recruitment"
+      },
+      {
+        "alert_id": "er_Missing Department",
+        "module_key": "er",
+        "module_label": "Employee Relations",
+        "severity": "Warning",
+        "issue_type": "Missing Department",
+        "issue_count": 1,
+        "recommended_action": "Update subject employee department assignment",
+        "source_mart": "mart_er_exceptions",
+        "route_path": "/er"
+      }
+    ]
+  },
+  "exceptions": {
+    "exceptions": [
+      {
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Critical",
+        "issue_type": "Invalid Vacancy Quantity",
+        "exception_count": 1,
+        "recommended_action": "Enter positive quantity",
+        "route_path": "/recruitment"
+      },
+      {
+        "module_key": "compliance",
+        "module_label": "Saudization & Compliance",
+        "severity": "Critical",
+        "issue_type": "Missing WPS Record",
+        "exception_count": 15,
+        "recommended_action": "Add employee to WPS payroll files",
+        "route_path": "/compliance"
+      },
+      {
+        "module_key": "compliance",
+        "module_label": "Saudization & Compliance",
+        "severity": "Warning",
+        "issue_type": "Occupation Mismatch",
+        "exception_count": 16,
+        "recommended_action": "Correct occupational designation code in Qiwa portal",
+        "route_path": "/compliance"
+      },
+      {
+        "module_key": "compliance",
+        "module_label": "Saudization & Compliance",
+        "severity": "Warning",
+        "issue_type": "Missing Salary Info",
+        "exception_count": 15,
+        "recommended_action": "Update salary values in GOSI/payroll database",
+        "route_path": "/compliance"
+      },
+      {
+        "module_key": "compliance",
+        "module_label": "Saudization & Compliance",
+        "severity": "Critical",
+        "issue_type": "Insurance Inactive",
+        "exception_count": 15,
+        "recommended_action": "Activate insurance profile in provider database",
+        "route_path": "/compliance"
+      },
+      {
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Critical",
+        "issue_type": "Offer Missing Salary",
+        "exception_count": 1,
+        "recommended_action": "Enter base salary details",
+        "route_path": "/recruitment"
+      },
+      {
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Talent Review Missing Potential Rating",
+        "exception_count": 1,
+        "recommended_action": "Enter potential rating on talent review record",
+        "route_path": "/talent"
+      },
+      {
+        "module_key": "workforce",
+        "module_label": "Workforce",
+        "severity": "Critical",
+        "issue_type": "Inactive Employee Payroll",
+        "exception_count": 1,
+        "recommended_action": "Hold payroll run and check termination status/period logic",
+        "route_path": "/workforce"
+      },
+      {
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Competency Linked to Unknown Employee",
+        "exception_count": 1,
+        "recommended_action": "Correct employee_id on competency assessment",
+        "route_path": "/talent"
+      },
+      {
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Goal Linked to Unknown Employee",
+        "exception_count": 1,
+        "recommended_action": "Correct employee_id on goal record",
+        "route_path": "/talent"
+      },
+      {
+        "module_key": "payroll",
+        "module_label": "Payroll & Cost",
+        "severity": "Warning",
+        "issue_type": "Missing Cost Center",
+        "exception_count": 2,
+        "recommended_action": "Assign cost center in profile",
+        "route_path": "/payroll"
+      },
+      {
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Successor Linked to Unknown Employee",
+        "exception_count": 2,
+        "recommended_action": "Correct successor_employee_id in succession plan",
+        "route_path": "/talent"
+      },
+      {
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Critical",
+        "issue_type": "Duplicate Requisition ID",
+        "exception_count": 2,
+        "recommended_action": "Deduplicate requisition records",
+        "route_path": "/recruitment"
+      },
+      {
+        "module_key": "er",
+        "module_label": "Employee Relations",
+        "severity": "Critical",
+        "issue_type": "Missing Closure Date",
+        "exception_count": 1,
+        "recommended_action": "Fill closed_date in log",
+        "route_path": "/er"
+      },
+      {
+        "module_key": "er",
+        "module_label": "Employee Relations",
+        "severity": "Critical",
+        "issue_type": "Overdue Open Case",
+        "exception_count": 8,
+        "recommended_action": "Expedite investigation and case resolution",
+        "route_path": "/er"
+      },
+      {
+        "module_key": "er",
+        "module_label": "Employee Relations",
+        "severity": "Critical",
+        "issue_type": "Invalid Date Range",
+        "exception_count": 1,
+        "recommended_action": "Correct date entries",
+        "route_path": "/er"
+      },
+      {
+        "module_key": "er",
+        "module_label": "Employee Relations",
+        "severity": "Warning",
+        "issue_type": "Missing Escalation Reason",
+        "exception_count": 1,
+        "recommended_action": "Document reason for case escalation",
+        "route_path": "/er"
+      },
+      {
+        "module_key": "data-quality",
+        "module_label": "Data Quality",
+        "severity": "Critical",
+        "issue_type": "Active Employee with Missing Salary",
+        "exception_count": 1,
+        "recommended_action": "Input basic salary details in contract record",
+        "route_path": "/data-quality"
+      },
+      {
+        "module_key": "data-quality",
+        "module_label": "Data Quality",
+        "severity": "Warning",
+        "issue_type": "HR Request Breaching SLA",
+        "exception_count": 1,
+        "recommended_action": "Escalate request status and allocate to alternate agent",
+        "route_path": "/data-quality"
+      },
+      {
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Training Hours Missing or Invalid",
+        "exception_count": 1,
+        "recommended_action": "Enter valid positive training hours for this course",
+        "route_path": "/talent"
+      },
+      {
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Warning",
+        "issue_type": "Missing Interview Date",
+        "exception_count": 1,
+        "recommended_action": "Set scheduled interview timestamp",
+        "route_path": "/recruitment"
+      },
+      {
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Warning",
+        "issue_type": "Unknown Source Channel",
+        "exception_count": 1,
+        "recommended_action": "Update to standard channel",
+        "route_path": "/recruitment"
+      },
+      {
+        "module_key": "workforce",
+        "module_label": "Workforce",
+        "severity": "Critical",
+        "issue_type": "Duplicate Employee ID",
+        "exception_count": 2,
+        "recommended_action": "Merge or delete duplicate employee record in ERP",
+        "route_path": "/workforce"
+      },
+      {
+        "module_key": "compliance",
+        "module_label": "Saudization & Compliance",
+        "severity": "Warning",
+        "issue_type": "Contract Not Authenticated",
+        "exception_count": 1,
+        "recommended_action": "Request employee to log into Qiwa and approve contract",
+        "route_path": "/compliance"
+      },
+      {
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Enrollment Linked to Unknown Employee",
+        "exception_count": 1,
+        "recommended_action": "Correct employee_id on enrollment record",
+        "route_path": "/talent"
+      },
+      {
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Warning",
+        "issue_type": "Empty Candidate Pipeline",
+        "exception_count": 3,
+        "recommended_action": "Source and link candidates to requisition",
+        "route_path": "/recruitment"
+      },
+      {
+        "module_key": "data-quality",
+        "module_label": "Data Quality",
+        "severity": "Critical",
+        "issue_type": "Negative or Abnormal Payroll Value",
+        "exception_count": 3,
+        "recommended_action": "Review monthly payroll worksheet calculations for adjustments",
+        "route_path": "/data-quality"
+      },
+      {
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Warning",
+        "issue_type": "Learning Course Missing Category",
+        "exception_count": 1,
+        "recommended_action": "Assign a category to this training course",
+        "route_path": "/talent"
+      },
+      {
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Warning",
+        "issue_type": "Missing Plan Dimension",
+        "exception_count": 1,
+        "recommended_action": "Specify project and department details",
+        "route_path": "/recruitment"
+      },
+      {
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Rating Outside Allowed Range",
+        "exception_count": 1,
+        "recommended_action": "Correct rating to within 1.0\u20135.0 scale",
+        "route_path": "/talent"
+      },
+      {
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Warning",
+        "issue_type": "Critical Role Missing Successor",
+        "exception_count": 1,
+        "recommended_action": "Nominate a successor for this critical role",
+        "route_path": "/talent"
+      },
+      {
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Warning",
+        "issue_type": "Goal Missing Status",
+        "exception_count": 1,
+        "recommended_action": "Set goal status (Completed/In Progress/Overdue etc.)",
+        "route_path": "/talent"
+      },
+      {
+        "module_key": "payroll",
+        "module_label": "Payroll & Cost",
+        "severity": "Critical",
+        "issue_type": "Negative Gross Pay",
+        "exception_count": 1,
+        "recommended_action": "Correct payroll calculation",
+        "route_path": "/payroll"
+      },
+      {
+        "module_key": "payroll",
+        "module_label": "Payroll & Cost",
+        "severity": "Critical",
+        "issue_type": "Payroll Component Mismatch",
+        "exception_count": 1,
+        "recommended_action": "Recalculate gross salary components",
+        "route_path": "/payroll"
+      },
+      {
+        "module_key": "attendance",
+        "module_label": "Attendance",
+        "severity": "Warning",
+        "issue_type": "Missing Workday Attendance",
+        "exception_count": 418,
+        "recommended_action": "Confirm if employee was absent, on leave, or missed punch",
+        "route_path": "/attendance"
+      },
+      {
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Critical",
+        "issue_type": "Onboarding Not Triggered",
+        "exception_count": 1,
+        "recommended_action": "Create onboarding record",
+        "route_path": "/recruitment"
+      },
+      {
+        "module_key": "er",
+        "module_label": "Employee Relations",
+        "severity": "Warning",
+        "issue_type": "Missing Legal Reference",
+        "exception_count": 1,
+        "recommended_action": "Enter legal case details",
+        "route_path": "/er"
+      },
+      {
+        "module_key": "data-quality",
+        "module_label": "Data Quality",
+        "severity": "Warning",
+        "issue_type": "Missing Cost Center",
+        "exception_count": 1,
+        "recommended_action": "Assign financial cost center code in master profile",
+        "route_path": "/data-quality"
+      },
+      {
+        "module_key": "data-quality",
+        "module_label": "Data Quality",
+        "severity": "Warning",
+        "issue_type": "Attendance Record with Missing Punch",
+        "exception_count": 1,
+        "recommended_action": "Request employee punch reconciliation or supervisor approval",
+        "route_path": "/data-quality"
+      },
+      {
+        "module_key": "workforce",
+        "module_label": "Workforce",
+        "severity": "Warning",
+        "issue_type": "Missing Cost Center",
+        "exception_count": 1,
+        "recommended_action": "Assign financial cost center code in master profile",
+        "route_path": "/workforce"
+      },
+      {
+        "module_key": "compliance",
+        "module_label": "Saudization & Compliance",
+        "severity": "Critical",
+        "issue_type": "Missing Qiwa Contract",
+        "exception_count": 15,
+        "recommended_action": "Register digital contract in Qiwa portal",
+        "route_path": "/compliance"
+      },
+      {
+        "module_key": "compliance",
+        "module_label": "Saudization & Compliance",
+        "severity": "Warning",
+        "issue_type": "Missing Work Permit Expiry Date",
+        "exception_count": 7,
+        "recommended_action": "Update compliance records with Work Permit expiry date",
+        "route_path": "/compliance"
+      },
+      {
+        "module_key": "compliance",
+        "module_label": "Saudization & Compliance",
+        "severity": "Warning",
+        "issue_type": "Missing Iqama Expiry Date",
+        "exception_count": 7,
+        "recommended_action": "Update compliance records with Iqama expiry date",
+        "route_path": "/compliance"
+      },
+      {
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Review Missing Reviewer",
+        "exception_count": 1,
+        "recommended_action": "Assign a reviewer before finalizing review",
+        "route_path": "/talent"
+      },
+      {
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Critical",
+        "issue_type": "Missing Recruiter",
+        "exception_count": 1,
+        "recommended_action": "Assign a recruiter",
+        "route_path": "/recruitment"
+      },
+      {
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Review Linked to Unknown Employee",
+        "exception_count": 1,
+        "recommended_action": "Correct employee_id on review record",
+        "route_path": "/talent"
+      },
+      {
+        "module_key": "workforce",
+        "module_label": "Workforce",
+        "severity": "Warning",
+        "issue_type": "Missing Iqama Expiry Date",
+        "exception_count": 7,
+        "recommended_action": "Update compliance records with Iqama expiry date",
+        "route_path": "/workforce"
+      },
+      {
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Warning",
+        "issue_type": "Missing Pipeline Stage",
+        "exception_count": 1,
+        "recommended_action": "Assign current pipeline stage",
+        "route_path": "/recruitment"
+      },
+      {
+        "module_key": "er",
+        "module_label": "Employee Relations",
+        "severity": "Critical",
+        "issue_type": "Missing Target Due Date",
+        "exception_count": 1,
+        "recommended_action": "Set target due date based on SLA rules",
+        "route_path": "/er"
+      },
+      {
+        "module_key": "er",
+        "module_label": "Employee Relations",
+        "severity": "Warning",
+        "issue_type": "Inactive Case Subject",
+        "exception_count": 1,
+        "recommended_action": "Check if case is archive or needs resolution closure",
+        "route_path": "/er"
+      },
+      {
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Warning",
+        "issue_type": "High Performer With High Flight Risk",
+        "exception_count": 1,
+        "recommended_action": "Engage retention measures for this high-performer",
+        "route_path": "/talent"
+      },
+      {
+        "module_key": "attendance",
+        "module_label": "Attendance",
+        "severity": "Critical",
+        "issue_type": "Overtime Amount Missing",
+        "exception_count": 1,
+        "recommended_action": "Process overtime payment in monthly payroll",
+        "route_path": "/attendance"
+      },
+      {
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Warning",
+        "issue_type": "Missing Performance Review",
+        "exception_count": 3,
+        "recommended_action": "Assign and complete a performance review",
+        "route_path": "/talent"
+      },
+      {
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Warning",
+        "issue_type": "Duplicate Skill Record",
+        "exception_count": 2,
+        "recommended_action": "Deduplicate employee skill records",
+        "route_path": "/talent"
+      },
+      {
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Warning",
+        "issue_type": "Goal Overdue",
+        "exception_count": 1,
+        "recommended_action": "Resolve or update overdue goal",
+        "route_path": "/talent"
+      },
+      {
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Training Completed Without Date",
+        "exception_count": 1,
+        "recommended_action": "Set completion_date on completed enrollment",
+        "route_path": "/talent"
+      },
+      {
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Competency Score Outside Range",
+        "exception_count": 1,
+        "recommended_action": "Correct competency scores to 1.0\u20135.0 range",
+        "route_path": "/talent"
+      },
+      {
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Review Completed Without Rating",
+        "exception_count": 1,
+        "recommended_action": "Enter rating before marking review Completed",
+        "route_path": "/talent"
+      },
+      {
+        "module_key": "attendance",
+        "module_label": "Attendance",
+        "severity": "Warning",
+        "issue_type": "Source Late Minutes Mismatch",
+        "exception_count": 1,
+        "recommended_action": "Verify source system lateness logic and parameters",
+        "route_path": "/attendance"
+      },
+      {
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Warning",
+        "issue_type": "Unknown Employee ID",
+        "exception_count": 1,
+        "recommended_action": "Verify active employee ID and link",
+        "route_path": "/recruitment"
+      },
+      {
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Warning",
+        "issue_type": "Plan Unfulfilled",
+        "exception_count": 4,
+        "recommended_action": "Expedite hiring pipeline",
+        "route_path": "/recruitment"
+      },
+      {
+        "module_key": "er",
+        "module_label": "Employee Relations",
+        "severity": "Warning",
+        "issue_type": "Missing Project",
+        "exception_count": 2,
+        "recommended_action": "Update subject employee project assignment",
+        "route_path": "/er"
+      },
+      {
+        "module_key": "data-quality",
+        "module_label": "Data Quality",
+        "severity": "Critical",
+        "issue_type": "Duplicate Employee ID",
+        "exception_count": 1,
+        "recommended_action": "Merge or delete duplicate employee record in ERP",
+        "route_path": "/data-quality"
+      },
+      {
+        "module_key": "data-quality",
+        "module_label": "Data Quality",
+        "severity": "Warning",
+        "issue_type": "Missing Manager",
+        "exception_count": 2,
+        "recommended_action": "Assign supervisor/manager in employee profile",
+        "route_path": "/data-quality"
+      },
+      {
+        "module_key": "data-quality",
+        "module_label": "Data Quality",
+        "severity": "Warning",
+        "issue_type": "Missing Nationality",
+        "exception_count": 1,
+        "recommended_action": "Update nationality field in employee record",
+        "route_path": "/data-quality"
+      },
+      {
+        "module_key": "workforce",
+        "module_label": "Workforce",
+        "severity": "Warning",
+        "issue_type": "Missing Nationality",
+        "exception_count": 1,
+        "recommended_action": "Update nationality field in employee record",
+        "route_path": "/workforce"
+      },
+      {
+        "module_key": "workforce",
+        "module_label": "Workforce",
+        "severity": "Warning",
+        "issue_type": "Missing Manager",
+        "exception_count": 2,
+        "recommended_action": "Assign supervisor/manager in employee profile",
+        "route_path": "/workforce"
+      },
+      {
+        "module_key": "workforce",
+        "module_label": "Workforce",
+        "severity": "Warning",
+        "issue_type": "Missing Contract End Date",
+        "exception_count": 10,
+        "recommended_action": "Update contract records with end date",
+        "route_path": "/workforce"
+      },
+      {
+        "module_key": "compliance",
+        "module_label": "Saudization & Compliance",
+        "severity": "Critical",
+        "issue_type": "Missing GOSI Status Record",
+        "exception_count": 15,
+        "recommended_action": "Check GOSI enrollment status",
+        "route_path": "/compliance"
+      },
+      {
+        "module_key": "compliance",
+        "module_label": "Saudization & Compliance",
+        "severity": "Warning",
+        "issue_type": "Missing Nationality",
+        "exception_count": 1,
+        "recommended_action": "Update employee nationality records in master file",
+        "route_path": "/compliance"
+      },
+      {
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Warning",
+        "issue_type": "Missing Target Hire Date",
+        "exception_count": 1,
+        "recommended_action": "Provide target hire date",
+        "route_path": "/recruitment"
+      },
+      {
+        "module_key": "attendance",
+        "module_label": "Attendance",
+        "severity": "Warning",
+        "issue_type": "One Punch Only",
+        "exception_count": 1,
+        "recommended_action": "Reconcile check-in or check-out time",
+        "route_path": "/attendance"
+      },
+      {
+        "module_key": "attendance",
+        "module_label": "Attendance",
+        "severity": "Warning",
+        "issue_type": "Source Net Late Minutes Mismatch",
+        "exception_count": 1,
+        "recommended_action": "Verify source system net lateness calculations",
+        "route_path": "/attendance"
+      },
+      {
+        "module_key": "payroll",
+        "module_label": "Payroll & Cost",
+        "severity": "Critical",
+        "issue_type": "Negative Net Pay",
+        "exception_count": 1,
+        "recommended_action": "Correct payroll deductions",
+        "route_path": "/payroll"
+      },
+      {
+        "module_key": "payroll",
+        "module_label": "Payroll & Cost",
+        "severity": "Critical",
+        "issue_type": "Inactive Employee Payroll",
+        "exception_count": 1,
+        "recommended_action": "Hold payroll and verify termination status",
+        "route_path": "/payroll"
+      },
+      {
+        "module_key": "payroll",
+        "module_label": "Payroll & Cost",
+        "severity": "Warning",
+        "issue_type": "Missing Project",
+        "exception_count": 2,
+        "recommended_action": "Assign project to employee",
+        "route_path": "/payroll"
+      },
+      {
+        "module_key": "er",
+        "module_label": "Employee Relations",
+        "severity": "Warning",
+        "issue_type": "Inactive Case Owner",
+        "exception_count": 1,
+        "recommended_action": "Reassign case owner to active employee",
+        "route_path": "/er"
+      },
+      {
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Duplicate Performance Review ID",
+        "exception_count": 2,
+        "recommended_action": "Deduplicate performance review records",
+        "route_path": "/talent"
+      },
+      {
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Critical",
+        "issue_type": "Duplicate Candidate ID",
+        "exception_count": 2,
+        "recommended_action": "Deduplicate candidate records",
+        "route_path": "/recruitment"
+      },
+      {
+        "module_key": "attendance",
+        "module_label": "Attendance",
+        "severity": "Critical",
+        "issue_type": "Overtime Hours Missing",
+        "exception_count": 7,
+        "recommended_action": "Investigate overtime validation or manual entry error",
+        "route_path": "/attendance"
+      },
+      {
+        "module_key": "er",
+        "module_label": "Employee Relations",
+        "severity": "Critical",
+        "issue_type": "Duplicate Case ID",
+        "exception_count": 2,
+        "recommended_action": "Deduplicate ER logs",
+        "route_path": "/er"
+      },
+      {
+        "module_key": "data-quality",
+        "module_label": "Data Quality",
+        "severity": "Warning",
+        "issue_type": "Missing Project",
+        "exception_count": 1,
+        "recommended_action": "Assign cost project code in master profile",
+        "route_path": "/data-quality"
+      },
+      {
+        "module_key": "data-quality",
+        "module_label": "Data Quality",
+        "severity": "Critical",
+        "issue_type": "Inactive Employee with Payroll Record",
+        "exception_count": 2,
+        "recommended_action": "Hold payroll run and check termination status/period logic",
+        "route_path": "/data-quality"
+      },
+      {
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Warning",
+        "issue_type": "Career Path Missing Next Role",
+        "exception_count": 1,
+        "recommended_action": "Define the next_role for this career path entry",
+        "route_path": "/talent"
+      },
+      {
+        "module_key": "workforce",
+        "module_label": "Workforce",
+        "severity": "Warning",
+        "issue_type": "Missing Project",
+        "exception_count": 1,
+        "recommended_action": "Assign cost project code in master profile",
+        "route_path": "/workforce"
+      },
+      {
+        "module_key": "compliance",
+        "module_label": "Saudization & Compliance",
+        "severity": "Warning",
+        "issue_type": "Missing Cost Center assignment",
+        "exception_count": 1,
+        "recommended_action": "Update cost center in master file",
+        "route_path": "/compliance"
+      },
+      {
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Warning",
+        "issue_type": "Missing Interviewer",
+        "exception_count": 1,
+        "recommended_action": "Assign interviewer employee ID",
+        "route_path": "/recruitment"
+      },
+      {
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Warning",
+        "issue_type": "Successor Assigned to Inactive Employee",
+        "exception_count": 1,
+        "recommended_action": "Reassign succession to an active employee",
+        "route_path": "/talent"
+      },
+      {
+        "module_key": "data-quality",
+        "module_label": "Data Quality",
+        "severity": "Critical",
+        "issue_type": "Abnormal Payroll Value",
+        "exception_count": 1,
+        "recommended_action": "Review contract salary figures for input errors",
+        "route_path": "/data-quality"
+      },
+      {
+        "module_key": "compliance",
+        "module_label": "Saudization & Compliance",
+        "severity": "Warning",
+        "issue_type": "Missing Project assignment",
+        "exception_count": 1,
+        "recommended_action": "Update project mapping in master file",
+        "route_path": "/compliance"
+      },
+      {
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Critical",
+        "issue_type": "Overdue Requisition",
+        "exception_count": 1,
+        "recommended_action": "Expedite sourcing and pipeline conversions",
+        "route_path": "/recruitment"
+      },
+      {
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "severity": "Critical",
+        "issue_type": "Successor Readiness Missing",
+        "exception_count": 1,
+        "recommended_action": "Set readiness status for this successor nomination",
+        "route_path": "/talent"
+      },
+      {
+        "module_key": "attendance",
+        "module_label": "Attendance",
+        "severity": "Warning",
+        "issue_type": "Missing Check-out",
+        "exception_count": 1,
+        "recommended_action": "Request employee to provide check-out time",
+        "route_path": "/attendance"
+      },
+      {
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Critical",
+        "issue_type": "Unknown Requisition Link",
+        "exception_count": 1,
+        "recommended_action": "Link candidate to active requisition",
+        "route_path": "/recruitment"
+      },
+      {
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "severity": "Warning",
+        "issue_type": "Plan Exceeded",
+        "exception_count": 1,
+        "recommended_action": "Review project hiring plan",
+        "route_path": "/recruitment"
+      },
+      {
+        "module_key": "er",
+        "module_label": "Employee Relations",
+        "severity": "Warning",
+        "issue_type": "Missing Department",
+        "exception_count": 1,
+        "recommended_action": "Update subject employee department assignment",
+        "route_path": "/er"
+      },
+      {
+        "module_key": "payroll",
+        "module_label": "Payroll & Cost",
+        "severity": "Warning",
+        "issue_type": "Overtime Cost Without Hours",
+        "exception_count": 7,
+        "recommended_action": "Verify attendance punches and overtime logs",
+        "route_path": "/payroll"
+      }
+    ]
+  },
+  "data_freshness": {
+    "freshness": [
+      {
+        "module_key": "executive",
+        "module_label": "Executive Summary",
+        "source_table": "mart_exec_kpis",
+        "max_source_date": "2026-06-30",
+        "last_refresh_timestamp": "2026-06-28T16:02:45.455000",
+        "stale_flag": true,
+        "stale_reason": "Derived from overall system state"
+      },
+      {
+        "module_key": "data-quality",
+        "module_label": "Data Quality",
+        "source_table": "data_quality",
+        "max_source_date": "2026-06-30",
+        "last_refresh_timestamp": "2026-06-28T16:02:45.455000",
+        "stale_flag": false,
+        "stale_reason": "Refreshed during DQ pipeline run"
+      },
+      {
+        "module_key": "workforce",
+        "module_label": "Workforce",
+        "source_table": "employees",
+        "max_source_date": "2025-04-01",
+        "last_refresh_timestamp": "2026-06-28T16:02:45.455000",
+        "stale_flag": false,
+        "stale_reason": "Data is current"
+      },
+      {
+        "module_key": "payroll",
+        "module_label": "Payroll & Cost",
+        "source_table": "payroll",
+        "max_source_date": "2026-06",
+        "last_refresh_timestamp": "2026-06-28T16:02:45.455000",
+        "stale_flag": false,
+        "stale_reason": "Data is current"
+      },
+      {
+        "module_key": "attendance",
+        "module_label": "Attendance",
+        "source_table": "attendance",
+        "max_source_date": "2026-06-04",
+        "last_refresh_timestamp": "2026-06-28T16:02:45.455000",
+        "stale_flag": true,
+        "stale_reason": "Attendance date 2026-06-04 is older than expected report month end 2026-06-30"
+      },
+      {
+        "module_key": "compliance",
+        "module_label": "Saudization & Compliance",
+        "source_table": "compliance",
+        "max_source_date": "2026-06",
+        "last_refresh_timestamp": "2026-06-28T16:02:45.455000",
+        "stale_flag": false,
+        "stale_reason": "Data is current"
+      },
+      {
+        "module_key": "er",
+        "module_label": "Employee Relations",
+        "source_table": "employee_relations",
+        "max_source_date": "2026-06-10",
+        "last_refresh_timestamp": "2026-06-28T16:02:45.455000",
+        "stale_flag": false,
+        "stale_reason": "Data is current"
+      },
+      {
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "source_table": "recruitment_requisitions",
+        "max_source_date": "2026-06-10",
+        "last_refresh_timestamp": "2026-06-28T16:02:45.455000",
+        "stale_flag": false,
+        "stale_reason": "Data is current"
+      },
+      {
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "source_table": "performance_reviews",
+        "max_source_date": "2026-06-26",
+        "last_refresh_timestamp": "2026-06-28T16:02:45.455000",
+        "stale_flag": false,
+        "stale_reason": "Data is current"
+      }
+    ]
+  },
+  "filter_options": {
+    "report_month": "2026-06",
+    "companies": [
+      "Company A",
+      "Company B"
+    ],
+    "projects": [
+      "PROJ-BETA",
+      "PROJ-ALPHA",
+      "PROJ-GAMMA"
+    ],
+    "departments": [
+      "HR",
+      "Executive",
+      "Finance",
+      "Operations",
+      "Marketing",
+      "Engineering"
+    ],
+    "cost_centers": [
+      "CC-HR",
+      "CC-ENG",
+      "CC-MKT",
+      "CC-FIN",
+      "CC-OPS",
+      "CC-EXEC"
+    ],
+    "locations": [],
+    "nationalities": [
+      "Saudi",
+      "British",
+      "Canadian",
+      "Syrian",
+      "German",
+      "Jordanian",
+      "American",
+      "Egyptian",
+      "Australian"
+    ],
+    "modules": [
+      "recruitment",
+      "er",
+      "attendance",
+      "payroll",
+      "compliance",
+      "executive",
+      "data-quality",
+      "workforce",
+      "talent"
+    ]
+  },
+  "navigation_status": {
+    "navigation": [
+      {
+        "module_key": "executive",
+        "page_key": "executive",
+        "route_path": "/executive",
+        "status": "Registered"
+      },
+      {
+        "module_key": "data-quality",
+        "page_key": "data-quality",
+        "route_path": "/data-quality",
+        "status": "Registered"
+      },
+      {
+        "module_key": "workforce",
+        "page_key": "workforce",
+        "route_path": "/workforce",
+        "status": "Registered"
+      },
+      {
+        "module_key": "payroll",
+        "page_key": "payroll",
+        "route_path": "/payroll",
+        "status": "Registered"
+      },
+      {
+        "module_key": "attendance",
+        "page_key": "attendance",
+        "route_path": "/attendance",
+        "status": "Registered"
+      },
+      {
+        "module_key": "compliance",
+        "page_key": "compliance",
+        "route_path": "/compliance",
+        "status": "Registered"
+      },
+      {
+        "module_key": "er",
+        "page_key": "er",
+        "route_path": "/er",
+        "status": "Registered"
+      },
+      {
+        "module_key": "recruitment",
+        "page_key": "recruitment",
+        "route_path": "/recruitment",
+        "status": "Registered"
+      },
+      {
+        "module_key": "talent",
+        "page_key": "talent",
+        "route_path": "/talent",
+        "status": "Registered"
+      }
+    ]
+  },
+  "qa_index": {
+    "qa_index": [
+      {
+        "module_key": "executive",
+        "module_label": "Executive Summary",
+        "screenshot_path": "docs/qa/screenshots/milestone_1_executive_summary.png",
+        "screenshot_exists": true,
+        "qa_report_path": "docs/qa/reports/executive_summary_qa_report.md",
+        "qa_report_exists": false,
+        "raw_api_path": "docs/qa/api_outputs/executive_api_outputs.json",
+        "raw_api_exists": false,
+        "status": "Pending"
+      },
+      {
+        "module_key": "data-quality",
+        "module_label": "Data Quality",
+        "screenshot_path": "docs/qa/screenshots/milestone_1_data_quality.png",
+        "screenshot_exists": true,
+        "qa_report_path": "docs/qa/reports/qa_report.md",
+        "qa_report_exists": false,
+        "raw_api_path": "docs/qa/api_outputs/data-quality_api_outputs.json",
+        "raw_api_exists": false,
+        "status": "Pending"
+      },
+      {
+        "module_key": "workforce",
+        "module_label": "Workforce",
+        "screenshot_path": "docs/qa/screenshots/milestone_2a_workforce_dashboard.png",
+        "screenshot_exists": true,
+        "qa_report_path": "docs/qa/reports/workforce_qa_report.md",
+        "qa_report_exists": false,
+        "raw_api_path": "docs/qa/api_outputs/workforce_api_outputs.json",
+        "raw_api_exists": false,
+        "status": "Pending"
+      },
+      {
+        "module_key": "payroll",
+        "module_label": "Payroll & Cost",
+        "screenshot_path": "docs/qa/screenshots/milestone_2b_payroll_dashboard.png",
+        "screenshot_exists": true,
+        "qa_report_path": "docs/qa/reports/milestone_2b_payroll_qa_report.md",
+        "qa_report_exists": true,
+        "raw_api_path": "docs/qa/api_outputs/milestone_2b_payroll_api_outputs.json",
+        "raw_api_exists": true,
+        "status": "Complete"
+      },
+      {
+        "module_key": "attendance",
+        "module_label": "Attendance",
+        "screenshot_path": "docs/qa/screenshots/milestone_2c_attendance_dashboard.png",
+        "screenshot_exists": true,
+        "qa_report_path": "docs/qa/reports/milestone_2c_attendance_qa_report.md",
+        "qa_report_exists": true,
+        "raw_api_path": "docs/qa/api_outputs/milestone_2c_attendance_api_outputs.json",
+        "raw_api_exists": true,
+        "status": "Complete"
+      },
+      {
+        "module_key": "compliance",
+        "module_label": "Saudization & Compliance",
+        "screenshot_path": "docs/qa/screenshots/milestone_2d_compliance_dashboard.png",
+        "screenshot_exists": true,
+        "qa_report_path": "docs/qa/reports/milestone_2d_compliance_qa_report.md",
+        "qa_report_exists": true,
+        "raw_api_path": "docs/qa/api_outputs/milestone_2d_compliance_api_outputs.json",
+        "raw_api_exists": true,
+        "status": "Complete"
+      },
+      {
+        "module_key": "er",
+        "module_label": "Employee Relations",
+        "screenshot_path": "docs/qa/screenshots/milestone_2e_er_dashboard.png",
+        "screenshot_exists": true,
+        "qa_report_path": "docs/qa/reports/milestone_2e_er_qa_report.md",
+        "qa_report_exists": true,
+        "raw_api_path": "docs/qa/api_outputs/milestone_2e_er_api_outputs.json",
+        "raw_api_exists": true,
+        "status": "Complete"
+      },
+      {
+        "module_key": "recruitment",
+        "module_label": "Recruitment & Hiring",
+        "screenshot_path": "docs/qa/screenshots/milestone_2f_recruitment_dashboard.png",
+        "screenshot_exists": true,
+        "qa_report_path": "docs/qa/reports/milestone_2f_recruitment_qa_report.md",
+        "qa_report_exists": true,
+        "raw_api_path": "docs/qa/api_outputs/milestone_2f_recruitment_api_outputs.json",
+        "raw_api_exists": true,
+        "status": "Complete"
+      },
+      {
+        "module_key": "talent",
+        "module_label": "Talent & Succession",
+        "screenshot_path": "docs/qa/screenshots/milestone_2g_talent_dashboard.png",
+        "screenshot_exists": true,
+        "qa_report_path": "docs/qa/reports/milestone_2g_talent_qa_report.md",
+        "qa_report_exists": true,
+        "raw_api_path": "docs/qa/api_outputs/milestone_2g_talent_api_outputs.json",
+        "raw_api_exists": true,
+        "status": "Complete"
+      }
+    ]
+  }
+}

@@ -1,0 +1,4 @@
+offer_id,candidate_id,offer_date,salary,outcome_status,outcome_date
+OFF001,CAN001,2026-06-15,15000,Accepted,2026-06-18
+OFF002,CAN005,2026-06-20,,Sent,
+OFF003,CAN007,2026-06-05,12000,Accepted,2026-06-08

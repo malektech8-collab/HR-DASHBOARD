@@ -1,0 +1,4 @@
+interview_id,candidate_id,interview_date,recruiter_id,rating,outcome
+INT001,CAN001,2026-06-10 10:00:00,EMP001,5,Pass
+INT002,CAN002,2026-06-12 14:00:00,,3,Pass
+INT003,CAN005,,EMP001,,Pending

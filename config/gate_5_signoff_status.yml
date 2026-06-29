@@ -1,0 +1,52 @@
+# HR Command Center - Gate 5 Controlled Load Readiness Scorecard
+# Scorecard status for final approval package review.
+
+gate_5_signoff_rules:
+  required_thresholds:
+    runbook_documented: true
+    scope_limited: true
+    workflow_mapped: true
+    storage_approved: true
+    rollback_plan_approved: true
+    incident_plan_approved: true
+
+gate_5_scores:
+  - source_category: "HRIS / Employee Master"
+    runbook_completed: true
+    rollback_completed: true
+    readiness_status: "Ready for Approval Package Review"
+
+  - source_category: "Payroll"
+    runbook_completed: true
+    rollback_completed: true
+    readiness_status: "Ready for Approval Package Review"
+
+  - source_category: "Attendance"
+    runbook_completed: true
+    rollback_completed: true
+    readiness_status: "Ready for Approval Package Review"
+
+  - source_category: "Government / Compliance"
+    runbook_completed: true
+    rollback_completed: true
+    readiness_status: "Ready for Approval Package Review"
+
+  - source_category: "Employee Relations / Case Management"
+    runbook_completed: true
+    rollback_completed: true
+    readiness_status: "Ready for Approval Package Review"
+
+  - source_category: "Recruitment / Workforce Planning"
+    runbook_completed: true
+    rollback_completed: true
+    readiness_status: "Ready for Approval Package Review"
+
+  - source_category: "Talent / Performance / Learning"
+    runbook_completed: true
+    rollback_completed: true
+    readiness_status: "Ready for Approval Package Review"
+
+  - source_category: "Data Quality / Command Center Metadata"
+    runbook_completed: true
+    rollback_completed: true
+    readiness_status: "Ready for Approval Package Review"

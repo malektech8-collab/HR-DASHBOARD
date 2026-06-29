@@ -1,0 +1,71 @@
+# HR Command Center - Synthetic Dry-Run Control Totals Configuration
+# Maps expected aggregate checksums for validation verification.
+
+control_totals:
+  - source_category: "HRIS / Employee Master"
+    expected_rows: 19
+    checksums:
+      - name: "active_headcount"
+        expected_value: 19
+      - name: "saudi_count"
+        expected_value: 9
+      - name: "non_saudi_count"
+        expected_value: 9
+
+  - source_category: "Payroll"
+    expected_rows: 20
+    checksums:
+      - name: "total_gross_pay"
+        expected_value: 446175.00
+      - name: "total_net_pay"
+        expected_value: 418175.00
+      - name: "total_deductions"
+        expected_value: 28000.00
+
+  - source_category: "Attendance"
+    expected_rows: 494
+    checksums:
+      - name: "unique_employees"
+        expected_value: 19
+      - name: "total_late_minutes"
+        expected_value: 30
+      - name: "total_overtime_hours"
+        expected_value: 2.50
+
+  - source_category: "Government / Compliance"
+    expected_rows: 19
+    checksums:
+      - name: "saudization_rate_pct"
+        expected_value: 50.00
+      - name: "wps_compliant_count"
+        expected_value: 19
+
+  - source_category: "Employee Relations / Case Management"
+    expected_rows: 11
+    checksums:
+      - name: "open_cases"
+        expected_value: 8
+      - name: "closed_cases"
+        expected_value: 2
+
+  - source_category: "Recruitment / Workforce Planning"
+    expected_rows: 7
+    checksums:
+      - name: "open_requisitions"
+        expected_value: 5
+      - name: "offer_acceptance_pct"
+        expected_value: 100.00
+
+  - source_category: "Talent / Performance / Learning"
+    expected_rows: 16
+    checksums:
+      - name: "average_performance_rating"
+        expected_value: 3.39
+      - name: "goal_completion_pct"
+        expected_value: 33.33
+
+  - source_category: "Data Quality / Command Center Metadata"
+    expected_rows: 9
+    checksums:
+      - name: "audited_modules_count"
+        expected_value: 9

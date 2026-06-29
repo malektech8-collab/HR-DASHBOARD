@@ -1,0 +1,55 @@
+data/raw/*
+data/bronze/*
+data/silver/*
+data/gold/*
+warehouse/*.duckdb
+warehouse/*.wal
+.env
+__pycache__/
+node_modules/
+dist/
+.venv/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.DS_Store
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*credentials*
+*secret*
+*token*
+*password*
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Node / frontend
+node_modules/
+dist/
+build/
+
+# OS/editor
+.DS_Store
+.vscode/
+.idea/
+
+# Real HR data zones - keep only .gitkeep
+data/real_*/**
+!data/real_*/.gitkeep
+
+# Generated warehouse/runtime artifacts
+*.duckdb
+*.db
+*.sqlite
+*.sqlite3
+

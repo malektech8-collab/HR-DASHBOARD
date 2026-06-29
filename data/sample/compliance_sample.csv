@@ -1,0 +1,5 @@
+employee_id,period,qiwa_status,gosi_status,mudad_status,contract_authenticated,gosi_salary,payroll_basic_salary,occupation_code,occupation_match_status,work_permit_expiry,iqama_expiry,insurance_status
+EMP001,2026-06,Active,Registered,Compliant,True,12000,12000,123456,Matched,2027-06-01,,Active
+EMP002,2026-06,Active,Registered,Compliant,True,15000,15000,234567,Matched,2026-12-31,2026-12-31,Active
+EMP003,2026-06,Active,Registered,Compliant,True,11000,11000,345678,Matched,2027-05-01,,Active
+EMP004,2026-06,Active,Registered,Compliant,False,18000,18000,456789,Mismatch,2026-11-01,2026-11-01,Active

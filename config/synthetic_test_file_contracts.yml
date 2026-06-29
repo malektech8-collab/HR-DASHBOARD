@@ -1,0 +1,270 @@
+# HR Command Center - Synthetic Test File Ingestion Contracts
+# Configures the exact file parsing schemas, validation parameters, and safety constraints.
+
+synthetic_contracts:
+  - source_category: "HRIS / Employee Master"
+    source_system_name: "Jisr HR Portal"
+    expected_file_name_pattern: "^jisr_employee_master_\\d{8}\\.csv$"
+    expected_file_format: "CSV"
+    encoding: "UTF-8"
+    delimiter: ","
+    required_columns:
+      - "emp_id"
+      - "emp_num"
+      - "full_name"
+      - "status"
+      - "joining_date"
+      - "nationality"
+    optional_columns:
+      - "termination_date"
+      - "department"
+      - "project"
+      - "job_title"
+    data_type_rules:
+      emp_id: "VARCHAR"
+      emp_num: "VARCHAR"
+      full_name: "VARCHAR"
+      status: "VARCHAR"
+      joining_date: "DATE"
+    date_format_rules: "YYYY-MM-DD"
+    numeric_format_rules: "None"
+    allowed_status_values:
+      - "Active"
+      - "Terminated"
+    privacy_classification_required: true
+    masking_required: true
+    control_totals_required: true
+    record_count_expected: 19
+    synthetic_example_rows_allowed: 100
+    real_data_allowed: false
+    validation_status: "Approved"
+    owner: "HR Director"
+    notes: "Baseline reference mapping for employee active states."
+
+  - source_category: "Payroll"
+    source_system_name: "NetSuite ERP Financials"
+    expected_file_name_pattern: "^netsuite_payroll_ledger_\\d{6}\\.xlsx$"
+    expected_file_format: "XLSX"
+    encoding: "UTF-8"
+    sheet_name: "Payroll Details"
+    required_columns:
+      - "netsuite_emp_id"
+      - "pay_period"
+      - "salary_basic"
+      - "gross_salary"
+      - "net_salary"
+    optional_columns:
+      - "allowance_housing"
+      - "allowance_transport"
+      - "total_deductions"
+    data_type_rules:
+      netsuite_emp_id: "VARCHAR"
+      pay_period: "VARCHAR"
+      salary_basic: "DECIMAL(18,2)"
+    date_format_rules: "None"
+    numeric_format_rules: "Float"
+    allowed_status_values: []
+    privacy_classification_required: true
+    masking_required: true
+    control_totals_required: true
+    record_count_expected: 20
+    synthetic_example_rows_allowed: 100
+    real_data_allowed: false
+    validation_status: "Approved"
+    owner: "Finance Director"
+    notes: "Official monthly gross and net payouts configuration."
+
+  - source_category: "Attendance"
+    source_system_name: "ZK Teco Biometric Attendance Portal"
+    expected_file_name_pattern: "^zk_attendance_logs_\\d{8}\\.csv$"
+    expected_file_format: "CSV"
+    encoding: "UTF-8"
+    delimiter: ","
+    required_columns:
+      - "badge_emp_id"
+      - "punch_date"
+      - "first_punch_in"
+      - "last_punch_out"
+    optional_columns:
+      - "tardy_minutes"
+      - "absent_status"
+    data_type_rules:
+      badge_emp_id: "VARCHAR"
+      punch_date: "DATE"
+      first_punch_in: "TIMESTAMP"
+    date_format_rules: "YYYY-MM-DD"
+    numeric_format_rules: "Integer"
+    allowed_status_values:
+      - "Excused"
+      - "Absent"
+    privacy_classification_required: true
+    masking_required: false
+    control_totals_required: true
+    record_count_expected: 494
+    synthetic_example_rows_allowed: 1000
+    real_data_allowed: false
+    validation_status: "Approved"
+    owner: "HR Operations Manager"
+    notes: "Standard daily clock punch timelines."
+
+  - source_category: "Government / Compliance"
+    source_system_name: "GOSI / Qiwa Government Portals"
+    expected_file_name_pattern: "^gosi_compliance_status_\\d{8}\\.csv$"
+    expected_file_format: "CSV"
+    encoding: "UTF-8"
+    delimiter: ","
+    required_columns:
+      - "portal_emp_id"
+      - "gosi_active"
+      - "wps_compliance"
+      - "iqama_expiry"
+    optional_columns:
+      - "qiwa_verified"
+      - "wp_expiry"
+    data_type_rules:
+      portal_emp_id: "VARCHAR"
+      gosi_active: "VARCHAR"
+      iqama_expiry: "DATE"
+    date_format_rules: "YYYY-MM-DD"
+    numeric_format_rules: "None"
+    allowed_status_values:
+      - "Compliant"
+      - "Non-Compliant"
+    privacy_classification_required: true
+    masking_required: true
+    control_totals_required: true
+    record_count_expected: 19
+    synthetic_example_rows_allowed: 100
+    real_data_allowed: false
+    validation_status: "Approved"
+    owner: "Government Relations Officer"
+    notes: "Official compliance monitoring records."
+
+  - source_category: "Employee Relations / Case Management"
+    source_system_name: "SharePoint ER Tracker"
+    expected_file_name_pattern: "^er_sharepoint_log_\\d{8}\\.csv$"
+    expected_file_format: "CSV"
+    encoding: "UTF-8"
+    delimiter: ","
+    required_columns:
+      - "sp_case_id"
+      - "sp_subject_emp_id"
+      - "sp_case_category"
+      - "sp_status"
+    optional_columns:
+      - "sp_created_at"
+      - "sp_due_date"
+      - "sp_closed_at"
+    data_type_rules:
+      sp_case_id: "VARCHAR"
+      sp_subject_emp_id: "VARCHAR"
+      sp_status: "VARCHAR"
+    date_format_rules: "YYYY-MM-DD"
+    numeric_format_rules: "None"
+    allowed_status_values:
+      - "Open"
+      - "Closed"
+    privacy_classification_required: true
+    masking_required: true
+    control_totals_required: true
+    record_count_expected: 11
+    synthetic_example_rows_allowed: 50
+    real_data_allowed: false
+    validation_status: "Approved"
+    owner: "Employee Relations Manager"
+    notes: "Legal cases and HR request trackings."
+
+  - source_category: "Recruitment / Workforce Planning"
+    source_system_name: "Lever ATS"
+    expected_file_name_pattern: "^lever_recruitment_reqs_\\d{8}\\.csv$"
+    expected_file_format: "CSV"
+    encoding: "UTF-8"
+    delimiter: ","
+    required_columns:
+      - "ats_req_id"
+      - "ats_title"
+      - "ats_status"
+    optional_columns:
+      - "ats_dept"
+      - "ats_approved_date"
+      - "ats_target_date"
+    data_type_rules:
+      ats_req_id: "VARCHAR"
+      ats_status: "VARCHAR"
+    date_format_rules: "YYYY-MM-DD"
+    numeric_format_rules: "None"
+    allowed_status_values:
+      - "Open"
+      - "Filled"
+      - "Cancelled"
+    privacy_classification_required: true
+    masking_required: false
+    control_totals_required: true
+    record_count_expected: 7
+    synthetic_example_rows_allowed: 100
+    real_data_allowed: false
+    validation_status: "Approved"
+    owner: "Head of Talent Acquisition"
+    notes: "Recruiting pipelines and vacancies mapping."
+
+  - source_category: "Talent / Performance / Learning"
+    source_system_name: "Coursera LMS / SAP SuccessFactors Talent"
+    expected_file_name_pattern: "^successfactors_talent_\\d{8}\\.xlsx$"
+    expected_file_format: "XLSX"
+    encoding: "UTF-8"
+    sheet_name: "Talent Metrics"
+    required_columns:
+      - "sf_emp_id"
+      - "sf_perf_rating"
+      - "sf_status"
+    optional_columns:
+      - "sf_successor_emp_id"
+      - "sf_successor_readiness"
+    data_type_rules:
+      sf_emp_id: "VARCHAR"
+      sf_perf_rating: "INTEGER"
+    date_format_rules: "None"
+    numeric_format_rules: "Integer"
+    allowed_status_values:
+      - "Completed"
+      - "In Progress"
+    privacy_classification_required: true
+    masking_required: true
+    control_totals_required: true
+    record_count_expected: 16
+    synthetic_example_rows_allowed: 100
+    real_data_allowed: false
+    validation_status: "Approved"
+    owner: "Talent & Development Director"
+    notes: "Successor key is pseudonymized to opaque token only. Ratings are restricted."
+
+  - source_category: "Data Quality / Command Center Metadata"
+    source_system_name: "Command Center Audit Engine"
+    expected_file_name_pattern: "^command_center_audit_\\d{8}\\.csv$"
+    expected_file_format: "CSV"
+    encoding: "UTF-8"
+    delimiter: ","
+    required_columns:
+      - "module_key"
+      - "api_health_status"
+      - "reconciliation_status"
+    optional_columns:
+      - "last_checked_at"
+    data_type_rules:
+      module_key: "VARCHAR"
+      api_health_status: "VARCHAR"
+    date_format_rules: "YYYY-MM-DD HH:MM:SS"
+    numeric_format_rules: "None"
+    allowed_status_values:
+      - "Healthy"
+      - "Unhealthy"
+      - "Unknown"
+    privacy_classification_required: true
+    masking_required: false
+    control_totals_required: true
+    record_count_expected: 9
+    synthetic_example_rows_allowed: 20
+    real_data_allowed: false
+    validation_status: "Approved"
+    owner: "HR Systems Lead"
+    notes: "Central validation matrix for command center module checks."

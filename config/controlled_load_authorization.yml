@@ -1,0 +1,69 @@
+# HR Command Center - Controlled Load Authorization Workflow
+# Declares approval roles, decisions, evidence requirements, and expiration rules.
+
+stages:
+  - stage_number: 1
+    reviewer_role: "HR Analytics Owner"
+    required_evidence: "Gate 5 Signoff Package Document"
+    allowed_decisions: ["Approved", "Approved with Conditions", "Rejected", "Needs Clarification"]
+    expiration_days: 30
+
+  - stage_number: 2
+    reviewer_role: "Source Business Owner"
+    required_evidence: "Technical inventory ownership matrices"
+    allowed_decisions: ["Approved", "Rejected", "Needs Clarification"]
+    expiration_days: 15
+
+  - stage_number: 3
+    reviewer_role: "Technical Owner"
+    required_evidence: "File naming and delivery validation logs"
+    allowed_decisions: ["Approved", "Rejected", "Needs Clarification"]
+    expiration_days: 15
+
+  - stage_number: 4
+    reviewer_role: "Data Steward"
+    required_evidence: "Mapped canonical fields and Exception checklist"
+    allowed_decisions: ["Approved", "Approved with Conditions", "Rejected"]
+    expiration_days: 15
+
+  - stage_number: 5
+    reviewer_role: "Data Privacy Officer"
+    required_evidence: "Masking configuration and opaque successor candidate verification"
+    allowed_decisions: ["Approved", "Rejected"]
+    expiration_days: 30
+
+  - stage_number: 6
+    reviewer_role: "CISO / Security Lead"
+    required_evidence: "RBAC visibility configurations and risk mit register log"
+    allowed_decisions: ["Approved", "Rejected"]
+    expiration_days: 30
+
+  - stage_number: 7
+    reviewer_role: "Infrastructure Lead"
+    required_evidence: "AES-256 folder volume permissions"
+    allowed_decisions: ["Approved", "Rejected"]
+    expiration_days: 30
+
+  - stage_number: 8
+    reviewer_role: "Technical Operations"
+    required_evidence: "Rollback transaction test verification reports"
+    allowed_decisions: ["Approved", "Rejected"]
+    expiration_days: 15
+
+  - stage_number: 9
+    reviewer_role: "Program Sponsor"
+    required_evidence: "Scheduled calendar delivery window check"
+    allowed_decisions: ["Approved", "Approved with Conditions", "Rejected"]
+    expiration_days: 15
+
+  - stage_number: 10
+    reviewer_role: "Chief HR Officer"
+    required_evidence: "Written final load directive"
+    allowed_decisions: ["Approved", "Rejected"]
+    expiration_days: 7
+
+  - stage_number: 11
+    reviewer_role: "System Architect"
+    required_evidence: "Status flag set to Ready in configs"
+    allowed_decisions: ["Approved"]
+    expiration_days: 365

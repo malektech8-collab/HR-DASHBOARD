@@ -1,0 +1,100 @@
+﻿# HR Command Center - Signoff Evidence Validation Schema
+# Defines the 21-field evidence review schema for authorization evidence items.
+
+signoff_evidence_validation:
+  evidence_schema_fields:
+    - evidence_id
+    - evidence_type
+    - approving_role
+    - approval_status
+    - evidence_reference
+    - approval_date
+    - expiry_date
+    - approved_source_category
+    - approved_field_list
+    - excluded_field_list
+    - masking_confirmation
+    - access_restriction_confirmation
+    - rollback_acknowledgement
+    - incident_response_acknowledgement
+    - post_load_validation_acknowledgement
+    - execution_owner_confirmation
+    - stop_authority_confirmation
+    - validation_result
+    - missing_evidence_flag
+    - reviewer_role
+    - notes
+  field_count: 21
+  allowed_approval_statuses:
+    - "Not Provided"
+    - "Provided - Pending Review"
+    - "Valid"
+    - "Valid with Conditions"
+    - "Rejected"
+    - "Expired"
+  evidence_items:
+    - evidence_id: "AUTH-EVD-001"
+      evidence_type: "CHRO Written Authorization"
+      approving_role: "CHRO"
+      approval_status: "Not Provided"
+      evidence_reference: "N/A"
+      approval_date: "N/A"
+      expiry_date: "N/A"
+      approved_source_category: "Data Quality / Command Center Metadata"
+      approved_field_list: "module_key, module_name, api_health_status, reconciliation_status, qa_artifact_status, refresh_status, freshness_timestamp, dashboard_route_key, exception_count_by_module, owner_role"
+      excluded_field_list: "employee_name, employee_number, national_id, iqama_number, passport_number, mobile_number, email_address, bank_iban, salary, payroll_components, er_legal_case_text, gosi_mudad_qiwa_muqeem, medical_insurance, recruitment_candidate_pii, performance_talent, free_text_notes"
+      masking_confirmation: "Not Provided"
+      access_restriction_confirmation: "Not Provided"
+      rollback_acknowledgement: "Not Provided"
+      incident_response_acknowledgement: "Not Provided"
+      post_load_validation_acknowledgement: "Not Provided"
+      execution_owner_confirmation: "Not Provided"
+      stop_authority_confirmation: "Not Provided"
+      validation_result: "Pending"
+      missing_evidence_flag: true
+      reviewer_role: "Systems Architect"
+      notes: "Awaiting CHRO signed authorization letter"
+    - evidence_id: "AUTH-EVD-002"
+      evidence_type: "CISO Security Clearance"
+      approving_role: "CISO"
+      approval_status: "Not Provided"
+      evidence_reference: "N/A"
+      approval_date: "N/A"
+      expiry_date: "N/A"
+      approved_source_category: "Data Quality / Command Center Metadata"
+      approved_field_list: "module_key, module_name, api_health_status, reconciliation_status, qa_artifact_status, refresh_status, freshness_timestamp, dashboard_route_key, exception_count_by_module, owner_role"
+      excluded_field_list: "employee_name, employee_number, national_id, iqama_number, passport_number, mobile_number, email_address, bank_iban, salary, payroll_components, er_legal_case_text, gosi_mudad_qiwa_muqeem, medical_insurance, recruitment_candidate_pii, performance_talent, free_text_notes"
+      masking_confirmation: "Not Provided"
+      access_restriction_confirmation: "Not Provided"
+      rollback_acknowledgement: "Not Provided"
+      incident_response_acknowledgement: "Not Provided"
+      post_load_validation_acknowledgement: "Not Provided"
+      execution_owner_confirmation: "Not Provided"
+      stop_authority_confirmation: "Not Provided"
+      validation_result: "Pending"
+      missing_evidence_flag: true
+      reviewer_role: "Systems Architect"
+      notes: "Awaiting CISO security clearance letter"
+    - evidence_id: "AUTH-EVD-003"
+      evidence_type: "IT Operations Director Execution Readiness"
+      approving_role: "IT Operations Director"
+      approval_status: "Not Provided"
+      evidence_reference: "N/A"
+      approval_date: "N/A"
+      expiry_date: "N/A"
+      approved_source_category: "Data Quality / Command Center Metadata"
+      approved_field_list: "module_key, module_name, api_health_status, reconciliation_status, qa_artifact_status, refresh_status, freshness_timestamp, dashboard_route_key, exception_count_by_module, owner_role"
+      excluded_field_list: "employee_name, employee_number, national_id, iqama_number, passport_number, mobile_number, email_address, bank_iban, salary, payroll_components, er_legal_case_text, gosi_mudad_qiwa_muqeem, medical_insurance, recruitment_candidate_pii, performance_talent, free_text_notes"
+      masking_confirmation: "Not Provided"
+      access_restriction_confirmation: "Not Provided"
+      rollback_acknowledgement: "Not Provided"
+      incident_response_acknowledgement: "Not Provided"
+      post_load_validation_acknowledgement: "Not Provided"
+      execution_owner_confirmation: "Not Provided"
+      stop_authority_confirmation: "Not Provided"
+      validation_result: "Pending"
+      missing_evidence_flag: true
+      reviewer_role: "Systems Architect"
+      notes: "Awaiting IT Operations Director execution readiness confirmation"
+  notes: "All evidence items default to Not Provided. No approvals fabricated."
+

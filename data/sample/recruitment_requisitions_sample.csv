@@ -1,0 +1,8 @@
+requisition_id,job_title,department,project,cost_center,owner_id,approval_date,target_hire_date,closed_date,status
+REQ001,Software Engineer,Engineering,PROJ-BETA,CC-ENG,EMP011,2026-06-01,2026-06-25,2026-06-20,Closed
+REQ002,HR Specialist,HR,PROJ-ALPHA,CC-HR,EMP011,2026-06-02,2026-07-15,,Open
+REQ002,HR Specialist duplicate log,HR,PROJ-ALPHA,CC-HR,EMP011,2026-06-02,2026-07-15,,Open
+REQ003,Financial Analyst,Finance,PROJ-ALPHA,CC-FIN,,2026-06-05,2026-07-20,,Open
+REQ004,Operations Supervisor,Operations,PROJ-GAMMA,CC-OPS,EMP011,2026-05-01,2026-06-15,,Open
+REQ005,Marketing Manager,Marketing,PROJ-ALPHA,CC-MKT,EMP011,2026-06-10,,,Open
+REQ006,QA Engineer,Engineering,PROJ-BETA,CC-ENG,EMP011,2026-06-01,2026-06-15,2026-06-10,Closed

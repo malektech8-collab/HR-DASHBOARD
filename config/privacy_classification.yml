@@ -1,0 +1,98 @@
+# HR Command Center - Privacy Classification Registry
+# Defines the classification level of individual fields across the canonical data model.
+
+classifications:
+  - field_name: "employee_name"
+    classification: "Personal Data"
+    description: "Identifiable name of employee"
+    handling_instruction: "Pseudonymize or hash in reports unless accessed by HR Admin roles"
+
+  - field_name: "employee_id"
+    classification: "Internal"
+    description: "Company-internal unique ID"
+    handling_instruction: "Safe to display as primary record key"
+
+  - field_name: "national_id_number"
+    classification: "Government ID Sensitive"
+    description: "Saudi National ID or Iqama number"
+    handling_instruction: "Must be masked by default in views, show only last 4 digits"
+
+  - field_name: "passport_number"
+    classification: "Government ID Sensitive"
+    description: "Foreign passport identifier"
+    handling_instruction: "Exempt from ingestion unless mandatory, must be fully masked"
+
+  - field_name: "bank_account_iban"
+    classification: "Financial Sensitive"
+    description: "IBAN payment account number"
+    handling_instruction: "Never display in dashboard, restrict access to finance database only"
+
+  - field_name: "gross_salary"
+    classification: "Financial Sensitive"
+    description: "Monthly gross pay before deductions"
+    handling_instruction: "Aggregate only in dashboards, restrict employee-level row access"
+
+  - field_name: "net_salary"
+    classification: "Financial Sensitive"
+    description: "Final payout amount"
+    handling_instruction: "Restricted visibility, viewable only by authorized Payroll roles"
+
+  - field_name: "medical_insurance_policy"
+    classification: "Health Sensitive"
+    description: "Medical policy number and class"
+    handling_instruction: "Aggregate to premium sums, do not expose chronic logs"
+
+  - field_name: "disciplinary_cases"
+    classification: "Legal Sensitive"
+    description: "Employee relations warnings or disputes"
+    handling_instruction: "Pseudonymize employee and redact detail narrative"
+
+  - field_name: "performance_rating"
+    classification: "Confidential"
+    description: "Talent performance review rating"
+    handling_instruction: "Restrict to management and Talent leads, hide from general staff"
+
+  - field_name: "successor_readiness"
+    classification: "Confidential"
+    description: "Succession plans and readiness metrics"
+    handling_instruction: "High sensitive planning, restricted to HR Executives only"
+
+  - field_name: "flight_risk"
+    classification: "Confidential"
+    description: "Calculated risk of employee leaving"
+    handling_instruction: "Strictly confidential, restrict to Executives and Talent leads"
+
+  - field_name: "email"
+    classification: "Personal Data"
+    description: "Corporate or personal email address"
+    handling_instruction: "Mask or redact in standard reports"
+
+  - field_name: "phone_number"
+    classification: "Personal Data"
+    description: "Mobile or contact phone number"
+    handling_instruction: "Mask as +966*****5678 in listings"
+
+  - field_name: "successor_employee_key"
+    classification: "Personal Sensitive Data"
+    description: "Pseudonymized successor key"
+    handling_instruction: "Opaque token only, never show raw employee ID or initials. Restrict row access to authorized roles."
+
+  - field_name: "actual_check_in"
+    classification: "Operational Data"
+    description: "Check-in time logs"
+    handling_instruction: "Visible to operational roles; aggregate tardy summaries for dashboards"
+
+  - field_name: "gosi_status"
+    classification: "Legal Sensitive Data"
+    description: "GOSI registration status"
+    handling_instruction: "Restrict to compliance managers and HR executives"
+
+  - field_name: "disciplinary_cases_description"
+    classification: "Legal Sensitive Data"
+    description: "Detailed ER case description"
+    handling_instruction: "Scrub personal names and financial data; viewable only by ER managers"
+
+  - field_name: "investigation_notes"
+    classification: "Legal Sensitive Data"
+    description: "Free-text legal investigation notes"
+    handling_instruction: "Do not ingest raw; restrict access strictly to ER head and legal counsel"

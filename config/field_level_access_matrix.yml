@@ -1,0 +1,113 @@
+# HR Command Center - Field-Level Access Control Matrix
+# Maps 11 roles to allowed access levels (Full, Masked, Pseudonymized, Aggregate, Hidden).
+
+roles_matrix:
+  admin_system:
+    employee_name: "Full"
+    national_id_number: "Masked"
+    passport_number: "Hidden"
+    basic_salary: "Full"
+    deductions: "Full"
+    bank_account_iban: "Hidden"
+    successor_employee_key: "Pseudonymized"
+    disciplinary_cases_description: "Full"
+
+  hr_executive:
+    employee_name: "Full"
+    national_id_number: "Masked"
+    passport_number: "Hidden"
+    basic_salary: "Full"
+    deductions: "Full"
+    bank_account_iban: "Hidden"
+    successor_employee_key: "Pseudonymized"
+    disciplinary_cases_description: "Full"
+
+  hr_operations_manager:
+    employee_name: "Full"
+    national_id_number: "Masked"
+    passport_number: "Hidden"
+    basic_salary: "Hidden"
+    deductions: "Hidden"
+    bank_account_iban: "Hidden"
+    successor_employee_key: "Hidden"
+    disciplinary_cases_description: "Hidden"
+
+  payroll_manager:
+    employee_name: "Masked"
+    national_id_number: "Masked"
+    passport_number: "Hidden"
+    basic_salary: "Full"
+    deductions: "Full"
+    bank_account_iban: "Hidden"
+    successor_employee_key: "Hidden"
+    disciplinary_cases_description: "Hidden"
+
+  employee_relations_manager:
+    employee_name: "Full"
+    national_id_number: "Masked"
+    passport_number: "Hidden"
+    basic_salary: "Hidden"
+    deductions: "Hidden"
+    bank_account_iban: "Hidden"
+    successor_employee_key: "Hidden"
+    disciplinary_cases_description: "Full"
+
+  recruitment_manager:
+    employee_name: "Masked"
+    national_id_number: "Hidden"
+    passport_number: "Hidden"
+    basic_salary: "Hidden"
+    deductions: "Hidden"
+    bank_account_iban: "Hidden"
+    successor_employee_key: "Hidden"
+    disciplinary_cases_description: "Hidden"
+
+  talent_manager:
+    employee_name: "Masked"
+    national_id_number: "Hidden"
+    passport_number: "Hidden"
+    basic_salary: "Hidden"
+    deductions: "Hidden"
+    bank_account_iban: "Hidden"
+    successor_employee_key: "Pseudonymized"
+    disciplinary_cases_description: "Hidden"
+
+  compliance_manager:
+    employee_name: "Masked"
+    national_id_number: "Masked"
+    passport_number: "Hidden"
+    basic_salary: "Hidden"
+    deductions: "Hidden"
+    bank_account_iban: "Hidden"
+    successor_employee_key: "Hidden"
+    disciplinary_cases_description: "Hidden"
+
+  project_manager:
+    employee_name: "Hidden"
+    national_id_number: "Hidden"
+    passport_number: "Hidden"
+    basic_salary: "Hidden"
+    deductions: "Hidden"
+    bank_account_iban: "Hidden"
+    successor_employee_key: "Hidden"
+    disciplinary_cases_description: "Hidden"
+
+  viewer_executive_aggregate_only:
+    employee_name: "Hidden"
+    national_id_number: "Hidden"
+    passport_number: "Hidden"
+    basic_salary: "Aggregate"
+    deductions: "Aggregate"
+    bank_account_iban: "Hidden"
+    successor_employee_key: "Hidden"
+    disciplinary_cases_description: "Hidden"
+
+  auditor_read_only:
+    employee_name: "Masked"
+    national_id_number: "Masked"
+    passport_number: "Hidden"
+    basic_salary: "Full"
+    deductions: "Full"
+    bank_account_iban: "Hidden"
+    successor_employee_key: "Pseudonymized"
+    disciplinary_cases_description: "Full"

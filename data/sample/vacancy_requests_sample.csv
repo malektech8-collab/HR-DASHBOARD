@@ -1,0 +1,4 @@
+request_id,department,project,job_title,quantity,status,approved_date
+VAC001,HR,PROJ-ALPHA,HR Specialist,1,Approved,2026-06-01
+VAC002,Engineering,PROJ-BETA,Software Engineer,2,Approved,2026-06-02
+VAC003,Operations,PROJ-GAMMA,Operations Coordinator,-1,Approved,2026-06-03

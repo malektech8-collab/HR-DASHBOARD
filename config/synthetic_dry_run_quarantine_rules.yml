@@ -1,0 +1,17 @@
+# HR Command Center - Synthetic Dry-Run Quarantine & Rejection Mappings
+# Configures operational actions and logs for failed validation rules.
+
+quarantine_rules:
+  - action_key: "QUARANTINE"
+    severity_level: "High"
+    target_folder: "data/synthetic_dry_run/quarantine/"
+    trigger_rules: ["INT-001", "INT-002", "LOG-001", "LOG-005", "LOG-006", "LOG-007"]
+    log_file_path: "data/synthetic_dry_run/logs/quarantine.log"
+    resolution_path: "Escalate to Data Steward for manual data repair"
+
+  - action_key: "REJECT"
+    severity_level: "Critical"
+    target_folder: "data/synthetic_dry_run/rejected/"
+    trigger_rules: ["SCH-001", "SCH-002", "SCH-003", "LOG-002", "LOG-003", "LOG-004", "SAF-001", "SAF-002", "SAF-003", "SAF-004"]
+    log_file_path: "data/synthetic_dry_run/logs/rejection.log"
+    resolution_path: "Reject transfer and request source owner to resend clean export file"

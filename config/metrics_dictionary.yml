@@ -1,0 +1,258 @@
+metrics:
+  active_headcount:
+    name: Active Headcount
+    definition: Count of employees where status is Active
+    formula: COUNT(DISTINCT employee_id) FILTER (WHERE status = 'Active')
+    unit: employees
+  joiners_this_month:
+    name: Joiners This Month
+    definition: Count of employees joining in the selected month
+    formula: COUNT(DISTINCT employee_id) FILTER (WHERE joining_date BETWEEN month_start AND month_end)
+    unit: employees
+  leavers_this_month:
+    name: Leavers This Month
+    definition: Count of employees terminated in the selected month
+    formula: COUNT(DISTINCT employee_id) FILTER (WHERE termination_date BETWEEN month_start AND month_end)
+    unit: employees
+  turnover_rate:
+    name: Turnover Rate
+    definition: Rate of employee turnover for the selected month
+    formula: leavers_this_month / active_headcount
+    unit: percentage
+  payroll_cost:
+    name: Payroll Cost
+    definition: Sum of gross pay for the selected month
+    formula: SUM(gross_pay) FILTER (WHERE payroll_period = selected_month)
+    unit: SAR
+  overtime_cost:
+    name: Overtime Cost
+    definition: Sum of overtime amount paid for the selected month
+    formula: SUM(overtime_amount) FILTER (WHERE payroll_period = selected_month)
+    unit: SAR
+  absence_days:
+    name: Absence Days
+    definition: Sum of unexcused absence days in the selected month
+    formula: SUM(absence_days)
+    unit: days
+  data_quality_score:
+    name: Data Quality Score
+    definition: Overall score reflecting missing fields, duplicate IDs, and exceptions
+    formula: 1.0 - (total_errors / total_checks)
+    unit: percentage
+
+  saudi_headcount:
+    name: Saudi Headcount
+    definition: Count of active Saudi employees
+    formula: COUNT(DISTINCT employee_id) FILTER (WHERE status = 'Active' AND is_saudi = TRUE)
+    unit: employees
+  non_saudi_headcount:
+    name: Non-Saudi Headcount
+    definition: Count of active non-Saudi employees
+    formula: COUNT(DISTINCT employee_id) FILTER (WHERE status = 'Active' AND is_saudi = FALSE)
+    unit: employees
+  saudization_rate:
+    name: Saudization Rate
+    definition: Percentage of active Saudi employees relative to total headcount
+    formula: saudi_headcount / active_headcount
+    unit: percentage
+  probation_count:
+    name: Employees on Probation
+    definition: Active employees joined in the last 90 days
+    formula: COUNT(DISTINCT employee_id) FILTER (WHERE status = 'Active' AND joining_date BETWEEN (anchor_date - 90 days) AND anchor_date)
+    unit: employees
+  contract_expiring_30:
+    name: Contracts Expiring in 30 Days
+    definition: Count of active contracts expiring within 30 days
+    formula: COUNT(DISTINCT employee_id) FILTER (WHERE status = 'Active' AND contract_end_date BETWEEN anchor_date AND (anchor_date + 30 days))
+    unit: contracts
+  iqama_expiring_30:
+    name: Iqamas Expiring in 30 Days
+    definition: Count of active Iqamas expiring within 30 days (non-Saudis)
+    formula: COUNT(DISTINCT employee_id) FILTER (WHERE status = 'Active' AND is_saudi = FALSE AND iqama_expiry BETWEEN anchor_date AND (anchor_date + 30 days))
+    unit: iqamas
+  missing_manager_count:
+    name: Missing Manager Count
+    definition: Active employees missing supervisor or manager assignment
+    formula: COUNT(DISTINCT employee_id) FILTER (WHERE status = 'Active' AND (manager_id IS NULL OR manager_id = ''))
+    unit: issues
+  missing_project_count:
+    name: Missing Project Count
+    definition: Active employees missing a project assignment
+    formula: COUNT(DISTINCT employee_id) FILTER (WHERE status = 'Active' AND (project IS NULL OR project = ''))
+    unit: issues
+  missing_cost_center_count:
+    name: Missing Cost Center Count
+    definition: Active employees missing financial cost center assignment
+    formula: COUNT(DISTINCT employee_id) FILTER (WHERE status = 'Active' AND (cost_center IS NULL OR cost_center = ''))
+    unit: issues
+
+  basic_salary_cost:
+    name: Basic Salary Cost
+    definition: Sum of basic salary in the selected month
+    formula: SUM(basic_salary) FILTER (WHERE payroll_period = selected_month)
+    unit: SAR
+  allowances_cost:
+    name: Allowances Cost
+    definition: Sum of housing, transport, and other allowances in the selected month
+    formula: SUM(housing_allowance + transport_allowance + other_allowances) FILTER (WHERE payroll_period = selected_month)
+    unit: SAR
+  net_payroll:
+    name: Net Payroll
+    definition: Sum of net pay (gross pay minus deductions) in the selected month
+    formula: SUM(net_pay) FILTER (WHERE payroll_period = selected_month)
+    unit: SAR
+  avg_cost_per_employee:
+    name: Average Cost per Employee
+    definition: Average total payroll cost per paid employee in the selected month
+    formula: total_payroll_cost / employees_paid
+    unit: SAR
+  payroll_variance_pct:
+    name: Payroll Variance MoM
+    definition: Monthly percentage variance in total payroll cost vs previous period
+    formula: (total_payroll_cost_current - total_payroll_cost_previous) / total_payroll_cost_previous
+    unit: percentage
+  employees_paid:
+    name: Employees Paid
+    definition: Count of distinct employees receiving a payroll record in the selected month
+    formula: COUNT(DISTINCT employee_id) FILTER (WHERE payroll_period = selected_month)
+    unit: employees
+  payroll_exception_count:
+    name: Payroll Exceptions Count
+    definition: Count of errors or warnings flagged during payroll reconciliation audits
+    formula: COUNT(*) FROM mart_payroll_exceptions
+    unit: issues
+
+  attendance_compliance_pct:
+    name: Attendance Compliance Rate
+    definition: Rate of expected workdays completed without absences, missing punches, or net lateness
+    formula: 1.0 - (COUNT(CASE WHEN calculated_net_late_minutes > 0 OR missing_punch_count > 0 OR absence_days > 0 THEN 1 END) / CAST(COUNT(*) AS DOUBLE))
+    unit: percentage
+  late_minutes:
+    name: Late Minutes
+    definition: Sum of late check-in minutes beyond the grace period
+    formula: SUM(calculated_late_minutes)
+    unit: minutes
+  excused_late_minutes:
+    name: Excused Late Minutes
+    definition: Sum of late check-in minutes excused by supervisors
+    formula: SUM(excused_late_minutes)
+    unit: minutes
+  net_late_minutes:
+    name: Net Late Minutes
+    definition: Official late minutes remaining after deducting excused minutes
+    formula: SUM(calculated_net_late_minutes)
+    unit: minutes
+  early_leave_minutes:
+    name: Early Leave Minutes
+    definition: Sum of minutes left early before scheduled shift end
+    formula: SUM(date_diff('minute', actual_check_out, scheduled_end))
+    unit: minutes
+  missing_punch_count:
+    name: Missing Punch Count
+    definition: Count of missing check-in or check-out punches
+    formula: SUM(missing_punch_count)
+    unit: punches
+  overtime_hours:
+    name: Overtime Hours
+    definition: Sum of approved overtime hours in attendance logs
+    formula: SUM(overtime_hours) FILTER (WHERE overtime_approved = TRUE)
+    unit: hours
+  attendance_exception_count:
+    name: Attendance Exceptions Count
+    definition: Total number of flagged exceptions in attendance records
+    formula: COUNT(*) FROM mart_attendance_exceptions
+    unit: issues
+
+  # Employee Relations Metrics
+  total_open_er_cases:
+    name: Total Open ER Cases
+    definition: Count of active open employee relations cases in period
+    formula: COUNT(case_id) WHERE case_status = 'Open'
+    unit: cases
+  new_cases_this_month:
+    name: New Cases This Month
+    definition: Count of employee relations cases opened in period
+    formula: COUNT(case_id) WHERE created_date BETWEEN month_start AND month_end
+    unit: cases
+  closed_cases_this_month:
+    name: Closed Cases This Month
+    definition: Count of employee relations cases resolved in period
+    formula: COUNT(case_id) WHERE closed_date BETWEEN month_start AND month_end
+    unit: cases
+  average_case_aging_days:
+    name: Average Case Aging Days
+    definition: Average duration in days cases remain open
+    formula: AVG(date_diff('day', created_date, COALESCE(closed_date, anchor_date)))
+    unit: days
+  er_exception_count:
+    name: ER Exception Count
+    definition: Total count of compliance or case violations in ER logs
+    formula: COUNT(*) FROM mart_er_exceptions
+    unit: issues
+
+  # Recruitment Metrics
+  open_requisitions:
+    name: Open Requisitions
+    definition: Count of active approved requisitions currently open
+    formula: COUNT(requisition_id) WHERE status IN ('Open', 'Approved', 'In Progress', 'On Hold')
+    unit: requisitions
+  approved_vacancies:
+    name: Approved Vacancies
+    definition: Sum of headcount quantity for approved vacancy requests
+    formula: SUM(quantity) WHERE status = 'Approved'
+    unit: vacancies
+  candidates_in_pipeline:
+    name: Candidates in Pipeline
+    definition: Total number of candidate profiles currently in active funnel stages
+    formula: COUNT(candidate_id)
+    unit: candidates
+  interviews_scheduled:
+    name: Interviews Scheduled
+    definition: Total interview sessions scheduled for the report month
+    formula: COUNT(interview_id) WHERE interview_date BETWEEN month_start AND month_end
+    unit: interviews
+  offers_extended:
+    name: Offers Extended
+    definition: Total offer letters sent to candidates in report month
+    formula: COUNT(offer_id) WHERE offer_date BETWEEN month_start AND month_end
+    unit: offers
+  offer_acceptance_pct:
+    name: Offer Acceptance Rate
+    definition: Ratio of accepted offers to total decided offers
+    formula: accepted offers / decided offers
+    unit: percentage
+  hires_this_month:
+    name: Hires This Month
+    definition: Total candidate onboardings completed in report month
+    formula: COUNT(candidate_id)
+    unit: hires
+  average_time_to_fill:
+    name: Average Time to Fill
+    definition: Average number of days to successfully hire for an approved requisition
+    formula: AVG(hire_date - approval_date)
+    unit: days
+  overdue_requisitions:
+    name: Overdue Requisitions
+    definition: Open requisitions that have breached their effective target hire date
+    formula: COUNT(requisition_id) WHERE effective_target_hire_date < anchor_date
+    unit: requisitions
+  workforce_plan_fulfillment_pct:
+    name: Workforce Plan Fulfillment Rate
+    definition: Ratio of actual active headcount to planned headcount targets
+    formula: actual_active_headcount / planned_headcount
+    unit: percentage
+  recruitment_exception_count:
+    name: Recruitment Exceptions Count
+    definition: Total count of data quality or timeline warnings in recruitment records
+    formula: COUNT(*) FROM mart_recruitment_exceptions
+    unit: issues
+
+
+thresholds:
+  payroll_variance_rules:
+    basic_salary_change_pct: 0.10  # 10% change threshold for MoM basic salary
+    gross_pay_change_amount: 2000.0  # 2,000 SAR change threshold for MoM gross pay
+  attendance_rules:
+    grace_period_minutes: 15
+
+

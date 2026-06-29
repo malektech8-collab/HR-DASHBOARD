@@ -1,0 +1,247 @@
+# HR Command Center - Ingestion Stop Criteria Registry
+# Defines all 22 execution stop criteria.
+
+stop_criteria_count: 22
+
+criteria:
+  - id: "STP-001"
+    name: "Real data appears outside approved folder"
+    severity: "Critical"
+    detection_method: "Directory scan trigger"
+    stop_action: "Halt pipeline immediately"
+    owner: "Systems Architect"
+    escalation_route: "CISO"
+    rollback_requirement: true
+    evidence_required: "File listing dump"
+    restart_condition: "Manual folder purge"
+
+  - id: "STP-002"
+    name: "Unauthorized field appears"
+    severity: "High"
+    detection_method: "Schema validator scan"
+    stop_action: "Halt pipeline immediately"
+    owner: "Data Quality Steward"
+    escalation_route: "IT Ops Director"
+    rollback_requirement: true
+    evidence_required: "Schema mismatch logs"
+    restart_condition: "Source file recreation"
+
+  - id: "STP-003"
+    name: "Payroll field appears"
+    severity: "Critical"
+    detection_method: "Header audit check"
+    stop_action: "Halt pipeline immediately"
+    owner: "Data Privacy Officer"
+    escalation_route: "CHRO"
+    rollback_requirement: true
+    evidence_required: "Detected headers list"
+    restart_condition: "DPO validation signoff"
+
+  - id: "STP-004"
+    name: "Government ID appears"
+    severity: "Critical"
+    detection_method: "Header audit check"
+    stop_action: "Halt pipeline immediately"
+    owner: "Data Privacy Officer"
+    escalation_route: "CHRO"
+    rollback_requirement: true
+    evidence_required: "Detected headers list"
+    restart_condition: "DPO validation signoff"
+
+  - id: "STP-005"
+    name: "Bank/IBAN appears"
+    severity: "Critical"
+    detection_method: "Header audit check"
+    stop_action: "Halt pipeline immediately"
+    owner: "Data Privacy Officer"
+    escalation_route: "CHRO"
+    rollback_requirement: true
+    evidence_required: "Detected headers list"
+    restart_condition: "DPO validation signoff"
+
+  - id: "STP-006"
+    name: "ER/legal field appears"
+    severity: "Critical"
+    detection_method: "Header audit check"
+    stop_action: "Halt pipeline immediately"
+    owner: "Data Privacy Officer"
+    escalation_route: "CHRO"
+    rollback_requirement: true
+    evidence_required: "Detected headers list"
+    restart_condition: "DPO validation signoff"
+
+  - id: "STP-007"
+    name: "Talent/performance field appears"
+    severity: "Critical"
+    detection_method: "Header audit check"
+    stop_action: "Halt pipeline immediately"
+    owner: "Data Privacy Officer"
+    escalation_route: "CHRO"
+    rollback_requirement: true
+    evidence_required: "Detected headers list"
+    restart_condition: "DPO validation signoff"
+
+  - id: "STP-008"
+    name: "Free-text employee note appears"
+    severity: "High"
+    detection_method: "Regex pattern scan"
+    stop_action: "Halt pipeline immediately"
+    owner: "Data Quality Steward"
+    escalation_route: "IT Ops Director"
+    rollback_requirement: true
+    evidence_required: "Regex match log"
+    restart_condition: "Source file recreation"
+
+  - id: "STP-009"
+    name: "Credential or token appears"
+    severity: "Critical"
+    detection_method: "Secret scanner scan"
+    stop_action: "Halt pipeline immediately"
+    owner: "Security Lead"
+    escalation_route: "CISO"
+    rollback_requirement: true
+    evidence_required: "Secret scanner report"
+    restart_condition: "CISO validation signoff"
+
+  - id: "STP-010"
+    name: "Live connection string appears"
+    severity: "Critical"
+    detection_method: "Secret scanner scan"
+    stop_action: "Halt pipeline immediately"
+    owner: "Security Lead"
+    escalation_route: "CISO"
+    rollback_requirement: true
+    evidence_required: "Secret scanner report"
+    restart_condition: "CISO validation signoff"
+
+  - id: "STP-011"
+    name: "File name does not match approved pattern"
+    severity: "Medium"
+    detection_method: "Manifest check trigger"
+    stop_action: "Reject drop file"
+    owner: "Data Quality Steward"
+    escalation_route: "IT Ops Director"
+    rollback_requirement: false
+    evidence_required: "Filename match error"
+    restart_condition: "Correct file upload"
+
+  - id: "STP-012"
+    name: "Record count exceeds approved range"
+    severity: "Medium"
+    detection_method: "Row count validation"
+    stop_action: "Reject drop file"
+    owner: "Data Quality Steward"
+    escalation_route: "IT Ops Director"
+    rollback_requirement: false
+    evidence_required: "Row count mismatch log"
+    restart_condition: "Correct file upload"
+
+  - id: "STP-013"
+    name: "Control total mismatch exceeds tolerance"
+    severity: "High"
+    detection_method: "Checksum check trigger"
+    stop_action: "Halt pipeline immediately"
+    owner: "Data Quality Steward"
+    escalation_route: "IT Ops Director"
+    rollback_requirement: true
+    evidence_required: "Checksum validation report"
+    restart_condition: "Source file recreation"
+
+  - id: "STP-014"
+    name: "Masking rule fails"
+    severity: "Critical"
+    detection_method: "Post-load masking scan"
+    stop_action: "Halt pipeline immediately"
+    owner: "Data Privacy Officer"
+    escalation_route: "CHRO"
+    rollback_requirement: true
+    evidence_required: "Masking check report"
+    restart_condition: "Restore previous snapshot"
+
+  - id: "STP-015"
+    name: "Access restriction fails"
+    severity: "Critical"
+    detection_method: "RBAC validation test"
+    stop_action: "Halt pipeline immediately"
+    owner: "Security Lead"
+    escalation_route: "CISO"
+    rollback_requirement: true
+    evidence_required: "RBAC check logs"
+    restart_condition: "Restore previous snapshot"
+
+  - id: "STP-016"
+    name: "Audit logging fails"
+    severity: "High"
+    detection_method: "Audit database ping"
+    stop_action: "Halt pipeline immediately"
+    owner: "Systems Architect"
+    escalation_route: "CISO"
+    rollback_requirement: true
+    evidence_required: "Log service status"
+    restart_condition: "Audit index refresh"
+
+  - id: "STP-017"
+    name: "Dashboard exposes restricted fields"
+    severity: "Critical"
+    detection_method: "Post-load UI validation"
+    stop_action: "Halt pipeline immediately"
+    owner: "Data Privacy Officer"
+    escalation_route: "CHRO"
+    rollback_requirement: true
+    evidence_required: "UI audit logs"
+    restart_condition: "Restore previous snapshot"
+
+  - id: "STP-018"
+    name: "Source owner withdraws approval"
+    severity: "High"
+    detection_method: "Manual alert trigger"
+    stop_action: "Halt pipeline immediately"
+    owner: "Systems Architect"
+    escalation_route: "CHRO"
+    rollback_requirement: true
+    evidence_required: "Written stop order"
+    restart_condition: "Re-obtained approval"
+
+  - id: "STP-019"
+    name: "Privacy/security owner issues stop order"
+    severity: "Critical"
+    detection_method: "Manual alert trigger"
+    stop_action: "Halt pipeline immediately"
+    owner: "Systems Architect"
+    escalation_route: "CHRO"
+    rollback_requirement: true
+    evidence_required: "Written stop order"
+    restart_condition: "Re-obtained approval"
+
+  - id: "STP-020"
+    name: "Rollback owner is unavailable"
+    severity: "High"
+    detection_method: "Checklist pre-run check"
+    stop_action: "Abort scheduling window"
+    owner: "IT Operations Director"
+    escalation_route: "CHRO"
+    rollback_requirement: false
+    evidence_required: "On-call registry logs"
+    restart_condition: "Owner availability confirmed"
+
+  - id: "STP-021"
+    name: "Incident response owner is unavailable"
+    severity: "High"
+    detection_method: "Checklist pre-run check"
+    stop_action: "Abort scheduling window"
+    owner: "IT Operations Director"
+    escalation_route: "CHRO"
+    rollback_requirement: false
+    evidence_required: "On-call registry logs"
+    restart_condition: "Owner availability confirmed"
+
+  - id: "STP-022"
+    name: "Staging disk encryption is disabled or fails"
+    severity: "Critical"
+    detection_method: "Disk permissions audit"
+    stop_action: "Halt pipeline immediately"
+    owner: "Security Lead"
+    escalation_route: "CISO"
+    rollback_requirement: true
+    evidence_required: "Volume status logs"
+    restart_condition: "Re-encryption verification"

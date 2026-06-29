@@ -1,0 +1,5 @@
+assessment_id,employee_id,competency_name,required_score,actual_score,assessed_date
+COM001,EMP001,SQL Fundamentals,4.0,4.5,2026-06-10
+COM002,EMP002,Python Coding,4.0,3.0,2026-06-11
+COM003,EMP999,Unknown competency,3.0,3.0,2026-06-12
+COM004,EMP004,Marketing Strategy,4.0,6.0,2026-06-13
