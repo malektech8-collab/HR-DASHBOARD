@@ -30,3 +30,7 @@ Evidence items in this register are reviewed in the Milestone 3I authorization e
 - [Final Authorization Evidence Review](FINAL_AUTHORIZATION_EVIDENCE_REVIEW.md)
 - [Signoff Evidence Validation Log](SIGNOFF_EVIDENCE_VALIDATION_LOG.md)
 - [Go/No-Go Decision Record](CONTROLLED_LOAD_GO_NO_GO_DECISION_RECORD.md)
+
+## Milestone 3J Cross-Reference
+
+Milestone 3J defines the planning package for future authorization evidence intake and hold-condition closure. No authorization evidence is recorded as provided by Milestone 3J, and no real-data execution or load scheduling is approved.

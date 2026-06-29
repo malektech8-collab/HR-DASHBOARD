@@ -50,3 +50,11 @@ This checklist must be fully completed and signed off before the analytical engi
 - [ ] No-real-data audit passed
 
 See: [Milestone 3I Go/No-Go Summary](MILESTONE_3I_GO_NO_GO_SUMMARY.md)
+
+## Milestone 3J Planning Cross-Reference
+
+- [ ] Authorization evidence intake template prepared.
+- [ ] Hold-condition closure tracker prepared.
+- [ ] Evidence validation, expiry, versioning, rejection, and audit-trail rules prepared.
+- [ ] No real-data execution approved.
+- [ ] No load scheduling approved.
