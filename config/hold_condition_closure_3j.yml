@@ -1,0 +1,34 @@
+# HR Command Center - Milestone 3J Hold-Condition Closure Tracker
+
+hold_condition_closure_3j:
+  milestone: "3J"
+  tracker_status: "Planning Only"
+  decision_recommendation: "Hold"
+  closure_status_default: "Open - Evidence Not Provided"
+  first_load_domain: "Data Quality / Command Center Metadata"
+  stop_criteria_count: 22
+  hold_conditions:
+    - condition_id: "3J-HOLD-001"
+      condition: "CHRO written authorization missing"
+      required_evidence_id: "AUTH-EVD-001"
+      evidence_status: "Not Provided"
+      closure_status: "Open - Evidence Not Provided"
+    - condition_id: "3J-HOLD-002"
+      condition: "CISO security clearance missing"
+      required_evidence_id: "AUTH-EVD-002"
+      evidence_status: "Not Provided"
+      closure_status: "Open - Evidence Not Provided"
+    - condition_id: "3J-HOLD-003"
+      condition: "IT Operations Director execution readiness confirmation missing"
+      required_evidence_id: "AUTH-EVD-003"
+      evidence_status: "Not Provided"
+      closure_status: "Open - Evidence Not Provided"
+    - condition_id: "3J-HOLD-004"
+      condition: "Owner availability cannot be confirmed until evidence is validated"
+      required_evidence_id: "AUTH-EVD-001, AUTH-EVD-002, AUTH-EVD-003"
+      evidence_status: "Not Provided"
+      closure_status: "Open - Evidence Not Provided"
+  all_hold_conditions_closed: false
+  real_data_execution: "Not Approved"
+  load_scheduling: "Not Approved"
+  notes: "Hold conditions remain open by default. Closure is a future review action after evidence is provided and validated."

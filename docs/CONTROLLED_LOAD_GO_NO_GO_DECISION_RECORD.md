@@ -61,3 +61,7 @@ Await submission of authorization evidence from CHRO, CISO, and IT Operations Di
 - [Final Authorization Evidence Review](FINAL_AUTHORIZATION_EVIDENCE_REVIEW.md)
 - [Gate 5 Final Authorization Review](GATE_5_FINAL_AUTHORIZATION_REVIEW.md)
 - [Stop Criteria Confirmation](STOP_CRITERIA_CONFIRMATION.md)
+
+## Milestone 3J Cross-Reference
+
+Milestone 3J prepares planning artifacts for future evidence intake and hold-condition closure only. The current recommendation remains **Hold** until required authorization evidence is provided and validated through a future authorized review.

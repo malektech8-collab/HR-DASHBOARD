@@ -1,0 +1,66 @@
+# HR Command Center - Milestone 3J Authorization Evidence Intake Configuration
+
+authorization_evidence_intake_3j:
+  milestone: "3J"
+  intake_status: "Planning Only"
+  default_evidence_status: "Not Provided"
+  decision_recommendation: "Hold"
+  first_load_domain: "Data Quality / Command Center Metadata"
+  stop_criteria_count: 22
+  real_data_execution: "Not Approved"
+  load_scheduling: "Not Approved"
+  required_signatories:
+    - role: "CHRO"
+      evidence_id: "AUTH-EVD-001"
+      required_evidence: "Written authorization letter"
+      default_status: "Not Provided"
+    - role: "CISO"
+      evidence_id: "AUTH-EVD-002"
+      required_evidence: "Security clearance letter"
+      default_status: "Not Provided"
+    - role: "IT Operations Director"
+      evidence_id: "AUTH-EVD-003"
+      required_evidence: "Execution readiness confirmation"
+      default_status: "Not Provided"
+  allowed_evidence_statuses:
+    - "Not Provided"
+    - "Provided - Pending Review"
+    - "Valid"
+    - "Valid with Conditions"
+    - "Rejected"
+    - "Expired"
+  validation_rules:
+    - rule_id: "3J-VAL-001"
+      rule: "Evidence must map to one of the three required evidence IDs."
+      failure_action: "Reject evidence"
+    - rule_id: "3J-VAL-002"
+      rule: "Evidence must reference Data Quality / Command Center Metadata only."
+      failure_action: "Reject evidence"
+    - rule_id: "3J-VAL-003"
+      rule: "Evidence must not include real employee records or restricted fields."
+      failure_action: "Reject evidence and keep Hold"
+    - rule_id: "3J-VAL-004"
+      rule: "Evidence must not include credentials, tokens, API keys, passwords, database URLs, or production connection strings."
+      failure_action: "Reject evidence and escalate to security reviewer"
+  expiry_rules:
+    default_expiry_days: 30
+    expired_status: "Expired"
+    expiry_action: "Keep decision recommendation Hold until refreshed evidence is validated"
+  versioning_rules:
+    version_format: "AUTH-EVD-###-vN"
+    superseded_versions_retained: true
+    approval_version_status_default: "Not Provided"
+  rejection_rules:
+    rejection_status: "Rejected"
+    rejection_requires_reason: true
+    rejection_keeps_decision_recommendation: "Hold"
+  audit_trail_requirements:
+    - "Evidence ID"
+    - "Signatory role"
+    - "Submission date"
+    - "Reviewer role"
+    - "Validation result"
+    - "Version"
+    - "Decision impact"
+    - "Rejection reason when applicable"
+  notes: "This configuration defines planning rules only. It does not approve scheduling or real-data execution."

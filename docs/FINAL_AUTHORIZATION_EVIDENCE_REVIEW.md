@@ -105,3 +105,7 @@ This document reviews each authorization evidence item against the 21-field sche
 
 All three authorization evidence items remain at `Not Provided` status. No approvals have been fabricated. Evidence review is complete but authorization is pending.
 
+
+## Milestone 3J Cross-Reference
+
+Milestone 3J adds planning-only intake, validation, expiry, versioning, rejection, and audit-trail requirements for future authorization evidence review. This does not change the Milestone 3I defaults: evidence remains `Not Provided`, status remains `Authorization Evidence Pending`, and decision recommendation remains `Hold`.
