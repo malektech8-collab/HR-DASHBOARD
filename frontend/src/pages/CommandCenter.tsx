@@ -6,7 +6,6 @@ import {
   fetchCommandCenterPriorityAlerts,
   fetchCommandCenterExceptions,
   fetchCommandCenterDataFreshness,
-  fetchCommandCenterNavigationStatus,
   fetchCommandCenterQaIndex
 } from '../lib/api';
 import type { 
@@ -15,7 +14,6 @@ import type {
   PriorityAlertItem,
   ExceptionSummaryItem,
   FreshnessItem,
-  NavigationStatusItem,
   QaIndexItem
 } from '../lib/types';
 import { 
@@ -51,7 +49,6 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
   const [alerts, setAlerts] = useState<PriorityAlertItem[]>([]);
   const [exceptions, setExceptions] = useState<ExceptionSummaryItem[]>([]);
   const [freshness, setFreshness] = useState<FreshnessItem[]>([]);
-  const [navStatus, setNavStatus] = useState<NavigationStatusItem[]>([]);
   const [qaIndex, setQaIndex] = useState<QaIndexItem[]>([]);
   
   const [loading, setLoading] = useState(true);
@@ -67,7 +64,6 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
         alertsData,
         exceptionsData,
         freshnessData,
-        navData,
         qaData
       ] = await Promise.all([
         fetchCommandCenterOverview(),
@@ -75,7 +71,6 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
         fetchCommandCenterPriorityAlerts(),
         fetchCommandCenterExceptions(),
         fetchCommandCenterDataFreshness(),
-        fetchCommandCenterNavigationStatus(),
         fetchCommandCenterQaIndex()
       ]);
       
@@ -84,9 +79,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
       setAlerts(alertsData.alerts);
       setExceptions(exceptionsData.exceptions);
       setFreshness(freshnessData.freshness);
-      setNavStatus(navData.navigation);
       setQaIndex(qaData.qa_index);
-      console.debug("Navigation targets loaded:", navData.navigation.length);
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'Failed to connect to backend FastAPI services.');
@@ -159,8 +152,6 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
       default: return <Shield className="w-5 h-5 text-slate-400" />;
     }
   };
-
-  console.debug("navStatus", navStatus);
 
   return (
     <div className="space-y-8 pb-16">

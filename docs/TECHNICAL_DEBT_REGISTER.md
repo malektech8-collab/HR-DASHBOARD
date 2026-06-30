@@ -27,12 +27,14 @@ This register lists all known baseline technical debt, TypeScript compiler warni
 - **Remediation**: Align interface definitions in `types.ts` with component props. Fix the prop structures of `KpiCard` and `ExceptionTable` in legacy pages.
 - **Resolution Notes**: Type files, component props, and interfaces have been refactored to use fully standard TypeScript types. Frontend builds compile with zero errors.
 
-### TD-003 — Unused Variable Warnings
+### TD-003 — Unused Variable and Console Debug Cleanup in CommandCenter
 
+- **Status**: CLOSED/RESOLVED
 - **Category**: Frontend Hardening
-- **Description**: Unused variables present in `CommandCenter.tsx` (`navStatus`), `EmployeeRelations.tsx` (`CheckCircle2`), `Recruitment.tsx` (`HelpCircle`), and `Talent.tsx` (`deptAvg`).
-- **Impact**: Minimal impact, but causes warnings in compiler outputs.
-- **Remediation**: Remove unused imports and local variable declarations.
+- **Description**: Unused variables present in `CommandCenter.tsx` (`navStatus`), `EmployeeRelations.tsx` (`CheckCircle2`), `Recruitment.tsx` (`HelpCircle`), and `Talent.tsx` (`deptAvg`), along with console debug noise.
+- **Impact**: Minimal impact, but causes warnings in compiler outputs and pollution in browser logs.
+- **Remediation**: Remove unused imports and local variable declarations, and clean up debug console logs.
+- **Resolution Notes**: Unused variables and console.debug logging statements in `CommandCenter.tsx` were successfully refactored and cleaned up. Build remains fully stable and clean.
 
 ## Exclusions
 
