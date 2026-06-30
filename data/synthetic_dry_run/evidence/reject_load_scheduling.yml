@@ -1,0 +1,12 @@
+evidence_id: "AUTH-EVD-003"
+evidence_type: "IT Operations Director Execution Readiness"
+signatory_role: "IT Operations Director"
+evidence_status: "Synthetic Test Only"
+evidence_source: "Synthetic Only"
+approved_source_category: "Data Quality / Command Center Metadata"
+decision_recommendation: "Hold"
+real_data_execution: "Not Approved"
+load_scheduling: "Scheduled"
+stop_criteria_count: 22
+expected_outcome: "reject"
+notes: "Synthetic negative sample attempting to schedule a load window."

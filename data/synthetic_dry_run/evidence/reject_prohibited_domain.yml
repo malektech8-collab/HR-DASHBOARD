@@ -1,0 +1,12 @@
+evidence_id: "AUTH-EVD-001"
+evidence_type: "CHRO Written Authorization"
+signatory_role: "CHRO"
+evidence_status: "Synthetic Test Only"
+evidence_source: "Synthetic Only"
+approved_source_category: "Payroll"
+decision_recommendation: "Hold"
+real_data_execution: "Not Approved"
+load_scheduling: "Not Approved"
+stop_criteria_count: 22
+expected_outcome: "reject"
+notes: "Synthetic negative sample with prohibited domain."
