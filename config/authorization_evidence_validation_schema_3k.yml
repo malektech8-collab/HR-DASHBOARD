@@ -1,0 +1,66 @@
+# HR Command Center - Milestone 3K Synthetic Evidence Validation Schema
+
+authorization_evidence_validation_schema_3k:
+  milestone: "3K"
+  validation_scope: "Synthetic evidence only"
+  allowed_input_directory: "data/synthetic_dry_run/evidence/"
+  refused_path_fragments:
+    - "data/real_"
+    - ".env"
+    - "credentials"
+    - "secret"
+    - "token"
+    - "password"
+  required_fields:
+    - evidence_id
+    - evidence_type
+    - signatory_role
+    - evidence_status
+    - evidence_source
+    - approved_source_category
+    - decision_recommendation
+    - real_data_execution
+    - load_scheduling
+    - stop_criteria_count
+    - expected_outcome
+  allowed_evidence_ids:
+    - "AUTH-EVD-001"
+    - "AUTH-EVD-002"
+    - "AUTH-EVD-003"
+  allowed_signatory_roles:
+    - "CHRO"
+    - "CISO"
+    - "IT Operations Director"
+  allowed_statuses:
+    - "Not Provided"
+    - "Synthetic Test Only"
+    - "Provided - Pending Review"
+    - "Valid"
+    - "Valid with Conditions"
+    - "Rejected"
+    - "Expired"
+  required_evidence_source: "Synthetic Only"
+  approved_source_category: "Data Quality / Command Center Metadata"
+  rejected_fields:
+    - "employee_name"
+    - "employee_number"
+    - "national_id"
+    - "iqama_number"
+    - "passport_number"
+    - "mobile_number"
+    - "email_address"
+    - "bank_iban"
+    - "salary"
+    - "payroll_components"
+    - "er_legal_case_text"
+    - "gosi_mudad_qiwa_muqeem"
+    - "medical_insurance"
+    - "recruitment_candidate_pii"
+    - "performance_talent"
+    - "free_text_notes"
+  stop_criteria_count: 22
+  required_defaults:
+    decision_recommendation: "Hold"
+    real_data_execution: "Not Approved"
+    load_scheduling: "Not Approved"
+  notes: "Synthetic validation results must not update or imply real authorization evidence approval."

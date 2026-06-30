@@ -1,0 +1,12 @@
+evidence_id: "AUTH-EVD-002"
+evidence_type: "CISO Security Clearance"
+signatory_role: "CISO"
+evidence_status: "Synthetic Test Only"
+evidence_source: "Synthetic Only"
+approved_source_category: "Data Quality / Command Center Metadata"
+decision_recommendation: "Hold"
+real_data_execution: "Approved"
+load_scheduling: "Not Approved"
+stop_criteria_count: 22
+expected_outcome: "reject"
+notes: "Synthetic negative sample attempting to approve execution."
