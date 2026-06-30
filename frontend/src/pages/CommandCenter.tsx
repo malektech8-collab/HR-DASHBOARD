@@ -160,6 +160,8 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
     }
   };
 
+  console.debug("navStatus", navStatus);
+
   return (
     <div className="space-y-8 pb-16">
       {/* 1. Header Row */}

@@ -787,3 +787,125 @@ export interface QaIndexResponse {
   qa_index: QaIndexItem[];
 }
 
+export interface ErTrendsItem {
+  month: string;
+  open_cases: number;
+  closed_cases: number;
+}
+
+export interface ErTrendsData {
+  trends: ErTrendsItem[];
+}
+
+export interface ErCasesByProjectItem {
+  project: string;
+  case_count: number;
+}
+
+export interface ErCasesByProjectData {
+  projects: ErCasesByProjectItem[];
+}
+
+export interface ErCasesByDepartmentItem {
+  department: string;
+  case_count: number;
+}
+
+export interface ErCasesByDepartmentData {
+  departments: ErCasesByDepartmentItem[];
+}
+
+export interface ErCaseTypeItem {
+  case_type: string;
+  case_count: number;
+}
+
+export interface ErCaseTypeData {
+  case_types: ErCaseTypeItem[];
+}
+
+export interface ErCaseStatusItem {
+  status: string;
+  case_count: number;
+}
+
+export interface ErCaseStatusData {
+  statuses: ErCaseStatusItem[];
+}
+
+export interface ErSlaPerformanceItem {
+  sla_compliance_pct: number;
+  overdue_cases_count: number;
+}
+
+export interface ErSlaPerformanceData {
+  sla_performance: ErSlaPerformanceItem[];
+}
+
+export interface ErAgingBucketItem {
+  aging_bucket: string;
+  case_count: number;
+}
+
+export interface ErAgingBucketData {
+  aging_buckets: ErAgingBucketItem[];
+}
+
+export interface ErExceptionsData {
+  exceptions: any[];
+}
+
+export interface TalentSummaryData {
+  report_month: string;
+  kpis: KPIItem[];
+}
+
+export interface PerformanceDistributionData {
+  performance_distribution: CategoryDistribution;
+}
+
+export interface PerformanceTrendsData {
+  months: string[];
+  performance_trends: any;
+}
+
+export interface PerformanceByProjectData {
+  performance_by_project: any;
+}
+
+export interface PerformanceByDepartmentData {
+  performance_by_department: any;
+}
+
+export interface GoalCompletionData {
+  goal_completion: any;
+}
+
+export interface CompetencyGapData {
+  competency_gaps: any;
+}
+
+export interface LearningCompletionData {
+  learning_completion: any;
+}
+
+export interface LearningByProjectData {
+  learning_by_project: any;
+}
+
+export interface SuccessionCoverageData {
+  succession_coverage: any;
+}
+
+export interface SuccessorReadinessData {
+  successor_readiness: any;
+}
+
+export interface TalentRiskData {
+  talent_risk: any;
+}
+
+export interface TalentExceptionsData {
+  exceptions: any[];
+}
+

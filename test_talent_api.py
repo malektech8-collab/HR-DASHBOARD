@@ -1,18 +1,38 @@
-import urllib.request
-import json
+import sys
+import os
+from fastapi.testclient import TestClient
 
-endpoints = [
-    'summary', 'performance-distribution', 'trends', 'by-project', 'by-department',
-    'goals', 'competency-gaps', 'learning', 'succession', 'succession-readiness',
-    'risk', 'exceptions'
-]
+# Add backend to python path
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "backend"))
+)
 
-for ep in endpoints:
-    url = f"http://127.0.0.1:8000/api/talent/{ep}"
-    try:
-        with urllib.request.urlopen(url) as r:
-            data = json.loads(r.read())
-            keys = list(data.keys())
-            print(f"OK  {ep}: keys={keys}")
-    except Exception as e:
-        print(f"FAIL {ep}: {e}")
+from app.main import app
+
+client = TestClient(app)
+
+def test_api():
+    print("Testing Talent API endpoints locally...")
+
+    endpoints = [
+        'summary', 'performance-distribution', 'trends', 'by-project', 'by-department',
+        'goals', 'competency-gaps', 'learning', 'succession', 'succession-readiness',
+        'risk', 'exceptions'
+    ]
+
+    success = True
+    for ep in endpoints:
+        try:
+            res = client.get(f"/api/talent/{ep}")
+            assert res.status_code == 200
+            data = res.json()
+            assert isinstance(data, dict) or isinstance(data, list)
+            print(f"  [OK] {ep} endpoint responded with 200")
+        except Exception as e:
+            print(f"  [ERROR] {ep} endpoint failed: {e}")
+            success = False
+
+    assert success, "Talent API tests FAILED."
+
+if __name__ == "__main__":
+    test_api()

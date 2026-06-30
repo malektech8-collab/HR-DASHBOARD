@@ -291,7 +291,7 @@ export const Recruitment: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {openReqsKpi && (
           <KpiCard 
-            title={openReqsKpi.label}
+            label={openReqsKpi.label}
             value={openReqsKpi.value}
             unit={openReqsKpi.unit}
             status={openReqsKpi.status as any}
@@ -300,7 +300,7 @@ export const Recruitment: React.FC = () => {
         )}
         {approvedVacKpi && (
           <KpiCard 
-            title={approvedVacKpi.label}
+            label={approvedVacKpi.label}
             value={approvedVacKpi.value}
             unit={approvedVacKpi.unit}
             status={approvedVacKpi.status as any}
@@ -309,7 +309,7 @@ export const Recruitment: React.FC = () => {
         )}
         {pipelineKpi && (
           <KpiCard 
-            title={pipelineKpi.label}
+            label={pipelineKpi.label}
             value={pipelineKpi.value}
             unit={pipelineKpi.unit}
             status={pipelineKpi.status as any}
@@ -318,7 +318,7 @@ export const Recruitment: React.FC = () => {
         )}
         {interviewsKpi && (
           <KpiCard 
-            title={interviewsKpi.label}
+            label={interviewsKpi.label}
             value={interviewsKpi.value}
             unit={interviewsKpi.unit}
             status={interviewsKpi.status as any}
@@ -327,7 +327,7 @@ export const Recruitment: React.FC = () => {
         )}
         {offersKpi && (
           <KpiCard 
-            title={offersKpi.label}
+            label={offersKpi.label}
             value={offersKpi.value}
             unit={offersKpi.unit}
             status={offersKpi.status as any}
@@ -340,7 +340,7 @@ export const Recruitment: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
         {offerAcceptanceKpi && (
           <KpiCard 
-            title={offerAcceptanceKpi.label}
+            label={offerAcceptanceKpi.label}
             value={offerAcceptanceKpi.value}
             unit={offerAcceptanceKpi.unit}
             status={offerAcceptanceKpi.status as any}
@@ -349,7 +349,7 @@ export const Recruitment: React.FC = () => {
         )}
         {hiresKpi && (
           <KpiCard 
-            title={hiresKpi.label}
+            label={hiresKpi.label}
             value={hiresKpi.value}
             unit={hiresKpi.unit}
             status={hiresKpi.status as any}
@@ -358,7 +358,7 @@ export const Recruitment: React.FC = () => {
         )}
         {ttfKpi && (
           <KpiCard 
-            title={ttfKpi.label}
+            label={ttfKpi.label}
             value={ttfKpi.value}
             unit={ttfKpi.unit}
             status={ttfKpi.status as any}
@@ -367,7 +367,7 @@ export const Recruitment: React.FC = () => {
         )}
         {overdueReqsKpi && (
           <KpiCard 
-            title={overdueReqsKpi.label}
+            label={overdueReqsKpi.label}
             value={overdueReqsKpi.value}
             unit={overdueReqsKpi.unit}
             status={overdueReqsKpi.status as any}
@@ -376,7 +376,7 @@ export const Recruitment: React.FC = () => {
         )}
         {fulfillmentKpi && (
           <KpiCard 
-            title={fulfillmentKpi.label}
+            label={fulfillmentKpi.label}
             value={fulfillmentKpi.value}
             unit={fulfillmentKpi.unit}
             status={fulfillmentKpi.status as any}
@@ -385,7 +385,7 @@ export const Recruitment: React.FC = () => {
         )}
         {exceptionsKpi && (
           <KpiCard 
-            title={exceptionsKpi.label}
+            label={exceptionsKpi.label}
             value={exceptionsKpi.value}
             unit={exceptionsKpi.unit}
             status={exceptionsKpi.status as any}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Shield, ShieldAlert, ShieldCheck, HelpCircle } from 'lucide-react';
+import { Shield, ShieldAlert } from 'lucide-react';
 
 interface GovernanceStatusData {
   current_gate: string;

@@ -24,7 +24,7 @@ import type {
 } from '../lib/types';
 import { KpiCard } from '../components/cards/KpiCard';
 import { ExceptionTable } from '../components/tables/ExceptionTable';
-import { Scale, ShieldAlert, FileText, CheckCircle2, RefreshCw } from 'lucide-react';
+import { Scale, ShieldAlert, FileText, RefreshCw } from 'lucide-react';
 
 export const EmployeeRelations: React.FC = () => {
   const [summary, setSummary] = useState<ErSummaryData | null>(null);

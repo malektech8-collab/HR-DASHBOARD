@@ -207,7 +207,7 @@ export const Talent: React.FC = () => {
   const deptNames = byDepartment?.departments.map(d => d.department) || [];
   const deptHigh = byDepartment?.departments.map(d => d.high_performers) || [];
   const deptLow = byDepartment?.departments.map(d => d.low_performers) || [];
-  const deptAvg = byDepartment?.departments.map(d => d.average_rating) || [];
+
 
   const deptOption = {
     backgroundColor: 'transparent',
@@ -352,7 +352,6 @@ export const Talent: React.FC = () => {
           return (
             <KpiCard
               key={key}
-              id={`talent-kpi-${key}`}
               label={kpi.label}
               value={kpi.value}
               unit={kpi.unit}
@@ -518,7 +517,6 @@ export const Talent: React.FC = () => {
           </span>
         </h2>
         <ExceptionTable
-          id="talent-exceptions-table"
           data={exceptions}
           title="Talent & Succession Exceptions"
         />

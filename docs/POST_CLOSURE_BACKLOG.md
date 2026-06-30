@@ -7,10 +7,12 @@ This backlog tracks architectural cleanups, test framework upgrades, and validat
 ## Backlog Items
 
 ### 1. Refactor Test Suite Framework
+- **Status**: CLOSED/RESOLVED
 - **Description**: Migrate legacy tests from live localhost HTTP calls to FastAPI's mock client.
 - **Priority**: High (Fixes pytest execution).
 
 ### 2. Standardize Component Interfaces
+- **Status**: CLOSED/RESOLVED
 - **Description**: Fix type definitions and prop structures of `<KpiCard />` and `<ExceptionTable />` across frontend modules to resolve TypeScript compile errors.
 - **Priority**: High (Restores `npm run build` success).
 
