@@ -28,7 +28,7 @@ import type {
 } from '../lib/types';
 import { KpiCard } from '../components/cards/KpiCard';
 import { ExceptionTable } from '../components/tables/ExceptionTable';
-import { UserPlus, ShieldAlert, FileText, CheckCircle2, RefreshCw, Briefcase, HelpCircle, Clock } from 'lucide-react';
+import { UserPlus, ShieldAlert, RefreshCw } from 'lucide-react';
 
 export const Recruitment: React.FC = () => {
   const [summary, setSummary] = useState<RecruitmentSummaryData | null>(null);
@@ -295,7 +295,6 @@ export const Recruitment: React.FC = () => {
             value={openReqsKpi.value}
             unit={openReqsKpi.unit}
             status={openReqsKpi.status as any}
-            icon={Briefcase}
           />
         )}
         {approvedVacKpi && (
@@ -304,7 +303,6 @@ export const Recruitment: React.FC = () => {
             value={approvedVacKpi.value}
             unit={approvedVacKpi.unit}
             status={approvedVacKpi.status as any}
-            icon={CheckCircle2}
           />
         )}
         {pipelineKpi && (
@@ -313,7 +311,6 @@ export const Recruitment: React.FC = () => {
             value={pipelineKpi.value}
             unit={pipelineKpi.unit}
             status={pipelineKpi.status as any}
-            icon={UserPlus}
           />
         )}
         {interviewsKpi && (
@@ -322,7 +319,6 @@ export const Recruitment: React.FC = () => {
             value={interviewsKpi.value}
             unit={interviewsKpi.unit}
             status={interviewsKpi.status as any}
-            icon={Clock}
           />
         )}
         {offersKpi && (
@@ -331,7 +327,6 @@ export const Recruitment: React.FC = () => {
             value={offersKpi.value}
             unit={offersKpi.unit}
             status={offersKpi.status as any}
-            icon={FileText}
           />
         )}
       </div>
@@ -344,7 +339,6 @@ export const Recruitment: React.FC = () => {
             value={offerAcceptanceKpi.value}
             unit={offerAcceptanceKpi.unit}
             status={offerAcceptanceKpi.status as any}
-            icon={CheckCircle2}
           />
         )}
         {hiresKpi && (
@@ -353,7 +347,6 @@ export const Recruitment: React.FC = () => {
             value={hiresKpi.value}
             unit={hiresKpi.unit}
             status={hiresKpi.status as any}
-            icon={UserPlus}
           />
         )}
         {ttfKpi && (
@@ -362,7 +355,6 @@ export const Recruitment: React.FC = () => {
             value={ttfKpi.value}
             unit={ttfKpi.unit}
             status={ttfKpi.status as any}
-            icon={Clock}
           />
         )}
         {overdueReqsKpi && (
@@ -371,7 +363,6 @@ export const Recruitment: React.FC = () => {
             value={overdueReqsKpi.value}
             unit={overdueReqsKpi.unit}
             status={overdueReqsKpi.status as any}
-            icon={ShieldAlert}
           />
         )}
         {fulfillmentKpi && (
@@ -380,7 +371,6 @@ export const Recruitment: React.FC = () => {
             value={fulfillmentKpi.value}
             unit={fulfillmentKpi.unit}
             status={fulfillmentKpi.status as any}
-            icon={Briefcase}
           />
         )}
         {exceptionsKpi && (
@@ -389,7 +379,6 @@ export const Recruitment: React.FC = () => {
             value={exceptionsKpi.value}
             unit={exceptionsKpi.unit}
             status={exceptionsKpi.status as any}
-            icon={ShieldAlert}
           />
         )}
       </div>

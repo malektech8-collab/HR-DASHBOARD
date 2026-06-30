@@ -787,125 +787,27 @@ export interface QaIndexResponse {
   qa_index: QaIndexItem[];
 }
 
-export interface ErTrendsItem {
-  month: string;
-  open_cases: number;
-  closed_cases: number;
+declare global {
+  type ErSummaryData = import('./types').ErSummaryData;
+  type ErTrendsData = import('./types').ErTrendsData;
+  type ErCasesByProjectData = import('./types').ErCasesByProjectData;
+  type ErCasesByDepartmentData = import('./types').ErCasesByDepartmentData;
+  type ErCaseTypeData = import('./types').ErCaseTypeData;
+  type ErCaseStatusData = import('./types').ErCaseStatusData;
+  type ErSlaPerformanceData = import('./types').ErSlaPerformanceData;
+  type ErAgingBucketData = import('./types').ErAgingBucketData;
+  type ErExceptionsData = import('./types').ErExceptionsData;
+  type TalentSummaryData = import('./types').TalentSummaryData;
+  type PerformanceDistributionData = import('./types').PerformanceDistributionData;
+  type PerformanceTrendsData = import('./types').PerformanceTrendsData;
+  type PerformanceByProjectData = import('./types').PerformanceByProjectData;
+  type PerformanceByDepartmentData = import('./types').PerformanceByDepartmentData;
+  type GoalCompletionData = import('./types').GoalCompletionData;
+  type CompetencyGapData = import('./types').CompetencyGapData;
+  type LearningCompletionData = import('./types').LearningCompletionData;
+  type LearningByProjectData = import('./types').LearningByProjectData;
+  type SuccessionCoverageData = import('./types').SuccessionCoverageData;
+  type SuccessorReadinessData = import('./types').SuccessorReadinessData;
+  type TalentRiskData = import('./types').TalentRiskData;
+  type TalentExceptionsData = import('./types').TalentExceptionsData;
 }
-
-export interface ErTrendsData {
-  trends: ErTrendsItem[];
-}
-
-export interface ErCasesByProjectItem {
-  project: string;
-  case_count: number;
-}
-
-export interface ErCasesByProjectData {
-  projects: ErCasesByProjectItem[];
-}
-
-export interface ErCasesByDepartmentItem {
-  department: string;
-  case_count: number;
-}
-
-export interface ErCasesByDepartmentData {
-  departments: ErCasesByDepartmentItem[];
-}
-
-export interface ErCaseTypeItem {
-  case_type: string;
-  case_count: number;
-}
-
-export interface ErCaseTypeData {
-  case_types: ErCaseTypeItem[];
-}
-
-export interface ErCaseStatusItem {
-  status: string;
-  case_count: number;
-}
-
-export interface ErCaseStatusData {
-  statuses: ErCaseStatusItem[];
-}
-
-export interface ErSlaPerformanceItem {
-  sla_compliance_pct: number;
-  overdue_cases_count: number;
-}
-
-export interface ErSlaPerformanceData {
-  sla_performance: ErSlaPerformanceItem[];
-}
-
-export interface ErAgingBucketItem {
-  aging_bucket: string;
-  case_count: number;
-}
-
-export interface ErAgingBucketData {
-  aging_buckets: ErAgingBucketItem[];
-}
-
-export interface ErExceptionsData {
-  exceptions: any[];
-}
-
-export interface TalentSummaryData {
-  report_month: string;
-  kpis: KPIItem[];
-}
-
-export interface PerformanceDistributionData {
-  performance_distribution: CategoryDistribution;
-}
-
-export interface PerformanceTrendsData {
-  months: string[];
-  performance_trends: any;
-}
-
-export interface PerformanceByProjectData {
-  performance_by_project: any;
-}
-
-export interface PerformanceByDepartmentData {
-  performance_by_department: any;
-}
-
-export interface GoalCompletionData {
-  goal_completion: any;
-}
-
-export interface CompetencyGapData {
-  competency_gaps: any;
-}
-
-export interface LearningCompletionData {
-  learning_completion: any;
-}
-
-export interface LearningByProjectData {
-  learning_by_project: any;
-}
-
-export interface SuccessionCoverageData {
-  succession_coverage: any;
-}
-
-export interface SuccessorReadinessData {
-  successor_readiness: any;
-}
-
-export interface TalentRiskData {
-  talent_risk: any;
-}
-
-export interface TalentExceptionsData {
-  exceptions: any[];
-}
-

@@ -30,10 +30,7 @@ import type {
 } from '../lib/types';
 import { KpiCard } from '../components/cards/KpiCard';
 import { ExceptionTable } from '../components/tables/ExceptionTable';
-import {
-  Star, TrendingUp, Target, BookOpen, Users, AlertTriangle,
-  Award, ChevronRight, Shield, Zap
-} from 'lucide-react';
+import { Star, AlertTriangle } from 'lucide-react';
 
 const CATEGORY_COLORS: Record<string, string> = {
   'Outstanding': '#10b981',
@@ -138,19 +135,6 @@ export const Talent: React.FC = () => {
 
   // ---- KPI lookups ----
   const getKpi = (key: string) => summary?.kpis.find(k => k.key === key);
-  const kpiIcon: Record<string, React.ReactNode> = {
-    employees_reviewed: <Users size={20} />,
-    review_completion_pct: <ChevronRight size={20} />,
-    average_performance_rating: <Star size={20} />,
-    high_performers: <Award size={20} />,
-    low_performers: <AlertTriangle size={20} />,
-    goal_completion_pct: <Target size={20} />,
-    training_completion_pct: <BookOpen size={20} />,
-    average_training_hours: <Zap size={20} />,
-    critical_roles_covered_pct: <Shield size={20} />,
-    ready_successors: <TrendingUp size={20} />,
-    talent_exception_count: <AlertTriangle size={20} />,
-  };
 
   const kpiKeys = [
     'employees_reviewed', 'review_completion_pct', 'average_performance_rating',
@@ -356,7 +340,6 @@ export const Talent: React.FC = () => {
               value={kpi.value}
               unit={kpi.unit}
               status={kpi.status as any}
-              icon={kpiIcon[key]}
             />
           );
         })}
@@ -518,7 +501,6 @@ export const Talent: React.FC = () => {
         </h2>
         <ExceptionTable
           data={exceptions}
-          title="Talent & Succession Exceptions"
         />
       </div>
     </div>
