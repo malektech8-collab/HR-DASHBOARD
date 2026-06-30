@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { GovernanceWidget } from '../components/widgets/GovernanceWidget';
 import { 
   fetchCommandCenterOverview,
   fetchCommandCenterModuleHealth,
@@ -85,6 +86,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
       setFreshness(freshnessData.freshness);
       setNavStatus(navData.navigation);
       setQaIndex(qaData.qa_index);
+      console.debug("Navigation targets loaded:", navData.navigation.length);
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'Failed to connect to backend FastAPI services.');
@@ -197,6 +199,9 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
           </div>
         </div>
       </div>
+
+      {/* Governance Gate Status */}
+      <GovernanceWidget />
 
       {/* 2. Overview Cards Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">

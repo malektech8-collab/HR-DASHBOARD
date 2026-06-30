@@ -1,0 +1,18 @@
+# HR Analytics Command Center - Governance Status Configuration
+# Managed under Milestone 3L.
+
+governance_status:
+  current_gate: "Gate 5 - Authorization Evidence Pending"
+  current_status: "Authorization Evidence Pending"
+  evidence_status: "Not Provided"
+  synthetic_validation_status: "Synthetic Validation Only"
+  decision_recommendation: "Hold"
+  real_data_execution_approved: false
+  real_authorization_evidence_approved: false
+  load_scheduling_approved: false
+  go_no_go_meeting_held: false
+  stop_criteria_count: 22
+  last_completed_milestone: "3K"
+  milestone_3i_status: "Authorization Evidence Pending"
+  milestone_3j_status: "Planning Only"
+  milestone_3k_status: "Synthetic Validation Only"

@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api import executive, data_quality, workforce, payroll, attendance, compliance, er, recruitment, talent, command_center
+from app.api.endpoints import governance
 from app.schemas.kpi import RefreshStatusResponse
 from app.config import settings
 import os
@@ -53,7 +54,7 @@ app.include_router(er.router, prefix="/api/er", tags=["Employee Relations"])
 app.include_router(recruitment.router, prefix="/api/recruitment", tags=["Recruitment"])
 app.include_router(talent.router, prefix="/api/talent", tags=["Talent"])
 app.include_router(command_center.router, prefix="/api/command-center", tags=["Command Center"])
-
+app.include_router(governance.router, prefix="/api/governance", tags=["Governance"])
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host=settings.HOST, port=settings.PORT, reload=settings.DEBUG)
