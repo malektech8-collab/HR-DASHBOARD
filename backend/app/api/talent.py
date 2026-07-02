@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException
-from app.db.duckdb_client import DuckDBClient
+from fastapi import APIRouter, HTTPException, Depends
+from app.db.duckdb_client import get_db_connection
+import duckdb
 from app.schemas.talent import (
     TalentSummaryResponse,
     PerformanceDistributionResponse,
@@ -71,10 +72,9 @@ def get_talent_report_month():
 
 
 @router.get("/summary", response_model=TalentSummaryResponse)
-def get_talent_summary():
-    conn = None
+def get_talent_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_talent_kpis").fetchone()
         if not res:
             raise HTTPException(status_code=404, detail="No talent KPI records found")
@@ -84,9 +84,7 @@ def get_talent_summary():
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     report_month = get_talent_report_month()
 
@@ -174,10 +172,9 @@ def get_talent_summary():
 
 
 @router.get("/performance-distribution", response_model=PerformanceDistributionResponse)
-def get_performance_distribution():
-    conn = None
+def get_performance_distribution(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_performance_distribution ORDER BY performance_category").fetchall()
         distribution = [
             PerformanceDistributionItem(
@@ -189,16 +186,13 @@ def get_performance_distribution():
         return PerformanceDistributionResponse(distribution=distribution)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
 
 @router.get("/trends", response_model=PerformanceTrendsResponse)
-def get_performance_trends():
-    conn = None
+def get_performance_trends(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute(
             "SELECT * FROM mart_talent_review_trends ORDER BY period ASC"
         ).fetchall()
@@ -215,16 +209,13 @@ def get_performance_trends():
         return PerformanceTrendsResponse(trends=trends)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
 
 @router.get("/by-project", response_model=PerformanceByProjectResponse)
-def get_performance_by_project():
-    conn = None
+def get_performance_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_performance_by_project ORDER BY project").fetchall()
         projects = [
             PerformanceByProjectItem(
@@ -239,16 +230,13 @@ def get_performance_by_project():
         return PerformanceByProjectResponse(projects=projects)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
 
 @router.get("/by-department", response_model=PerformanceByDepartmentResponse)
-def get_performance_by_department():
-    conn = None
+def get_performance_by_department(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_performance_by_department ORDER BY department").fetchall()
         departments = [
             PerformanceByDepartmentItem(
@@ -263,16 +251,13 @@ def get_performance_by_department():
         return PerformanceByDepartmentResponse(departments=departments)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
 
 @router.get("/goals", response_model=GoalCompletionResponse)
-def get_goal_completion():
-    conn = None
+def get_goal_completion(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_goal_completion ORDER BY department").fetchall()
         goals = [
             GoalCompletionItem(
@@ -289,16 +274,13 @@ def get_goal_completion():
         return GoalCompletionResponse(goals=goals)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
 
 @router.get("/competency-gaps", response_model=CompetencyGapResponse)
-def get_competency_gaps():
-    conn = None
+def get_competency_gaps(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_competency_gaps ORDER BY avg_gap DESC").fetchall()
         gaps = [
             CompetencyGapItem(
@@ -312,16 +294,13 @@ def get_competency_gaps():
         return CompetencyGapResponse(gaps=gaps)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
 
 @router.get("/learning", response_model=LearningCompletionResponse)
-def get_learning_completion():
-    conn = None
+def get_learning_completion(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_learning_completion ORDER BY category").fetchall()
         completion = [
             LearningCompletionItem(
@@ -335,16 +314,13 @@ def get_learning_completion():
         return LearningCompletionResponse(completion=completion)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
 
 @router.get("/learning-by-project", response_model=LearningByProjectResponse)
-def get_learning_by_project():
-    conn = None
+def get_learning_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_learning_by_project ORDER BY project, department").fetchall()
         projects = [
             LearningByProjectItem(
@@ -358,16 +334,13 @@ def get_learning_by_project():
         return LearningByProjectResponse(projects=projects)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
 
 @router.get("/succession", response_model=SuccessionCoverageResponse)
-def get_succession_coverage():
-    conn = None
+def get_succession_coverage(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_succession_coverage ORDER BY role_title").fetchall()
         coverage = [
             SuccessionCoverageItem(
@@ -381,16 +354,13 @@ def get_succession_coverage():
         return SuccessionCoverageResponse(coverage=coverage)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
 
 @router.get("/succession-readiness", response_model=SuccessorReadinessResponse)
-def get_successor_readiness():
-    conn = None
+def get_successor_readiness(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_successor_readiness ORDER BY readiness").fetchall()
         readiness = [
             SuccessorReadinessItem(
@@ -402,16 +372,13 @@ def get_successor_readiness():
         return SuccessorReadinessResponse(readiness=readiness)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
 
 @router.get("/risk", response_model=TalentRiskResponse)
-def get_talent_risk():
-    conn = None
+def get_talent_risk(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_talent_risk ORDER BY risk_category, department").fetchall()
         risks = [
             TalentRiskItem(
@@ -428,16 +395,13 @@ def get_talent_risk():
         return TalentRiskResponse(risks=risks)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
 
 @router.get("/exceptions", response_model=TalentExceptionsResponse)
-def get_talent_exceptions():
-    conn = None
+def get_talent_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute(
             "SELECT record_id_str, issue_type, description, severity, recommended_action FROM mart_talent_exceptions ORDER BY severity DESC, issue_type"
         ).fetchall()
@@ -455,6 +419,3 @@ def get_talent_exceptions():
         return TalentExceptionsResponse(exceptions=exceptions)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()

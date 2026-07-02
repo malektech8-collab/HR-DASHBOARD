@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException
-from app.db.duckdb_client import DuckDBClient
+from fastapi import APIRouter, HTTPException, Depends
+from app.db.duckdb_client import get_db_connection
+import duckdb
 from app.schemas.recruitment import (
     RecruitmentSummaryResponse,
     RecruitmentPipelineResponse,
@@ -28,8 +29,7 @@ import yaml
 
 router = APIRouter()
 
-def get_configured_report_month():
-    conn = None
+def get_configured_report_month(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
         config_path = "config/business_rules.yml"
         if os.path.exists(config_path):
@@ -42,7 +42,7 @@ def get_configured_report_month():
         report_month_source = rec_rules.get("report_month_source", "max_requisition_date")
         
         if report_month_source == "max_requisition_date":
-            conn = DuckDBClient.get_connection()
+
             max_date_row = conn.execute("SELECT MAX(approval_date) FROM recruitment_requisitions").fetchone()
             max_date = max_date_row[0] if max_date_row else None
             if max_date:
@@ -50,15 +50,12 @@ def get_configured_report_month():
         return "2026-06"
     except Exception:
         return "2026-06"
-    finally:
-        if conn:
-            conn.close()
+
 
 @router.get("/summary", response_model=RecruitmentSummaryResponse)
-def get_recruitment_summary():
-    conn = None
+def get_recruitment_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_recruitment_kpis").fetchone()
         if not res:
             raise HTTPException(status_code=404, detail="No recruitment KPI records found")
@@ -66,9 +63,7 @@ def get_recruitment_summary():
         row_dict = dict(zip(cols, res))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     report_month = get_configured_report_month()
 
@@ -155,38 +150,31 @@ def get_recruitment_summary():
     return RecruitmentSummaryResponse(report_month=report_month, kpis=kpis)
 
 @router.get("/pipeline", response_model=RecruitmentPipelineResponse)
-def get_recruitment_pipeline():
-    conn = None
+def get_recruitment_pipeline(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_recruitment_pipeline").fetchall()
         pipeline = [PipelineStageItem(pipeline_stage=row[0] or "Applied", candidate_count=row[1]) for row in res]
         return RecruitmentPipelineResponse(pipeline=pipeline)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
 @router.get("/trends", response_model=RecruitmentTrendsResponse)
-def get_recruitment_trends():
-    conn = None
+def get_recruitment_trends(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_recruitment_trends ORDER BY period ASC").fetchall()
         trends = [RecruitmentTrendItem(period=row[0], requisitions_opened=row[1], hires=row[2]) for row in res]
         return RecruitmentTrendsResponse(trends=trends)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
 @router.get("/by-project", response_model=RecruitmentByProjectResponse)
-def get_recruitment_by_project():
-    conn = None
+def get_recruitment_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_recruitment_by_project").fetchall()
         projects = [
             RecruitmentByProjectItem(
@@ -200,15 +188,12 @@ def get_recruitment_by_project():
         return RecruitmentByProjectResponse(projects=projects)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
 @router.get("/by-department", response_model=RecruitmentByDepartmentResponse)
-def get_recruitment_by_department():
-    conn = None
+def get_recruitment_by_department(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_recruitment_by_department").fetchall()
         departments = [
             RecruitmentByDepartmentItem(
@@ -222,15 +207,12 @@ def get_recruitment_by_department():
         return RecruitmentByDepartmentResponse(departments=departments)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
 @router.get("/time-to-fill", response_model=TimeToFillResponse)
-def get_time_to_fill():
-    conn = None
+def get_time_to_fill(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_recruitment_time_to_fill").fetchall()
         ttf_mapped = []
         for row in res:
@@ -243,15 +225,12 @@ def get_time_to_fill():
         return TimeToFillResponse(time_to_fill=ttf_mapped)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
 @router.get("/source-effectiveness", response_model=SourceEffectivenessResponse)
-def get_source_effectiveness():
-    conn = None
+def get_source_effectiveness(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_recruitment_source_effectiveness").fetchall()
         sources = [
             SourceEffectivenessItem(
@@ -264,43 +243,34 @@ def get_source_effectiveness():
         return SourceEffectivenessResponse(sources=sources)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
 @router.get("/offers", response_model=OfferAcceptanceResponse)
-def get_offer_acceptance():
-    conn = None
+def get_offer_acceptance(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_offer_acceptance").fetchall()
         offers = [OfferAcceptanceItem(offer_status=row[0] or "Pending", offer_count=row[1]) for row in res]
         return OfferAcceptanceResponse(offers=offers)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
 @router.get("/onboarding", response_model=OnboardingStatusResponse)
-def get_onboarding_status():
-    conn = None
+def get_onboarding_status(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_onboarding_status").fetchall()
         onboarding = [OnboardingStatusItem(onboarding_status=row[0] or "Unknown", hire_count=row[1]) for row in res]
         return OnboardingStatusResponse(onboarding=onboarding)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
 @router.get("/workforce-plan", response_model=WorkforcePlanVsActualResponse)
-def get_workforce_plan_vs_actual():
-    conn = None
+def get_workforce_plan_vs_actual(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_workforce_plan_vs_actual").fetchall()
         plan = [
             WorkforcePlanVsActualItem(
@@ -314,15 +284,12 @@ def get_workforce_plan_vs_actual():
         return WorkforcePlanVsActualResponse(plan=plan)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
 @router.get("/exceptions", response_model=RecruitmentExceptionsResponse)
-def get_recruitment_exceptions():
-    conn = None
+def get_recruitment_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_recruitment_exceptions").fetchall()
         exceptions = []
         for row in res:
@@ -337,6 +304,3 @@ def get_recruitment_exceptions():
         return RecruitmentExceptionsResponse(exceptions=exceptions)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()

@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException
-from app.db.duckdb_client import DuckDBClient
+from fastapi import APIRouter, HTTPException, Depends
+from app.db.duckdb_client import get_db_connection
+import duckdb
 from app.schemas.kpi import ExecutiveSummaryResponse, KPIItem
 from app.config import settings
 import os
@@ -8,10 +9,9 @@ from datetime import datetime
 router = APIRouter()
 
 @router.get("/summary", response_model=ExecutiveSummaryResponse)
-def get_executive_summary():
-    conn = None
+def get_executive_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         # Query mart_exec_kpis
         res_kpi = conn.execute("SELECT * FROM mart_exec_kpis").fetchone()
         if not res_kpi:
@@ -25,10 +25,7 @@ def get_executive_summary():
         trends_res = conn.execute("SELECT month, active_headcount, payroll_cost FROM mart_exec_trends").fetchall()
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
-            
+
     # Calculate last refresh time from DB modification time
     last_refresh_str = "Unknown"
     if os.path.exists(settings.DATABASE_PATH):

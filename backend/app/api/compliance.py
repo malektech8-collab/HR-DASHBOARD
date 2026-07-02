@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException
-from app.db.duckdb_client import DuckDBClient
+from fastapi import APIRouter, HTTPException, Depends
+from app.db.duckdb_client import get_db_connection
+import duckdb
 from app.schemas.compliance import (
     ComplianceSummaryResponse,
     SaudizationSummaryResponse,
@@ -22,8 +23,7 @@ import yaml
 
 router = APIRouter()
 
-def get_configured_report_month():
-    conn = None
+def get_configured_report_month(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
         config_path = "config/business_rules.yml"
         if os.path.exists(config_path):
@@ -36,7 +36,7 @@ def get_configured_report_month():
         report_month_source = compliance_rules.get("report_month_source", "max_compliance_period")
         
         if report_month_source == "max_compliance_period":
-            conn = DuckDBClient.get_connection()
+
             max_period_row = conn.execute("SELECT MAX(period) FROM compliance").fetchone()
             max_period = max_period_row[0] if max_period_row else None
             if max_period:
@@ -44,15 +44,12 @@ def get_configured_report_month():
         return "2026-06"
     except Exception:
         return "2026-06"
-    finally:
-        if conn:
-            conn.close()
+
 
 @router.get("/summary", response_model=ComplianceSummaryResponse)
-def get_compliance_summary():
-    conn = None
+def get_compliance_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_compliance_kpis").fetchone()
         if not res:
             raise HTTPException(status_code=404, detail="No compliance KPI records found")
@@ -60,9 +57,7 @@ def get_compliance_summary():
         row_dict = dict(zip(cols, res))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     report_month = get_configured_report_month()
 
@@ -149,17 +144,14 @@ def get_compliance_summary():
     return ComplianceSummaryResponse(report_month=report_month, kpis=kpis)
 
 @router.get("/saudization", response_model=SaudizationSummaryResponse)
-def get_saudization():
-    conn = None
+def get_saudization(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_saudization_summary ORDER BY period ASC").fetchall()
         cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     trends = []
     for row in res:
@@ -174,17 +166,14 @@ def get_saudization():
     return SaudizationSummaryResponse(trends=trends)
 
 @router.get("/saudization-by-project", response_model=SaudizationByProjectResponse)
-def get_saudization_by_project():
-    conn = None
+def get_saudization_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_saudization_by_project ORDER BY project ASC").fetchall()
         cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     projects = []
     for row in res:
@@ -200,17 +189,14 @@ def get_saudization_by_project():
     return SaudizationByProjectResponse(projects=projects)
 
 @router.get("/saudization-by-department", response_model=SaudizationByDepartmentResponse)
-def get_saudization_by_department():
-    conn = None
+def get_saudization_by_department(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_saudization_by_department ORDER BY department ASC").fetchall()
         cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     departments = []
     for row in res:
@@ -226,17 +212,14 @@ def get_saudization_by_department():
     return SaudizationByDepartmentResponse(departments=departments)
 
 @router.get("/document-expiry", response_model=DocumentExpiryResponse)
-def get_document_expiry():
-    conn = None
+def get_document_expiry(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_document_expiry").fetchall()
         cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     buckets = []
     for row in res:
@@ -249,17 +232,14 @@ def get_document_expiry():
     return DocumentExpiryResponse(buckets=buckets)
 
 @router.get("/gosi", response_model=GosiStatusResponse)
-def get_gosi():
-    conn = None
+def get_gosi(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_gosi_status ORDER BY gosi_status ASC").fetchall()
         cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     statuses = []
     for row in res:
@@ -271,17 +251,14 @@ def get_gosi():
     return GosiStatusResponse(statuses=statuses)
 
 @router.get("/wps", response_model=WpsStatusResponse)
-def get_wps():
-    conn = None
+def get_wps(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_wps_status ORDER BY wps_status ASC").fetchall()
         cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     statuses = []
     for row in res:
@@ -293,17 +270,14 @@ def get_wps():
     return WpsStatusResponse(statuses=statuses)
 
 @router.get("/exceptions", response_model=ComplianceExceptionsResponse)
-def get_exceptions():
-    conn = None
+def get_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_compliance_exceptions").fetchall()
         cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     exceptions = []
     for row in res:

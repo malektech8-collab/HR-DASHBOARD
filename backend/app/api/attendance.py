@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException
-from app.db.duckdb_client import DuckDBClient
+from fastapi import APIRouter, HTTPException, Depends
+from app.db.duckdb_client import get_db_connection
+import duckdb
 from app.schemas.attendance import (
     AttendanceSummaryResponse,
     AttendanceTrendsResponse,
@@ -23,8 +24,7 @@ import yaml
 router = APIRouter()
 
 # Helper function to get report month dynamically from config or DB
-def get_configured_report_month():
-    conn = None
+def get_configured_report_month(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
         # Load rules to check config
         config_path = "config/business_rules.yml"
@@ -38,7 +38,7 @@ def get_configured_report_month():
         report_month_source = attendance_rules.get("report_month_source", "max_attendance_date")
         
         if report_month_source == "max_attendance_date":
-            conn = DuckDBClient.get_connection()
+
             max_date_row = conn.execute("SELECT MAX(attendance_date) FROM attendance").fetchone()
             max_date = max_date_row[0] if max_date_row else None
             if max_date:
@@ -49,15 +49,12 @@ def get_configured_report_month():
         return "2026-06"
     except Exception:
         return "2026-06"
-    finally:
-        if conn:
-            conn.close()
+
 
 @router.get("/summary", response_model=AttendanceSummaryResponse)
-def get_attendance_summary():
-    conn = None
+def get_attendance_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_attendance_kpis").fetchone()
         if not res:
             raise HTTPException(status_code=404, detail="No attendance KPI records found")
@@ -65,9 +62,7 @@ def get_attendance_summary():
         row_dict = dict(zip(cols, res))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     # Determine status and trends
     compliance_pct = row_dict["attendance_compliance_pct"]
@@ -153,17 +148,14 @@ def get_attendance_summary():
     )
 
 @router.get("/trends", response_model=AttendanceTrendsResponse)
-def get_attendance_trends():
-    conn = None
+def get_attendance_trends(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_attendance_trend ORDER BY month").fetchall()
         cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     trends = []
     for row in res:
@@ -181,17 +173,14 @@ def get_attendance_trends():
     return AttendanceTrendsResponse(trends=trends)
 
 @router.get("/by-project", response_model=AttendanceByProjectResponse)
-def get_attendance_by_project():
-    conn = None
+def get_attendance_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_attendance_by_project").fetchall()
         cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     projects = []
     for row in res:
@@ -210,17 +199,14 @@ def get_attendance_by_project():
     return AttendanceByProjectResponse(projects=projects)
 
 @router.get("/by-department", response_model=AttendanceByDepartmentResponse)
-def get_attendance_by_department():
-    conn = None
+def get_attendance_by_department(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_attendance_by_department").fetchall()
         cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     departments = []
     for row in res:
@@ -240,17 +226,14 @@ def get_attendance_by_department():
     return AttendanceByDepartmentResponse(departments=departments)
 
 @router.get("/late-arrival", response_model=AttendanceLateArrivalResponse)
-def get_attendance_late_arrival():
-    conn = None
+def get_attendance_late_arrival(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_attendance_late_arrival ORDER BY total_late_minutes DESC").fetchall()
         cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     late_arrivals = []
     for row in res:
@@ -269,17 +252,14 @@ def get_attendance_late_arrival():
     return AttendanceLateArrivalResponse(late_arrivals=late_arrivals)
 
 @router.get("/overtime", response_model=AttendanceOvertimeResponse)
-def get_attendance_overtime():
-    conn = None
+def get_attendance_overtime(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_attendance_overtime ORDER BY attendance_ot_hours DESC").fetchall()
         cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     overtime_records = []
     for row in res:
@@ -297,17 +277,14 @@ def get_attendance_overtime():
     return AttendanceOvertimeResponse(overtime_records=overtime_records)
 
 @router.get("/missing-punches", response_model=AttendanceMissingPunchesResponse)
-def get_attendance_missing_punches():
-    conn = None
+def get_attendance_missing_punches(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_attendance_missing_punches ORDER BY total_missing_punches DESC").fetchall()
         cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     missing_punches = []
     for row in res:
@@ -325,17 +302,14 @@ def get_attendance_missing_punches():
     return AttendanceMissingPunchesResponse(missing_punches=missing_punches)
 
 @router.get("/exceptions", response_model=AttendanceExceptionsResponse)
-def get_attendance_exceptions():
-    conn = None
+def get_attendance_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_attendance_exceptions").fetchall()
         cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     exceptions = []
     for row in res:

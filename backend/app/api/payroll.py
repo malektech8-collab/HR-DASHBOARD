@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException
-from app.db.duckdb_client import DuckDBClient
+from fastapi import APIRouter, HTTPException, Depends
+from app.db.duckdb_client import get_db_connection
+import duckdb
 from app.schemas.payroll import (
     PayrollSummaryResponse,
     PayrollReconciliationResponse,
@@ -22,10 +23,9 @@ from typing import List
 router = APIRouter()
 
 @router.get("/summary", response_model=PayrollSummaryResponse)
-def get_payroll_summary():
-    conn = None
+def get_payroll_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_payroll_kpis").fetchone()
         if not res:
             raise HTTPException(status_code=404, detail="No payroll KPI records found")
@@ -39,9 +39,7 @@ def get_payroll_summary():
         recon_dict = dict(zip(recon_cols, recon_res))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     # Determine trend values
     variance_pct = row_dict["payroll_variance_pct"]
@@ -148,17 +146,14 @@ def get_payroll_summary():
     )
 
 @router.get("/trends", response_model=PayrollTrendsResponse)
-def get_payroll_trends():
-    conn = None
+def get_payroll_trends(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_payroll_trend ORDER BY month").fetchall()
         cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     trends = []
     for row in res:
@@ -177,17 +172,14 @@ def get_payroll_trends():
     return PayrollTrendsResponse(trends=trends)
 
 @router.get("/by-project", response_model=PayrollByProjectResponse)
-def get_payroll_by_project():
-    conn = None
+def get_payroll_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_payroll_by_project").fetchall()
         cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     projects = []
     for row in res:
@@ -202,17 +194,14 @@ def get_payroll_by_project():
     return PayrollByProjectResponse(projects=projects)
 
 @router.get("/by-department", response_model=PayrollByDepartmentResponse)
-def get_payroll_by_department():
-    conn = None
+def get_payroll_by_department(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_payroll_by_department").fetchall()
         cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     departments = []
     for row in res:
@@ -227,17 +216,14 @@ def get_payroll_by_department():
     return PayrollByDepartmentResponse(departments=departments)
 
 @router.get("/components", response_model=PayrollComponentsResponse)
-def get_payroll_components():
-    conn = None
+def get_payroll_components(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_payroll_components").fetchall()
         cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     components = []
     for row in res:
@@ -250,10 +236,9 @@ def get_payroll_components():
     return PayrollComponentsResponse(components=components)
 
 @router.get("/variance", response_model=PayrollVarianceResponse)
-def get_payroll_variance():
-    conn = None
+def get_payroll_variance(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         # Query components variance
         comp_res = conn.execute("SELECT * FROM mart_payroll_variance_components").fetchall()
         comp_cols = [desc[0] for desc in conn.description]
@@ -263,9 +248,7 @@ def get_payroll_variance():
         emp_cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     components = []
     for row in comp_res:
@@ -293,17 +276,14 @@ def get_payroll_variance():
     return PayrollVarianceResponse(components=components, employees=employees)
 
 @router.get("/exceptions", response_model=PayrollExceptionsResponse)
-def get_payroll_exceptions():
-    conn = None
+def get_payroll_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_payroll_exceptions").fetchall()
         cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     exceptions = []
     for row in res:

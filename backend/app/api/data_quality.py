@@ -1,14 +1,14 @@
-from fastapi import APIRouter, HTTPException
-from app.db.duckdb_client import DuckDBClient
+from fastapi import APIRouter, HTTPException, Depends
+from app.db.duckdb_client import get_db_connection
+import duckdb
 from app.schemas.kpi import DataQualitySummaryResponse, DQExceptionsResponse, DQExceptionItem
 
 router = APIRouter()
 
 @router.get("/summary", response_model=DataQualitySummaryResponse)
-def get_data_quality_summary():
-    conn = None
+def get_data_quality_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_data_quality_summary").fetchone()
         if not res:
             raise HTTPException(status_code=404, detail="No data quality summary records found")
@@ -16,10 +16,7 @@ def get_data_quality_summary():
         row_dict = dict(zip(cols, res))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
-            
+
     return DataQualitySummaryResponse(
         data_quality_score=round(row_dict["data_quality_score"] * 100, 2),
         missing_manager_count=row_dict["missing_manager_count"],
@@ -31,10 +28,9 @@ def get_data_quality_summary():
     )
 
 @router.get("/exceptions", response_model=DQExceptionsResponse)
-def get_data_quality_exceptions():
-    conn = None
+def get_data_quality_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_data_quality_exceptions").fetchall()
         exceptions = []
         for r in res:
@@ -48,8 +44,5 @@ def get_data_quality_exceptions():
             ))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
-            
+
     return DQExceptionsResponse(exceptions=exceptions)

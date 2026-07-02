@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException
-from app.db.duckdb_client import DuckDBClient
+from fastapi import APIRouter, HTTPException, Depends
+from app.db.duckdb_client import get_db_connection
+import duckdb
 from app.schemas.er import (
     ErSummaryResponse,
     ErTrendResponse,
@@ -24,8 +25,7 @@ import yaml
 
 router = APIRouter()
 
-def get_configured_report_month():
-    conn = None
+def get_configured_report_month(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
         config_path = "config/business_rules.yml"
         if os.path.exists(config_path):
@@ -38,7 +38,7 @@ def get_configured_report_month():
         report_month_source = er_rules.get("report_month_source", "max_case_date")
         
         if report_month_source == "max_case_date":
-            conn = DuckDBClient.get_connection()
+
             max_date_row = conn.execute("SELECT MAX(created_date) FROM employee_relations").fetchone()
             max_date = max_date_row[0] if max_date_row else None
             if max_date:
@@ -46,15 +46,12 @@ def get_configured_report_month():
         return "2026-06"
     except Exception:
         return "2026-06"
-    finally:
-        if conn:
-            conn.close()
+
 
 @router.get("/summary", response_model=ErSummaryResponse)
-def get_er_summary():
-    conn = None
+def get_er_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_er_kpis").fetchone()
         if not res:
             raise HTTPException(status_code=404, detail="No ER KPI records found")
@@ -62,9 +59,7 @@ def get_er_summary():
         row_dict = dict(zip(cols, res))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     report_month = get_configured_report_month()
 
@@ -151,17 +146,14 @@ def get_er_summary():
     return ErSummaryResponse(report_month=report_month, kpis=kpis)
 
 @router.get("/trends", response_model=ErTrendResponse)
-def get_er_trends():
-    conn = None
+def get_er_trends(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_er_case_trend ORDER BY period ASC").fetchall()
         cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     trends = []
     for row in res:
@@ -174,17 +166,14 @@ def get_er_trends():
     return ErTrendResponse(trends=trends)
 
 @router.get("/by-project", response_model=ErCasesByProjectResponse)
-def get_er_by_project():
-    conn = None
+def get_er_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_er_cases_by_project ORDER BY project ASC").fetchall()
         cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     projects = []
     for row in res:
@@ -201,17 +190,14 @@ def get_er_by_project():
     return ErCasesByProjectResponse(projects=projects)
 
 @router.get("/by-department", response_model=ErCasesByDepartmentResponse)
-def get_er_by_department():
-    conn = None
+def get_er_by_department(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_er_cases_by_department ORDER BY department ASC").fetchall()
         cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     departments = []
     for row in res:
@@ -228,17 +214,14 @@ def get_er_by_department():
     return ErCasesByDepartmentResponse(departments=departments)
 
 @router.get("/case-types", response_model=ErCaseTypeResponse)
-def get_er_case_types():
-    conn = None
+def get_er_case_types(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_er_case_type_distribution ORDER BY case_type ASC").fetchall()
         cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     case_types = []
     for row in res:
@@ -250,17 +233,14 @@ def get_er_case_types():
     return ErCaseTypeResponse(case_types=case_types)
 
 @router.get("/status", response_model=ErCaseStatusResponse)
-def get_er_status():
-    conn = None
+def get_er_status(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_er_case_status_distribution ORDER BY case_status ASC").fetchall()
         cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     statuses = []
     for row in res:
@@ -272,17 +252,14 @@ def get_er_status():
     return ErCaseStatusResponse(statuses=statuses)
 
 @router.get("/sla", response_model=ErSlaPerformanceResponse)
-def get_er_sla():
-    conn = None
+def get_er_sla(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_er_sla_performance ORDER BY category_type ASC, category ASC").fetchall()
         cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     performance = []
     for row in res:
@@ -298,17 +275,14 @@ def get_er_sla():
     return ErSlaPerformanceResponse(performance=performance)
 
 @router.get("/aging", response_model=ErAgingBucketResponse)
-def get_er_aging():
-    conn = None
+def get_er_aging(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_er_aging_buckets").fetchall()
         cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     buckets = []
     for row in res:
@@ -320,17 +294,14 @@ def get_er_aging():
     return ErAgingBucketResponse(buckets=buckets)
 
 @router.get("/exceptions", response_model=ErExceptionsResponse)
-def get_er_exceptions():
-    conn = None
+def get_er_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_er_exceptions").fetchall()
         cols = [desc[0] for desc in conn.description]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     exceptions = []
     for row in res:

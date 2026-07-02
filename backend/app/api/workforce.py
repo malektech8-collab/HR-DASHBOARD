@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException
-from app.db.duckdb_client import DuckDBClient
+from fastapi import APIRouter, HTTPException, Depends
+from app.db.duckdb_client import get_db_connection
+import duckdb
 from app.schemas.workforce import (
     WorkforceSummaryResponse, 
     WorkforceTrendsResponse, 
@@ -12,10 +13,9 @@ from app.schemas.kpi import KPIItem, DQExceptionsResponse, DQExceptionItem
 router = APIRouter()
 
 @router.get("/summary", response_model=WorkforceSummaryResponse)
-def get_workforce_summary():
-    conn = None
+def get_workforce_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_workforce_kpis").fetchone()
         if not res:
             raise HTTPException(status_code=404, detail="No workforce KPI records found")
@@ -24,9 +24,7 @@ def get_workforce_summary():
         row_dict = dict(zip(cols, res))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     # Build KPIs list matching exactly the 10 KPIs requested
     kpis = [
@@ -116,16 +114,13 @@ def get_workforce_summary():
     )
 
 @router.get("/trends", response_model=WorkforceTrendsResponse)
-def get_workforce_trends():
-    conn = None
+def get_workforce_trends(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT month, active_headcount FROM mart_workforce_headcount_trend").fetchall()
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     months = [r[0] for r in res]
     headcount = [r[1] for r in res]
@@ -136,16 +131,13 @@ def get_workforce_trends():
     )
 
 @router.get("/distribution", response_model=WorkforceDistributionResponse)
-def get_workforce_distribution():
-    conn = None
+def get_workforce_distribution(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT category, metric_value, headcount FROM mart_workforce_distribution").fetchall()
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     # Split rows into respective categories
     dist_dict = {
@@ -173,10 +165,9 @@ def get_workforce_distribution():
     )
 
 @router.get("/contract-expiry", response_model=ExpiryAgingResponse)
-def get_contract_expiry():
-    conn = None
+def get_contract_expiry(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_workforce_contract_expiry").fetchone()
         if not res:
             raise HTTPException(status_code=404, detail="No contract expiry records found")
@@ -184,9 +175,7 @@ def get_contract_expiry():
         row_dict = dict(zip(cols, res))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     return ExpiryAgingResponse(
         expired=row_dict["expired"],
@@ -198,10 +187,9 @@ def get_contract_expiry():
     )
 
 @router.get("/iqama-expiry", response_model=ExpiryAgingResponse)
-def get_iqama_expiry():
-    conn = None
+def get_iqama_expiry(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_workforce_iqama_expiry").fetchone()
         if not res:
             raise HTTPException(status_code=404, detail="No iqama expiry records found")
@@ -209,9 +197,7 @@ def get_iqama_expiry():
         row_dict = dict(zip(cols, res))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     return ExpiryAgingResponse(
         expired=row_dict["expired"],
@@ -223,10 +209,9 @@ def get_iqama_expiry():
     )
 
 @router.get("/exceptions", response_model=DQExceptionsResponse)
-def get_workforce_exceptions():
-    conn = None
+def get_workforce_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-        conn = DuckDBClient.get_connection()
+
         res = conn.execute("SELECT * FROM mart_workforce_exceptions").fetchall()
         exceptions = []
         for r in res:
@@ -240,8 +225,6 @@ def get_workforce_exceptions():
             ))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+
 
     return DQExceptionsResponse(exceptions=exceptions)
