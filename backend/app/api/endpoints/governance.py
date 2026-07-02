@@ -1,6 +1,10 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi.security import OAuth2PasswordRequestForm
 import os
 import yaml
+from typing import Dict, Any
+from app.core.security import create_access_token, MOCK_USER_DB, Role
+from app.api.dependencies.auth import RoleChecker
 
 router = APIRouter()
 
@@ -11,8 +15,29 @@ CONFIG_PATH = os.path.abspath(
     )
 )
 
+@router.post("/token")
+def login(form_data: OAuth2PasswordRequestForm = Depends()) -> Dict[str, Any]:
+    """
+    Authenticate synthetic users and return a JWT access token.
+    """
+    user = MOCK_USER_DB.get(form_data.username)
+    if not user or user["hashed_password"] != form_data.password:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    access_token = create_access_token(data={"sub": user["email"]})
+    return {"access_token": access_token, "token_type": "bearer"}
+
 @router.get("/status")
-def get_governance_status():
+def get_governance_status(
+    current_user: Dict[str, Any] = Depends(RoleChecker([Role.SYSTEM_ADMIN, Role.EXECUTIVE]))
+) -> Dict[str, Any]:
+    """
+    Fetch the system governance status. Restriced to SYSTEM_ADMIN and EXECUTIVE roles.
+    """
     if not os.path.exists(CONFIG_PATH):
         raise HTTPException(
             status_code=404,
