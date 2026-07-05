@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import ReactECharts from 'echarts-for-react';
+import ReactECharts from '../components/charts/ReactECharts';
 import { 
   fetchAttendanceSummary, 
   fetchAttendanceTrends, 
