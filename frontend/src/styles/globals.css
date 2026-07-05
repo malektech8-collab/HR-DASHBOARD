@@ -1,32 +1,50 @@
 @import "tailwindcss";
 
 :root {
-  --background: #090d16; /* Deep dark space */
-  --foreground: #f8fafc; /* High contrast text */
+  /* Color Palette */
+  --background: #090d16;          /* Deep space dark */
+  --foreground: #f8fafc;          /* High contrast text */
+  --border: #1e293b;              /* Slate 800 */
+  --card: #0f172a;                /* Slate 900 */
+  --card-foreground: #f8fafc;     /* Slate 50 */
   
-  --border: #1e293b; /* Slate 800 */
-  --card: #0f172a; /* Slate 900 */
-  --card-foreground: #f8fafc;
+  --primary: #38bdf8;             /* Sky 400 */
+  --primary-hover: #0ea5e9;       /* Sky 500 */
+  --primary-foreground: #0f172a;  /* Dark Slate for contrast */
   
-  --primary: #38bdf8; /* Sky 400 */
-  --primary-foreground: #0f172a;
-  
-  --accent: #6366f1; /* Indigo 500 */
+  --accent: #6366f1;              /* Indigo 500 */
+  --accent-hover: #4f46e5;        /* Indigo 600 */
   --accent-foreground: #ffffff;
   
-  --muted: #1e293b;
-  --muted-foreground: #64748b; /* Slate 500 */
+  --muted: #1e293b;               /* Slate 800 */
+  --muted-foreground: #64748b;    /* Slate 500 */
   
-  --healthy: #10b981; /* Emerald 500 */
-  --warning: #f59e0b; /* Amber 500 */
-  --critical: #ef4444; /* Red 500 */
-  --neutral: #64748b; /* Slate 500 */
+  /* Status Colors */
+  --healthy: #10b981;             /* Emerald 500 */
+  --warning: #f59e0b;             /* Amber 500 */
+  --critical: #ef4444;            /* Red 500 */
+  --neutral: #64748b;             /* Slate 500 */
+  
+  /* Typography & Layout Tokens */
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlos, Monaco, Consolas, monospace;
+  
+  --radius-lg: 0.75rem;           /* 12px */
+  --radius-md: 0.5rem;            /* 8px */
+  --radius-sm: 0.25rem;           /* 4px */
 }
 
+/* Base resets & focus indicators */
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-sans);
   margin: 0;
   padding: 0;
+}
+
+/* Global Focus Outline Reset */
+*:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
