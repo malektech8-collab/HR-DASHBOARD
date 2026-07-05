@@ -1,17 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { AppLayout } from './components/layout/AppLayout';
-import { CommandCenter } from './pages/CommandCenter';
-import { ExecutiveSummary } from './pages/ExecutiveSummary';
-import { DataQuality } from './pages/DataQuality';
-import { Workforce } from './pages/Workforce';
-import { Payroll } from './pages/Payroll';
-import { Attendance } from './pages/Attendance';
-import { Compliance } from './pages/Compliance';
-import { EmployeeRelations } from './pages/EmployeeRelations';
-import { Recruitment } from './pages/Recruitment';
-import { Talent } from './pages/Talent';
+import { CommandCenter } from './pages/CommandCenter'; // Statically imported for immediate landing load
+import { PageSkeleton } from './components/ui/PageSkeleton';
 import { fetchRefreshStatus } from './lib/api';
 import type { RefreshStatus } from './lib/types';
+
+// Lazy-loaded domain pages
+const ExecutiveSummary = lazy(() => import('./pages/ExecutiveSummary').then(m => ({ default: m.ExecutiveSummary })));
+const DataQuality = lazy(() => import('./pages/DataQuality').then(m => ({ default: m.DataQuality })));
+const Workforce = lazy(() => import('./pages/Workforce').then(m => ({ default: m.Workforce })));
+const Payroll = lazy(() => import('./pages/Payroll').then(m => ({ default: m.Payroll })));
+const Attendance = lazy(() => import('./pages/Attendance').then(m => ({ default: m.Attendance })));
+const Compliance = lazy(() => import('./pages/Compliance').then(m => ({ default: m.Compliance })));
+const EmployeeRelations = lazy(() => import('./pages/EmployeeRelations').then(m => ({ default: m.EmployeeRelations })));
+const Recruitment = lazy(() => import('./pages/Recruitment').then(m => ({ default: m.Recruitment })));
+const Talent = lazy(() => import('./pages/Talent').then(m => ({ default: m.Talent })));
 
 function App() {
   const [currentPage, setCurrentPage] = useState('command-center');
@@ -73,7 +76,9 @@ function App() {
       lastRefreshAt={metadata?.last_refresh_at || 'Unknown'}
       refreshStatus={syncStatus}
     >
-      {renderPage()}
+      <Suspense fallback={<PageSkeleton />}>
+        {renderPage()}
+      </Suspense>
     </AppLayout>
   );
 }
