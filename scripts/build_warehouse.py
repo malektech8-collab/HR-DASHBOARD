@@ -1,9 +1,15 @@
 import os
+import sys
 import duckdb
 import yaml
 import calendar
 import json
 import subprocess
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "backend")))
+from app.db.duckdb_client import configure_s3
+
+
 
 def build_warehouse():
     os.makedirs("warehouse", exist_ok=True)
@@ -13,42 +19,51 @@ def build_warehouse():
     
     # Connect to DuckDB
     conn = duckdb.connect(db_path)
+    configure_s3(conn)
     
+    # Prepend DATA_PREFIX if configured
+    data_prefix = os.getenv("DATA_PREFIX", "").rstrip("/")
+    if data_prefix:
+        data_prefix = f"{data_prefix}/"
+        
     # 1. Create source tables from Parquet files
     parquet_files = {
-        "employees": "data/silver/employees.parquet",
-        "payroll": "data/silver/payroll.parquet",
-        "attendance": "data/silver/attendance.parquet",
-        "hr_requests": "data/silver/hr_requests.parquet",
-        "compliance": "data/silver/compliance.parquet",
-        "employee_relations": "data/silver/employee_relations.parquet",
-        "recruitment_requisitions": "data/silver/recruitment_requisitions.parquet",
-        "candidates": "data/silver/candidates.parquet",
-        "interviews": "data/silver/interviews.parquet",
-        "offers": "data/silver/offers.parquet",
-        "onboarding": "data/silver/onboarding.parquet",
-        "workforce_plan": "data/silver/workforce_plan.parquet",
-        "vacancy_requests": "data/silver/vacancy_requests.parquet",
-        "data_quality": "data/gold/data_quality_report.parquet",
+        "employees": f"{data_prefix}data/silver/employees.parquet",
+        "payroll": f"{data_prefix}data/silver/payroll.parquet",
+        "attendance": f"{data_prefix}data/silver/attendance.parquet",
+        "hr_requests": f"{data_prefix}data/silver/hr_requests.parquet",
+        "compliance": f"{data_prefix}data/silver/compliance.parquet",
+        "employee_relations": f"{data_prefix}data/silver/employee_relations.parquet",
+        "recruitment_requisitions": f"{data_prefix}data/silver/recruitment_requisitions.parquet",
+        "candidates": f"{data_prefix}data/silver/candidates.parquet",
+        "interviews": f"{data_prefix}data/silver/interviews.parquet",
+        "offers": f"{data_prefix}data/silver/offers.parquet",
+        "onboarding": f"{data_prefix}data/silver/onboarding.parquet",
+        "workforce_plan": f"{data_prefix}data/silver/workforce_plan.parquet",
+        "vacancy_requests": f"{data_prefix}data/silver/vacancy_requests.parquet",
+        "data_quality": f"{data_prefix}data/gold/data_quality_report.parquet",
         # Milestone 2G: Talent, Performance, Learning & Succession
-        "performance_reviews": "data/silver/performance_reviews.parquet",
-        "performance_goals": "data/silver/performance_goals.parquet",
-        "competency_assessments": "data/silver/competency_assessments.parquet",
-        "learning_enrollments": "data/silver/learning_enrollments.parquet",
-        "training_catalog": "data/silver/training_catalog.parquet",
-        "succession_plans": "data/silver/succession_plans.parquet",
-        "talent_reviews": "data/silver/talent_reviews.parquet",
-        "employee_skills": "data/silver/employee_skills.parquet",
-        "career_paths": "data/silver/career_paths.parquet",
+        "performance_reviews": f"{data_prefix}data/silver/performance_reviews.parquet",
+        "performance_goals": f"{data_prefix}data/silver/performance_goals.parquet",
+        "competency_assessments": f"{data_prefix}data/silver/competency_assessments.parquet",
+        "learning_enrollments": f"{data_prefix}data/silver/learning_enrollments.parquet",
+        "training_catalog": f"{data_prefix}data/silver/training_catalog.parquet",
+        "succession_plans": f"{data_prefix}data/silver/succession_plans.parquet",
+        "talent_reviews": f"{data_prefix}data/silver/talent_reviews.parquet",
+        "employee_skills": f"{data_prefix}data/silver/employee_skills.parquet",
+        "career_paths": f"{data_prefix}data/silver/career_paths.parquet",
     }
+
     
     for table_name, file_path in parquet_files.items():
-        if os.path.exists(file_path):
+        is_remote = file_path.startswith(("s3://", "http://", "https://"))
+        if is_remote or os.path.exists(file_path):
             conn.execute(f"DROP TABLE IF EXISTS {table_name};")
             conn.execute(f"CREATE TABLE {table_name} AS SELECT * FROM read_parquet('{file_path}');")
             print(f"Loaded table '{table_name}' from {file_path}")
         else:
             print(f"Warning: file {file_path} not found. Skipping table '{table_name}'.")
+
 
     # Load business rules to get config context
     config_path = "config/business_rules.yml"
