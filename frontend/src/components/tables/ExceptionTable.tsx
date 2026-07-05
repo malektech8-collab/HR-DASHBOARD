@@ -10,6 +10,8 @@ import {
 import type { ColumnDef, SortingState } from '@tanstack/react-table';
 import type { DQExceptionItem } from '../../lib/types';
 import { ChevronDown, ChevronUp, ChevronsUpDown, AlertTriangle, AlertCircle, Search } from 'lucide-react';
+import { Button } from '../ui/Button';
+import { TableContainer, TableWrapper, TableHeader, TableRow, TableHeadCell, TableCell } from '../ui/Table';
 
 interface ExceptionTableProps {
   data: DQExceptionItem[];
@@ -96,7 +98,7 @@ export const ExceptionTable: React.FC<ExceptionTableProps> = ({ data }) => {
   });
 
   return (
-    <div className="bg-card border border-border rounded-xl shadow-lg flex flex-col overflow-hidden text-foreground">
+    <TableContainer>
       {/* Table Header Filter Row */}
       <div className="p-4 border-b border-border flex items-center justify-between gap-4 bg-slate-950/20">
         <div className="relative flex-1 max-w-sm">
@@ -115,52 +117,50 @@ export const ExceptionTable: React.FC<ExceptionTableProps> = ({ data }) => {
       </div>
 
       {/* Main Table view */}
-      <div className="flex-1 overflow-x-auto">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            {table.getHeaderGroups().map(headerGroup => (
-              <tr key={headerGroup.id} className="border-b border-border bg-slate-950/30">
-                {headerGroup.headers.map(header => (
-                  <th 
-                    key={header.id} 
-                    className="p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground select-none cursor-pointer hover:bg-slate-950/40"
-                    onClick={header.column.getToggleSortingHandler()}
-                  >
-                    <div className="flex items-center gap-1.5">
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                      {header.column.getCanSort() && (
-                        {
-                          asc: <ChevronUp className="w-3.5 h-3.5 text-primary" />,
-                          desc: <ChevronDown className="w-3.5 h-3.5 text-primary" />,
-                        }[header.column.getIsSorted() as string] ?? <ChevronsUpDown className="w-3.5 h-3.5 text-muted-foreground/50" />
-                      )}
-                    </div>
-                  </th>
+      <TableWrapper>
+        <TableHeader>
+          {table.getHeaderGroups().map(headerGroup => (
+            <TableRow key={headerGroup.id} className="bg-slate-950/30">
+              {headerGroup.headers.map(header => (
+                <TableHeadCell 
+                  key={header.id} 
+                  onClick={header.column.getToggleSortingHandler()}
+                  ariaSort={header.column.getIsSorted() as React.AriaAttributes['aria-sort']}
+                >
+                  <div className="flex items-center gap-1.5">
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                    {header.column.getCanSort() && (
+                      {
+                        asc: <ChevronUp className="w-3.5 h-3.5 text-primary" />,
+                        desc: <ChevronDown className="w-3.5 h-3.5 text-primary" />,
+                      }[header.column.getIsSorted() as string] ?? <ChevronsUpDown className="w-3.5 h-3.5 text-muted-foreground/50" />
+                    )}
+                  </div>
+                </TableHeadCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <tbody className="divide-y divide-border/50">
+          {table.getRowModel().rows.length > 0 ? (
+            table.getRowModel().rows.map(row => (
+              <TableRow key={row.id}>
+                {row.getVisibleCells().map(cell => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
                 ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody className="divide-y divide-border/50">
-            {table.getRowModel().rows.length > 0 ? (
-              table.getRowModel().rows.map(row => (
-                <tr key={row.id} className="hover:bg-slate-900/30 transition-colors">
-                  {row.getVisibleCells().map(cell => (
-                    <td key={cell.id} className="p-4 text-sm align-middle">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={columns.length} className="p-8 text-center text-sm text-muted-foreground">
-                  No exceptions found. Data quality is healthy!
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="text-center text-muted-foreground py-8">
+                No exceptions found. Data quality is healthy!
+              </TableCell>
+            </TableRow>
+          )}
+        </tbody>
+      </TableWrapper>
 
       {/* Pagination Controls Footer */}
       {table.getPageCount() > 1 && (
@@ -172,23 +172,25 @@ export const ExceptionTable: React.FC<ExceptionTableProps> = ({ data }) => {
             <span className="font-semibold text-foreground">{table.getPageCount()}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <button
+            <Button
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
-              className="px-3 py-1.5 rounded border border-border bg-card hover:bg-muted text-foreground transition-all disabled:opacity-40 disabled:hover:bg-card"
+              variant="secondary"
+              size="sm"
             >
               Previous
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
-              className="px-3 py-1.5 rounded border border-border bg-card hover:bg-muted text-foreground transition-all disabled:opacity-40 disabled:hover:bg-card"
+              variant="secondary"
+              size="sm"
             >
               Next
-            </button>
+            </Button>
           </div>
         </div>
       )}
-    </div>
+    </TableContainer>
   );
 };
