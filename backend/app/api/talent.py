@@ -50,15 +50,7 @@ def get_talent_report_month():
         conn = DuckDBClient.get_connection()
         try:
             row = conn.execute(
-                "SELECT MAX(review_period) FROM performance_reviews WHERE review_period IS NOT NULL"
-            ).fetchone()
-            if row and row[0]:
-                return str(row[0])[:7]
-        except Exception:
-            pass
-        try:
-            row = conn.execute(
-                "SELECT MAX(completion_date) FROM learning_enrollments WHERE completion_date IS NOT NULL"
+                "SELECT max_source_date FROM mart_command_center_data_freshness WHERE module_key = 'talent'"
             ).fetchone()
             if row and row[0]:
                 return str(row[0])[:7]

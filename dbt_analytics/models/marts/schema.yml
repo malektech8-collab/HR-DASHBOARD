@@ -1,0 +1,53 @@
+version: 2
+
+models:
+  - name: mart_exec_kpis
+    description: "Executive KPIs summary table"
+    columns:
+      - name: report_month
+        tests:
+          - unique
+          - not_null
+      - name: active_headcount
+        tests:
+          - not_null
+      - name: payroll_cost
+        tests:
+          - not_null
+
+  - name: mart_data_quality_summary
+    description: "Data Quality metrics summary table"
+    columns:
+      - name: data_quality_score
+        tests:
+          - not_null
+
+  - name: mart_payroll_kpis
+    description: "Payroll KPIs summary table"
+    columns:
+      - name: total_payroll_cost
+        tests:
+          - not_null
+      - name: employees_paid
+        tests:
+          - not_null
+
+  - name: mart_attendance_kpis
+    description: "Attendance KPIs summary table"
+    columns:
+      - name: attendance_compliance_pct
+        tests:
+          - not_null
+      - name: absence_days
+        tests:
+          - not_null
+
+  - name: mart_compliance_kpis
+    description: "Compliance/Saudization KPIs summary table"
+    columns:
+      - name: saudization_pct
+        tests:
+          - not_null
+      - name: saudi_headcount
+        tests:
+          - not_null

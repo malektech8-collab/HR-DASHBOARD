@@ -53,3 +53,7 @@ data/real_*/**
 *.sqlite
 *.sqlite3
 
+# dbt
+dbt_analytics/target/
+dbt_analytics/logs/
+dbt_analytics/dbt_packages/

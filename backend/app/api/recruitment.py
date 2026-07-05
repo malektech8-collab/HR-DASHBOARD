@@ -42,14 +42,16 @@ def get_configured_report_month(conn: duckdb.DuckDBPyConnection = Depends(get_db
         report_month_source = rec_rules.get("report_month_source", "max_requisition_date")
         
         if report_month_source == "max_requisition_date":
-
-            max_date_row = conn.execute("SELECT MAX(approval_date) FROM recruitment_requisitions").fetchone()
+            max_date_row = conn.execute(
+                "SELECT max_source_date FROM mart_command_center_data_freshness WHERE module_key = 'recruitment'"
+            ).fetchone()
             max_date = max_date_row[0] if max_date_row else None
             if max_date:
                 return str(max_date)[:7]
         return "2026-06"
     except Exception:
         return "2026-06"
+
 
 
 @router.get("/summary", response_model=RecruitmentSummaryResponse)

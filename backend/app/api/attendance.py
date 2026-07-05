@@ -38,15 +38,14 @@ def get_configured_report_month(conn: duckdb.DuckDBPyConnection = Depends(get_db
         report_month_source = attendance_rules.get("report_month_source", "max_attendance_date")
         
         if report_month_source == "max_attendance_date":
-
-            max_date_row = conn.execute("SELECT MAX(attendance_date) FROM attendance").fetchone()
+            max_date_row = conn.execute(
+                "SELECT max_source_date FROM mart_command_center_data_freshness WHERE module_key = 'attendance'"
+            ).fetchone()
             max_date = max_date_row[0] if max_date_row else None
             if max_date:
-                if hasattr(max_date, "strftime"):
-                    return max_date.strftime("%Y-%m")
-                else:
-                    return str(max_date)[:7]
+                return str(max_date)[:7]
         return "2026-06"
+
     except Exception:
         return "2026-06"
 

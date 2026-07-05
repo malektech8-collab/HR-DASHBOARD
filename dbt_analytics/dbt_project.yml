@@ -1,0 +1,44 @@
+name: 'hr_analytics'
+version: '1.0.0'
+config-version: 2
+
+profile: 'hr_analytics'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  hr_analytics:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: view
+
+vars:
+  report_month: "2026-06"
+  report_month_start: "2026-06-01"
+  report_month_end: "2026-06-30"
+  report_anchor_date: "2026-06-30"
+  talent_month_start: "2026-06-01"
+  talent_month_end: "2026-06-30"
+  default_sla_days: 45
+  disciplinary_sla_days: 14
+  grievance_sla_days: 10
+  labor_case_sla_days: 30
+  grace_period_minutes: 15
+  min_rating: 1.0
+  max_rating: 5.0
+  weekend_days_sql: "'Friday'"
+  has_gosi_source_sql: "TRUE"
+  has_wps_source_sql: "TRUE"
+  critical_titles_sql: "'Chief Executive Officer', 'Engineering Director', 'Finance Director', 'HR Manager'"
+  start_date_str: "2026-06-01"
+  end_date_str: "2026-06-30"
+
+

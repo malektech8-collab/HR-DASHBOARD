@@ -1,0 +1,16 @@
+{{ config(materialized='view') }}
+
+WITH anchor AS (
+        SELECT last_day(CAST(MAX(payroll_period) || '-01' AS DATE)) AS anchor_date
+        FROM {{ ref('stg_payroll') }}
+    )
+    SELECT 
+        COUNT(DISTINCT CASE WHEN c.iqama_expiry < (SELECT anchor_date FROM anchor) THEN e.employee_id END) AS expired,
+        COUNT(DISTINCT CASE WHEN c.iqama_expiry BETWEEN (SELECT anchor_date FROM anchor) AND (SELECT anchor_date FROM anchor) + INTERVAL 30 DAY THEN e.employee_id END) AS "0_30",
+        COUNT(DISTINCT CASE WHEN c.iqama_expiry BETWEEN (SELECT anchor_date FROM anchor) + INTERVAL 31 DAY AND (SELECT anchor_date FROM anchor) + INTERVAL 60 DAY THEN e.employee_id END) AS "31_60",
+        COUNT(DISTINCT CASE WHEN c.iqama_expiry BETWEEN (SELECT anchor_date FROM anchor) + INTERVAL 61 DAY AND (SELECT anchor_date FROM anchor) + INTERVAL 90 DAY THEN e.employee_id END) AS "61_90",
+        COUNT(DISTINCT CASE WHEN c.iqama_expiry > (SELECT anchor_date FROM anchor) + INTERVAL 90 DAY THEN e.employee_id END) AS "90_plus",
+        COUNT(DISTINCT CASE WHEN c.iqama_expiry IS NULL THEN e.employee_id END) AS missing_date
+    FROM {{ ref('base_active_workforce') }} e
+    LEFT JOIN {{ ref('stg_compliance') }} c ON e.employee_id = c.employee_id
+    WHERE e.is_saudi = FALSE

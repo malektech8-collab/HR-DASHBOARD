@@ -1,0 +1,7 @@
+hr_analytics:
+  outputs:
+    dev:
+      type: duckdb
+      path: "../warehouse/hr_analytics.duckdb"
+      threads: 1
+  target: dev

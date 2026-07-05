@@ -36,14 +36,16 @@ def get_configured_report_month(conn: duckdb.DuckDBPyConnection = Depends(get_db
         report_month_source = compliance_rules.get("report_month_source", "max_compliance_period")
         
         if report_month_source == "max_compliance_period":
-
-            max_period_row = conn.execute("SELECT MAX(period) FROM compliance").fetchone()
+            max_period_row = conn.execute(
+                "SELECT max_source_date FROM mart_command_center_data_freshness WHERE module_key = 'compliance'"
+            ).fetchone()
             max_period = max_period_row[0] if max_period_row else None
             if max_period:
                 return str(max_period)[:7]
         return "2026-06"
     except Exception:
         return "2026-06"
+
 
 
 @router.get("/summary", response_model=ComplianceSummaryResponse)

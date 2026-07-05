@@ -1,0 +1,29 @@
+version: 2
+
+sources:
+  - name: hr_raw
+    schema: main
+    tables:
+      - name: employees
+      - name: payroll
+      - name: attendance
+      - name: hr_requests
+      - name: compliance
+      - name: employee_relations
+      - name: recruitment_requisitions
+      - name: candidates
+      - name: interviews
+      - name: offers
+      - name: onboarding
+      - name: workforce_plan
+      - name: vacancy_requests
+      - name: data_quality
+      - name: performance_reviews
+      - name: performance_goals
+      - name: competency_assessments
+      - name: learning_enrollments
+      - name: training_catalog
+      - name: succession_plans
+      - name: talent_reviews
+      - name: employee_skills
+      - name: career_paths
