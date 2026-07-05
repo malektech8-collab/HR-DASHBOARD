@@ -32,7 +32,7 @@ async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<an
       localStorage.removeItem('auth_token');
     }
     const text = await response.text();
-    throw new Error(text || `Request failed with status ${response.status}`);
+    throw new Error(`Request failed with status ${response.status}: ${text}`);
   }
   return response.json();
 }

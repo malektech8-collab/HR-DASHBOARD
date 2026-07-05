@@ -11,10 +11,11 @@ class DuckDBClient:
 def get_db_connection() -> Generator[duckdb.DuckDBPyConnection, None, None]:
     """
     Dependency generator yielding a read-only DuckDB database connection.
-    Guarantees the connection is closed after execution completes.
+    Sets thread limit to 1 to prevent CPU/thread contention under concurrent queries.
     """
     conn = DuckDBClient.get_connection()
     try:
+        conn.execute("SET threads TO 1")
         yield conn
     finally:
         conn.close()

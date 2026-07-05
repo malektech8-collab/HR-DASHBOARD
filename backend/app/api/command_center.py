@@ -19,15 +19,13 @@ from app.schemas.command_center import (
 router = APIRouter()
 
 @router.get("/overview", response_model=CommandCenterOverviewResponse)
-def get_overview(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+async def get_overview(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-
-        row = conn.execute("SELECT * FROM mart_command_center_overview").fetchone()
+        cursor = conn.execute("SELECT * FROM mart_command_center_overview")
+        row = cursor.fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="Overview metrics not found")
-        
-        desc = conn.execute("DESCRIBE mart_command_center_overview").fetchall()
-        cols = [d[0] for d in desc]
+        cols = [desc[0] for desc in cursor.description]
         data = dict(zip(cols, row))
         return data
     except Exception as e:
@@ -35,12 +33,11 @@ def get_overview(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
 
 
 @router.get("/module-health", response_model=ModuleHealthResponse)
-def get_module_health(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+async def get_module_health(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-
-        rows = conn.execute("SELECT * FROM mart_command_center_module_health").fetchall()
-        desc = conn.execute("DESCRIBE mart_command_center_module_health").fetchall()
-        cols = [d[0] for d in desc]
+        cursor = conn.execute("SELECT * FROM mart_command_center_module_health")
+        rows = cursor.fetchall()
+        cols = [desc[0] for desc in cursor.description]
         modules = [dict(zip(cols, row)) for row in rows]
         return {"modules": modules}
     except Exception as e:
@@ -48,12 +45,11 @@ def get_module_health(conn: duckdb.DuckDBPyConnection = Depends(get_db_connectio
 
 
 @router.get("/priority-alerts", response_model=PriorityAlertResponse)
-def get_priority_alerts(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+async def get_priority_alerts(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-
-        rows = conn.execute("SELECT * FROM mart_command_center_priority_alerts").fetchall()
-        desc = conn.execute("DESCRIBE mart_command_center_priority_alerts").fetchall()
-        cols = [d[0] for d in desc]
+        cursor = conn.execute("SELECT * FROM mart_command_center_priority_alerts")
+        rows = cursor.fetchall()
+        cols = [desc[0] for desc in cursor.description]
         alerts = [dict(zip(cols, row)) for row in rows]
         return {"alerts": alerts}
     except Exception as e:
@@ -61,12 +57,11 @@ def get_priority_alerts(conn: duckdb.DuckDBPyConnection = Depends(get_db_connect
 
 
 @router.get("/exceptions", response_model=ExceptionSummaryResponse)
-def get_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+async def get_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-
-        rows = conn.execute("SELECT * FROM mart_command_center_exception_summary").fetchall()
-        desc = conn.execute("DESCRIBE mart_command_center_exception_summary").fetchall()
-        cols = [d[0] for d in desc]
+        cursor = conn.execute("SELECT * FROM mart_command_center_exception_summary")
+        rows = cursor.fetchall()
+        cols = [desc[0] for desc in cursor.description]
         exceptions = [dict(zip(cols, row)) for row in rows]
         return {"exceptions": exceptions}
     except Exception as e:
@@ -74,12 +69,11 @@ def get_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection))
 
 
 @router.get("/data-freshness", response_model=FreshnessResponse)
-def get_data_freshness(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+async def get_data_freshness(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-
-        rows = conn.execute("SELECT * FROM mart_command_center_data_freshness").fetchall()
-        desc = conn.execute("DESCRIBE mart_command_center_data_freshness").fetchall()
-        cols = [d[0] for d in desc]
+        cursor = conn.execute("SELECT * FROM mart_command_center_data_freshness")
+        rows = cursor.fetchall()
+        cols = [desc[0] for desc in cursor.description]
         freshness = [dict(zip(cols, row)) for row in rows]
         return {"freshness": freshness}
     except Exception as e:
@@ -87,15 +81,13 @@ def get_data_freshness(conn: duckdb.DuckDBPyConnection = Depends(get_db_connecti
 
 
 @router.get("/filter-options", response_model=FilterOptionsResponse)
-def get_filter_options(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+async def get_filter_options(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-
-        row = conn.execute("SELECT * FROM mart_command_center_filter_options").fetchone()
+        cursor = conn.execute("SELECT * FROM mart_command_center_filter_options")
+        row = cursor.fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="Filter options not found")
-        
-        desc = conn.execute("DESCRIBE mart_command_center_filter_options").fetchall()
-        cols = [d[0] for d in desc]
+        cols = [desc[0] for desc in cursor.description]
         data = dict(zip(cols, row))
         return data
     except Exception as e:
@@ -103,12 +95,11 @@ def get_filter_options(conn: duckdb.DuckDBPyConnection = Depends(get_db_connecti
 
 
 @router.get("/navigation-status", response_model=NavigationStatusResponse)
-def get_navigation_status(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+async def get_navigation_status(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-
-        rows = conn.execute("SELECT * FROM mart_command_center_navigation_status").fetchall()
-        desc = conn.execute("DESCRIBE mart_command_center_navigation_status").fetchall()
-        cols = [d[0] for d in desc]
+        cursor = conn.execute("SELECT * FROM mart_command_center_navigation_status")
+        rows = cursor.fetchall()
+        cols = [desc[0] for desc in cursor.description]
         navigation = [dict(zip(cols, row)) for row in rows]
         return {"navigation": navigation}
     except Exception as e:
@@ -116,9 +107,8 @@ def get_navigation_status(conn: duckdb.DuckDBPyConnection = Depends(get_db_conne
 
 
 @router.get("/qa-index", response_model=QaIndexResponse)
-def get_qa_index(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+async def get_qa_index(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     try:
-
         rows = conn.execute("SELECT module_key, module_label, screenshot_path, qa_report_path FROM base_command_center_module_registry").fetchall()
         
         project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
@@ -144,7 +134,8 @@ def get_qa_index(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
             qa_exists = os.path.exists(abs_qa_path)
             raw_exists = os.path.exists(abs_raw_path)
             
-            status = "Complete" if (scr_exists and qa_exists and raw_exists) else "Pending"
+            # Map API verification status
+            status = "Verified" if (scr_exists and qa_exists and raw_exists) else "Pending"
             
             qa_index.append(QaIndexItem(
                 module_key=m_key,
@@ -161,4 +152,3 @@ def get_qa_index(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
         return {"qa_index": qa_index}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
