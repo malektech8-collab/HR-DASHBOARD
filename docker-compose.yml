@@ -26,6 +26,7 @@ services:
       - DATA_PREFIX=${DATA_PREFIX:-}
     volumes:
       - ./warehouse:/app/warehouse
+      - ./data:/app/data
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 10s
