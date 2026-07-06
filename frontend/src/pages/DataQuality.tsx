@@ -23,7 +23,14 @@ import {
 } from 'lucide-react';
 import { useTemplatesQuery, useUploadMutation, useRefreshMutation } from '../hooks/useDataManagement';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+
+const getTemplateFilename = (name: string): string => {
+  return name
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join('_') + '.csv';
+};
 
 export const DataQuality: React.FC = () => {
   const [summary, setSummary] = useState<DataQualitySummaryData | null>(null);
@@ -297,9 +304,9 @@ export const DataQuality: React.FC = () => {
                         <p className="text-xs text-muted-foreground line-clamp-2">{t.description}</p>
                       </div>
                       <a
-                        href={`${API_BASE_URL}/api/data/templates?name=${t.name}`}
+                        href={`/templates/${getTemplateFilename(t.name)}`}
                         className="mt-4 flex items-center justify-center gap-2 px-3 py-1.5 bg-muted hover:bg-secondary text-foreground text-xs font-semibold rounded-lg transition border border-border"
-                        download
+                        download={getTemplateFilename(t.name)}
                       >
                         <Download className="w-3.5 h-3.5" /> Download Schema Template
                       </a>
