@@ -2,6 +2,19 @@ import os
 import polars as pl
 
 def ingest():
+    original_exists = os.path.exists
+    def custom_exists(path):
+        if isinstance(path, str) and path.startswith("data/sample/") and path.endswith("_sample.csv"):
+            filename = os.path.basename(path)
+            table_name = filename.replace("_sample.csv", "")
+            marker1 = f"data/silver/{table_name}.parquet.uploaded"
+            marker2 = f"/app/data/silver/{table_name}.parquet.uploaded"
+            if original_exists(marker1) or original_exists(marker2):
+                print(f"Skipping ingestion for table '{table_name}' due to manual upload (.uploaded marker).")
+                return False
+        return original_exists(path)
+    os.path.exists = custom_exists
+
     os.makedirs("data/bronze", exist_ok=True)
     os.makedirs("data/silver", exist_ok=True)
     
@@ -348,6 +361,7 @@ def ingest():
         print("Ingested career_paths to bronze/silver.")
 
     print("Ingestion complete.")
+    os.path.exists = original_exists
 
 if __name__ == "__main__":
     ingest()

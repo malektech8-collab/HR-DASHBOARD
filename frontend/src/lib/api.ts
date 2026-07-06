@@ -438,3 +438,41 @@ export async function fetchCommandCenterQaIndex(): Promise<QaIndexResponse> {
   const res = await fetch(`${API_BASE_URL}/api/command-center/qa-index`);
   return handleResponse<QaIndexResponse>(res);
 }
+
+// Data Management API endpoints
+export interface TemplateInfo {
+  name: string;
+  filename: string;
+  description: string;
+}
+
+export async function fetchTemplates(): Promise<TemplateInfo[]> {
+  const res = await fetch(`${API_BASE_URL}/api/data/templates`);
+  return handleResponse<TemplateInfo[]>(res);
+}
+
+export async function uploadFile(file: File): Promise<any> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch(`${API_BASE_URL}/api/data/upload`, {
+    method: "POST",
+    body: formData,
+  });
+  return handleResponse<any>(res);
+}
+
+export interface RefreshReport {
+  status: string;
+  return_code: number;
+  stdout: string;
+  stderr: string;
+  execution_time_seconds: number;
+}
+
+export async function triggerRefresh(): Promise<RefreshReport> {
+  const res = await fetch(`${API_BASE_URL}/api/data/refresh`, {
+    method: "POST",
+  });
+  return handleResponse<RefreshReport>(res);
+}
