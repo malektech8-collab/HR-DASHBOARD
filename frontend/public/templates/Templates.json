@@ -1,0 +1,27 @@
+[
+  {
+    "name": "employees",
+    "filename": "Employees.csv",
+    "description": "Employee demographics, payroll base, and contract terms."
+  },
+  {
+    "name": "payroll",
+    "filename": "Payroll.csv",
+    "description": "Monthly payroll metrics including basic salary and deductions."
+  },
+  {
+    "name": "attendance",
+    "filename": "Attendance.csv",
+    "description": "Daily attendance timesheets and overtime hours."
+  },
+  {
+    "name": "compliance",
+    "filename": "Compliance.csv",
+    "description": "Saudization quotas, GOSI contributions, and Iqama status."
+  },
+  {
+    "name": "employee_relations",
+    "filename": "Employee_Relations.csv",
+    "description": "Employee complaints, disputes, and active labor cases."
+  }
+]
