@@ -23,7 +23,7 @@ services:
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-}
       - AWS_S3_ENDPOINT=${AWS_S3_ENDPOINT:-}
       - AWS_S3_USE_SSL=${AWS_S3_USE_SSL:-true}
-      - DATA_PREFIX=${DATA_PREFIX:-}
+      - DATA_PREFIX=
     volumes:
       - ./warehouse:/app/warehouse
       - ./data:/app/data
