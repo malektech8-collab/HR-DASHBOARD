@@ -508,7 +508,7 @@ export const Payroll: React.FC = () => {
               const isIncrease = emp.change_amount > 0;
               const isLargeChange = Math.abs(emp.change_amount) > 2000;
               return (
-                <div key={emp.employee_id} className="flex items-center justify-between p-3 rounded-lg border border-border/60 bg-slate-950/10 hover:bg-slate-950/20 transition-all">
+                <div key={emp.employee_id} className="flex items-center justify-between p-3 rounded-lg border border-border/60 bg-muted/40 hover:bg-muted/60 transition-all">
                   <div className="space-y-1">
                     <div className="text-sm font-semibold flex items-center gap-1.5">
                       {emp.employee_name || 'Unknown Employee'}

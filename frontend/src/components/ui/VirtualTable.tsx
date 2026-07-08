@@ -64,7 +64,7 @@ export function VirtualTable<T>({
         className="w-full"
       >
         <TableWrapper>
-          <TableHeader className="sticky top-0 z-10 bg-[#0f172a] border-b border-border">
+          <TableHeader className="sticky top-0 z-10 bg-card border-b border-border">
             <TableRow>
               {columns.map((col, idx) => (
                 <TableHeadCell key={idx} className={col.className}>

@@ -52,12 +52,12 @@ export const GovernanceWidget: React.FC = () => {
   return (
     <div className="bg-gradient-to-br from-card/60 to-card/30 backdrop-blur-md border border-border p-6 rounded-2xl shadow-xl relative overflow-hidden">
       {/* Decorative background glow */}
-      <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-32 h-32 bg-warning/5 rounded-full blur-3xl pointer-events-none"></div>
 
       {/* Widget Header */}
       <div className="flex items-center justify-between border-b border-border/60 pb-4 mb-4">
         <div className="flex items-center gap-2.5">
-          <span className="p-1.5 bg-amber-500/10 text-amber-400 rounded-lg">
+          <span className="p-1.5 bg-warning/10 text-warning rounded-lg">
             <Shield className="w-5 h-5" />
           </span>
           <div>
@@ -66,16 +66,16 @@ export const GovernanceWidget: React.FC = () => {
           </div>
         </div>
         {data && (
-          <span className="px-3 py-1 text-xs font-bold tracking-wider uppercase bg-amber-500/15 text-amber-400 border border-amber-500/30 rounded-full animate-pulse">
+          <span className="px-3 py-1 text-xs font-bold tracking-wider uppercase bg-warning/15 text-warning border border-warning/30 rounded-full animate-pulse">
             {data.decision_recommendation}
           </span>
         )}
       </div>
 
       {/* Role Selection / Auth Toolbar */}
-      <div className="mb-5 p-3.5 bg-slate-950/60 border border-border/40 rounded-xl">
+      <div className="mb-5 p-3.5 bg-muted/40 border border-border/40 rounded-xl">
         <div className="flex items-center gap-2 text-xs font-semibold text-foreground mb-2.5">
-          <KeyRound className="w-3.5 h-3.5 text-amber-400" />
+          <KeyRound className="w-3.5 h-3.5 text-warning" />
           <span>Select Synthetic Identity (RBAC Session)</span>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -84,7 +84,7 @@ export const GovernanceWidget: React.FC = () => {
             disabled={loginMutation.isPending}
             variant="secondary"
             size="sm"
-            className="bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border-amber-500/20"
+            className="bg-warning/10 text-warning hover:bg-warning/20 border-warning/20"
           >
             System Admin
           </Button>
@@ -93,7 +93,7 @@ export const GovernanceWidget: React.FC = () => {
             disabled={loginMutation.isPending}
             variant="secondary"
             size="sm"
-            className="bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 border-indigo-500/20"
+            className="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/20 border-indigo-500/20"
           >
             Executive
           </Button>
@@ -102,7 +102,7 @@ export const GovernanceWidget: React.FC = () => {
             disabled={loginMutation.isPending}
             variant="secondary"
             size="sm"
-            className="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border-emerald-500/20"
+            className="bg-healthy/10 text-healthy hover:bg-healthy/20 border-healthy/20"
           >
             HR Analyst (403)
           </Button>
@@ -138,22 +138,22 @@ export const GovernanceWidget: React.FC = () => {
         <>
           {/* Critical Status Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
-            <div className="p-3 bg-slate-950/40 border border-border/50 rounded-xl">
+            <div className="p-3 bg-muted/40 border border-border/50 rounded-xl">
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Gate 5 Status</p>
-              <p className="font-bold text-xs mt-1 text-amber-400">{data.current_status}</p>
+              <p className="font-bold text-xs mt-1 text-warning">{data.current_status}</p>
             </div>
 
-            <div className="p-3 bg-slate-950/40 border border-border/50 rounded-xl">
+            <div className="p-3 bg-muted/40 border border-border/50 rounded-xl">
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Evidence Status</p>
-              <p className="font-bold text-xs mt-1 text-red-400">{data.evidence_status}</p>
+              <p className="font-bold text-xs mt-1 text-critical">{data.evidence_status}</p>
             </div>
 
-            <div className="p-3 bg-slate-950/40 border border-border/50 rounded-xl">
+            <div className="p-3 bg-muted/40 border border-border/50 rounded-xl">
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Validation State</p>
-              <p className="font-bold text-xs mt-1 text-indigo-400">{data.synthetic_validation_status}</p>
+              <p className="font-bold text-xs mt-1 text-indigo-600 dark:text-indigo-400">{data.synthetic_validation_status}</p>
             </div>
 
-            <div className="p-3 bg-slate-950/40 border border-border/50 rounded-xl">
+            <div className="p-3 bg-muted/40 border border-border/50 rounded-xl">
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Stop Criteria Count</p>
               <p className="font-bold text-xs mt-1 text-foreground">{data.stop_criteria_count} Registered</p>
             </div>
@@ -162,30 +162,30 @@ export const GovernanceWidget: React.FC = () => {
           {/* Authorization Checkboxes / Flags */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5 text-[11px] border-t border-border/40 pt-4">
             <div className="flex items-center gap-2 text-muted-foreground">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-              <span>Real-data execution: <strong className="text-red-400">Not Approved</strong></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-critical"></span>
+              <span>Real-data execution: <strong className="text-critical">Not Approved</strong></span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-              <span>Load scheduling: <strong className="text-red-400">Not Approved</strong></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-critical"></span>
+              <span>Load scheduling: <strong className="text-critical">Not Approved</strong></span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
-              <span>Go/No-Go meeting: <strong className="text-slate-400">Not Held</strong></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-neutral"></span>
+              <span>Go/No-Go meeting: <strong className="text-muted-foreground">Not Held</strong></span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-              <span>Last Milestone: <strong className="text-emerald-400">{data.last_completed_milestone}</strong></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-healthy"></span>
+              <span>Last Milestone: <strong className="text-healthy">{data.last_completed_milestone}</strong></span>
             </div>
           </div>
         </>
       )}
 
       {/* System Warning Banner */}
-      <div className="bg-red-500/10 border border-red-500/20 p-3.5 rounded-xl flex items-start gap-2.5">
-        <ShieldAlert className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+      <div className="bg-critical/10 border border-critical/20 p-3.5 rounded-xl flex items-start gap-2.5">
+        <ShieldAlert className="w-4 h-4 text-critical shrink-0 mt-0.5" />
         <div>
-          <p className="text-[11px] font-bold text-red-400 leading-tight">REAL-DATA EXECUTION LOCKED</p>
+          <p className="text-[11px] font-bold text-critical leading-tight">REAL-DATA EXECUTION LOCKED</p>
           <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">
             The project environment operates strictly on synthetic validation protocols. No live database connection is active, and production load scheduling is disabled.
           </p>

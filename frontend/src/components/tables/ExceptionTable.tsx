@@ -135,7 +135,7 @@ export const ExceptionTable: React.FC<ExceptionTableProps> = ({ data }) => {
   return (
     <div className="flex flex-col text-foreground">
       {/* Table Header Filter Row */}
-      <div className="p-4 border border-b-0 border-border rounded-t-xl flex items-center justify-between gap-4 bg-slate-950/20">
+      <div className="p-4 border border-b-0 border-border rounded-t-xl flex items-center justify-between gap-4 bg-muted/40">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <input

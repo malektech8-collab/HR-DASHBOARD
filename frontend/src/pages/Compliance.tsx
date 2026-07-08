@@ -501,7 +501,7 @@ export const Compliance: React.FC = () => {
             Official Saudization, GOSI, WPS compliance status, and document validity audit.
           </p>
         </div>
-        <div className="px-3 py-1.5 rounded-lg border border-border bg-slate-950/20 text-xs font-semibold text-muted-foreground flex items-center gap-2">
+        <div className="px-3 py-1.5 rounded-lg border border-border bg-muted/40 text-xs font-semibold text-muted-foreground flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
           Report Period: {summary.report_month}
         </div>

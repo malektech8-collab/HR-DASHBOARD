@@ -118,7 +118,7 @@ export const Talent: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500" />
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent" />
       </div>
     );
   }
@@ -126,9 +126,9 @@ export const Talent: React.FC = () => {
   if (error) {
     return (
       <div className="p-8 text-center">
-        <AlertTriangle className="mx-auto h-12 w-12 text-red-400 mb-4" />
-        <p className="text-red-400 text-lg font-semibold">{error}</p>
-        <button onClick={loadData} className="mt-4 px-4 py-2 bg-indigo-600 rounded-lg text-white hover:bg-indigo-500 transition">Retry</button>
+        <AlertTriangle className="mx-auto h-12 w-12 text-critical mb-4" />
+        <p className="text-critical text-lg font-semibold">{error}</p>
+        <button onClick={loadData} className="mt-4 px-4 py-2 bg-accent rounded-lg text-white hover:bg-accent-hover transition">Retry</button>
       </div>
     );
   }
@@ -314,15 +314,15 @@ export const Talent: React.FC = () => {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Talent, Performance & Succession</h1>
-          <p className="text-slate-400 text-sm mt-1">
-            Report Month: <span className="text-indigo-400 font-medium">{summary?.report_month || '—'}</span>
+          <h1 className="text-2xl font-bold text-foreground">Talent, Performance & Succession</h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            Report Month: <span className="text-accent font-medium">{summary?.report_month || '—'}</span>
           </p>
         </div>
         <button
           id="talent-refresh-btn"
           onClick={loadData}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 rounded-lg text-white text-sm hover:bg-indigo-500 transition"
+          className="flex items-center gap-2 px-4 py-2 bg-accent rounded-lg text-white text-sm hover:bg-accent-hover transition"
         >
           <Star size={16} /> Refresh
         </button>
@@ -347,81 +347,81 @@ export const Talent: React.FC = () => {
 
       {/* Row 1: Performance Distribution + Trend */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl p-5">
-          <h2 className="text-white font-semibold text-base mb-4">Performance Distribution</h2>
+        <div className="bg-card border border-border rounded-xl p-5 transition-theme">
+          <h2 className="text-foreground font-semibold text-base mb-4">Performance Distribution</h2>
           {distribution && distribution.distribution.length > 0
             ? <ReactECharts option={distOption} style={{ height: 260 }} />
-            : <p className="text-slate-400 text-sm text-center py-16">No data available</p>
+            : <p className="text-muted-foreground text-sm text-center py-16">No data available</p>
           }
         </div>
-        <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl p-5">
-          <h2 className="text-white font-semibold text-base mb-4">Review Completion Trend</h2>
+        <div className="bg-card border border-border rounded-xl p-5 transition-theme">
+          <h2 className="text-foreground font-semibold text-base mb-4">Review Completion Trend</h2>
           {trends && trends.trends.length > 0
             ? <ReactECharts option={trendOption} style={{ height: 260 }} />
-            : <p className="text-slate-400 text-sm text-center py-16">No data available</p>
+            : <p className="text-muted-foreground text-sm text-center py-16">No data available</p>
           }
         </div>
       </div>
 
       {/* Row 2: Performance by Department + Goal Completion */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl p-5">
-          <h2 className="text-white font-semibold text-base mb-4">Performance by Department</h2>
+        <div className="bg-card border border-border rounded-xl p-5 transition-theme">
+          <h2 className="text-foreground font-semibold text-base mb-4">Performance by Department</h2>
           {byDepartment && byDepartment.departments.length > 0
             ? <ReactECharts option={deptOption} style={{ height: 260 }} />
-            : <p className="text-slate-400 text-sm text-center py-16">No data available</p>
+            : <p className="text-muted-foreground text-sm text-center py-16">No data available</p>
           }
         </div>
-        <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl p-5">
-          <h2 className="text-white font-semibold text-base mb-4">Goal Completion by Department</h2>
+        <div className="bg-card border border-border rounded-xl p-5 transition-theme">
+          <h2 className="text-foreground font-semibold text-base mb-4">Goal Completion by Department</h2>
           {goals && goals.goals.length > 0
             ? <ReactECharts option={goalOption} style={{ height: 260 }} />
-            : <p className="text-slate-400 text-sm text-center py-16">No data available</p>
+            : <p className="text-muted-foreground text-sm text-center py-16">No data available</p>
           }
         </div>
       </div>
 
       {/* Row 3: Competency Gaps + Learning Completion */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl p-5">
-          <h2 className="text-white font-semibold text-base mb-4">Competency Gaps</h2>
+        <div className="bg-card border border-border rounded-xl p-5 transition-theme">
+          <h2 className="text-foreground font-semibold text-base mb-4">Competency Gaps</h2>
           {competencyGaps && competencyGaps.gaps.length > 0
             ? <ReactECharts option={compOption} style={{ height: 280 }} />
-            : <p className="text-slate-400 text-sm text-center py-16">No data available</p>
+            : <p className="text-muted-foreground text-sm text-center py-16">No data available</p>
           }
         </div>
-        <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl p-5">
-          <h2 className="text-white font-semibold text-base mb-4">Learning Completion by Category</h2>
+        <div className="bg-card border border-border rounded-xl p-5 transition-theme">
+          <h2 className="text-foreground font-semibold text-base mb-4">Learning Completion by Category</h2>
           {learning && learning.completion.length > 0
             ? <ReactECharts option={learnOption} style={{ height: 280 }} />
-            : <p className="text-slate-400 text-sm text-center py-16">No data available</p>
+            : <p className="text-muted-foreground text-sm text-center py-16">No data available</p>
           }
         </div>
       </div>
 
       {/* Row 4: Succession Coverage Table */}
-      <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl p-5">
-        <h2 className="text-white font-semibold text-base mb-4">Succession Plan Coverage — Critical Roles</h2>
+      <div className="bg-card border border-border rounded-xl p-5 transition-theme">
+        <h2 className="text-foreground font-semibold text-base mb-4">Succession Plan Coverage — Critical Roles</h2>
         {succession && succession.coverage.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-700">
-                  <th className="text-left text-slate-400 font-medium py-2 px-3">Role</th>
-                  <th className="text-right text-slate-400 font-medium py-2 px-3">Valid Successors</th>
-                  <th className="text-center text-slate-400 font-medium py-2 px-3">Coverage</th>
+                <tr className="border-b border-border">
+                  <th className="text-left text-muted-foreground font-medium py-2 px-3">Role</th>
+                  <th className="text-right text-muted-foreground font-medium py-2 px-3">Valid Successors</th>
+                  <th className="text-center text-muted-foreground font-medium py-2 px-3">Coverage</th>
                 </tr>
               </thead>
               <tbody>
                 {succession.coverage.map((row, i) => (
-                  <tr key={i} className="border-b border-slate-700/40 hover:bg-slate-700/30 transition">
-                    <td className="py-2 px-3 text-slate-200">{row.role_title}</td>
-                    <td className="py-2 px-3 text-right text-slate-300">{row.valid_successor_count}</td>
+                  <tr key={i} className="border-b border-border/60 hover:bg-muted/50 transition">
+                    <td className="py-2 px-3 text-foreground">{row.role_title}</td>
+                    <td className="py-2 px-3 text-right text-muted-foreground">{row.valid_successor_count}</td>
                     <td className="py-2 px-3 text-center">
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                         row.coverage_status === 'Covered'
-                          ? 'bg-emerald-500/20 text-emerald-400'
-                          : 'bg-red-500/20 text-red-400'
+                          ? 'bg-healthy/20 text-healthy'
+                          : 'bg-critical/20 text-critical'
                       }`}>
                         {row.coverage_status}
                       </span>
@@ -432,70 +432,70 @@ export const Talent: React.FC = () => {
             </table>
           </div>
         ) : (
-          <p className="text-slate-400 text-sm text-center py-8">No succession data available</p>
+          <p className="text-muted-foreground text-sm text-center py-8">No succession data available</p>
         )}
       </div>
 
       {/* Row 5: Readiness + Risk */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl p-5">
-          <h2 className="text-white font-semibold text-base mb-4">Successor Readiness</h2>
+        <div className="bg-card border border-border rounded-xl p-5 transition-theme">
+          <h2 className="text-foreground font-semibold text-base mb-4">Successor Readiness</h2>
           {readiness && readiness.readiness.length > 0
             ? <ReactECharts option={readOption} style={{ height: 240 }} />
-            : <p className="text-slate-400 text-sm text-center py-16">No data available</p>
+            : <p className="text-muted-foreground text-sm text-center py-16">No data available</p>
           }
         </div>
-        <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl p-5">
-          <h2 className="text-white font-semibold text-base mb-4">Talent Risk Profile</h2>
+        <div className="bg-card border border-border rounded-xl p-5 transition-theme">
+          <h2 className="text-foreground font-semibold text-base mb-4">Talent Risk Profile</h2>
           {riskData && riskData.risks.length > 0
             ? <ReactECharts option={riskOption} style={{ height: 240 }} />
-            : <p className="text-slate-400 text-sm text-center py-16">No data available</p>
+            : <p className="text-muted-foreground text-sm text-center py-16">No data available</p>
           }
         </div>
       </div>
 
       {/* Performance by Project Table */}
-      <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl p-5">
-        <h2 className="text-white font-semibold text-base mb-4">Performance by Project</h2>
+      <div className="bg-card border border-border rounded-xl p-5 transition-theme">
+        <h2 className="text-foreground font-semibold text-base mb-4">Performance by Project</h2>
         {byProject && byProject.projects.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-700">
-                  <th className="text-left text-slate-400 font-medium py-2 px-3">Project</th>
-                  <th className="text-right text-slate-400 font-medium py-2 px-3">Reviewed</th>
-                  <th className="text-right text-slate-400 font-medium py-2 px-3">Avg Rating</th>
-                  <th className="text-right text-slate-400 font-medium py-2 px-3">High Performers</th>
-                  <th className="text-right text-slate-400 font-medium py-2 px-3">Low Performers</th>
+                <tr className="border-b border-border">
+                  <th className="text-left text-muted-foreground font-medium py-2 px-3">Project</th>
+                  <th className="text-right text-muted-foreground font-medium py-2 px-3">Reviewed</th>
+                  <th className="text-right text-muted-foreground font-medium py-2 px-3">Avg Rating</th>
+                  <th className="text-right text-muted-foreground font-medium py-2 px-3">High Performers</th>
+                  <th className="text-right text-muted-foreground font-medium py-2 px-3">Low Performers</th>
                 </tr>
               </thead>
               <tbody>
                 {byProject.projects.map((row, i) => (
-                  <tr key={i} className="border-b border-slate-700/40 hover:bg-slate-700/30 transition">
-                    <td className="py-2 px-3 text-slate-200">{row.project}</td>
-                    <td className="py-2 px-3 text-right text-slate-300">{row.reviewed_count}</td>
+                  <tr key={i} className="border-b border-border/60 hover:bg-muted/50 transition">
+                    <td className="py-2 px-3 text-foreground">{row.project}</td>
+                    <td className="py-2 px-3 text-right text-muted-foreground">{row.reviewed_count}</td>
                     <td className="py-2 px-3 text-right">
-                      <span className={`font-semibold ${row.average_rating >= 3.5 ? 'text-emerald-400' : row.average_rating >= 2.5 ? 'text-amber-400' : 'text-red-400'}`}>
+                      <span className={`font-semibold ${row.average_rating >= 3.5 ? 'text-healthy' : row.average_rating >= 2.5 ? 'text-warning' : 'text-critical'}`}>
                         {row.average_rating.toFixed(2)}
                       </span>
                     </td>
-                    <td className="py-2 px-3 text-right text-indigo-400">{row.high_performers}</td>
-                    <td className="py-2 px-3 text-right text-red-400">{row.low_performers}</td>
+                    <td className="py-2 px-3 text-right text-accent">{row.high_performers}</td>
+                    <td className="py-2 px-3 text-right text-critical">{row.low_performers}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         ) : (
-          <p className="text-slate-400 text-sm text-center py-8">No project data available</p>
+          <p className="text-muted-foreground text-sm text-center py-8">No project data available</p>
         )}
       </div>
 
       {/* Talent Exceptions Table */}
-      <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl p-5">
-        <h2 className="text-white font-semibold text-base mb-4">
+      <div className="bg-card border border-border rounded-xl p-5 transition-theme">
+        <h2 className="text-foreground font-semibold text-base mb-4">
           Talent Data Quality Exceptions
-          <span className="ml-2 bg-red-500/20 text-red-400 border border-red-500/30 text-xs px-2 py-0.5 rounded">
+          <span className="ml-2 bg-critical/20 text-critical border border-critical/30 text-xs px-2 py-0.5 rounded">
             {exceptions.length}
           </span>
         </h2>

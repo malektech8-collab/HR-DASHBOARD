@@ -451,6 +451,10 @@ export async function fetchTemplates(): Promise<TemplateInfo[]> {
   return handleResponse<TemplateInfo[]>(res);
 }
 
+export function getTemplateDownloadUrl(name: string): string {
+  return `${API_BASE_URL}/api/data/templates?name=${encodeURIComponent(name)}`;
+}
+
 export async function uploadFile(file: File): Promise<any> {
   const formData = new FormData();
   formData.append("file", file);

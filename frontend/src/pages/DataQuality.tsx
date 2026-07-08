@@ -22,15 +22,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { useTemplatesQuery, useUploadMutation, useRefreshMutation } from '../hooks/useDataManagement';
-
-
-
-const getTemplateFilename = (name: string): string => {
-  return name
-    .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join('_') + '.csv';
-};
+import { getTemplateDownloadUrl } from '../lib/api';
 
 export const DataQuality: React.FC = () => {
   const [summary, setSummary] = useState<DataQualitySummaryData | null>(null);
@@ -242,7 +234,7 @@ export const DataQuality: React.FC = () => {
               return (
                 <div 
                   key={idx} 
-                  className={`bg-card border rounded-lg p-4 flex flex-col justify-between min-h-[110px] transition-all hover:bg-slate-900/10 ${
+                  className={`bg-card border rounded-lg p-4 flex flex-col justify-between min-h-[110px] transition-all hover:bg-muted/40 ${
                     hasIssues 
                       ? m.isCritical 
                         ? 'border-critical/30 shadow-critical/5' 
@@ -259,7 +251,7 @@ export const DataQuality: React.FC = () => {
                       {m.value}
                     </span>
                     {hasIssues ? (
-                      <span className="text-[9px] font-bold uppercase text-muted-foreground bg-slate-950/20 px-1 py-0.5 rounded border border-border">
+                      <span className="text-[9px] font-bold uppercase text-muted-foreground bg-muted px-1 py-0.5 rounded border border-border">
                         Audit
                       </span>
                     ) : (
@@ -298,15 +290,15 @@ export const DataQuality: React.FC = () => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {templates?.map((t) => (
-                    <div key={t.name} className="border border-border bg-slate-950/10 rounded-lg p-4 flex flex-col justify-between hover:bg-slate-900/10 transition">
+                    <div key={t.name} className="border border-border bg-muted/40 rounded-lg p-4 flex flex-col justify-between hover:bg-muted/60 transition">
                       <div className="space-y-1">
                         <p className="text-sm font-bold capitalize">{t.name.replace("_", " ")}</p>
                         <p className="text-xs text-muted-foreground line-clamp-2">{t.description}</p>
                       </div>
                       <a
-                        href={`/templates/${getTemplateFilename(t.name)}`}
+                        href={getTemplateDownloadUrl(t.name)}
                         className="mt-4 flex items-center justify-center gap-2 px-3 py-1.5 bg-muted hover:bg-secondary text-foreground text-xs font-semibold rounded-lg transition border border-border"
-                        download={getTemplateFilename(t.name)}
+                        download={t.filename}
                       >
                         <Download className="w-3.5 h-3.5" /> Download Schema Template
                       </a>
@@ -352,7 +344,7 @@ export const DataQuality: React.FC = () => {
                 onDragLeave={handleDrag}
                 onDrop={handleDrop}
                 className={`border-2 border-dashed rounded-xl p-8 text-center flex flex-col items-center justify-center gap-3 transition ${
-                  dragActive ? "border-primary bg-primary/5" : "border-border hover:bg-slate-900/5"
+                  dragActive ? "border-primary bg-primary/5" : "border-border hover:bg-muted/30"
                 }`}
               >
                 <input
@@ -371,7 +363,7 @@ export const DataQuality: React.FC = () => {
 
               {/* Selected File Details */}
               {selectedFile && (
-                <div className="bg-slate-950/20 border border-border p-4 rounded-lg flex items-center justify-between">
+                <div className="bg-muted/40 border border-border p-4 rounded-lg flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <FileText className="w-8 h-8 text-primary" />
                     <div>

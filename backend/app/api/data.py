@@ -14,14 +14,28 @@ router = APIRouter()
 SAMPLE_DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../data/sample"))
 SILVER_DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../data/silver"))
 
-# For production container environment, default to /app/data/silver
+SCRIPTS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../scripts"))
+
+# For production container environment, default to /app/data/silver, /app/data/sample, /app/scripts
 CONTAINER_SILVER_DIR = "/app/data/silver"
+CONTAINER_SAMPLE_DIR = "/app/data/sample"
+CONTAINER_SCRIPTS_DIR = "/app/scripts"
 
 def get_silver_dir() -> str:
     if os.path.exists(CONTAINER_SILVER_DIR):
         return CONTAINER_SILVER_DIR
     os.makedirs(SILVER_DATA_DIR, exist_ok=True)
     return SILVER_DATA_DIR
+
+def get_sample_dir() -> str:
+    if os.path.exists(CONTAINER_SAMPLE_DIR):
+        return CONTAINER_SAMPLE_DIR
+    return SAMPLE_DATA_DIR
+
+def get_scripts_dir() -> str:
+    if os.path.exists(CONTAINER_SCRIPTS_DIR):
+        return CONTAINER_SCRIPTS_DIR
+    return SCRIPTS_DIR
 
 class TemplateInfo(BaseModel):
     name: str
@@ -42,56 +56,51 @@ def compile_csv_to_parquet(csv_path: str, parquet_path: str, table_name: str):
     try:
         df = pl.read_csv(csv_path, null_values=[""])
         
-        # Apply specific type casting based on table name
+        # Apply specific type casting based on table name.
+        # Columns are only cast if present, since uploaded files may omit optional columns.
         if table_name == "employees":
-            df = df.with_columns([
-                pl.col("is_saudi").cast(pl.Boolean, strict=False),
-                pl.col("joining_date").str.to_date("%Y-%m-%d", strict=False),
-                pl.col("termination_date").str.to_date("%Y-%m-%d", strict=False),
-                pl.col("contract_end_date").str.to_date("%Y-%m-%d", strict=False),
-                pl.col("basic_salary").cast(pl.Float64, strict=False),
-                pl.col("housing_allowance").cast(pl.Float64, strict=False),
-                pl.col("transport_allowance").cast(pl.Float64, strict=False),
-            ])
+            date_cols = ["joining_date", "termination_date", "contract_end_date"]
+            numeric_cols = ["basic_salary", "housing_allowance", "transport_allowance"]
+            df = df.with_columns(
+                [pl.col(c).str.to_date("%Y-%m-%d", strict=False) for c in date_cols if c in df.columns] +
+                [pl.col(c).cast(pl.Float64, strict=False) for c in numeric_cols if c in df.columns] +
+                ([pl.col("is_saudi").cast(pl.Boolean, strict=False)] if "is_saudi" in df.columns else [])
+            )
         elif table_name == "payroll":
             numeric_cols = [
-                "basic_salary", "housing_allowance", "transport_allowance", 
-                "other_allowances", "overtime_amount", "deductions", 
+                "basic_salary", "housing_allowance", "transport_allowance",
+                "other_allowances", "overtime_amount", "deductions",
                 "gross_pay", "net_pay"
             ]
             df = df.with_columns([
                 pl.col(c).cast(pl.Float64, strict=False) for c in numeric_cols if c in df.columns
             ])
         elif table_name == "attendance":
-            df = df.with_columns([
-                pl.col("attendance_date").str.to_date("%Y-%m-%d", strict=False),
-                pl.col("scheduled_start").str.to_datetime("%Y-%m-%d %H:%M:%S", strict=False),
-                pl.col("scheduled_end").str.to_datetime("%Y-%m-%d %H:%M:%S", strict=False),
-                pl.col("actual_check_in").str.to_datetime("%Y-%m-%d %H:%M:%S", strict=False),
-                pl.col("actual_check_out").str.to_datetime("%Y-%m-%d %H:%M:%S", strict=False),
-                pl.col("late_minutes").cast(pl.Int64, strict=False),
-                pl.col("excused_late_minutes").cast(pl.Int64, strict=False),
-                pl.col("net_late_minutes").cast(pl.Int64, strict=False),
-                pl.col("absence_days").cast(pl.Float64, strict=False),
-                pl.col("overtime_hours").cast(pl.Float64, strict=False),
-                pl.col("overtime_approved").cast(pl.Boolean, strict=False),
-                pl.col("missing_punch_count").cast(pl.Int64, strict=False),
-            ])
+            date_cols = ["attendance_date"]
+            datetime_cols = ["scheduled_start", "scheduled_end", "actual_check_in", "actual_check_out"]
+            int_cols = ["late_minutes", "excused_late_minutes", "net_late_minutes", "missing_punch_count"]
+            float_cols = ["absence_days", "overtime_hours"]
+            df = df.with_columns(
+                [pl.col(c).str.to_date("%Y-%m-%d", strict=False) for c in date_cols if c in df.columns] +
+                [pl.col(c).str.to_datetime("%Y-%m-%d %H:%M:%S", strict=False) for c in datetime_cols if c in df.columns] +
+                [pl.col(c).cast(pl.Int64, strict=False) for c in int_cols if c in df.columns] +
+                [pl.col(c).cast(pl.Float64, strict=False) for c in float_cols if c in df.columns] +
+                ([pl.col("overtime_approved").cast(pl.Boolean, strict=False)] if "overtime_approved" in df.columns else [])
+            )
         elif table_name == "compliance":
-            df = df.with_columns([
-                pl.col("contract_authenticated").cast(pl.Boolean, strict=False),
-                pl.col("gosi_salary").cast(pl.Float64, strict=False),
-                pl.col("payroll_basic_salary").cast(pl.Float64, strict=False),
-                pl.col("work_permit_expiry").str.to_date("%Y-%m-%d", strict=False),
-                pl.col("iqama_expiry").str.to_date("%Y-%m-%d", strict=False),
-            ])
+            numeric_cols = ["gosi_salary", "payroll_basic_salary"]
+            date_cols = ["work_permit_expiry", "iqama_expiry"]
+            df = df.with_columns(
+                [pl.col(c).cast(pl.Float64, strict=False) for c in numeric_cols if c in df.columns] +
+                [pl.col(c).str.to_date("%Y-%m-%d", strict=False) for c in date_cols if c in df.columns] +
+                ([pl.col("contract_authenticated").cast(pl.Boolean, strict=False)] if "contract_authenticated" in df.columns else [])
+            )
         elif table_name == "employee_relations":
-            df = df.with_columns([
-                pl.col("created_date").str.to_date("%Y-%m-%d", strict=False),
-                pl.col("target_due_date").str.to_date("%Y-%m-%d", strict=False),
-                pl.col("closed_date").str.to_date("%Y-%m-%d", strict=False),
-                pl.col("escalated").cast(pl.Boolean, strict=False),
-            ])
+            date_cols = ["created_date", "target_due_date", "closed_date"]
+            df = df.with_columns(
+                [pl.col(c).str.to_date("%Y-%m-%d", strict=False) for c in date_cols if c in df.columns] +
+                ([pl.col("escalated").cast(pl.Boolean, strict=False)] if "escalated" in df.columns else [])
+            )
             
         df.write_parquet(parquet_path)
     except Exception as e:
@@ -118,11 +127,12 @@ def get_templates(
             raise HTTPException(status_code=404, detail="Template not found")
         
         # Security validation against path traversal
+        sample_dir = get_sample_dir()
         safe_filename = os.path.basename(target["filename"])
-        file_path = os.path.join(SAMPLE_DATA_DIR, safe_filename)
-        
+        file_path = os.path.join(sample_dir, safe_filename)
+
         # Verify file actually exists and path is safe
-        if not os.path.exists(file_path) or not file_path.startswith(SAMPLE_DATA_DIR):
+        if not os.path.exists(file_path) or not file_path.startswith(sample_dir):
             raise HTTPException(status_code=404, detail=f"Template file {target['filename']} not found on server")
         
         return FileResponse(
@@ -199,7 +209,7 @@ def trigger_refresh():
     """
     Systematically run scripts/refresh_all.py via Python subprocess and return pipeline health report.
     """
-    script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../scripts/refresh_all.py"))
+    script_path = os.path.join(get_scripts_dir(), "refresh_all.py")
     if not os.path.exists(script_path):
         raise HTTPException(status_code=500, detail=f"Refresh script not found at {script_path}")
         

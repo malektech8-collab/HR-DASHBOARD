@@ -128,13 +128,13 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
   const getStatusBadge = (status: 'Healthy' | 'Warning' | 'Critical' | 'Unknown') => {
     switch (status) {
       case 'Healthy':
-        return <span className="px-2 py-0.5 text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-md">Healthy</span>;
+        return <span className="px-2 py-0.5 text-[11px] font-semibold bg-healthy/10 text-healthy border border-healthy/20 rounded-md">Healthy</span>;
       case 'Warning':
-        return <span className="px-2 py-0.5 text-[11px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-md animate-pulse">Warning</span>;
+        return <span className="px-2 py-0.5 text-[11px] font-semibold bg-warning/10 text-warning border border-warning/20 rounded-md animate-pulse">Warning</span>;
       case 'Critical':
-        return <span className="px-2 py-0.5 text-[11px] font-semibold bg-red-500/10 text-red-400 border border-red-500/20 rounded-md animate-pulse">Critical</span>;
+        return <span className="px-2 py-0.5 text-[11px] font-semibold bg-critical/10 text-critical border border-critical/20 rounded-md animate-pulse">Critical</span>;
       default:
-        return <span className="px-2 py-0.5 text-[11px] font-semibold bg-slate-500/10 text-slate-400 border border-slate-500/20 rounded-md">Unknown</span>;
+        return <span className="px-2 py-0.5 text-[11px] font-semibold bg-neutral/10 text-neutral border border-neutral/20 rounded-md">Unknown</span>;
     }
   };
 
@@ -149,7 +149,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
       case 'er': return <Scale className="w-5 h-5 text-purple-400" />;
       case 'recruitment': return <UserPlus className="w-5 h-5 text-pink-400" />;
       case 'talent': return <Star className="w-5 h-5 text-yellow-400" />;
-      default: return <Shield className="w-5 h-5 text-slate-400" />;
+      default: return <Shield className="w-5 h-5 text-muted-foreground" />;
     }
   };
 
@@ -173,20 +173,20 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
         </div>
         
         <div className="flex flex-wrap items-center gap-4 text-xs">
-          <div className="flex items-center gap-2 bg-slate-900/40 px-3 py-2 rounded-xl border border-border">
+          <div className="flex items-center gap-2 bg-muted/60 px-3 py-2 rounded-xl border border-border">
             <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
             <span className="text-muted-foreground">Report Month:</span>
             <span className="font-semibold">{overview.latest_source_business_date ? overview.latest_source_business_date.slice(0,7) : '2026-06'}</span>
           </div>
-          <div className="flex items-center gap-2 bg-slate-900/40 px-3 py-2 rounded-xl border border-border">
+          <div className="flex items-center gap-2 bg-muted/60 px-3 py-2 rounded-xl border border-border">
             <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
             <span className="text-muted-foreground">Business Cutoff:</span>
             <span className="font-semibold">{overview.latest_source_business_date || '2026-06-30'}</span>
           </div>
-          <div className="flex items-center gap-2 bg-slate-900/40 px-3 py-2 rounded-xl border border-border">
+          <div className="flex items-center gap-2 bg-muted/60 px-3 py-2 rounded-xl border border-border">
             <RefreshCw className="w-3.5 h-3.5 text-muted-foreground animate-spin-slow" />
             <span className="text-muted-foreground">Warehouse Sync:</span>
-            <span className="font-semibold text-emerald-400">
+            <span className="font-semibold text-healthy">
               {new Date(overview.last_data_refresh).toLocaleTimeString()}
             </span>
           </div>
@@ -245,11 +245,11 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
           </div>
           <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Attendance Compliance</p>
           <div className="flex items-baseline gap-1 mt-2">
-            <span className="text-2xl font-bold tracking-tight text-amber-400">
+            <span className="text-2xl font-bold tracking-tight text-amber-600 dark:text-amber-400">
               {(overview.attendance_compliance_pct * 100).toFixed(1)}%
             </span>
           </div>
-          <div className="flex items-center gap-1 text-[11px] text-amber-400/80 mt-2 font-medium">
+          <div className="flex items-center gap-1 text-[11px] text-amber-600/80 dark:text-amber-400/80 mt-2 font-medium">
             <span>Attendance details</span>
             <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
           </div>
@@ -265,11 +265,11 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
           </div>
           <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Saudization Rate</p>
           <div className="flex items-baseline gap-1 mt-2">
-            <span className="text-2xl font-bold tracking-tight text-emerald-400">
+            <span className="text-2xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400">
               {overview.saudization_pct.toFixed(1)}%
             </span>
           </div>
-          <div className="flex items-center gap-1 text-[11px] text-emerald-400/80 mt-2 font-medium">
+          <div className="flex items-center gap-1 text-[11px] text-emerald-600/80 dark:text-emerald-400/80 mt-2 font-medium">
             <span>Saudization logs</span>
             <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
           </div>
@@ -285,10 +285,10 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
           </div>
           <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Open ER Cases</p>
           <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-2xl font-bold tracking-tight text-purple-400">{overview.open_er_cases}</span>
+            <span className="text-2xl font-bold tracking-tight text-purple-600 dark:text-purple-400">{overview.open_er_cases}</span>
             <span className="text-[10px] text-muted-foreground">active</span>
           </div>
-          <div className="flex items-center gap-1 text-[11px] text-purple-400/80 mt-2 font-medium">
+          <div className="flex items-center gap-1 text-[11px] text-purple-600/80 dark:text-purple-400/80 mt-2 font-medium">
             <span>Labor cases panel</span>
             <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
           </div>
@@ -304,10 +304,10 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
           </div>
           <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Open Requisitions</p>
           <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-2xl font-bold tracking-tight text-pink-400">{overview.open_requisitions}</span>
+            <span className="text-2xl font-bold tracking-tight text-pink-600 dark:text-pink-400">{overview.open_requisitions}</span>
             <span className="text-[10px] text-muted-foreground">reqs</span>
           </div>
-          <div className="flex items-center gap-1 text-[11px] text-pink-400/80 mt-2 font-medium">
+          <div className="flex items-center gap-1 text-[11px] text-pink-600/80 dark:text-pink-400/80 mt-2 font-medium">
             <span>Hiring dashboard</span>
             <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
           </div>
@@ -323,11 +323,11 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
           </div>
           <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Talent Review Rate</p>
           <div className="flex items-baseline gap-1 mt-2">
-            <span className="text-2xl font-bold tracking-tight text-yellow-400">
+            <span className="text-2xl font-bold tracking-tight text-yellow-600 dark:text-yellow-400">
               {overview.review_completion_pct.toFixed(1)}%
             </span>
           </div>
-          <div className="flex items-center gap-1 text-[11px] text-yellow-400/80 mt-2 font-medium">
+          <div className="flex items-center gap-1 text-[11px] text-yellow-600/80 dark:text-yellow-400/80 mt-2 font-medium">
             <span>Talent & succession</span>
             <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
           </div>
@@ -343,10 +343,10 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
           </div>
           <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Active Exceptions</p>
           <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-2xl font-bold tracking-tight text-red-400">{overview.total_active_exceptions}</span>
+            <span className="text-2xl font-bold tracking-tight text-critical">{overview.total_active_exceptions}</span>
             <span className="text-[10px] text-muted-foreground">issues</span>
           </div>
-          <div className="flex items-center gap-1 text-[11px] text-red-400/80 mt-2 font-medium">
+          <div className="flex items-center gap-1 text-[11px] text-critical/80 mt-2 font-medium">
             <span>Exceptions list</span>
             <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
           </div>
@@ -356,7 +356,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
         <div className="p-4 bg-card/60 border border-border rounded-xl relative overflow-hidden">
           <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">System Integration</p>
           <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-2xl font-bold tracking-tight text-emerald-400">
+            <span className="text-2xl font-bold tracking-tight text-healthy">
               {overview.modules_healthy}
             </span>
             <span className="text-sm font-semibold text-muted-foreground">/ 9 healthy</span>
@@ -374,11 +374,11 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
           </div>
           <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Data Quality Score</p>
           <div className="flex items-baseline gap-1 mt-2">
-            <span className="text-2xl font-bold tracking-tight text-indigo-400">
+            <span className="text-2xl font-bold tracking-tight text-accent">
               {(overview.data_quality_score * 100).toFixed(1)}%
             </span>
           </div>
-          <div className="flex items-center gap-1 text-[11px] text-indigo-400/80 mt-2 font-medium">
+          <div className="flex items-center gap-1 text-[11px] text-accent/80 mt-2 font-medium">
             <span>Quality assertions</span>
             <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
           </div>
@@ -404,7 +404,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
               <div>
                 <div className="flex items-center justify-between gap-2 border-b border-border/60 pb-3 mb-4">
                   <div className="flex items-center gap-2.5">
-                    <span className="p-1.5 bg-slate-900/60 border border-border/80 rounded-lg">
+                    <span className="p-1.5 bg-muted border border-border/80 rounded-lg">
                       {getModuleIcon(mod.module_key)}
                     </span>
                     <div>
@@ -422,13 +422,13 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
                   </div>
                   <div>
                     <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Sync State</p>
-                    <p className={`font-semibold mt-0.5 ${mod.stale_flag ? 'text-amber-400' : 'text-emerald-400'}`}>
+                    <p className={`font-semibold mt-0.5 ${mod.stale_flag ? 'text-warning' : 'text-healthy'}`}>
                       {mod.stale_flag ? 'Stale Data' : 'Current'}
                     </p>
                   </div>
                   <div>
                     <p className="text-[10px] text-muted-foreground uppercase tracking-wider">API Connection</p>
-                    <p className={`font-semibold mt-0.5 ${mod.api_health_status === 'Healthy' ? 'text-emerald-400' : 'text-red-400'}`}>
+                    <p className={`font-semibold mt-0.5 ${mod.api_health_status === 'Healthy' ? 'text-healthy' : 'text-critical'}`}>
                       {mod.api_health_status}
                     </p>
                   </div>
@@ -457,7 +457,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
                     href={`/qa-report?module=${mod.module_key}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="p-1.5 bg-slate-900/60 hover:bg-slate-900 border border-border/60 hover:border-border text-muted-foreground hover:text-foreground rounded-lg transition"
+                    className="p-1.5 bg-muted hover:bg-muted/70 border border-border/60 hover:border-border text-muted-foreground hover:text-foreground rounded-lg transition"
                     title="View QA markdown report"
                   >
                     <FileText className="w-3.5 h-3.5" />
@@ -467,7 +467,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
                     href={`/screenshot?module=${mod.module_key}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="p-1.5 bg-slate-900/60 hover:bg-slate-900 border border-border/60 hover:border-border text-muted-foreground hover:text-foreground rounded-lg transition"
+                    className="p-1.5 bg-muted hover:bg-muted/70 border border-border/60 hover:border-border text-muted-foreground hover:text-foreground rounded-lg transition"
                     title="View latest system screenshot"
                   >
                     <Image className="w-3.5 h-3.5" />
@@ -477,7 +477,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
                     href={`/raw-api?module=${mod.module_key}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="p-1.5 bg-slate-900/60 hover:bg-slate-900 border border-border/60 hover:border-border text-muted-foreground hover:text-foreground rounded-lg transition font-mono text-[9px] font-bold"
+                    className="p-1.5 bg-muted hover:bg-muted/70 border border-border/60 hover:border-border text-muted-foreground hover:text-foreground rounded-lg transition font-mono text-[9px] font-bold"
                     title="View raw API endpoint JSON"
                   >
                     JSON
@@ -492,7 +492,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
       {/* 4. Data Freshness Monitor Row */}
       <div className="bg-card/40 backdrop-blur-md border border-border rounded-2xl p-6">
         <h3 className="text-lg font-bold tracking-tight flex items-center gap-2 mb-4">
-          <Database className="w-4 h-4 text-sky-400 animate-pulse" />
+          <Database className="w-4 h-4 text-primary animate-pulse" />
           Data Freshness & Sync Monitor
         </h3>
         
@@ -510,9 +510,9 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
             </thead>
             <tbody className="divide-y divide-border/65">
               {freshness.map((row) => (
-                <tr key={row.module_key} className="hover:bg-slate-950/20 transition-colors">
+                <tr key={row.module_key} className="hover:bg-muted/40 transition-colors">
                   <td className="py-3.5 px-4 font-bold text-foreground capitalize">{row.module_label}</td>
-                  <td className="py-3.5 px-4 font-mono text-xs text-indigo-300">{row.source_table}</td>
+                  <td className="py-3.5 px-4 font-mono text-xs text-accent">{row.source_table}</td>
                   <td className="py-3.5 px-4 font-mono text-xs">
                     {row.max_source_date ? row.max_source_date : 'N/A'}
                   </td>
@@ -521,9 +521,9 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
                   </td>
                   <td className="py-3.5 px-4">
                     {row.stale_flag ? (
-                      <span className="px-2 py-0.5 text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded">STALE</span>
+                      <span className="px-2 py-0.5 text-[10px] font-bold bg-warning/10 text-warning border border-warning/20 rounded">STALE</span>
                     ) : (
-                      <span className="px-2 py-0.5 text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded">CURRENT</span>
+                      <span className="px-2 py-0.5 text-[10px] font-bold bg-healthy/10 text-healthy border border-healthy/20 rounded">CURRENT</span>
                     )}
                   </td>
                   <td className="py-3.5 px-4 text-xs text-muted-foreground max-w-xs truncate" title={row.stale_reason}>
@@ -540,16 +540,16 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
       <div className="bg-card/40 backdrop-blur-md border border-border rounded-2xl p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold tracking-tight flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-amber-400 animate-bounce" />
+            <AlertTriangle className="w-4 h-4 text-warning animate-bounce" />
             Executive Priority Alerts Queue
           </h3>
-          <span className="px-2 py-0.5 text-[10px] font-bold bg-amber-500/20 text-amber-400 rounded">
+          <span className="px-2 py-0.5 text-[10px] font-bold bg-warning/20 text-warning rounded">
             {alerts.length} Critical/Warning items
           </span>
         </div>
 
         {alerts.length === 0 ? (
-          <div className="text-center p-8 bg-slate-900/10 border border-dashed border-border rounded-xl">
+          <div className="text-center p-8 bg-muted/40 border border-dashed border-border rounded-xl">
             <p className="text-sm text-muted-foreground font-semibold">Queue Clear — No high priority alerts pending.</p>
           </div>
         ) : (
@@ -558,15 +558,15 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
               <div 
                 key={al.alert_id}
                 className={`p-4 rounded-xl border flex justify-between items-start gap-4 transition hover:shadow-md ${
-                  al.severity === 'Critical' 
-                    ? 'bg-red-500/5 border-red-500/20 hover:border-red-500/40' 
-                    : 'bg-amber-500/5 border-amber-500/20 hover:border-amber-500/40'
+                  al.severity === 'Critical'
+                    ? 'bg-critical/5 border-critical/20 hover:border-critical/40'
+                    : 'bg-warning/5 border-warning/20 hover:border-warning/40'
                 }`}
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <span className={`px-1.5 py-0.5 text-[9px] uppercase font-bold rounded ${
-                      al.severity === 'Critical' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400'
+                      al.severity === 'Critical' ? 'bg-critical/20 text-critical' : 'bg-warning/20 text-warning'
                     }`}>
                       {al.severity}
                     </span>
@@ -583,7 +583,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
                 
                 <button 
                   onClick={() => onNavigate(al.module_key)}
-                  className="p-1.5 bg-slate-900/60 hover:bg-slate-900 border border-border/80 text-muted-foreground hover:text-foreground rounded-lg transition self-center"
+                  className="p-1.5 bg-muted hover:bg-muted/70 border border-border/80 text-muted-foreground hover:text-foreground rounded-lg transition self-center"
                   title="Drill down to exception source"
                 >
                   <ChevronRight className="w-4 h-4" />
@@ -597,7 +597,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
       {/* 6. Exception Summary Table Row */}
       <div className="bg-card/40 backdrop-blur-md border border-border rounded-2xl p-6">
         <h3 className="text-lg font-bold tracking-tight flex items-center gap-2 mb-4">
-          <ShieldAlert className="w-4 h-4 text-red-400 animate-pulse" />
+          <ShieldAlert className="w-4 h-4 text-critical animate-pulse" />
           Cross-Module Exception Summary Matrix
         </h3>
 
@@ -615,19 +615,19 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
             </thead>
             <tbody className="divide-y divide-border/65">
               {exceptions.map((ex, index) => (
-                <tr key={`${ex.module_key}_${ex.issue_type}_${index}`} className="hover:bg-slate-950/20 transition-colors">
+                <tr key={`${ex.module_key}_${ex.issue_type}_${index}`} className="hover:bg-muted/40 transition-colors">
                   <td className="py-3 px-4 font-bold text-foreground capitalize">{ex.module_label}</td>
                   <td className="py-3 px-4">
                     <span className={`px-2 py-0.5 text-[10px] font-bold rounded ${
-                      ex.severity === 'Critical' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
-                      ex.severity === 'Warning' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
-                      'bg-slate-500/10 text-slate-400 border border-slate-500/20'
+                      ex.severity === 'Critical' ? 'bg-critical/10 text-critical border border-critical/20' :
+                      ex.severity === 'Warning' ? 'bg-warning/10 text-warning border border-warning/20' :
+                      'bg-neutral/10 text-neutral border border-neutral/20'
                     }`}>
                       {ex.severity}
                     </span>
                   </td>
                   <td className="py-3 px-4 font-medium text-foreground">{ex.issue_type}</td>
-                  <td className="py-3 px-4 font-mono font-bold text-red-400">{ex.exception_count}</td>
+                  <td className="py-3 px-4 font-mono font-bold text-critical">{ex.exception_count}</td>
                   <td className="py-3 px-4 text-xs text-muted-foreground">{ex.recommended_action || 'Review details.'}</td>
                   <td className="py-3 px-4">
                     <button
@@ -647,7 +647,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
       {/* 7. Regression QA Status Index Row */}
       <div className="bg-card/40 backdrop-blur-md border border-border rounded-2xl p-6">
         <h3 className="text-lg font-bold tracking-tight flex items-center gap-2 mb-4">
-          <ShieldCheck className="w-4 h-4 text-emerald-400 animate-pulse" />
+          <ShieldCheck className="w-4 h-4 text-healthy animate-pulse" />
           Regression Testing & QA Status Index
         </h3>
 
@@ -664,31 +664,31 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
             </thead>
             <tbody className="divide-y divide-border/65">
               {qaIndex.map((qa) => (
-                <tr key={qa.module_key} className="hover:bg-slate-950/20 transition-colors">
+                <tr key={qa.module_key} className="hover:bg-muted/40 transition-colors">
                   <td className="py-3.5 px-4 font-bold text-foreground">{qa.module_label}</td>
                   <td className="py-3.5 px-4 text-xs font-mono">
-                    <span className={qa.screenshot_exists ? 'text-emerald-400 font-semibold' : 'text-muted-foreground'}>
+                    <span className={qa.screenshot_exists ? 'text-healthy font-semibold' : 'text-muted-foreground'}>
                       {qa.screenshot_exists ? '✅ PRESENT' : '⚠️ MISSING'}
                     </span>
                     <span className="text-[10px] text-muted-foreground block font-sans mt-0.5">{qa.screenshot_path}</span>
                   </td>
                   <td className="py-3.5 px-4 text-xs font-mono">
-                    <span className={qa.qa_report_exists ? 'text-emerald-400 font-semibold' : 'text-muted-foreground'}>
+                    <span className={qa.qa_report_exists ? 'text-healthy font-semibold' : 'text-muted-foreground'}>
                       {qa.qa_report_exists ? '✅ PRESENT' : '⚠️ MISSING'}
                     </span>
                     <span className="text-[10px] text-muted-foreground block font-sans mt-0.5">{qa.qa_report_path}</span>
                   </td>
                   <td className="py-3.5 px-4 text-xs font-mono">
-                    <span className={qa.raw_api_exists ? 'text-emerald-400 font-semibold' : 'text-muted-foreground'}>
+                    <span className={qa.raw_api_exists ? 'text-healthy font-semibold' : 'text-muted-foreground'}>
                       {qa.raw_api_exists ? '✅ PRESENT' : '⚠️ MISSING'}
                     </span>
                     <span className="text-[10px] text-muted-foreground block font-sans mt-0.5">{qa.raw_api_path}</span>
                   </td>
                   <td className="py-3.5 px-4">
                     {qa.status === 'Complete' ? (
-                      <span className="px-2 py-0.5 text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded">PASSED</span>
+                      <span className="px-2 py-0.5 text-[10px] font-bold bg-healthy/10 text-healthy border border-healthy/20 rounded">PASSED</span>
                     ) : (
-                      <span className="px-2 py-0.5 text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded animate-pulse">PENDING</span>
+                      <span className="px-2 py-0.5 text-[10px] font-bold bg-warning/10 text-warning border border-warning/20 rounded animate-pulse">PENDING</span>
                     )}
                   </td>
                 </tr>

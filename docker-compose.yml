@@ -27,6 +27,9 @@ services:
     volumes:
       - ./warehouse:/app/warehouse
       - ./data:/app/data
+      - ./scripts:/app/scripts
+      - ./dbt_analytics:/app/dbt_analytics
+      - ./config:/app/config
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 10s
@@ -44,8 +47,6 @@ services:
     restart: unless-stopped
     ports:
       - "8080:8080"
-    volumes:
-      - ./frontend/public/templates:/usr/share/nginx/html/templates
     depends_on:
       backend:
         condition: service_healthy

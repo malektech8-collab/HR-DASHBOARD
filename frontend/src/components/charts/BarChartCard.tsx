@@ -24,7 +24,7 @@ export const BarChartCard: React.FC<BarChartCardProps> = ({
   }));
 
   return (
-    <div className="bg-card border border-border rounded-xl p-5 shadow-lg flex flex-col h-[300px]">
+    <div className="bg-card border border-border rounded-xl p-4 sm:p-5 shadow-lg flex flex-col h-[260px] sm:h-[300px] transition-theme">
       <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">{title}</h3>
       <div className="flex-1 min-h-0">
         <ResponsiveContainer width="100%" height="100%">

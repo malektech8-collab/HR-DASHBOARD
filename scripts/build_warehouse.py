@@ -6,7 +6,12 @@ import calendar
 import json
 import subprocess
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "backend")))
+# Local dev layout: scripts/../backend/app. Containerized layout: backend contents
+# are flattened directly under /app, so scripts/.. already contains the app package.
+_backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "backend"))
+if not os.path.isdir(os.path.join(_backend_dir, "app")):
+    _backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(_backend_dir)
 from app.db.duckdb_client import configure_s3
 
 
