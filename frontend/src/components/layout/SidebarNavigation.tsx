@@ -109,7 +109,7 @@ export const SidebarNavigation: React.FC<SidebarProps> = ({ currentPage, onPageC
 
         {/* Sidebar Footer */}
         <div className="p-4 border-t border-border text-center shrink-0">
-          <p className="text-xs text-muted-foreground">Version 1.0.0 (Milestone 2H)</p>
+          <p className="text-xs text-muted-foreground">Version 1.0.0 "Genesis"</p>
         </div>
       </aside>
     </>
