@@ -2,7 +2,7 @@
 
 -- 1. Active employee missing performance review
     SELECT e.employee_id AS record_id_str, 'Missing Performance Review' AS issue_type,
-        'Active employee ' || e.employee_id || ' has no completed review for ' || '{talent_report_month}' AS description,
+        'Active employee ' || e.employee_id || ' has no completed review for ' || '{{ var('report_month') }}' AS description,
         'Warning' AS severity, 'Assign and complete a performance review' AS recommended_action
     FROM {{ ref('base_talent_employee_population') }} e
     WHERE e.employee_id NOT IN (SELECT DISTINCT employee_id FROM {{ ref('base_performance_reviews_current') }})

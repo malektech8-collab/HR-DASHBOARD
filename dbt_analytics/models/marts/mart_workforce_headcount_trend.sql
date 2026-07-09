@@ -14,7 +14,7 @@ SELECT
     WHERE joining_date <= '2026-05-31' 
       AND (termination_date IS NULL OR termination_date > '2026-05-31')
     UNION ALL
-    SELECT 
-        '2026-06' AS month,
+    SELECT
+        '{{ var('report_month') }}' AS month,
         COUNT(DISTINCT employee_id) AS active_headcount
     FROM {{ ref('base_active_workforce') }}

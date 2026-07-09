@@ -13,7 +13,7 @@ WITH ranked AS (
             ROW_NUMBER() OVER (PARTITION BY s.employee_id ORDER BY s.completed_date DESC, s.performance_review_record_id DESC) AS rn
         FROM {{ ref('base_performance_review_source_records') }} s
         WHERE s.status = 'Completed'
-          AND s.review_period = '{talent_report_month}'
+          AND s.review_period = '{{ var('report_month') }}'
           AND s.employee_id IN (SELECT employee_id FROM {{ ref('base_talent_employee_population') }})
           AND s.rating IS NOT NULL
           AND s.rating BETWEEN {{ var('min_rating') }} AND {{ var('max_rating') }}

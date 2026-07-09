@@ -2,4 +2,4 @@
 
 SELECT *
     FROM {{ ref('stg_workforce_plan') }}
-    WHERE period = '{rec_report_month}'
+    WHERE period = '{{ var('report_month') }}'

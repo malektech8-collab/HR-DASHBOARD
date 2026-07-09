@@ -7,7 +7,7 @@
     UNION ALL
     -- Live dynamic current period
     SELECT 
-        '{rec_report_month}' AS period,
+        '{{ var('report_month') }}' AS period,
         COUNT(CASE WHEN approval_date BETWEEN '{{ var('report_month_start') }}' AND '{{ var('report_month_end') }}' THEN 1 END) AS requisitions_opened,
         COUNT(CASE WHEN hire_date BETWEEN '{{ var('report_month_start') }}' AND '{{ var('report_month_end') }}' THEN 1 END) AS hires
     FROM (
