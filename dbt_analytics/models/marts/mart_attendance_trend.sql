@@ -1,6 +1,8 @@
 {{ config(materialized='view') }}
 
-SELECT 
+{% if var('data_mode', 'demo') == 'demo' %}
+    -- Simulated historical trend for MVP visuals (demo mode only)
+    SELECT
         '2026-04' AS month,
         0.965 AS attendance_compliance_pct,
         2.0 AS absence_days,
@@ -9,7 +11,7 @@ SELECT
         1.0 AS missing_punch_count,
         8.0 AS overtime_hours
     UNION ALL
-    SELECT 
+    SELECT
         '2026-05' AS month,
         0.950 AS attendance_compliance_pct,
         3.0 AS absence_days,
@@ -18,8 +20,9 @@ SELECT
         2.0 AS missing_punch_count,
         12.5 AS overtime_hours
     UNION ALL
-    SELECT 
-        '2026-06' AS month,
+{% endif %}
+    SELECT
+        '{{ var('report_month') }}' AS month,
         ROUND(attendance_compliance_pct, 4) AS attendance_compliance_pct,
         absence_days,
         CAST(late_minutes AS DOUBLE) AS late_minutes,

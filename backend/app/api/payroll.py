@@ -18,12 +18,13 @@ from app.schemas.payroll import (
     PayrollExceptionsResponse
 )
 from app.schemas.kpi import KPIItem, DQExceptionItem
+from app.api._report_period import get_report_month
 from typing import List
 
 router = APIRouter()
 
 @router.get("/summary", response_model=PayrollSummaryResponse)
-def get_payroll_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+def get_payroll_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), report_month: str = Depends(get_report_month)):
     try:
 
         res = conn.execute("SELECT * FROM mart_payroll_kpis").fetchone()
@@ -140,7 +141,7 @@ def get_payroll_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connect
     )
 
     return PayrollSummaryResponse(
-        report_month="2026-06",
+        report_month=report_month,
         kpis=kpis,
         reconciliation=reconciliation
     )

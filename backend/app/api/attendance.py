@@ -18,40 +18,13 @@ from app.schemas.attendance import (
     AttendanceExceptionsResponse
 )
 from app.schemas.kpi import KPIItem, DQExceptionItem
-import os
-import yaml
+from app.api._report_period import get_report_month
 
 router = APIRouter()
 
-# Helper function to get report month dynamically from config or DB
-def get_configured_report_month(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
-    try:
-        # Load rules to check config
-        config_path = "config/business_rules.yml"
-        if os.path.exists(config_path):
-            with open(config_path, "r", encoding="utf-8") as f:
-                rules = yaml.safe_load(f)
-        else:
-            rules = {}
-            
-        attendance_rules = rules.get("attendance_rules", {})
-        report_month_source = attendance_rules.get("report_month_source", "max_attendance_date")
-        
-        if report_month_source == "max_attendance_date":
-            max_date_row = conn.execute(
-                "SELECT max_source_date FROM mart_command_center_data_freshness WHERE module_key = 'attendance'"
-            ).fetchone()
-            max_date = max_date_row[0] if max_date_row else None
-            if max_date:
-                return str(max_date)[:7]
-        return "2026-06"
-
-    except Exception:
-        return "2026-06"
-
 
 @router.get("/summary", response_model=AttendanceSummaryResponse)
-def get_attendance_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+def get_attendance_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), report_month: str = Depends(get_report_month)):
     try:
 
         res = conn.execute("SELECT * FROM mart_attendance_kpis").fetchone()
@@ -138,8 +111,6 @@ def get_attendance_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_conn
             status="critical" if row_dict["attendance_exception_count"] > 0 else "healthy"
         )
     ]
-
-    report_month = get_configured_report_month()
 
     return AttendanceSummaryResponse(
         report_month=report_month,

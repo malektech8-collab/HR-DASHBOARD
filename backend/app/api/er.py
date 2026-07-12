@@ -20,38 +20,14 @@ from app.schemas.er import (
     ErExceptionsResponse
 )
 from app.schemas.kpi import KPIItem, DQExceptionItem
-import os
-import yaml
+from app.api._report_period import get_report_month
 
 router = APIRouter()
-
-def get_configured_report_month(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
-    try:
-        config_path = "config/business_rules.yml"
-        if os.path.exists(config_path):
-            with open(config_path, "r", encoding="utf-8") as f:
-                rules = yaml.safe_load(f)
-        else:
-            rules = {}
-            
-        er_rules = rules.get("er_rules", {})
-        report_month_source = er_rules.get("report_month_source", "max_case_date")
-        
-        if report_month_source == "max_case_date":
-            max_date_row = conn.execute(
-                "SELECT max_source_date FROM mart_command_center_data_freshness WHERE module_key = 'er'"
-            ).fetchone()
-            max_date = max_date_row[0] if max_date_row else None
-            if max_date:
-                return str(max_date)[:7]
-        return "2026-06"
-    except Exception:
-        return "2026-06"
 
 
 
 @router.get("/summary", response_model=ErSummaryResponse)
-def get_er_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+def get_er_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), report_month: str = Depends(get_report_month)):
     try:
 
         res = conn.execute("SELECT * FROM mart_er_kpis").fetchone()
@@ -62,8 +38,6 @@ def get_er_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
 
-
-    report_month = get_configured_report_month()
 
     kpis = [
         KPIItem(

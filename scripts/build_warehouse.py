@@ -6,6 +6,11 @@ import calendar
 import json
 import subprocess
 
+# Load the repo-root .env BEFORE reading any env var, so a single uncommitted
+# .env drives both this pipeline and the backend (no split-brain on DATA_MODE).
+from dotenv import load_dotenv
+load_dotenv(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".env")))
+
 # Local dev layout: scripts/../backend/app. Containerized layout: backend contents
 # are flattened directly under /app, so scripts/.. already contains the app package.
 _backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "backend"))
@@ -13,6 +18,7 @@ if not os.path.isdir(os.path.join(_backend_dir, "app")):
     _backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(_backend_dir)
 from app.db.duckdb_client import configure_s3
+from app.config import settings
 
 
 
@@ -78,18 +84,34 @@ def build_warehouse():
     else:
         rules = {}
 
-    cc_rules = rules.get("command_center_rules", {})
-    cc_report_month = cc_rules.get("report_month", "2026-06")
+    # --- Cycle 5a: resolve report_month from the DATA (single source of truth) ---
+    # Prefer payroll_period (the canonical, always-complete monthly HR close),
+    # then compliance period; fall back to the ONE system-wide default in config.
+    def _derive_report_month():
+        for query in (
+            "SELECT CAST(MAX(payroll_period) AS VARCHAR) FROM payroll",
+            "SELECT CAST(MAX(period) AS VARCHAR) FROM compliance",
+        ):
+            try:
+                row = conn.execute(query).fetchone()
+                if row and row[0]:
+                    return str(row[0])[:7]
+            except Exception:
+                pass
+        return settings.DEFAULT_REPORT_MONTH
+
+    cc_report_month = _derive_report_month()
     try:
         year, month = map(int, cc_report_month.split("-"))
-        last_day = calendar.monthrange(year, month)[1]
-        cc_report_month_end = f"{cc_report_month}-{last_day:02d}"
     except Exception:
-        cc_report_month_end = f"{cc_report_month}-30"
+        cc_report_month = settings.DEFAULT_REPORT_MONTH
+        year, month = map(int, cc_report_month.split("-"))
+    last_day = calendar.monthrange(year, month)[1]
+    cc_report_month_end = f"{cc_report_month}-{last_day:02d}"
     cc_report_month_start = f"{cc_report_month}-01"
-
-    talent_rules = rules.get("talent_rules", {})
-    talent_report_month = talent_rules.get("default_report_month", "2026-06")
+    # Item 5: talent period now tracks the same resolved month (drops the old
+    # separate talent_report_month + hardcoded '-30' last-day bug) — see dbt_vars.
+    print(f"Resolved report_month from data: {cc_report_month} ({cc_report_month_start}..{cc_report_month_end})")
 
     # Create placeholders for table-backed views to prevent dbt compilation errors
     conn.execute("""
@@ -130,12 +152,15 @@ def build_warehouse():
         dbt_bin = "dbt"
 
     dbt_vars = {
+        "data_mode": os.getenv("DATA_MODE", "demo"),
         "report_month": cc_report_month,
         "report_month_start": cc_report_month_start,
         "report_month_end": cc_report_month_end,
+        # Item 2: anchor derives from the resolved period end (correct ER overdue math).
         "report_anchor_date": cc_report_month_end,
-        "talent_month_start": f"{talent_report_month}-01",
-        "talent_month_end": f"{talent_report_month}-30",
+        # Item 5: talent period tracks the resolved month via the same monthrange end.
+        "talent_month_start": cc_report_month_start,
+        "talent_month_end": cc_report_month_end,
         "default_sla_days": rules.get("recruitment_rules", {}).get("default_sla_days", 45),
         "disciplinary_sla_days": rules.get("er_rules", {}).get("sla_days", {}).get("Disciplinary", 14),
         "grievance_sla_days": rules.get("er_rules", {}).get("sla_days", {}).get("Grievance", 10),

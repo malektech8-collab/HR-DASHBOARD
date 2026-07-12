@@ -57,3 +57,10 @@ data/real_*/**
 dbt_analytics/target/
 dbt_analytics/logs/
 dbt_analytics/dbt_packages/
+
+# Local scratch / agent / runtime artifacts (never committed)
+scratch/
+.claude/
+backend/data/
+frontend/test-results/
+tracked_files.txt

@@ -1,18 +1,19 @@
 {{ config(materialized='view') }}
 
-SELECT 
-        '2026-04' AS month,
+-- Historical anchors are placeholders; to be replaced by report_month-relative derivation in the resolver cycle (5a).
+    SELECT
+        '{{ var('trend_m1') }}' AS month,
         COUNT(DISTINCT employee_id) AS active_headcount
     FROM {{ ref('stg_employees') }}
-    WHERE joining_date <= '2026-04-30' 
-      AND (termination_date IS NULL OR termination_date > '2026-04-30')
+    WHERE joining_date <= '{{ var('trend_m1_end') }}'
+      AND (termination_date IS NULL OR termination_date > '{{ var('trend_m1_end') }}')
     UNION ALL
-    SELECT 
-        '2026-05' AS month,
+    SELECT
+        '{{ var('trend_m2') }}' AS month,
         COUNT(DISTINCT employee_id) AS active_headcount
     FROM {{ ref('stg_employees') }}
-    WHERE joining_date <= '2026-05-31' 
-      AND (termination_date IS NULL OR termination_date > '2026-05-31')
+    WHERE joining_date <= '{{ var('trend_m2_end') }}'
+      AND (termination_date IS NULL OR termination_date > '{{ var('trend_m2_end') }}')
     UNION ALL
     SELECT
         '{{ var('report_month') }}' AS month,

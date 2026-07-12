@@ -28,43 +28,13 @@ from app.schemas.talent import (
     TalentExceptionsResponse,
 )
 from app.schemas.kpi import KPIItem, DQExceptionItem
-import os
-import yaml
+from app.api._report_period import get_report_month
 
 router = APIRouter()
 
 
-def get_talent_report_month():
-    """Resolve the talent report month using the 5-tier priority."""
-    try:
-        config_path = "config/business_rules.yml"
-        rules = {}
-        if os.path.exists(config_path):
-            with open(config_path, "r", encoding="utf-8") as f:
-                rules = yaml.safe_load(f) or {}
-        talent_rules = rules.get("talent_rules", {})
-        configured = talent_rules.get("configured_report_month", None)
-        if configured:
-            return configured
-
-        conn = DuckDBClient.get_connection()
-        try:
-            row = conn.execute(
-                "SELECT max_source_date FROM mart_command_center_data_freshness WHERE module_key = 'talent'"
-            ).fetchone()
-            if row and row[0]:
-                return str(row[0])[:7]
-        except Exception:
-            pass
-        finally:
-            conn.close()
-    except Exception:
-        pass
-    return "2026-06"
-
-
 @router.get("/summary", response_model=TalentSummaryResponse)
-def get_talent_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+def get_talent_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), report_month: str = Depends(get_report_month)):
     try:
 
         res = conn.execute("SELECT * FROM mart_talent_kpis").fetchone()
@@ -77,8 +47,6 @@ def get_talent_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connecti
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
 
-
-    report_month = get_talent_report_month()
 
     kpis = [
         KPIItem(
