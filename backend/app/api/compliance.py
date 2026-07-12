@@ -18,38 +18,14 @@ from app.schemas.compliance import (
     ComplianceExceptionsResponse
 )
 from app.schemas.kpi import KPIItem, DQExceptionItem
-import os
-import yaml
+from app.api._report_period import get_report_month
 
 router = APIRouter()
-
-def get_configured_report_month(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
-    try:
-        config_path = "config/business_rules.yml"
-        if os.path.exists(config_path):
-            with open(config_path, "r", encoding="utf-8") as f:
-                rules = yaml.safe_load(f)
-        else:
-            rules = {}
-            
-        compliance_rules = rules.get("compliance_rules", {})
-        report_month_source = compliance_rules.get("report_month_source", "max_compliance_period")
-        
-        if report_month_source == "max_compliance_period":
-            max_period_row = conn.execute(
-                "SELECT max_source_date FROM mart_command_center_data_freshness WHERE module_key = 'compliance'"
-            ).fetchone()
-            max_period = max_period_row[0] if max_period_row else None
-            if max_period:
-                return str(max_period)[:7]
-        return "2026-06"
-    except Exception:
-        return "2026-06"
 
 
 
 @router.get("/summary", response_model=ComplianceSummaryResponse)
-def get_compliance_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+def get_compliance_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), report_month: str = Depends(get_report_month)):
     try:
 
         res = conn.execute("SELECT * FROM mart_compliance_kpis").fetchone()
@@ -59,9 +35,6 @@ def get_compliance_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_conn
         row_dict = dict(zip(cols, res))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
-
-
-    report_month = get_configured_report_month()
 
     kpis = [
         KPIItem(

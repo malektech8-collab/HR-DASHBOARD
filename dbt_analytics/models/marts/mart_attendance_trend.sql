@@ -22,7 +22,7 @@
     UNION ALL
 {% endif %}
     SELECT
-        '2026-06' AS month,
+        '{{ var('report_month') }}' AS month,
         ROUND(attendance_compliance_pct, 4) AS attendance_compliance_pct,
         absence_days,
         CAST(late_minutes AS DOUBLE) AS late_minutes,

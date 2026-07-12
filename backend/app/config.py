@@ -14,6 +14,12 @@ class Settings(BaseSettings):
     # 'real' is set locally (uncommitted, via .env / env var) for real-data use.
     DATA_MODE: str = "demo"
 
+    # The ONE hardcoded report-month fallback for the whole system (cycle 5a).
+    # Mirrors the dbt_project.yml `report_month` default. Both the pipeline
+    # (build_warehouse.py) derivation fallback and the API resolver's no-row/
+    # error fallback read THIS value, so they can never drift apart.
+    DEFAULT_REPORT_MONTH: str = "2026-06"
+
     # S3 / Cloud Storage configurations
     AWS_ACCESS_KEY_ID: str | None = None
     AWS_SECRET_ACCESS_KEY: str | None = None
