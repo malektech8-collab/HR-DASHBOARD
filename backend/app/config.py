@@ -10,6 +10,10 @@ class Settings(BaseSettings):
     PORT: int = 8000
     DEBUG: bool = True
 
+    # Data mode: 'demo' (committed default) serves synthetic sample data;
+    # 'real' is set locally (uncommitted, via .env / env var) for real-data use.
+    DATA_MODE: str = "demo"
+
     # S3 / Cloud Storage configurations
     AWS_ACCESS_KEY_ID: str | None = None
     AWS_SECRET_ACCESS_KEY: str | None = None

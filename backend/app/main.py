@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api import executive, data_quality, workforce, payroll, attendance, compliance, er, recruitment, talent, command_center, data
 from app.api.endpoints import governance
-from app.schemas.kpi import RefreshStatusResponse
+from app.schemas.kpi import RefreshStatusResponse, AppConfigResponse
 from app.config import settings
 import os
 from datetime import datetime
@@ -44,6 +44,11 @@ def get_refresh_status():
         last_refresh_at=last_refresh_str,
         status=status_str
     )
+
+# Meta app-config endpoint (exposes the active data_mode to the frontend)
+@app.get("/api/meta/app-config", response_model=AppConfigResponse)
+def get_app_config():
+    return AppConfigResponse(data_mode=settings.DATA_MODE)
 
 # Include API routers
 app.include_router(executive.router, prefix="/api/executive", tags=["Executive"])

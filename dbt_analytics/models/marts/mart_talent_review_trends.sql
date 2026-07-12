@@ -1,9 +1,12 @@
 {{ config(materialized='view') }}
 
-SELECT '2026-04' AS period, 12 AS total_reviewed, 10 AS completed_reviews, 85.0 AS completion_pct, 3.6 AS avg_rating
+{% if var('data_mode', 'demo') == 'demo' %}
+    -- Simulated historical trend for MVP visuals (demo mode only)
+    SELECT '2026-04' AS period, 12 AS total_reviewed, 10 AS completed_reviews, 85.0 AS completion_pct, 3.6 AS avg_rating
     UNION ALL
     SELECT '2026-05' AS period, 14 AS total_reviewed, 12 AS completed_reviews, 88.0 AS completion_pct, 3.7 AS avg_rating
     UNION ALL
+{% endif %}
     SELECT '{{ var('report_month') }}' AS period,
         (SELECT COUNT(*) FROM {{ ref('base_talent_employee_population') }}) AS total_reviewed,
         (SELECT COUNT(DISTINCT employee_id) FROM {{ ref('base_performance_reviews_current') }}) AS completed_reviews,

@@ -6,6 +6,11 @@ import calendar
 import json
 import subprocess
 
+# Load the repo-root .env BEFORE reading any env var, so a single uncommitted
+# .env drives both this pipeline and the backend (no split-brain on DATA_MODE).
+from dotenv import load_dotenv
+load_dotenv(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".env")))
+
 # Local dev layout: scripts/../backend/app. Containerized layout: backend contents
 # are flattened directly under /app, so scripts/.. already contains the app package.
 _backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "backend"))
@@ -130,6 +135,7 @@ def build_warehouse():
         dbt_bin = "dbt"
 
     dbt_vars = {
+        "data_mode": os.getenv("DATA_MODE", "demo"),
         "report_month": cc_report_month,
         "report_month_start": cc_report_month_start,
         "report_month_end": cc_report_month_end,

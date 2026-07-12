@@ -39,3 +39,6 @@ class DQExceptionsResponse(BaseModel):
 class RefreshStatusResponse(BaseModel):
     last_refresh_at: str
     status: str
+
+class AppConfigResponse(BaseModel):
+    data_mode: str
