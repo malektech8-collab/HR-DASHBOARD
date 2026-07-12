@@ -9,11 +9,12 @@ from app.schemas.workforce import (
     CategoryDistribution
 )
 from app.schemas.kpi import KPIItem, DQExceptionsResponse, DQExceptionItem
+from app.api._report_period import get_report_month
 
 router = APIRouter()
 
 @router.get("/summary", response_model=WorkforceSummaryResponse)
-def get_workforce_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+def get_workforce_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), report_month: str = Depends(get_report_month)):
     try:
 
         res = conn.execute("SELECT * FROM mart_workforce_kpis").fetchone()
@@ -109,7 +110,7 @@ def get_workforce_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_conne
     ]
 
     return WorkforceSummaryResponse(
-        report_month="2026-06",
+        report_month=report_month,
         kpis=kpis
     )
 
