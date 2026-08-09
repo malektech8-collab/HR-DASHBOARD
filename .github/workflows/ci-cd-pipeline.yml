@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
@@ -69,7 +69,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
@@ -101,7 +101,7 @@ jobs:
 
       - name: Run Backend Tests (Pytest)
         run: |
-          pytest
+          pytest backend/tests
 
   # Job 3: Docker Build Verification (Gate 3)
   docker-build:
