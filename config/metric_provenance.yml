@@ -1,0 +1,221 @@
+# Metric provenance — which source domains each KPI mart column depends on.
+#
+# PURPOSE (P0-3 step 1). A metric whose source domain has not been provided by
+# the client must return null from the API rather than a value manufactured
+# from an empty table. Measured at declared:[employees], the mart layer today
+# reports absence_days = 494.0, gosi_missing_count = 19 and
+# sla_compliance_pct = 100.0 for domains that were never uploaded.
+#
+# This file is the mapping only. No suppression behaviour reads it yet; that
+# is step 2.
+#
+# GRANULARITY IS PER COLUMN, NOT PER MART OR PER PAGE. mart_exec_kpis carries
+# active_headcount (employees) and payroll_cost (payroll) in one row: with
+# declared:[employees] that row must return a real headcount AND a null
+# payroll cost. A mart-level mapping cannot express that.
+#
+# DEFAULT-DENY. An unmapped column is suppressed, not passed through. An
+# unmapped metric is an unreviewed one, and the failure mode of default-allow
+# is exactly the silent fabrication being removed. A CI test fails when any
+# KPI mart column is missing from this file.
+#
+# MULTI-SOURCE. A metric listing several domains requires ALL of them; a
+# partially-sourced metric is not a real one. attendance_compliance_pct needs
+# attendance for the numerator and employees for the expected-workday
+# denominator, so it is suppressed if either is absent.
+#
+# domains: [] means "no source domain" — a period label, a timestamp, or a
+# health indicator that is true regardless of what has been uploaded. Explicit
+# and reviewed, not a gap.
+#
+# scope_to_provided: true is the ruling-1 exception. data_quality_score
+# describes the UPLOAD, not the business, so nulling it would blind onboarding
+# exactly when it is most useful. It is scoped to the provided domains and
+# returned with that scope alongside the number. NOTE: scoping is a dbt change
+# (step 4) — total_errors/total_checks must stop counting checks for absent
+# domains, or the score is merely wrong in a different way.
+
+version: 1
+
+# Contracted domains gate on the declared-domain registry
+# (data/onboarding/declared_domains.yml). Uncontracted groups have no contract
+# and always load sample data, so in real mode they are never "provided" —
+# they are gated at module level (ruling 2 of the P0 plan).
+domains:
+  contracted:
+    employees: [employees]
+    payroll: [payroll]
+    attendance: [attendance]
+    compliance: [compliance]
+    hr_requests: [hr_requests]
+    employee_relations: [employee_relations]
+  uncontracted:
+    recruitment:
+      - recruitment_requisitions
+      - candidates
+      - interviews
+      - offers
+      - onboarding
+      - vacancy_requests
+      - workforce_plan
+    talent:
+      - performance_reviews
+      - performance_goals
+      - competency_assessments
+      - learning_enrollments
+      - training_catalog
+      - succession_plans
+      - talent_reviews
+      - employee_skills
+      - career_paths
+
+metrics:
+
+  mart_exec_kpis:
+    report_month: []                      # period label, not a measure
+    active_headcount: [employees]
+    joiners_count: [employees]
+    leavers_count: [employees]
+    turnover_rate: [employees]
+    payroll_cost: [payroll]
+    overtime_cost: [payroll]              # SUM(overtime_amount) from payroll
+    absence_days: [attendance]
+    data_quality_score:
+      domains: [employees, payroll, attendance, compliance]
+      scope_to_provided: true
+
+  mart_workforce_kpis:
+    active_headcount: [employees]
+    saudi_headcount: [employees]
+    non_saudi_headcount: [employees]
+    saudization_rate: [employees]
+    probation_count: [employees]
+    contract_expiring_30: [employees]
+    # LEFT JOINs stg_compliance for iqama_expiry — cross-domain despite living
+    # on a workforce mart. DECISIONS.md #5: iqama_expiry is sourced from
+    # compliance, not employees.
+    iqama_expiring_30: [employees, compliance]
+    missing_manager_count: [employees]
+    missing_project_count: [employees]
+    missing_cost_center_count: [employees]
+
+  mart_payroll_kpis:
+    total_payroll_cost: [payroll]
+    basic_salary_cost: [payroll]
+    allowances_cost: [payroll]
+    overtime_cost: [payroll]
+    deductions: [payroll]
+    net_payroll: [payroll]
+    avg_cost_per_employee: [payroll]
+    payroll_variance_pct: [payroll]
+    employees_paid: [payroll]
+    # Exceptions join payroll rows to employee attributes (inactive-employee
+    # pay, missing department), so both domains are required.
+    payroll_exception_count: [payroll, employees]
+
+  mart_attendance_kpis:
+    # The expected-workday denominator is employees x calendar, so every
+    # attendance rate needs both domains.
+    attendance_compliance_pct: [attendance, employees]
+    absence_days: [attendance, employees]
+    late_minutes: [attendance]
+    excused_late_minutes: [attendance]
+    net_late_minutes: [attendance]
+    early_leave_minutes: [attendance]
+    missing_punch_count: [attendance]
+    overtime_hours: [attendance]
+    # Reconciles attendance OT hours against PAID OT cost from payroll.
+    overtime_cost: [attendance, payroll]
+    attendance_exception_count: [attendance, employees, payroll]
+
+  mart_compliance_kpis:
+    # Headcount splits come from employees, not the compliance feed.
+    saudi_headcount: [employees]
+    non_saudi_headcount: [employees]
+    employees_missing_nationality: [employees]
+    saudization_pct: [employees]
+    iqamas_expiring_30: [compliance]
+    work_permits_expiring_30: [compliance]
+    iqamas_expired: [compliance]
+    work_permits_expired: [compliance]
+    # Category B, the most serious finding: at declared:[employees] this
+    # reported 19 — a false regulatory finding delivered to a Saudi employer,
+    # not merely a wrong number.
+    gosi_missing_count: [compliance]
+    wps_exception_count: [compliance]
+    compliance_exception_count: [compliance, employees]
+
+  mart_er_kpis:
+    total_open_er_cases: [employee_relations]
+    new_cases_this_month: [employee_relations]
+    closed_cases_this_month: [employee_relations]
+    average_case_aging_days: [employee_relations]
+    overdue_cases: [employee_relations]
+    # Category C: returned 100.0 over zero cases. A wrong good number invites
+    # no questions, which is what makes it worse than a wrong bad one.
+    sla_compliance_pct: [employee_relations]
+    disciplinary_cases: [employee_relations]
+    grievance_cases: [employee_relations]
+    labor_cases: [employee_relations]
+    escalated_cases: [employee_relations]
+    er_exception_count: [employee_relations, employees]
+
+  mart_recruitment_kpis:
+    open_requisitions: [recruitment]
+    approved_vacancies: [recruitment]
+    candidates_in_pipeline: [recruitment]
+    interviews_scheduled: [recruitment]
+    offers_extended: [recruitment]
+    offer_acceptance_pct: [recruitment]
+    hires_this_month: [recruitment]
+    average_time_to_fill: [recruitment]
+    overdue_requisitions: [recruitment]
+    workforce_plan_fulfillment_pct: [recruitment, employees]
+    recruitment_exception_count: [recruitment]
+
+  mart_talent_kpis:
+    employees_reviewed: [talent]
+    review_completion_pct: [talent, employees]
+    average_performance_rating: [talent]
+    high_performers: [talent]
+    low_performers: [talent]
+    goal_completion_pct: [talent]
+    training_completion_pct: [talent]
+    average_training_hours: [talent]
+    critical_roles_covered_pct: [talent]
+    ready_successors: [talent]
+    talent_exception_count: [talent]
+
+  mart_data_quality_summary:
+    data_quality_score:
+      domains: [employees, payroll, attendance, compliance]
+      scope_to_provided: true
+    missing_manager_count: [employees]
+    missing_project_count: [employees]
+    missing_cost_center_count: [employees]
+    missing_nationality_count: [employees]
+    duplicate_employee_count: [employees]
+    invalid_payroll_count: [payroll, employees]
+
+  mart_command_center_overview:
+    active_headcount: [employees]
+    payroll_cost: [payroll]
+    attendance_compliance_pct: [attendance, employees]
+    saudization_pct: [employees]
+    open_er_cases: [employee_relations]
+    open_requisitions: [recruitment]
+    review_completion_pct: [talent, employees]
+    # Sums exception rows across every module, so it inherits every domain.
+    # At declared:[employees] this read 742 against a demo baseline of 667 —
+    # the client would see MORE problems than the demo dataset, nearly all
+    # invented.
+    total_active_exceptions:
+      domains: [employees, payroll, attendance, compliance, employee_relations,
+                recruitment, talent]
+      scope_to_provided: true
+    modules_healthy: []                   # system health, not client data
+    last_data_refresh: []                 # pipeline timestamp
+    latest_source_business_date: []       # pipeline metadata
+    data_quality_score:
+      domains: [employees, payroll, attendance, compliance]
+      scope_to_provided: true

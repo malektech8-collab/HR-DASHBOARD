@@ -142,11 +142,13 @@ Current policy is **hard-reject** on unexpected columns — correct default, bec
 |---|---|---|
 | **0 — Foundation** ✅ | Working CI, `data_mode` gating, single-source period resolver, ingestion mechanism with contract validation | Complete at `2257d4a` |
 | **1 — Canonical schema + templates** | Bilingual schema definition, template generator, validate/preview/commit flow, localized errors | A non-technical HR user can download, fill, upload, and see their data |
-| **2 — Client zero** | Run real data end-to-end through Phase 1. Mapping profile for a real Arabic-headed export. Fix what breaks | Real workforce, Saudization, and payroll figures rendering correctly |
+| **2 — Client zero** | Run real data end-to-end through Phase 1. Mapping profile for a real Arabic-headed export. Fix what breaks | Real workforce, Saudization, and payroll figures rendering correctly — **and no metric rendering at all when its source data is absent** |
 | **3 — Product hardening** | Real auth and user management, RBAC, audit logging, demo/real UI indicator, retention controls | Safe to put in front of a client |
 | **4 — Deployment packaging** | Reproducible per-client stack, configuration, upgrade path, KSA hosting decision, DPA templates | A second deployment can be stood up without manual surgery |
 | **5 — AI Tier 1** | Provider abstraction, column mapper, compliance advisor, exception triage | AI improves onboarding measurably; disabling it breaks nothing |
 | **6 — AI Tier 2 + report builder** | Narrative, NL query, user-defined report schemas | — |
+
+**Phase 2 exit criterion, expanded (2026-08-10).** "Rendering correctly" includes *not rendering*. A metric whose source domain the client has not provided must return null from the API and render as an empty state — never as a value manufactured from an empty table. Measured before this was enforced, a client who had uploaded only their employee master was shown `absence_days = 494` (every employee absent every workday), `gosi_missing_count = 19` (a false regulatory finding), and `sla_compliance_pct = 100.0` over zero cases. Suppression belongs at the API layer, because CSV export, report generation and the local Power BI profile consume the same endpoints as the React app.
 
 **Sequencing rationale:** Phase 2 (real data, by hand) must precede Phase 5 (AI mapping). An inference engine cannot be built or tested without ground truth, and the manual mapping work produces exactly that ground truth.
 
