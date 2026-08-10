@@ -51,8 +51,11 @@ BAD_VALUE = {
 }
 
 
+CONTRACTS_DIR = "data/contracts"
+
+
 def contract(table):
-    with io.open("data/contracts/{}_schema.yml".format(table), encoding="utf-8") as f:
+    with io.open(os.path.join(CONTRACTS_DIR, "{}_schema.yml".format(table)), encoding="utf-8") as f:
         return yaml.safe_load(f)["columns"]
 
 
@@ -71,11 +74,15 @@ def write_csv(path, header, rows):
 
 
 def run(csv_path, table):
+    """Validate one case. The absolute case path is scrubbed from the recorded
+    error so results are comparable across runs and machines — the harness
+    compares semantics, not temp directory names."""
     try:
-        validate_csv_against_contract(csv_path, table)
+        validate_csv_against_contract(csv_path, table, contracts_dir=CONTRACTS_DIR)
         return {"outcome": "ACCEPT", "error": None}
     except SchemaValidationError as e:
-        return {"outcome": "REJECT", "error": str(e)}
+        return {"outcome": "REJECT",
+                "error": str(e).replace(csv_path, "<CASE_FILE>")}
     except Exception as e:  # any other failure is itself a finding
         return {"outcome": "ERROR", "error": "{}: {}".format(type(e).__name__, e)}
 
@@ -127,7 +134,11 @@ def build_cases(table):
 
 
 def main():
+    global CONTRACTS_DIR
     label = sys.argv[1] if len(sys.argv) > 1 else "run"
+    if len(sys.argv) > 2:
+        CONTRACTS_DIR = sys.argv[2]
+    print("contracts: {}".format(CONTRACTS_DIR))
     os.makedirs(CASES_DIR, exist_ok=True)
     results = {}
     for t in TABLES:

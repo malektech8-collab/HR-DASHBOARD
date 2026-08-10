@@ -53,6 +53,16 @@ columns:
   name_ar: سعودي الجنسية
   type: BOOLEAN
   required: true
+  # Declared derivation. Real HRIS exports carry `nationality`, not this
+  # boolean. The rule is resolved from the registry in scripts/derivations.py
+  # by NAME — contracts never carry executable expressions — and raises on any
+  # nationality value it does not recognise rather than defaulting to false.
+  #
+  # NOT YET ACTIVE: `required` stays true this cycle because flipping it would
+  # change what the validator accepts, which the Phase 1 guardrail forbids.
+  # Cycle 1b flips it to false and wires derive_column() into ingest_raw.py.
+  derived_from: nationality
+  derivation: nationality_is_saudi
   description_en: Whether the employee counts as Saudi for Saudization. Derived from nationality when the column is absent.
   description_ar: ما إذا كان الموظف يحتسب سعودياً لأغراض السعودة. يشتق من الجنسية عند غياب العمود.
   example: 'true'
