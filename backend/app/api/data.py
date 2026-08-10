@@ -146,13 +146,6 @@ def compile_csv_to_parquet(csv_path: str, parquet_path: str, table_name: str):
 
 CRLF = chr(13) + chr(10)
 
-TEMPLATE_CATALOGUE = [
-    {"name": "employees", "description": "Employee demographics, payroll base, and contract terms."},
-    {"name": "payroll", "description": "Monthly payroll metrics including basic salary and deductions."},
-    {"name": "attendance", "description": "Daily attendance timesheets and overtime hours."},
-    {"name": "compliance", "description": "Saudization quotas, GOSI contributions, and Iqama status."},
-    {"name": "employee_relations", "description": "Employee complaints, disputes, and active labor cases."},
-]
 
 
 def _canonical_schema():
@@ -196,46 +189,52 @@ def _header_only_csv(columns: List[str]) -> str:
 
 @router.get("/templates")
 def get_templates(
-    name: Optional[str] = Query(None, description="Optional name of the template to download")
+    name: Optional[str] = Query(None, description="Optional name of the template to download"),
+    locale: str = Query("en", description="Label locale: en or ar"),
 ):
     """
     Download a data template or list available data templates.
 
-    Templates are generated from data/contracts/{table}_schema.yml and contain
-    headers only — never sample or client data.
+    The catalogue is DERIVED from data/contracts/. A template exists if and
+    only if a contract exists — the invariant this endpoint should always have
+    enforced. Previously the domain list was hardcoded here, a third place it
+    was written down after the contracts directory and REAL_SOURCEABLE, and it
+    disagreed with both: hr_requests was contracted but absent, and
+    employee_relations was listed but had no contract.
+
+    Labels and descriptions come from the contract's own bilingual text, so
+    they cannot drift from the schema either.
+
+    Templates contain headers only — never sample or client data.
     """
-    templates = []
-    for entry in TEMPLATE_CATALOGUE:
-        cols = _contract_columns(entry["name"])
-        templates.append({
-            "name": entry["name"],
-            "filename": f"{entry['name']}_template.csv",
-            "description": entry["description"],
-            "available": cols is not None,
-            "unavailable_reason": None if cols is not None else (
-                f"No contract defined at data/contracts/{entry['name']}_schema.yml. "
-                f"A template cannot be generated without one."
-            ),
-        })
+    cs = _canonical_schema()
+    tables = cs.available_tables()
 
     if name:
-        target = next((t for t in templates if t["name"] == name), None)
-        if not target:
-            raise HTTPException(status_code=404, detail="Template not found")
-
-        columns = _contract_columns(name)
-        if columns is None:
-            # Fail loudly rather than fall back to sample data.
-            raise HTTPException(status_code=409, detail=target["unavailable_reason"])
-
+        if name not in tables:
+            raise HTTPException(
+                status_code=404,
+                detail=f"No template for '{name}': no contract at "
+                       f"data/contracts/{name}_schema.yml.",
+            )
         return Response(
-            content=_header_only_csv(columns),
+            content=_header_only_csv(cs.column_names(name)),
             media_type="text/csv",
             headers={
-                "Content-Disposition": f'attachment; filename="{target["filename"]}"'
+                "Content-Disposition": f'attachment; filename="{name}_template.csv"'
             },
         )
 
+    templates = []
+    for table in tables:
+        spec = cs.describe(table, locale)
+        templates.append({
+            "name": table,
+            "filename": f"{table}_template.csv",
+            "label": spec["label"],
+            "description": spec["description"],
+            "available": True,
+        })
     return templates
 
 @router.post("/upload")

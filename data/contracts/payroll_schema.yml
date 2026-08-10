@@ -130,5 +130,30 @@ columns:
   description_en: Payment status for this payroll line.
   description_ar: حالة الصرف لهذا السطر من مسير الرواتب.
   example: Paid
-  observed_values:
+  # Vocabulary authored by the practitioner, not derived from samples.
+  # EXCEPTION severity: an unexpected value surfaces as a data quality
+  # exception rather than refusing the client's whole file. Tighten to
+  # REJECT once real files confirm the list.
+  on_violation: exception
+  allowed_values:
   - Paid
+  - Pending
+  - Unpaid
+  - Hold
+  - Cancelled
+  value_labels:
+    Paid:
+      en: Paid
+      ar: مدفوع
+    Pending:
+      en: Pending
+      ar: قيد المعالجة
+    Unpaid:
+      en: Unpaid
+      ar: غير مدفوع
+    Hold:
+      en: Hold
+      ar: معلق
+    Cancelled:
+      en: Cancelled
+      ar: ملغى

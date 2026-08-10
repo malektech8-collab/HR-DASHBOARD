@@ -337,15 +337,25 @@ def validate_csv(csv_path, table, contracts_dir="data/contracts", today=None):
                     row=rws[0], value=val,
                 ))
 
-        # --- Rule 4: allowed_values (structural) --------------------------
+        # --- Rule 4: allowed_values ---------------------------------------
+        # Severity is declarable via `on_violation`. Default REJECT keeps a
+        # legally or structurally fixed vocabulary hard (e.g. case_type, which
+        # er_rules.sla_days keys on directly). A vocabulary we are confident of
+        # but have not yet confirmed against real files declares
+        # `on_violation: exception`, so an unexpected value surfaces as a data
+        # quality exception instead of refusing the client's whole file. It can
+        # be tightened to REJECT once real data confirms it.
         allowed = spec.get("allowed_values")
         if allowed:
+            sev = (SEVERITY_EXCEPTION
+                   if str(spec.get("on_violation", "")).lower() == "exception"
+                   else SEVERITY_REJECT)
             allowed_set = set(allowed)
             seen = df.select(pl.col(name)).drop_nulls().unique().to_series().to_list()
             invalid = [x for x in seen if x not in allowed_set]
             if invalid:
                 v.append(Violation(
-                    "allowed-values", table, name, SEVERITY_REJECT,
+                    "allowed-values", table, name, sev,
                     "[{}] {}: column '{}' has value(s) {} outside "
                     "allowed_values {}. Rule: allowed-values.".format(
                         table, csv_path, name, invalid, allowed),
@@ -406,3 +416,36 @@ def validate_csv_against_contract(csv_path, table,
         first = result.rejects[0]
         raise SchemaValidationError(first.message_en, result.violations)
     return None
+
+
+# --------------------------------------------------------------------------
+# presentation mapping: validator severity -> data-quality severity
+# --------------------------------------------------------------------------
+
+# base_command_center_exception_sources normalises severity with
+#   CASE LOWER(TRIM(severity)) WHEN 'critical'/'warning'/'info' ... ELSE 'Unknown'
+# so anything outside this set renders as 'Unknown' on the Command Center.
+# The raw validator severities ('reject'/'exception') must NEVER be emitted.
+DQ_SEVERITIES = ("Critical", "Warning", "Info")
+
+# Pay columns: a negative amount is a payroll defect, not a nuance.
+_PAY_COLUMNS = {"basic_salary", "gross_pay", "net_pay", "housing_allowance",
+                "transport_allowance", "other_allowances", "overtime_amount",
+                "deductions", "gosi_salary", "payroll_basic_salary"}
+
+
+def dq_severity(violation):
+    """Map a Violation to a Data Quality severity the marts understand."""
+    if violation.rule == "min-value":
+        return "Critical" if violation.column in _PAY_COLUMNS else "Warning"
+    if violation.rule in ("unique", "unique-primary-key"):
+        return "Warning"
+    if violation.rule == "allowed-values":
+        return "Warning"
+    return "Warning"
+
+
+def dq_recommended_action(violation, locale="en"):
+    if locale == "ar":
+        return "صحّح القيمة في الملف المصدر وأعد الرفع."
+    return "Correct the value in the source file and re-upload."

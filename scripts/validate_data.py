@@ -1,6 +1,24 @@
 import os
 import polars as pl
 
+CONTRACT_EXCEPTIONS_PATH = "data/gold/contract_exceptions.parquet"
+
+# Column order is the contract between this writer and stg_data_quality.
+GOLD_SCHEMA = {
+    "employee_id": pl.Utf8,
+    "employee_name": pl.Utf8,
+    "issue_type": pl.Utf8,
+    "description": pl.Utf8,
+    "severity": pl.Utf8,
+    "recommended_action": pl.Utf8,
+    "source": pl.Utf8,
+    "source_table": pl.Utf8,
+    "source_row": pl.Int64,
+    "source_column": pl.Utf8,
+    "rule": pl.Utf8,
+}
+
+
 def validate():
     os.makedirs("data/gold", exist_ok=True)
     print("Starting data validation...")
@@ -22,7 +40,16 @@ def validate():
             "issue_type": issue_type,
             "description": desc,
             "severity": severity,
-            "recommended_action": action
+            "recommended_action": action,
+            # Provenance (cycle 1b-ii). Additive: stg_data_quality is SELECT *
+            # and both downstream models select their columns explicitly, so
+            # no mart output changes. Contract violations arrive with these
+            # populated; the checks below are the "validation" source.
+            "source": "validation",
+            "source_table": None,
+            "source_row": None,
+            "source_column": None,
+            "rule": None,
         })
 
     # 1. Employees validation
@@ -202,22 +229,26 @@ def validate():
 
     # Write gold output
     if len(issues) > 0:
-        df_gold = pl.DataFrame(issues)
+        df_gold = pl.DataFrame(issues, schema=GOLD_SCHEMA)
     else:
         # Create empty with proper schema
-        df_gold = pl.DataFrame(
-            schema={
-                "employee_id": pl.Utf8,
-                "employee_name": pl.Utf8,
-                "issue_type": pl.Utf8,
-                "description": pl.Utf8,
-                "severity": pl.Utf8,
-                "recommended_action": pl.Utf8
-            }
-        )
+        df_gold = pl.DataFrame(schema=GOLD_SCHEMA)
+
+    # Merge EXCEPTION-severity contract violations produced by ingest. The file
+    # is written only on the real path and is unlinked at the start of every
+    # ingest run, so in demo it is absent and this is a no-op.
+    n_contract = 0
+    if os.path.exists(CONTRACT_EXCEPTIONS_PATH):
+        df_contract = pl.read_parquet(CONTRACT_EXCEPTIONS_PATH)
+        n_contract = df_contract.height
+        if n_contract:
+            df_gold = pl.concat([df_gold, df_contract.select(list(GOLD_SCHEMA))],
+                                how="vertical")
 
     df_gold.write_parquet("data/gold/data_quality_report.parquet")
-    print(f"Validation complete. Generated {len(issues)} issues in data/gold/data_quality_report.parquet")
+    total = len(issues) + n_contract
+    suffix = f" (+{n_contract} from contract validation)" if n_contract else ""
+    print(f"Validation complete. Generated {total} issues{suffix} in data/gold/data_quality_report.parquet")
 
 if __name__ == "__main__":
     validate()

@@ -64,9 +64,21 @@ columns:
   description_en: Current status of the request.
   description_ar: الحالة الحالية للطلب.
   example: Open
-  observed_values:
-  - Closed
+  # Vocabulary authored by the practitioner, not derived from samples.
+  # EXCEPTION severity: an unexpected value surfaces as a data quality
+  # exception rather than refusing the client's whole file. Tighten to
+  # REJECT once real files confirm the list.
+  on_violation: exception
+  allowed_values:
   - Open
+  - Closed
+  value_labels:
+    Open:
+      en: Open
+      ar: مفتوح
+    Closed:
+      en: Closed
+      ar: مغلق
 - name: created_at
   name_en: Created At
   name_ar: تاريخ الإنشاء

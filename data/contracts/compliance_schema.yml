@@ -47,8 +47,25 @@ columns:
   description_en: Employee status on the Qiwa platform.
   description_ar: حالة الموظف في منصة قوى.
   example: Active
-  observed_values:
+  # Vocabulary authored by the practitioner, not derived from samples.
+  # EXCEPTION severity: an unexpected value surfaces as a data quality
+  # exception rather than refusing the client's whole file. Tighten to
+  # REJECT once real files confirm the list.
+  on_violation: exception
+  allowed_values:
   - Active
+  - Inactive
+  - Suspended
+  value_labels:
+    Active:
+      en: Active
+      ar: نشط
+    Inactive:
+      en: Inactive
+      ar: غير نشط
+    Suspended:
+      en: Suspended
+      ar: موقوف
 - name: gosi_status
   name_en: GOSI Status
   name_ar: حالة التأمينات الاجتماعية
@@ -57,8 +74,25 @@ columns:
   description_en: Registration status with GOSI.
   description_ar: حالة التسجيل في المؤسسة العامة للتأمينات الاجتماعية.
   example: Registered
-  observed_values:
+  # Vocabulary authored by the practitioner, not derived from samples.
+  # EXCEPTION severity: an unexpected value surfaces as a data quality
+  # exception rather than refusing the client's whole file. Tighten to
+  # REJECT once real files confirm the list.
+  on_violation: exception
+  allowed_values:
   - Registered
+  - Not Registered
+  - Suspended
+  value_labels:
+    Registered:
+      en: Registered
+      ar: مسجل
+    Not Registered:
+      en: Not Registered
+      ar: غير مسجل
+    Suspended:
+      en: Suspended
+      ar: موقوف
 - name: mudad_status
   name_en: Mudad Status
   name_ar: حالة مدد
@@ -67,8 +101,25 @@ columns:
   description_en: Wage protection status on the Mudad platform.
   description_ar: حالة حماية الأجور في منصة مدد.
   example: Compliant
-  observed_values:
+  # Vocabulary authored by the practitioner, not derived from samples.
+  # EXCEPTION severity: an unexpected value surfaces as a data quality
+  # exception rather than refusing the client's whole file. Tighten to
+  # REJECT once real files confirm the list.
+  on_violation: exception
+  allowed_values:
   - Compliant
+  - Non-Compliant
+  - Pending
+  value_labels:
+    Compliant:
+      en: Compliant
+      ar: ملتزم
+    Non-Compliant:
+      en: Non-Compliant
+      ar: غير ملتزم
+    Pending:
+      en: Pending
+      ar: قيد المراجعة
 - name: contract_authenticated
   name_en: Contract Authenticated
   name_ar: العقد موثق
@@ -109,9 +160,21 @@ columns:
   description_en: Whether the platform occupation matches the actual job title.
   description_ar: ما إذا كانت المهنة في المنصة تطابق المسمى الوظيفي الفعلي.
   example: Matched
-  observed_values:
+  # Vocabulary authored by the practitioner, not derived from samples.
+  # EXCEPTION severity: an unexpected value surfaces as a data quality
+  # exception rather than refusing the client's whole file. Tighten to
+  # REJECT once real files confirm the list.
+  on_violation: exception
+  allowed_values:
   - Matched
   - Mismatch
+  value_labels:
+    Matched:
+      en: Matched
+      ar: مطابق
+    Mismatch:
+      en: Mismatch
+      ar: غير مطابق
 - name: work_permit_expiry
   name_en: Work Permit Expiry
   name_ar: تاريخ انتهاء رخصة العمل
@@ -136,5 +199,22 @@ columns:
   description_en: CCHI health insurance coverage status. Distinct from gosi_status, which carries the GOSI social-insurance side.
   description_ar: حالة تغطية التأمين الصحي (مجلس الضمان الصحي). تختلف عن حالة التأمينات الاجتماعية.
   example: Active
-  observed_values:
+  # Vocabulary authored by the practitioner, not derived from samples.
+  # EXCEPTION severity: an unexpected value surfaces as a data quality
+  # exception rather than refusing the client's whole file. Tighten to
+  # REJECT once real files confirm the list.
+  on_violation: exception
+  allowed_values:
   - Active
+  - Inactive
+  - Expired
+  value_labels:
+    Active:
+      en: Active
+      ar: نشط
+    Inactive:
+      en: Inactive
+      ar: غير نشط
+    Expired:
+      en: Expired
+      ar: منتهي
