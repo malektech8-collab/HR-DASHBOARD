@@ -40,15 +40,37 @@ def test_templates_endpoints():
     assert len(templates) > 0
     assert any(t["name"] == "employees" for t in templates)
 
-    # 2. Download template
+    # 2. Download template — headers only, generated from the contract.
     download_response = client.get("/api/data/templates?name=employees")
     assert download_response.status_code == 200
     assert "text/csv" in download_response.headers["content-type"]
-    assert "employees_sample.csv" in download_response.headers["content-disposition"]
+    assert "employees_template.csv" in download_response.headers["content-disposition"]
+
+    # 2a. The template MUST NOT contain data rows. Before Phase 1 this endpoint
+    # served data/sample/employees_sample.csv — fabricated employee records —
+    # as the client's onboarding artefact. Guard against that regressing.
+    body = download_response.text
+    rows = [r for r in body.splitlines() if r.strip()]
+    assert len(rows) == 1, f"template must be header-only, got {len(rows)} rows"
+    assert "EMP001" not in body and "Ahmad Al-Sudairy" not in body
+
+    # 2b. Headers must match the contract exactly, in order.
+    import yaml
+    from app.api.data import get_contracts_dir
+    with open(os.path.join(get_contracts_dir(), "employees_schema.yml"), encoding="utf-8") as f:
+        expected = [c["name"] for c in (yaml.safe_load(f) or {})["columns"]]
+    assert rows[0].strip().split(",") == expected
 
     # 3. Invalid template name
     invalid_response = client.get("/api/data/templates?name=nonexistent")
     assert invalid_response.status_code == 404
+
+    # 4. A catalogued domain with no contract is reported unavailable and must
+    #    fail loudly rather than fall back to sample data.
+    er = next(t for t in templates if t["name"] == "employee_relations")
+    assert er["available"] is False
+    no_contract = client.get("/api/data/templates?name=employee_relations")
+    assert no_contract.status_code == 409
 
 def test_upload_endpoints_validation():
     # 1. Forbidden file extension

@@ -1,11 +1,14 @@
+import csv
+import io
 import os
 import sys
 import subprocess
 import shutil
 import polars as pl
+import yaml
 from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, File, UploadFile, HTTPException, Query, status
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -15,11 +18,13 @@ SAMPLE_DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../..
 SILVER_DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../data/silver"))
 
 SCRIPTS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../scripts"))
+CONTRACTS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../data/contracts"))
 
 # For production container environment, default to /app/data/silver, /app/data/sample, /app/scripts
 CONTAINER_SILVER_DIR = "/app/data/silver"
 CONTAINER_SAMPLE_DIR = "/app/data/sample"
 CONTAINER_SCRIPTS_DIR = "/app/scripts"
+CONTAINER_CONTRACTS_DIR = "/app/data/contracts"
 
 def get_silver_dir() -> str:
     if os.path.exists(CONTAINER_SILVER_DIR):
@@ -37,10 +42,17 @@ def get_scripts_dir() -> str:
         return CONTAINER_SCRIPTS_DIR
     return SCRIPTS_DIR
 
+def get_contracts_dir() -> str:
+    if os.path.exists(CONTAINER_CONTRACTS_DIR):
+        return CONTAINER_CONTRACTS_DIR
+    return CONTRACTS_DIR
+
 class TemplateInfo(BaseModel):
     name: str
     filename: str
     description: str
+    available: bool = True
+    unavailable_reason: Optional[str] = None
 
 class RefreshReport(BaseModel):
     status: str
@@ -106,41 +118,98 @@ def compile_csv_to_parquet(csv_path: str, parquet_path: str, table_name: str):
     except Exception as e:
         raise ValueError(f"Polars compilation to Parquet failed: {str(e)}")
 
+# --- Template generation (Phase 1 hotfix) -------------------------------------
+# The template served to a client MUST NOT contain data. Before this change the
+# endpoint returned data/sample/{table}_sample.csv verbatim — fabricated employee
+# records (names, salaries, national context) presented as an onboarding artefact.
+# That violated the project principle "never present a fabricated number as real".
+#
+# Interim behaviour: a header-only CSV generated from the domain's contract.
+# Correct canonical column names, zero data rows. The full bilingual Excel
+# generator (instructions sheet, dropdowns, example rows) is the Phase 1
+# deliverable and replaces this.
+#
+# NOTE: this reads the contract YAML directly. It is repointed at the shared
+# canonical-schema loader in a later commit of this same cycle.
+
+CRLF = chr(13) + chr(10)
+
+TEMPLATE_CATALOGUE = [
+    {"name": "employees", "description": "Employee demographics, payroll base, and contract terms."},
+    {"name": "payroll", "description": "Monthly payroll metrics including basic salary and deductions."},
+    {"name": "attendance", "description": "Daily attendance timesheets and overtime hours."},
+    {"name": "compliance", "description": "Saudization quotas, GOSI contributions, and Iqama status."},
+    {"name": "employee_relations", "description": "Employee complaints, disputes, and active labor cases."},
+]
+
+
+def _contract_columns(table: str) -> Optional[List[str]]:
+    """Canonical column names for a table, or None when no contract exists.
+
+    Returning None (rather than falling back to sample data) is deliberate: a
+    domain without a contract has no template, and serving fabricated rows in
+    its place is the exact defect this change removes.
+    """
+    path = os.path.join(get_contracts_dir(), f"{table}_schema.yml")
+    if not os.path.exists(path):
+        return None
+    with open(path, "r", encoding="utf-8") as f:
+        spec = yaml.safe_load(f) or {}
+    cols = spec.get("columns") or []
+    names = [c["name"] for c in cols if isinstance(c, dict) and c.get("name")]
+    return names or None
+
+
+def _header_only_csv(columns: List[str]) -> str:
+    """One CRLF-terminated header row. No data rows, ever."""
+    buf = io.StringIO()
+    # CRLF: Excel on Windows is the primary consumer of these templates.
+    csv.writer(buf, lineterminator=CRLF).writerow(columns)
+    return buf.getvalue()
+
+
 @router.get("/templates")
 def get_templates(
     name: Optional[str] = Query(None, description="Optional name of the template to download")
 ):
     """
     Download a data template or list available data templates.
+
+    Templates are generated from data/contracts/{table}_schema.yml and contain
+    headers only — never sample or client data.
     """
-    templates = [
-        {"name": "employees", "filename": "employees_sample.csv", "description": "Employee demographics, payroll base, and contract terms."},
-        {"name": "payroll", "filename": "payroll_sample.csv", "description": "Monthly payroll metrics including basic salary and deductions."},
-        {"name": "attendance", "filename": "attendance_sample.csv", "description": "Daily attendance timesheets and overtime hours."},
-        {"name": "compliance", "filename": "compliance_sample.csv", "description": "Saudization quotas, GOSI contributions, and Iqama status."},
-        {"name": "employee_relations", "filename": "employee_relations_sample.csv", "description": "Employee complaints, disputes, and active labor cases."}
-    ]
-    
+    templates = []
+    for entry in TEMPLATE_CATALOGUE:
+        cols = _contract_columns(entry["name"])
+        templates.append({
+            "name": entry["name"],
+            "filename": f"{entry['name']}_template.csv",
+            "description": entry["description"],
+            "available": cols is not None,
+            "unavailable_reason": None if cols is not None else (
+                f"No contract defined at data/contracts/{entry['name']}_schema.yml. "
+                f"A template cannot be generated without one."
+            ),
+        })
+
     if name:
         target = next((t for t in templates if t["name"] == name), None)
         if not target:
             raise HTTPException(status_code=404, detail="Template not found")
-        
-        # Security validation against path traversal
-        sample_dir = get_sample_dir()
-        safe_filename = os.path.basename(target["filename"])
-        file_path = os.path.join(sample_dir, safe_filename)
 
-        # Verify file actually exists and path is safe
-        if not os.path.exists(file_path) or not file_path.startswith(sample_dir):
-            raise HTTPException(status_code=404, detail=f"Template file {target['filename']} not found on server")
-        
-        return FileResponse(
-            path=file_path,
-            filename=target["filename"],
-            media_type="text/csv"
+        columns = _contract_columns(name)
+        if columns is None:
+            # Fail loudly rather than fall back to sample data.
+            raise HTTPException(status_code=409, detail=target["unavailable_reason"])
+
+        return Response(
+            content=_header_only_csv(columns),
+            media_type="text/csv",
+            headers={
+                "Content-Disposition": f'attachment; filename="{target["filename"]}"'
+            },
         )
-        
+
     return templates
 
 @router.post("/upload")
