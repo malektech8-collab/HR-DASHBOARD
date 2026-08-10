@@ -13,8 +13,19 @@ outcome of validate_csv_against_contract for each:
   bad-type             -> must REJECT (type-conformance)
   bad-allowed-value    -> must REJECT (allowed-values)   [only where an enum exists]
 
-Run once before the extension and once after; the two JSON results must be
+Run once before a change and once after; the two JSON results must be
 byte-identical, including error strings.
+
+It ALSO records each table's column inventory (names, in contract order,
+plus the required subset). This closes a blind spot in the case-based design:
+every case is built from the same contract it is validated against, so a
+contract that has silently LOST a column stays self-consistent and every case
+still passes. An absence is invisible to behaviour testing. The inventory is
+compared directly, and `compare` exits non-zero if any column disappeared.
+
+Usage:
+    verify_contract_parity.py <label> [contracts_dir]     capture a run
+    verify_contract_parity.py compare <before.json> <after.json>
 
 No real data. All inputs are synthetic and written to a temporary directory.
 """
@@ -133,6 +144,74 @@ def build_cases(table):
     return cases
 
 
+def compare(before_path, after_path):
+    """Diff two captured runs. Returns a process exit code.
+
+    A DROPPED column is treated as a hard failure: it is the failure mode the
+    behaviour cases structurally cannot see, and it silently shrinks the
+    contract that every downstream consumer (template, labels, validation)
+    reads.
+    """
+    with io.open(before_path, encoding="utf-8") as f:
+        before = json.load(f)
+    with io.open(after_path, encoding="utf-8") as f:
+        after = json.load(f)
+
+    # Tolerate runs captured before the inventory was added.
+    b_inv = before.get("inventory", {})
+    a_inv = after.get("inventory", {})
+    b_cases = before.get("cases", before)
+    a_cases = after.get("cases", after)
+    if not b_inv or not a_inv:
+        print("WARNING: one input predates inventory capture; "
+              "column-inventory comparison skipped.")
+
+    failed = False
+
+    print("== column inventory ==")
+    for t in sorted(set(b_inv) | set(a_inv)):
+        bcols = b_inv.get(t, {}).get("columns", [])
+        acols = a_inv.get(t, {}).get("columns", [])
+        removed = [c for c in bcols if c not in acols]
+        added = [c for c in acols if c not in bcols]
+        reordered = (not removed and not added and bcols != acols)
+        if removed:
+            failed = True
+            print("  {:<12} DROPPED {}  <-- FAILURE".format(t, removed))
+        if added:
+            print("  {:<12} added   {}".format(t, added))
+        if reordered:
+            print("  {:<12} REORDERED (same set, different order)".format(t))
+        if not removed and not added and not reordered:
+            print("  {:<12} unchanged ({} columns)".format(t, len(acols)))
+    for t in sorted(set(b_inv) - set(a_inv)):
+        failed = True
+        print("  {:<12} TABLE MISSING ENTIRELY  <-- FAILURE".format(t))
+
+    print("== case outcomes ==")
+    diffs = 0
+    for t in sorted(set(b_cases) | set(a_cases)):
+        for c in sorted(set(b_cases.get(t, {})) | set(a_cases.get(t, {}))):
+            bb = b_cases.get(t, {}).get(c)
+            aa = a_cases.get(t, {}).get(c)
+            if bb == aa:
+                continue
+            diffs += 1
+            bo = (bb or {}).get("outcome")
+            ao = (aa or {}).get("outcome")
+            kind = "OUTCOME CHANGED" if bo != ao else "error string only"
+            print("  {:<12} {:<30} {} -> {}  ({})".format(t, c, bo, ao, kind))
+    if not diffs:
+        print("  all cases identical")
+
+    print("== verdict ==")
+    if failed:
+        print("  FAIL - a column or table was dropped")
+        return 1
+    print("  PASS - no column or table lost ({} case difference(s))".format(diffs))
+    return 0
+
+
 def main():
     global CONTRACTS_DIR
     label = sys.argv[1] if len(sys.argv) > 1 else "run"
@@ -141,13 +220,23 @@ def main():
     print("contracts: {}".format(CONTRACTS_DIR))
     os.makedirs(CASES_DIR, exist_ok=True)
     results = {}
+    inventory = {}
     for t in TABLES:
+        cols = contract(t)
+        # Recorded independently of any test case, so a dropped column shows up
+        # even though the behaviour cases would remain self-consistent.
+        inventory[t] = {
+            "columns": [c["name"] for c in cols],
+            "count": len(cols),
+            "required": [c["name"] for c in cols if c.get("required")],
+        }
         results[t] = {}
         for case_name, path in build_cases(t).items():
             results[t][case_name] = run(path, t)
     out = os.path.join(SCRATCH, "parity_{}.json".format(label))
+    payload = {"inventory": inventory, "cases": results}
     with io.open(out, "w", encoding="utf-8") as f:
-        json.dump(results, f, indent=2, ensure_ascii=False, sort_keys=True)
+        json.dump(payload, f, indent=2, ensure_ascii=False, sort_keys=True)
 
     total = sum(len(v) for v in results.values())
     acc = sum(1 for t in results for c in results[t]
@@ -155,7 +244,11 @@ def main():
     rej = sum(1 for t in results for c in results[t]
               if results[t][c]["outcome"] == "REJECT")
     err = total - acc - rej
-    print("[{}] cases={} accept={} reject={} error={}".format(label, total, acc, rej, err))
+    ncols = sum(v["count"] for v in inventory.values())
+    print("[{}] cases={} accept={} reject={} error={} | columns={} across {} tables"
+          .format(label, total, acc, rej, err, ncols, len(inventory)))
+    for t in TABLES:
+        print("  inventory   {:<12} {} columns".format(t, inventory[t]["count"]))
     print("written: {}".format(out))
     for t in TABLES:
         for c in sorted(results[t]):
@@ -163,4 +256,9 @@ def main():
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "compare":
+        if len(sys.argv) != 4:
+            print("usage: verify_contract_parity.py compare <before.json> <after.json>")
+            sys.exit(2)
+        sys.exit(compare(sys.argv[2], sys.argv[3]))
     main()
