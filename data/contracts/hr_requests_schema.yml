@@ -90,7 +90,7 @@ columns:
   example: HR Officer
 - name: sla_hours
   name_en: SLA Hours
-  name_ar: ساعات اتفاقية مستوى الخدمة
+  name_ar: المدة المستهدفة
   type: INTEGER
   required: true
   description_en: Target resolution time in hours.
@@ -106,7 +106,7 @@ columns:
   example: '53'
 - name: sla_breached
   name_en: SLA Breached
-  name_ar: تجاوز اتفاقية مستوى الخدمة
+  name_ar: تجاوز المدة المستهدفة
   type: BOOLEAN
   required: true
   description_en: Whether the SLA target was exceeded.

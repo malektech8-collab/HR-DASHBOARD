@@ -50,7 +50,7 @@ columns:
   example: Saudi
 - name: is_saudi
   name_en: Saudi National
-  name_ar: سعودي الجنسية
+  name_ar: سعودي
   type: BOOLEAN
   required: true
   # Declared derivation. Real HRIS exports carry `nationality`, not this
@@ -76,7 +76,7 @@ columns:
   example: Company A
 - name: department
   name_en: Department
-  name_ar: الإدارة
+  name_ar: القسم
   type: VARCHAR
   required: true
   description_en: Organisational department.
@@ -197,7 +197,7 @@ columns:
       ar: غير نشط
     Terminated:
       en: Terminated
-      ar: منتهية خدمته
+      ar: منتهي الخدمة
     On Leave:
       en: On Leave
       ar: في إجازة
