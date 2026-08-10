@@ -5,6 +5,8 @@
 **Governing reference:** [`docs/PRODUCT-ARCHITECTURE.md`](../PRODUCT-ARCHITECTURE.md) §4 (canonical schema and template flow).
 **Guardrails honoured:** plan only; no file touched; `data_mode=demo` unchanged; validator behaviour unchanged this cycle; no real data accessed or generated.
 
+> **Correction (2026-08-10).** This document originally stated a total of **84 columns**, and listed `payroll` as 14. Both figures were wrong: the real total is **73** (employees 21, payroll 13, attendance 15, compliance 13, hr_requests 11). The per-column enumerations below were always correct — only the counts were not. Verified against `main`: column names and order are identical between the original and extended contracts, so nothing was lost. Corrected in place below; this note records what was originally claimed. Note that 73 is the total **as this cycle was executed** — PR #10 subsequently added two optional employees columns (`work_unit`, `end_of_service_type`), so the current total on `main` is **75**. The figures in this document describe the state it reports on and are not updated as the schema grows.
+
 > **Housekeeping flag:** `docs/PRODUCT-ARCHITECTURE.md` is present in the working tree but **untracked** — it is not committed on `main` or any branch. The governing reference for every future cycle should be in version control. Recommend committing it before or alongside this plan. This document does not add it, since the deliverable was specified as the plan doc only.
 
 ---
@@ -40,13 +42,13 @@ columns:
     allowed_values: [...]
 ```
 
-No table-level metadata — no domain name, no description, no version, no primary key declaration, no cross-field rules. 84 columns total. Only **one** `allowed_values` list exists in the entire contract set (`employees.status`), which means enum-dropdown generation for Excel templates has almost nothing to work from today.
+No table-level metadata — no domain name, no description, no version, no primary key declaration, no cross-field rules. 73 columns total. Only **one** `allowed_values` list exists in the entire contract set (`employees.status`), which means enum-dropdown generation for Excel templates has almost nothing to work from today.
 
 ### 1.2 Every field, by domain
 
 **`employees_schema.yml` — 21 columns** (`employee_id` ᵁ, `employee_name`, `nationality`, `is_saudi` ᴮ, `company`, `department`, `project`, `job_title`, `job_family`, `grade`, `manager_id` °, `cost_center`, `employment_type`, `contract_type`, `joining_date` ᴰ, `termination_date` °ᴰ, `contract_end_date` °ᴰ, `status` ᴱ, `basic_salary` $, `housing_allowance` $, `transport_allowance` $)
 
-**`payroll_schema.yml` — 14 columns** (`payroll_period`, `employee_id`, `basic_salary` $ᴹ, `housing_allowance` $, `transport_allowance` $, `other_allowances` $, `overtime_amount` $, `deductions` $, `gross_pay` $ᴹ, `net_pay` $ᴹ, `project`, `cost_center`, `payroll_status`)
+**`payroll_schema.yml` — 13 columns** (`payroll_period`, `employee_id`, `basic_salary` $ᴹ, `housing_allowance` $, `transport_allowance` $, `other_allowances` $, `overtime_amount` $, `deductions` $, `gross_pay` $ᴹ, `net_pay` $ᴹ, `project`, `cost_center`, `payroll_status`)
 
 **`attendance_schema.yml` — 15 columns** (`attendance_date` ᴰ, `employee_id`, `shift_name`, `scheduled_start` ᵀ, `scheduled_end` ᵀ, `actual_check_in` °ᵀ, `actual_check_out` °ᵀ, `late_minutes` ᴵᴹ, `excused_late_minutes` ᴵ, `net_late_minutes` ᴵᴹ, `absence_days` #, `overtime_hours` #, `overtime_approved` ᴮ, `missing_punch_count` ᴵ, `project`)
 
@@ -62,7 +64,7 @@ No table-level metadata — no domain name, no description, no version, no prima
 |---|---|---|
 | A1 | `min_value: 0` declared on `attendance.late_minutes`, `attendance.net_late_minutes`, `payroll.basic_salary`, `payroll.gross_pay`, `payroll.net_pay` — **never enforced** | A real payroll file with negative pay passes contract validation. Caught later by `validate_data.py` as a DQ exception, but the hard gate lets it through. |
 | A2 | `unique: true` on `employees.employee_id` and `hr_requests.request_id` — **never enforced** | Duplicate employee IDs pass the gate. This is a known real-world defect class — `base_active_workforce` exists specifically to deduplicate them. |
-| A3 | Only one `allowed_values` list in 84 columns | 7 status/enum columns (`qiwa_status`, `gosi_status`, `mudad_status`, `payroll_status`, `request_status`, `insurance_status`, `occupation_match_status`) have no vocabulary, so no dropdown and no enum validation. Mixed Ar/En vocabularies are a named real-world issue (architecture §4). |
+| A3 | Only one `allowed_values` list in 73 columns | 7 status/enum columns (`qiwa_status`, `gosi_status`, `mudad_status`, `payroll_status`, `request_status`, `insurance_status`, `occupation_match_status`) have no vocabulary, so no dropdown and no enum validation. Mixed Ar/En vocabularies are a named real-world issue (architecture §4). |
 | A4 | No table-level metadata | Nowhere to put a domain's own bilingual name/description for the Excel instructions sheet. |
 | A5 | No cross-field rules | `gross_pay = basic + allowances + overtime − deductions` and `termination_date >= joining_date` live in `validate_data.py` and dbt, not the contract. Out of scope this cycle; noted so the format doesn't foreclose it. |
 | A6 | Only 5 of 21 tables have contracts | Matches `REAL_SOURCEABLE` (4) + `hr_requests` (contracted, not real-sourceable). |
@@ -294,7 +296,7 @@ De-duplicating `generate_sample_data.py`, `ingest_raw.py`, and `compile_csv_to_p
 |---|---|---|
 | CI green is mistaken for "extension is safe" — contracts are never read on the demo path | **High** | The §2.2 parity harness is mandatory, not optional |
 | `allowed_values` restructured into objects, breaking Rule 4 | Medium | Format pins it as a flat list; parity harness catches it |
-| Arabic labels wrong or machine-translated | Medium | HR-practitioner review of all 84 `name_ar` values before merge — the operator is the domain expert |
+| Arabic labels wrong or machine-translated | Medium | HR-practitioner review of all 73 `name_ar` values before merge — the operator is the domain expert |
 | Adding enum vocabularies (A3) rejects data that passes today | Medium | Only affects the real path; derive vocabularies from observed sample values first and review each |
 | i18n scope creep swallows the cycle | **High** | Cap Phase 1 at schema-derived labels; chrome localisation is separate |
 | Encoding damage to Arabic text on Windows | Medium | UTF-8 without BOM enforced; `.gitattributes` review; verify rendering after round-trip |
