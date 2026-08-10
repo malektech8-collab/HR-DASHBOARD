@@ -50,7 +50,7 @@ columns:
   example: Saudi
 - name: is_saudi
   name_en: Saudi National
-  name_ar: سعودي الجنسية
+  name_ar: سعودي
   type: BOOLEAN
   required: true
   # Declared derivation. Real HRIS exports carry `nationality`, not this
@@ -76,7 +76,7 @@ columns:
   example: Company A
 - name: department
   name_en: Department
-  name_ar: الإدارة
+  name_ar: القسم
   type: VARCHAR
   required: true
   description_en: Organisational department.
@@ -197,7 +197,7 @@ columns:
       ar: غير نشط
     Terminated:
       en: Terminated
-      ar: منتهية خدمته
+      ar: منتهي الخدمة
     On Leave:
       en: On Leave
       ar: في إجازة
@@ -225,3 +225,64 @@ columns:
   description_en: Monthly transport allowance in SAR.
   description_ar: بدل النقل الشهري بالريال السعودي.
   example: '500'
+- name: work_unit
+  name_en: Work Unit
+  name_ar: وحدة عمل
+  type: VARCHAR
+  required: false
+  description_en: 'Work unit within a department. The organisational hierarchy is
+    Location -> Department -> Work Unit: the location (the `project` column) is the
+    physical site and contains multiple departments, and each department contains
+    one or more work units. Optional - leave empty where a department is not
+    subdivided.'
+  description_ar: >-
+    وحدة العمل داخل القسم. التسلسل التنظيمي هو الموقع ثم القسم ثم وحدة العمل:
+    الموقع (عمود المشروع) هو الموقع الفعلي ويضم عدة أقسام، وكل قسم يضم وحدة عمل
+    أو أكثر. اختياري - يترك فارغاً إذا لم يكن القسم مقسماً إلى وحدات.
+  example: Payables
+- name: end_of_service_type
+  name_en: End of Service Type
+  name_ar: نوع نهاية الخدمة
+  type: VARCHAR
+  required: false
+  description_en: 'Reason employment ended. Populated only for employees whose
+    status is Terminated; leave empty for active employees. NOT YET CONDITIONALLY
+    VALIDATED: making this required when status=Terminated is a validator
+    behaviour change, queued for cycle 1b.'
+  description_ar: >-
+    سبب انتهاء الخدمة. يعبأ فقط للموظفين المنتهية خدمتهم، ويترك فارغاً للموظفين
+    على رأس العمل.
+  example: Resignation
+  allowed_values:
+  - Resignation
+  - Article 74
+  - Article 75
+  - Article 77
+  - Article 80
+  - Article 81
+  - Probation
+  value_labels:
+    Resignation:
+      en: Resignation
+      ar: استقالة
+    Article 74:
+      en: Article 74
+      ar: انتهاء العقد — المادة ٧٤
+    Article 75:
+      en: Article 75
+      ar: إنهاء بإشعار — المادة ٧٥
+    Article 77:
+      en: Article 77
+      ar: إنهاء دون سبب مشروع — المادة ٧٧
+    Article 80:
+      en: Article 80
+      ar: فصل دون مكافأة أو إشعار — المادة ٨٠
+    Article 81:
+      en: Article 81
+      ar: ترك العمل مع الاحتفاظ بالحقوق — المادة ٨١
+    # UNCONFIRMED: the Labor Law article governing probation-period termination
+    # has deliberately NOT been asserted here. Awaiting practitioner
+    # confirmation before any article number is attached to this value.
+    Probation:
+      en: Probation
+      ar: إنهاء خلال فترة التجربة
