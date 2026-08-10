@@ -1,66 +1,227 @@
+# Canonical bilingual schema - employees
+#
+# Single source of truth for: the downloadable template, the validation rules,
+# the UI labels, and the error messages. See docs/PRODUCT-ARCHITECTURE.md section 4.
+#
+# BACKWARD COMPATIBILITY: scripts/validate_schema.py reads only `columns` and,
+# per column, `name` / `required` / `type` / `allowed_values`. Every other key
+# here is additive and ignored by the validator.
+#
+# allowed_values MUST stay a flat list of strings - the validator compares raw
+# cell values against set(allowed_values). Bilingual display lives in the
+# parallel `value_labels` map.
+#
+# NOT YET ENFORCED (scheduled for cycle 1b, before Phase 2 real data):
+#   `unique`, `min_value` - declared below but inert in the current validator.
+# `observed_values` is sample-derived documentation only. It is NOT a
+# vocabulary, is never validated against, and is not exhaustive.
+
+version: 1
+table: employees
+label_en: Employees
+label_ar: الموظفون
+description_en: One row per employee. The workforce master record.
+description_ar: صف واحد لكل موظف. السجل الرئيسي للقوى العاملة.
 columns:
-  - name: employee_id
-    type: VARCHAR
-    required: true
-    unique: true
-  - name: employee_name
-    type: VARCHAR
-    required: true
-  - name: nationality
-    type: VARCHAR
-    required: true
-  - name: is_saudi
-    type: BOOLEAN
-    required: true
-  - name: company
-    type: VARCHAR
-    required: true
-  - name: department
-    type: VARCHAR
-    required: true
-  - name: project
-    type: VARCHAR
-    required: true
-  - name: job_title
-    type: VARCHAR
-    required: true
-  - name: job_family
-    type: VARCHAR
-    required: true
-  - name: grade
-    type: VARCHAR
-    required: true
-  - name: manager_id
-    type: VARCHAR
-    required: false
-  - name: cost_center
-    type: VARCHAR
-    required: true
-  - name: employment_type
-    type: VARCHAR
-    required: true
-  - name: contract_type
-    type: VARCHAR
-    required: true
-  - name: joining_date
-    type: DATE
-    required: true
-  - name: termination_date
-    type: DATE
-    required: false
-  - name: contract_end_date
-    type: DATE
-    required: false
-  - name: status
-    type: VARCHAR
-    required: true
-    allowed_values: ["Active", "Inactive", "Terminated", "On Leave"]
-  - name: basic_salary
-    type: DECIMAL
-    required: true
-  - name: housing_allowance
-    type: DECIMAL
-    required: true
-  - name: transport_allowance
-    type: DECIMAL
-    required: true
+- name: employee_id
+  name_en: Employee ID
+  name_ar: الرقم الوظيفي
+  type: VARCHAR
+  required: true
+  unique: true
+  description_en: Unique identifier of the employee within the company.
+  description_ar: المعرّف الفريد للموظف داخل الشركة.
+  example: EMP001
+- name: employee_name
+  name_en: Employee Name
+  name_ar: اسم الموظف
+  type: VARCHAR
+  required: true
+  description_en: Full name as it appears on official documents.
+  description_ar: الاسم الكامل كما يظهر في الوثائق الرسمية.
+  example: Ahmed Al-Otaibi
+- name: nationality
+  name_en: Nationality
+  name_ar: الجنسية
+  type: VARCHAR
+  required: true
+  description_en: Nationality as stated on the national ID or Iqama.
+  description_ar: الجنسية كما وردت في الهوية الوطنية أو الإقامة.
+  example: Saudi
+- name: is_saudi
+  name_en: Saudi National
+  name_ar: سعودي الجنسية
+  type: BOOLEAN
+  required: true
+  # Declared derivation. Real HRIS exports carry `nationality`, not this
+  # boolean. The rule is resolved from the registry in scripts/derivations.py
+  # by NAME — contracts never carry executable expressions — and raises on any
+  # nationality value it does not recognise rather than defaulting to false.
+  #
+  # NOT YET ACTIVE: `required` stays true this cycle because flipping it would
+  # change what the validator accepts, which the Phase 1 guardrail forbids.
+  # Cycle 1b flips it to false and wires derive_column() into ingest_raw.py.
+  derived_from: nationality
+  derivation: nationality_is_saudi
+  description_en: Whether the employee counts as Saudi for Saudization. Derived from nationality when the column is absent.
+  description_ar: ما إذا كان الموظف يحتسب سعودياً لأغراض السعودة. يشتق من الجنسية عند غياب العمود.
+  example: 'true'
+- name: company
+  name_en: Company
+  name_ar: الشركة
+  type: VARCHAR
+  required: true
+  description_en: Legal entity employing the person.
+  description_ar: الكيان القانوني الموظف.
+  example: Company A
+- name: department
+  name_en: Department
+  name_ar: الإدارة
+  type: VARCHAR
+  required: true
+  description_en: Organisational department.
+  description_ar: الإدارة التنظيمية.
+  example: Finance
+- name: project
+  name_en: Project
+  name_ar: المشروع
+  type: VARCHAR
+  required: true
+  description_en: Project or site the employee is assigned to.
+  description_ar: المشروع أو الموقع المكلّف به الموظف.
+  example: Project Alpha
+- name: job_title
+  name_en: Job Title
+  name_ar: المسمى الوظيفي
+  type: VARCHAR
+  required: true
+  description_en: Job title as stated in the employment contract.
+  description_ar: المسمى الوظيفي كما ورد في عقد العمل.
+  example: Accountant
+- name: job_family
+  name_en: Job Family
+  name_ar: المجموعة الوظيفية
+  type: VARCHAR
+  required: true
+  description_en: Broader job grouping used for analytics.
+  description_ar: التصنيف الوظيفي الأوسع المستخدم في التحليلات.
+  example: Finance
+- name: grade
+  name_en: Grade
+  name_ar: الدرجة الوظيفية
+  type: VARCHAR
+  required: true
+  description_en: Internal salary or job grade.
+  description_ar: الدرجة الوظيفية الداخلية.
+  example: G7
+- name: manager_id
+  name_en: Manager ID
+  name_ar: الرقم الوظيفي للمدير
+  type: VARCHAR
+  required: false
+  description_en: Employee ID of the direct manager.
+  description_ar: الرقم الوظيفي للمدير المباشر.
+  example: EMP002
+- name: cost_center
+  name_en: Cost Center
+  name_ar: مركز التكلفة
+  type: VARCHAR
+  required: true
+  description_en: Accounting cost center the cost is charged to.
+  description_ar: مركز التكلفة المحاسبي الذي تحمّل عليه التكلفة.
+  example: CC-100
+- name: employment_type
+  name_en: Employment Type
+  name_ar: نوع التوظيف
+  type: VARCHAR
+  required: true
+  description_en: Full-time, part-time, or contract.
+  description_ar: دوام كامل أو جزئي أو تعاقد.
+  example: Full-time
+  observed_values:
+  - Full-time
+- name: contract_type
+  name_en: Contract Type
+  name_ar: نوع العقد
+  type: VARCHAR
+  required: true
+  description_en: Limited or unlimited term contract.
+  description_ar: عقد محدد المدة أو غير محدد المدة.
+  example: Unlimited
+  observed_values:
+  - Limited
+  - Unlimited
+- name: joining_date
+  name_en: Joining Date
+  name_ar: تاريخ الانضمام
+  type: DATE
+  required: true
+  description_en: Date the employee started employment.
+  description_ar: تاريخ بدء الموظف للعمل.
+  example: '2024-03-15'
+- name: termination_date
+  name_en: Termination Date
+  name_ar: تاريخ انتهاء الخدمة
+  type: DATE
+  required: false
+  description_en: Date employment ended. Leave empty for active employees.
+  description_ar: تاريخ انتهاء الخدمة. يترك فارغاً للموظفين على رأس العمل.
+  example: '2026-01-31'
+- name: contract_end_date
+  name_en: Contract End Date
+  name_ar: تاريخ انتهاء العقد
+  type: DATE
+  required: false
+  description_en: Contract expiry date. Leave empty for unlimited contracts.
+  description_ar: تاريخ انتهاء العقد. يترك فارغاً للعقود غير محددة المدة.
+  example: '2027-03-14'
+- name: status
+  name_en: Employment Status
+  name_ar: حالة الموظف
+  type: VARCHAR
+  required: true
+  description_en: Current employment status.
+  description_ar: الحالة الوظيفية الحالية.
+  example: Active
+  allowed_values:
+  - Active
+  - Inactive
+  - Terminated
+  - On Leave
+  value_labels:
+    Active:
+      en: Active
+      ar: نشط
+    Inactive:
+      en: Inactive
+      ar: غير نشط
+    Terminated:
+      en: Terminated
+      ar: منتهية خدمته
+    On Leave:
+      en: On Leave
+      ar: في إجازة
+- name: basic_salary
+  name_en: Basic Salary
+  name_ar: الراتب الأساسي
+  type: DECIMAL
+  required: true
+  description_en: Monthly basic salary in SAR, excluding allowances.
+  description_ar: الراتب الأساسي الشهري بالريال السعودي، دون البدلات.
+  example: '8000'
+- name: housing_allowance
+  name_en: Housing Allowance
+  name_ar: بدل السكن
+  type: DECIMAL
+  required: true
+  description_en: Monthly housing allowance in SAR.
+  description_ar: بدل السكن الشهري بالريال السعودي.
+  example: '2000'
+- name: transport_allowance
+  name_en: Transport Allowance
+  name_ar: بدل النقل
+  type: DECIMAL
+  required: true
+  description_en: Monthly transport allowance in SAR.
+  description_ar: بدل النقل الشهري بالريال السعودي.
+  example: '500'

@@ -1,35 +1,122 @@
+# Canonical bilingual schema - hr_requests
+#
+# Single source of truth for: the downloadable template, the validation rules,
+# the UI labels, and the error messages. See docs/PRODUCT-ARCHITECTURE.md section 4.
+#
+# BACKWARD COMPATIBILITY: scripts/validate_schema.py reads only `columns` and,
+# per column, `name` / `required` / `type` / `allowed_values`. Every other key
+# here is additive and ignored by the validator.
+#
+# allowed_values MUST stay a flat list of strings - the validator compares raw
+# cell values against set(allowed_values). Bilingual display lives in the
+# parallel `value_labels` map.
+#
+# NOT YET ENFORCED (scheduled for cycle 1b, before Phase 2 real data):
+#   `unique`, `min_value` - declared below but inert in the current validator.
+# `observed_values` is sample-derived documentation only. It is NOT a
+# vocabulary, is never validated against, and is not exhaustive.
+
+version: 1
+table: hr_requests
+label_en: HR Requests
+label_ar: طلبات الموارد البشرية
+description_en: Employee service requests and their SLA outcomes.
+description_ar: طلبات خدمات الموظفين ونتائج اتفاقية مستوى الخدمة.
 columns:
-  - name: request_id
-    type: VARCHAR
-    required: true
-    unique: true
-  - name: employee_id
-    type: VARCHAR
-    required: true
-  - name: request_type
-    type: VARCHAR
-    required: true
-  - name: request_status
-    type: VARCHAR
-    required: true
-  - name: created_at
-    type: TIMESTAMP
-    required: true
-  - name: closed_at
-    type: TIMESTAMP
-    required: false
-  - name: owner
-    type: VARCHAR
-    required: true
-  - name: sla_hours
-    type: INTEGER
-    required: true
-  - name: actual_hours
-    type: INTEGER
-    required: false
-  - name: sla_breached
-    type: BOOLEAN
-    required: true
-  - name: project
-    type: VARCHAR
-    required: true
+- name: request_id
+  name_en: Request ID
+  name_ar: رقم الطلب
+  type: VARCHAR
+  required: true
+  unique: true
+  description_en: Unique identifier of the request.
+  description_ar: المعرّف الفريد للطلب.
+  example: REQ001
+- name: employee_id
+  name_en: Employee ID
+  name_ar: الرقم الوظيفي
+  type: VARCHAR
+  required: true
+  description_en: Unique identifier of the employee within the company.
+  description_ar: المعرّف الفريد للموظف داخل الشركة.
+  example: EMP001
+- name: request_type
+  name_en: Request Type
+  name_ar: نوع الطلب
+  type: VARCHAR
+  required: true
+  description_en: Category of the employee request.
+  description_ar: تصنيف طلب الموظف.
+  example: Leave Request
+  observed_values:
+  - Business Card Request
+  - Employment Certificate
+  - Leave Request
+  - Salary Transfer Letter
+- name: request_status
+  name_en: Request Status
+  name_ar: حالة الطلب
+  type: VARCHAR
+  required: true
+  description_en: Current status of the request.
+  description_ar: الحالة الحالية للطلب.
+  example: Open
+  observed_values:
+  - Closed
+  - Open
+- name: created_at
+  name_en: Created At
+  name_ar: تاريخ الإنشاء
+  type: TIMESTAMP
+  required: true
+  description_en: When the request was raised.
+  description_ar: وقت تقديم الطلب.
+  example: '2026-06-01 09:00:00'
+- name: closed_at
+  name_en: Closed At
+  name_ar: تاريخ الإغلاق
+  type: TIMESTAMP
+  required: false
+  description_en: When the request was closed. Empty if still open.
+  description_ar: وقت إغلاق الطلب. يترك فارغاً إذا كان مفتوحاً.
+  example: '2026-06-03 14:30:00'
+- name: owner
+  name_en: Owner
+  name_ar: المسؤول
+  type: VARCHAR
+  required: true
+  description_en: HR team member responsible for the request.
+  description_ar: موظف الموارد البشرية المسؤول عن الطلب.
+  example: HR Officer
+- name: sla_hours
+  name_en: SLA Hours
+  name_ar: ساعات اتفاقية مستوى الخدمة
+  type: INTEGER
+  required: true
+  description_en: Target resolution time in hours.
+  description_ar: الوقت المستهدف للإنجاز بالساعات.
+  example: '48'
+- name: actual_hours
+  name_en: Actual Hours
+  name_ar: الساعات الفعلية
+  type: INTEGER
+  required: false
+  description_en: Actual hours taken to resolve.
+  description_ar: الساعات الفعلية المستغرقة للإنجاز.
+  example: '53'
+- name: sla_breached
+  name_en: SLA Breached
+  name_ar: تجاوز اتفاقية مستوى الخدمة
+  type: BOOLEAN
+  required: true
+  description_en: Whether the SLA target was exceeded.
+  description_ar: ما إذا تم تجاوز المستهدف.
+  example: 'true'
+- name: project
+  name_en: Project
+  name_ar: المشروع
+  type: VARCHAR
+  required: true
+  description_en: Project or site the employee is assigned to.
+  description_ar: المشروع أو الموقع المكلّف به الموظف.
+  example: Project Alpha
