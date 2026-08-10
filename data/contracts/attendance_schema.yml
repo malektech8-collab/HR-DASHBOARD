@@ -1,48 +1,149 @@
+# Canonical bilingual schema - attendance
+#
+# Single source of truth for: the downloadable template, the validation rules,
+# the UI labels, and the error messages. See docs/PRODUCT-ARCHITECTURE.md section 4.
+#
+# BACKWARD COMPATIBILITY: scripts/validate_schema.py reads only `columns` and,
+# per column, `name` / `required` / `type` / `allowed_values`. Every other key
+# here is additive and ignored by the validator.
+#
+# allowed_values MUST stay a flat list of strings - the validator compares raw
+# cell values against set(allowed_values). Bilingual display lives in the
+# parallel `value_labels` map.
+#
+# NOT YET ENFORCED (scheduled for cycle 1b, before Phase 2 real data):
+#   `unique`, `min_value` - declared below but inert in the current validator.
+# `observed_values` is sample-derived documentation only. It is NOT a
+# vocabulary, is never validated against, and is not exhaustive.
+
+version: 1
+table: attendance
+label_en: Attendance
+label_ar: الحضور والانصراف
+description_en: One row per employee per attendance day.
+description_ar: صف واحد لكل موظف في كل يوم حضور.
 columns:
-  - name: attendance_date
-    type: DATE
-    required: true
-  - name: employee_id
-    type: VARCHAR
-    required: true
-  - name: shift_name
-    type: VARCHAR
-    required: true
-  - name: scheduled_start
-    type: TIMESTAMP
-    required: true
-  - name: scheduled_end
-    type: TIMESTAMP
-    required: true
-  - name: actual_check_in
-    type: TIMESTAMP
-    required: false
-  - name: actual_check_out
-    type: TIMESTAMP
-    required: false
-  - name: late_minutes
-    type: INTEGER
-    required: true
-    min_value: 0
-  - name: excused_late_minutes
-    type: INTEGER
-    required: true
-  - name: net_late_minutes
-    type: INTEGER
-    required: true
-    min_value: 0
-  - name: absence_days
-    type: DECIMAL
-    required: true
-  - name: overtime_hours
-    type: DECIMAL
-    required: true
-  - name: overtime_approved
-    type: BOOLEAN
-    required: true
-  - name: missing_punch_count
-    type: INTEGER
-    required: true
-  - name: project
-    type: VARCHAR
-    required: true
+- name: attendance_date
+  name_en: Attendance Date
+  name_ar: تاريخ الحضور
+  type: DATE
+  required: true
+  description_en: Calendar date of the attendance record.
+  description_ar: التاريخ الميلادي لسجل الحضور.
+  example: '2026-06-01'
+- name: employee_id
+  name_en: Employee ID
+  name_ar: الرقم الوظيفي
+  type: VARCHAR
+  required: true
+  description_en: Unique identifier of the employee within the company.
+  description_ar: المعرّف الفريد للموظف داخل الشركة.
+  example: EMP001
+- name: shift_name
+  name_en: Shift Name
+  name_ar: اسم الوردية
+  type: VARCHAR
+  required: true
+  description_en: Name of the shift scheduled for this day.
+  description_ar: اسم الوردية المجدولة لهذا اليوم.
+  example: Day Shift
+  observed_values:
+  - Day Shift
+- name: scheduled_start
+  name_en: Scheduled Start
+  name_ar: بداية الدوام المجدولة
+  type: TIMESTAMP
+  required: true
+  description_en: Scheduled shift start, YYYY-MM-DD HH:MM:SS.
+  description_ar: بداية الوردية المجدولة بصيغة التاريخ والوقت.
+  example: '2026-06-01 08:00:00'
+- name: scheduled_end
+  name_en: Scheduled End
+  name_ar: نهاية الدوام المجدولة
+  type: TIMESTAMP
+  required: true
+  description_en: Scheduled shift end, YYYY-MM-DD HH:MM:SS.
+  description_ar: نهاية الوردية المجدولة بصيغة التاريخ والوقت.
+  example: '2026-06-01 17:00:00'
+- name: actual_check_in
+  name_en: Actual Check-In
+  name_ar: وقت الحضور الفعلي
+  type: TIMESTAMP
+  required: false
+  description_en: Recorded check-in time. Empty if no punch was recorded.
+  description_ar: وقت الحضور المسجل. يترك فارغاً إذا لم تسجل بصمة.
+  example: '2026-06-01 08:05:00'
+- name: actual_check_out
+  name_en: Actual Check-Out
+  name_ar: وقت الانصراف الفعلي
+  type: TIMESTAMP
+  required: false
+  description_en: Recorded check-out time. Empty if no punch was recorded.
+  description_ar: وقت الانصراف المسجل. يترك فارغاً إذا لم تسجل بصمة.
+  example: '2026-06-01 17:02:00'
+- name: late_minutes
+  name_en: Late Minutes
+  name_ar: دقائق التأخير
+  type: INTEGER
+  required: true
+  min_value: 0
+  description_en: Raw minutes late as recorded by the source system.
+  description_ar: دقائق التأخير كما سجلها النظام المصدر.
+  example: '5'
+- name: excused_late_minutes
+  name_en: Excused Late Minutes
+  name_ar: دقائق التأخير المعذورة
+  type: INTEGER
+  required: true
+  description_en: Minutes of lateness formally excused.
+  description_ar: دقائق التأخير المعذورة رسمياً.
+  example: '0'
+- name: net_late_minutes
+  name_en: Net Late Minutes
+  name_ar: صافي دقائق التأخير
+  type: INTEGER
+  required: true
+  min_value: 0
+  description_en: Late minutes after deducting excused minutes.
+  description_ar: دقائق التأخير بعد خصم الدقائق المعذورة.
+  example: '5'
+- name: absence_days
+  name_en: Absence Days
+  name_ar: أيام الغياب
+  type: DECIMAL
+  required: true
+  description_en: Absence attributed to this record, in days.
+  description_ar: الغياب المحتسب على هذا السجل بالأيام.
+  example: '0'
+- name: overtime_hours
+  name_en: Overtime Hours
+  name_ar: ساعات العمل الإضافي
+  type: DECIMAL
+  required: true
+  description_en: Overtime worked, in hours.
+  description_ar: ساعات العمل الإضافي المنجزة.
+  example: '1.5'
+- name: overtime_approved
+  name_en: Overtime Approved
+  name_ar: العمل الإضافي معتمد
+  type: BOOLEAN
+  required: true
+  description_en: Whether the overtime was formally approved.
+  description_ar: ما إذا كان العمل الإضافي معتمداً رسمياً.
+  example: 'true'
+- name: missing_punch_count
+  name_en: Missing Punch Count
+  name_ar: عدد البصمات المفقودة
+  type: INTEGER
+  required: true
+  description_en: Number of missing check-in or check-out punches.
+  description_ar: عدد بصمات الحضور أو الانصراف المفقودة.
+  example: '0'
+- name: project
+  name_en: Project
+  name_ar: المشروع
+  type: VARCHAR
+  required: true
+  description_en: Project or site the employee is assigned to.
+  description_ar: المشروع أو الموقع المكلّف به الموظف.
+  example: Project Alpha

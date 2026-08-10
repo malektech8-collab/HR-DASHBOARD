@@ -1,40 +1,140 @@
+# Canonical bilingual schema - compliance
+#
+# Single source of truth for: the downloadable template, the validation rules,
+# the UI labels, and the error messages. See docs/PRODUCT-ARCHITECTURE.md section 4.
+#
+# BACKWARD COMPATIBILITY: scripts/validate_schema.py reads only `columns` and,
+# per column, `name` / `required` / `type` / `allowed_values`. Every other key
+# here is additive and ignored by the validator.
+#
+# allowed_values MUST stay a flat list of strings - the validator compares raw
+# cell values against set(allowed_values). Bilingual display lives in the
+# parallel `value_labels` map.
+#
+# NOT YET ENFORCED (scheduled for cycle 1b, before Phase 2 real data):
+#   `unique`, `min_value` - declared below but inert in the current validator.
+# `observed_values` is sample-derived documentation only. It is NOT a
+# vocabulary, is never validated against, and is not exhaustive.
+
+version: 1
+table: compliance
+label_en: Compliance
+label_ar: الالتزام الحكومي
+description_en: Government platform status per employee per period (Qiwa, GOSI, Mudad).
+description_ar: حالة المنصات الحكومية لكل موظف في كل فترة (قوى، التأمينات الاجتماعية، مدد).
 columns:
-  - name: employee_id
-    type: VARCHAR
-    required: true
-  - name: period
-    type: VARCHAR
-    required: true
-  - name: qiwa_status
-    type: VARCHAR
-    required: true
-  - name: gosi_status
-    type: VARCHAR
-    required: true
-  - name: mudad_status
-    type: VARCHAR
-    required: true
-  - name: contract_authenticated
-    type: BOOLEAN
-    required: true
-  - name: gosi_salary
-    type: DECIMAL
-    required: true
-  - name: payroll_basic_salary
-    type: DECIMAL
-    required: true
-  - name: occupation_code
-    type: VARCHAR
-    required: true
-  - name: occupation_match_status
-    type: VARCHAR
-    required: true
-  - name: work_permit_expiry
-    type: DATE
-    required: false
-  - name: iqama_expiry
-    type: DATE
-    required: false
-  - name: insurance_status
-    type: VARCHAR
-    required: true
+- name: employee_id
+  name_en: Employee ID
+  name_ar: الرقم الوظيفي
+  type: VARCHAR
+  required: true
+  description_en: Unique identifier of the employee within the company.
+  description_ar: المعرّف الفريد للموظف داخل الشركة.
+  example: EMP001
+- name: period
+  name_en: Period
+  name_ar: الفترة
+  type: VARCHAR
+  required: true
+  description_en: Reporting month in YYYY-MM format.
+  description_ar: شهر التقرير بصيغة سنة-شهر.
+  example: 2026-06
+- name: qiwa_status
+  name_en: Qiwa Status
+  name_ar: حالة قوى
+  type: VARCHAR
+  required: true
+  description_en: Employee status on the Qiwa platform.
+  description_ar: حالة الموظف في منصة قوى.
+  example: Active
+  observed_values:
+  - Active
+- name: gosi_status
+  name_en: GOSI Status
+  name_ar: حالة التأمينات الاجتماعية
+  type: VARCHAR
+  required: true
+  description_en: Registration status with GOSI.
+  description_ar: حالة التسجيل في المؤسسة العامة للتأمينات الاجتماعية.
+  example: Registered
+  observed_values:
+  - Registered
+- name: mudad_status
+  name_en: Mudad Status
+  name_ar: حالة مدد
+  type: VARCHAR
+  required: true
+  description_en: Wage protection status on the Mudad platform.
+  description_ar: حالة حماية الأجور في منصة مدد.
+  example: Compliant
+  observed_values:
+  - Compliant
+- name: contract_authenticated
+  name_en: Contract Authenticated
+  name_ar: العقد موثق
+  type: BOOLEAN
+  required: true
+  description_en: Whether the employment contract is authenticated on Qiwa.
+  description_ar: ما إذا كان عقد العمل موثقاً في منصة قوى.
+  example: 'true'
+- name: gosi_salary
+  name_en: GOSI Registered Salary
+  name_ar: الراتب المسجل في التأمينات
+  type: DECIMAL
+  required: true
+  description_en: Salary registered with GOSI, in SAR.
+  description_ar: الراتب المسجل لدى التأمينات الاجتماعية بالريال السعودي.
+  example: '10000'
+- name: payroll_basic_salary
+  name_en: Payroll Basic Salary
+  name_ar: الراتب الأساسي في مسير الرواتب
+  type: DECIMAL
+  required: true
+  description_en: Basic salary per payroll, for comparison against the GOSI figure.
+  description_ar: الراتب الأساسي حسب مسير الرواتب للمقارنة مع رقم التأمينات.
+  example: '8000'
+- name: occupation_code
+  name_en: Occupation Code
+  name_ar: رمز المهنة
+  type: VARCHAR
+  required: true
+  description_en: Official occupation code recorded on the government platform.
+  description_ar: رمز المهنة الرسمي المسجل في المنصة الحكومية.
+  example: '2411'
+- name: occupation_match_status
+  name_en: Occupation Match Status
+  name_ar: حالة تطابق المهنة
+  type: VARCHAR
+  required: true
+  description_en: Whether the platform occupation matches the actual job title.
+  description_ar: ما إذا كانت المهنة في المنصة تطابق المسمى الوظيفي الفعلي.
+  example: Matched
+  observed_values:
+  - Matched
+  - Mismatch
+- name: work_permit_expiry
+  name_en: Work Permit Expiry
+  name_ar: تاريخ انتهاء رخصة العمل
+  type: DATE
+  required: false
+  description_en: Work permit expiry date. Empty for Saudi nationals.
+  description_ar: تاريخ انتهاء رخصة العمل. يترك فارغاً للسعوديين.
+  example: '2027-01-15'
+- name: iqama_expiry
+  name_en: Iqama Expiry
+  name_ar: تاريخ انتهاء الإقامة
+  type: DATE
+  required: false
+  description_en: Iqama expiry date. Empty for Saudi nationals.
+  description_ar: تاريخ انتهاء الإقامة. يترك فارغاً للسعوديين.
+  example: '2027-02-20'
+- name: insurance_status
+  name_en: Insurance Status
+  name_ar: حالة التأمين الطبي
+  type: VARCHAR
+  required: true
+  description_en: Medical insurance coverage status.
+  description_ar: حالة تغطية التأمين الطبي.
+  example: Active
+  observed_values:
+  - Active
