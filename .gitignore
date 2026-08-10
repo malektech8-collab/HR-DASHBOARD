@@ -2,6 +2,9 @@ data/raw/*
 data/bronze/*
 data/silver/*
 data/gold/*
+# Deployment state and in-flight uploads: client data, never repo content.
+data/onboarding/*
+data/staging/*
 warehouse/*.duckdb
 warehouse/*.wal
 .env

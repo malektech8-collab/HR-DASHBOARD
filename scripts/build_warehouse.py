@@ -17,9 +17,16 @@ _backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "ba
 if not os.path.isdir(os.path.join(_backend_dir, "app")):
     _backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(_backend_dir)
+# scripts/ on the path so the guard can import onboarding/canonical_schema
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from app.db.duckdb_client import configure_s3
 from app.config import settings
 
+
+
+def _cs_available_tables():
+    import canonical_schema
+    return canonical_schema.available_tables()
 
 
 def build_warehouse():
@@ -142,6 +149,28 @@ def build_warehouse():
     );
     """)
     
+    # --- Declared-domain guard (Phase 2 P0, step 1) -----------------------
+    # Runs after ingest, before dbt. Real mode only: in demo nothing is
+    # declared and everything is populated from sample, which would trip the
+    # "populated but not declared" arm on every run.
+    #
+    # Making divergence fatal here is what lets the 11 dbt tests stay untouched.
+    # An empty mart for an undeclared domain is provably "not uploaded yet"
+    # rather than "silently broken", because declared-but-empty aborts before
+    # dbt ever runs.
+    if os.getenv("DATA_MODE", "demo") == "real":
+        import onboarding as _onb
+        contracted = set(_cs_available_tables())
+        row_counts = {}
+        for t in sorted(contracted):
+            try:
+                row_counts[t] = conn.execute(
+                    f"SELECT count(*) FROM {t}").fetchone()[0]
+            except Exception:
+                row_counts[t] = 0
+        _onb.assert_declared_matches_populated(row_counts)
+        print(f"Declared-domain guard passed. Row counts: {row_counts}")
+
     # Close connection so dbt doesn't lock the DuckDB file
     conn.close()
 
