@@ -104,8 +104,15 @@ def build_cases(table):
     row = [value_for(c) for c in cols]
     cases = {}
 
+    # Two rows, distinct on every unique/primary-key column. Writing the same
+    # row twice would duplicate the primary key, which is NOT a conformant
+    # file - the fixture must represent what it claims to.
+    row2 = list(row)
+    for i, c in enumerate(cols):
+        if c.get("unique") or c.get("primary_key"):
+            row2[i] = "{}-2".format(row[i])
     p = os.path.join(CASES_DIR, "{}__conformant.csv".format(table))
-    write_csv(p, names, [row, row])
+    write_csv(p, names, [row, row2])
     cases["conformant"] = p
 
     required = [c["name"] for c in cols if c.get("required")]
@@ -144,7 +151,36 @@ def build_cases(table):
     return cases
 
 
-def compare(before_path, after_path):
+def _parse_renames(argv):
+    """--expect-rename table.old:table.new (repeatable).
+
+    A rename is a removal plus an addition, which `compare` would otherwise
+    report as a dropped column and fail. Declaring it puts the intent on the
+    record instead of overriding the check. An UNDECLARED removal still fails.
+    """
+    renames = {}
+    i = 0
+    while i < len(argv):
+        if argv[i] == "--expect-rename":
+            if i + 1 >= len(argv):
+                raise SystemExit("--expect-rename needs table.old:table.new")
+            spec = argv[i + 1]
+            try:
+                old, new = spec.split(":", 1)
+                t_old, c_old = old.rsplit(".", 1)
+                t_new, c_new = new.rsplit(".", 1)
+            except ValueError:
+                raise SystemExit("bad --expect-rename {!r}; want table.old:table.new".format(spec))
+            if t_old != t_new:
+                raise SystemExit("--expect-rename must stay within one table")
+            renames.setdefault(t_old, {})[c_old] = c_new
+            i += 2
+        else:
+            i += 1
+    return renames
+
+
+def compare(before_path, after_path, renames=None):
     """Diff two captured runs. Returns a process exit code.
 
     A DROPPED column is treated as a hard failure: it is the failure mode the
@@ -158,6 +194,7 @@ def compare(before_path, after_path):
         after = json.load(f)
 
     # Tolerate runs captured before the inventory was added.
+    renames = renames or {}
     b_inv = before.get("inventory", {})
     a_inv = after.get("inventory", {})
     b_cases = before.get("cases", before)
@@ -174,7 +211,17 @@ def compare(before_path, after_path):
         acols = a_inv.get(t, {}).get("columns", [])
         removed = [c for c in bcols if c not in acols]
         added = [c for c in acols if c not in bcols]
-        reordered = (not removed and not added and bcols != acols)
+        declared = renames.get(t, {})
+        honoured = [(o, n) for o, n in declared.items()
+                    if o in removed and n in added]
+        for o, n in honoured:
+            removed.remove(o)
+            added.remove(n)
+            print("  {:<12} RENAMED {} -> {}  (declared)".format(t, o, n))
+        # Compare order with declared renames applied, so a rename in place is
+        # not mislabelled as a reordering.
+        bcols_renamed = [declared.get(c, c) for c in bcols]
+        reordered = (not removed and not added and bcols_renamed != acols)
         if removed:
             failed = True
             print("  {:<12} DROPPED {}  <-- FAILURE".format(t, removed))
@@ -257,8 +304,9 @@ def main():
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "compare":
-        if len(sys.argv) != 4:
-            print("usage: verify_contract_parity.py compare <before.json> <after.json>")
+        if len(sys.argv) < 4:
+            print("usage: verify_contract_parity.py compare <before.json> "
+                  "<after.json> [--expect-rename table.old:table.new ...]")
             sys.exit(2)
-        sys.exit(compare(sys.argv[2], sys.argv[3]))
+        sys.exit(compare(sys.argv[2], sys.argv[3], _parse_renames(sys.argv[4:])))
     main()

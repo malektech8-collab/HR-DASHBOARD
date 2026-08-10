@@ -29,6 +29,9 @@ columns:
   type: VARCHAR
   required: true
   unique: true
+  # Primary key. A duplicate here is structural, not a row-level
+  # exception: it corrupts every join and inflates every aggregate.
+  primary_key: true
   description_en: Unique identifier of the request.
   description_ar: المعرّف الفريد للطلب.
   example: REQ001

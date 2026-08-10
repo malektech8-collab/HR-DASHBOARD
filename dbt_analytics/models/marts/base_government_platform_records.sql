@@ -13,7 +13,7 @@ SELECT
         c.occupation_match_status,
         c.work_permit_expiry,
         c.iqama_expiry,
-        c.insurance_status,
+        c.health_insurance_status,
         e.employee_name,
         e.status AS employee_status,
         e.is_saudi,

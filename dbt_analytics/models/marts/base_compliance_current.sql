@@ -21,6 +21,6 @@ SELECT
         c.occupation_match_status,
         c.work_permit_expiry,
         c.iqama_expiry,
-        c.insurance_status
+        c.health_insurance_status
     FROM {{ ref('base_active_workforce') }} e
     LEFT JOIN {{ ref('stg_compliance') }} c ON e.employee_id = c.employee_id AND c.period = '{{ var('report_month') }}'

@@ -90,7 +90,7 @@ Saudi compliance indicators.
 - `occupation_match_status` (VARCHAR): Match between contract and real role.
 - `work_permit_expiry` (DATE): Expiry of work permit.
 - `iqama_expiry` (DATE): Expiry of Iqama (non-Saudis).
-- `insurance_status` (VARCHAR): Medical coverage status.
+- `health_insurance_status` (VARCHAR): Medical coverage status.
 
 ---
 
