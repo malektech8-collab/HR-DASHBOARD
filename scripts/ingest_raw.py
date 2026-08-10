@@ -7,10 +7,34 @@ from validate_schema import (validate_csv, SchemaValidationError, dq_severity, d
                              SEVERITY_EXCEPTION)
 from derivations import derive_column
 import canonical_schema as _cs
+import onboarding as _onb
 
 # Transport for EXCEPTION-severity contract violations: written here, merged
 # into the gold DQ report by validate_data.py so they reach the Data Quality
 # page. Gitignored; real-path only.
+NEWLINE = chr(10)
+
+# Sentinel directory for undeclared domains. It MUST NEVER EXIST ON DISK.
+#
+# In real mode an undeclared domain must ingest nothing, so its entry in the
+# `files` map is pointed here. The per-table ingest blocks are all guarded by
+# `os.path.exists(files[table])`, so a path that cannot exist makes them skip.
+# The typed zero-row silver table is written afterwards, in the finalisation
+# loop, where nothing can overwrite it.
+#
+# Naming it is deliberate. Control flow carried by a filesystem convention is
+# exactly the `.uploaded` marker pattern — a trick that worked until someone
+# created the file by accident and froze a table's ingest indefinitely. A named
+# constant plus a test asserting the directory's absence makes this an
+# invariant rather than a coincidence. If this directory is ever created, every
+# undeclared domain would silently ingest whatever it contains.
+UNDECLARED_SENTINEL_DIR = "data/raw/__undeclared__"
+
+
+class OnboardingIncompleteError(RuntimeError):
+    """Real mode cannot proceed: contracted domains are missing or undeclared."""
+
+
 CONTRACT_EXCEPTIONS_PATH = "data/gold/contract_exceptions.parquet"
 CONTRACT_EXCEPTION_SCHEMA = {
     "employee_id": pl.Utf8, "employee_name": pl.Utf8, "issue_type": pl.Utf8,
@@ -139,30 +163,78 @@ def ingest(data_mode=None):
         print(f"[contract] cleared stale {CONTRACT_EXCEPTIONS_PATH}")
 
     contract_exceptions = []
+    empty_domains = []
     if data_mode == "real":
-        real_sourceable = real_sourceable_tables()
-        print(f"[real] real-sourceable tables (derived from contracts): "
-              f"{sorted(real_sourceable)}")
-        for table in sorted(real_sourceable):
+        real_sourceable = sorted(real_sourceable_tables())
+        print(f"[real] contracted domains: {real_sourceable}")
+
+        # FAIL-CLOSED (Phase 2 P0-1). In real mode a missing raw file must NEVER
+        # be filled from data/sample — that produced a dashboard showing a
+        # fabricated headcount of 19 and Saudization of 50.0 beside a client's
+        # one real payroll figure, with no indicator. The fallback branch is
+        # deleted, not softened: there is no configuration under which real mode
+        # serves sample data for a contracted domain.
+        declared = _onb.load_declared(contracted=set(real_sourceable))
+        present = [t for t in real_sourceable
+                   if original_exists(f"data/raw/{t}.csv")]
+
+        if not declared:
+            # No declaration: every contracted domain is required. Report ALL
+            # missing at once — a client fixing one domain per run is the
+            # friction this product exists to remove.
+            missing = [t for t in real_sourceable if t not in present]
+            if missing:
+                raise OnboardingIncompleteError(
+                    "Real-data mode requires a file for every contracted domain. "
+                    f"Missing: {', '.join(missing)}. To onboard incrementally, "
+                    f"declare the domains you are providing in "
+                    f"{_onb.registry_path()}." + NEWLINE +
+                    "يتطلب وضع البيانات الحقيقية ملفاً لكل نطاق متعاقد عليه. "
+                    f"الملفات الناقصة: {'، '.join(missing)}. لبدء الإدخال "
+                    f"التدريجي، عرّف النطاقات التي تقدمها في الملف "
+                    f"{_onb.registry_path()}."
+                )
+            targets = real_sourceable
+        else:
+            # Declared partial onboarding. A declaration is a promise: a
+            # declared domain with no file is an error, not a fallback.
+            print(f"[real] declared domains: {sorted(declared)}")
+            missing = [t for t in sorted(declared) if t not in present]
+            if missing:
+                raise OnboardingIncompleteError(
+                    f"Declared domain(s) with no file: {', '.join(missing)}. "
+                    f"Expected data/raw/<domain>.csv. Remove them from "
+                    f"{_onb.registry_path()} or provide the file." + NEWLINE +
+                    f"نطاقات معرّفة بدون ملف: {'، '.join(missing)}."
+                )
+            targets = sorted(declared)
+            empty_domains = [t for t in real_sourceable if t not in declared]
+
+        for table in targets:
             raw_path = f"data/raw/{table}.csv"
-            if original_exists(raw_path):
-                # Hard schema gate. Any REJECT-severity violation raises and
-                # aborts the whole run (fail-closed) — no partial load, no
-                # silent downgrade to sample for this table. EXCEPTION-severity
-                # violations do not block: the file loads and the rows are
-                # routed to the data-quality layer.
-                result = validate_csv(raw_path, table)
-                if result.rejects:
-                    raise SchemaValidationError(result.rejects[0].message_en,
-                                                result.violations)
-                contract_exceptions.extend(result.exceptions)
-                files[table] = raw_path
-                print(f"[real] {table}: ingesting from {raw_path} (contract-validated).")
-                if result.exceptions:
-                    print(f"[contract] {table}: {len(result.exceptions)} "
-                          f"exception-severity violation(s) -> data quality layer.")
-            else:
-                print(f"[real] {table}: no {raw_path}; falling back to sample.")
+            # Hard schema gate. Any REJECT-severity violation raises and aborts
+            # the whole run (fail-closed) — no partial load. EXCEPTION-severity
+            # violations do not block: the file loads and the rows are routed to
+            # the data-quality layer.
+            result = validate_csv(raw_path, table)
+            if result.rejects:
+                raise SchemaValidationError(result.rejects[0].message_en,
+                                            result.violations)
+            contract_exceptions.extend(result.exceptions)
+            files[table] = raw_path
+            print(f"[real] {table}: ingesting from {raw_path} (contract-validated).")
+            if result.exceptions:
+                print(f"[contract] {table}: {len(result.exceptions)} "
+                      f"exception-severity violation(s) -> data quality layer.")
+
+        # Undeclared domains load NOTHING. Point the resolver at a path that
+        # cannot exist so the per-table ingest blocks below skip them entirely
+        # — leaving files[table] on the sample path would have those blocks
+        # re-ingest sample data a few hundred lines later, which is precisely
+        # the fallback this change removes. The typed zero-row tables are
+        # written after those blocks, in _finalise_undeclared().
+        for table in empty_domains:
+            files[table] = f"{UNDECLARED_SENTINEL_DIR}/{table}.csv"
 
     if contract_exceptions:
         _write_contract_exceptions(contract_exceptions)
@@ -499,6 +571,14 @@ def ingest(data_mode=None):
         print("Ingested career_paths to bronze/silver.")
 
     print("Ingestion complete.")
+    # Undeclared domains: typed zero-row silver tables, written every run so a
+    # previous run's rows can never survive as this client's data. Written here,
+    # after the per-table blocks, so nothing can overwrite them.
+    for table in empty_domains:
+        _onb.write_empty_table(table)
+        print(f"[real] {table}: not declared; empty table written "
+              f"(no sample fallback).")
+
     os.path.exists = original_exists
 
 if __name__ == "__main__":
