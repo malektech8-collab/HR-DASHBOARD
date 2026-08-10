@@ -256,6 +256,87 @@ def validate_csv(csv_path, table, contracts_dir="data/contracts", today=None):
                 # A column that will not parse cannot be range-checked.
                 continue
 
+        # --- Rule 5: DATE plausible range (structural) --------------------
+        # `0025-01-26` parses cleanly as year 25, so type conformance sees
+        # nothing wrong. This is the corrupted Excel date serial named in
+        # PRODUCT-ARCHITECTURE.md §4 and present in real client exports.
+        if str(ctype).upper() in ("DATE", "TIMESTAMP"):
+            lo = spec.get("min_date") or DEFAULT_MIN_DATE
+            hi = spec.get("max_date") or max_date
+            if isinstance(lo, str):
+                lo = datetime.date.fromisoformat(lo)
+            if isinstance(hi, str):
+                hi = datetime.date.fromisoformat(hi)
+            parsed = expr.cast(pl.Date) if expr is not None else None
+            if parsed is not None:
+                out_mask = (parsed.is_not_null()
+                            & ((parsed < pl.lit(lo)) | (parsed > pl.lit(hi))))
+                n_out = df.select(out_mask.sum().alias("n")).item()
+                if n_out and n_out > 0:
+                    flags = df.select(out_mask.alias("m"))["m"].to_list()
+                    rows = _rows_for(flags)
+                    bad_vals = df.filter(out_mask).select(name).to_series().to_list()
+                    for r, val in list(zip(rows, bad_vals))[:MAX_RENDERED_VIOLATIONS]:
+                        v.append(Violation(
+                            "date-range", table, name, SEVERITY_REJECT,
+                            "Row {}, {}: date {!r} is outside the plausible range "
+                            "({} to {}). A year like 0025 usually means a corrupted "
+                            "Excel date serial - check the source export.".format(
+                                r, en, val, lo.isoformat(), hi.isoformat()),
+                            "الصف {}، {}: التاريخ {!r} خارج النطاق المعقول "
+                            "({} إلى {}). سنة مثل 0025 تعني عادةً تلفاً في تنسيق "
+                            "التاريخ في ملف Excel - يرجى مراجعة الملف المصدر.".format(
+                                r, ar, val, lo.isoformat(), hi.isoformat()),
+                            row=r, value=val,
+                        ))
+
+        # --- Rule 6: min_value (EXCEPTION - row-level content) ------------
+        # Not structural: a negative salary is one wrong row, and the product's
+        # job is to say WHICH row. The file loads; the row is surfaced.
+        if "min_value" in spec and str(ctype).upper() in ("INTEGER", "DECIMAL"):
+            floor = spec["min_value"]
+            num = expr
+            low_mask = num.is_not_null() & (num < pl.lit(floor))
+            n_low = df.select(low_mask.sum().alias("n")).item()
+            if n_low and n_low > 0:
+                flags = df.select(low_mask.alias("m"))["m"].to_list()
+                rows = _rows_for(flags)
+                vals = df.filter(low_mask).select(name).to_series().to_list()
+                for r, val in list(zip(rows, vals))[:MAX_RENDERED_VIOLATIONS]:
+                    v.append(Violation(
+                        "min-value", table, name, SEVERITY_EXCEPTION,
+                        "Row {}, {}: value {} is below the minimum of {}.".format(
+                            r, en, val, floor),
+                        "الصف {}، {}: القيمة {} أقل من الحد الأدنى {}.".format(
+                            r, ar, val, floor),
+                        row=r, value=val,
+                    ))
+
+        # --- Rule 7: unique -----------------------------------------------
+        # Severity depends on whether the column is the primary key: a
+        # duplicate PK corrupts every join and inflates every aggregate, so it
+        # is structural. A duplicate elsewhere is a row-level exception.
+        if spec.get("unique"):
+            is_pk = bool(spec.get("primary_key"))
+            sev = SEVERITY_REJECT if is_pk else SEVERITY_EXCEPTION
+            col_vals = df.select(pl.col(name))[name].to_list()
+            seen_at = {}
+            for idx, val in enumerate(col_vals):
+                if val is None or val == "":
+                    continue
+                seen_at.setdefault(val, []).append(idx + FIRST_DATA_ROW)
+            dupes = {k: rws for k, rws in seen_at.items() if len(rws) > 1}
+            for val in sorted(dupes)[:MAX_RENDERED_VIOLATIONS]:
+                rws = dupes[val]
+                v.append(Violation(
+                    "unique-primary-key" if is_pk else "unique", table, name, sev,
+                    "{}: value {!r} appears {} times (rows {}); it must be "
+                    "unique.".format(en, val, len(rws), rws),
+                    "{}: القيمة {!r} مكررة {} مرات (الصفوف {})؛ يجب أن تكون "
+                    "فريدة.".format(ar, val, len(rws), rws),
+                    row=rws[0], value=val,
+                ))
+
         # --- Rule 4: allowed_values (structural) --------------------------
         allowed = spec.get("allowed_values")
         if allowed:
@@ -271,6 +352,43 @@ def validate_csv(csv_path, table, contracts_dir="data/contracts", today=None):
                     "{}: قيم غير مسموح بها {}. القيم المسموحة: {}.".format(
                         ar, invalid, allowed),
                     value=invalid[0] if invalid else None,
+                ))
+
+    # --- Rule 8: required_when (structural, conditional) ------------------
+    # Declarative {column, equals} only - never an expression string. A
+    # contract is operator-supplied data and must never be executable.
+    for spec in columns:
+        cond = spec.get("required_when")
+        if not cond or spec["name"] not in actual_set:
+            continue
+        cond_col = cond.get("column")
+        cond_val = cond.get("equals")
+        name = spec["name"]
+        en, ar = _labels(spec)
+        if cond_col not in actual_set:
+            v.append(Violation(
+                "required-when-condition-missing", table, name, SEVERITY_REJECT,
+                "[{}] {}: column '{}' is conditionally required on '{}', which "
+                "is not present in the file. Rule: required-when.".format(
+                    table, csv_path, name, cond_col),
+                "[{}] {}: العمود '{}' مطلوب شرطياً بناءً على '{}' غير الموجود "
+                "في الملف.".format(table, csv_path, name, cond_col),
+            ))
+            continue
+        cond_en, cond_ar = _labels(by_name[cond_col])
+        unmet = (pl.col(cond_col) == pl.lit(cond_val)) & (
+            pl.col(name).is_null() | (pl.col(name).str.strip_chars() == pl.lit("")))
+        n_unmet = df.select(unmet.sum().alias("n")).item()
+        if n_unmet and n_unmet > 0:
+            rows = _rows_for(df.select(unmet.alias("m"))["m"].to_list())
+            for r in rows[:MAX_RENDERED_VIOLATIONS]:
+                v.append(Violation(
+                    "required-when", table, name, SEVERITY_REJECT,
+                    "Row {}, {} is required when {} is \"{}\".".format(
+                        r, en, cond_en, cond_val),
+                    "الصف {}، {} مطلوب عندما تكون {} \"{}\".".format(
+                        r, ar, cond_ar, cond_val),
+                    row=r,
                 ))
 
     return ValidationResult(table, csv_path, v)

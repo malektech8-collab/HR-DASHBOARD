@@ -4,6 +4,8 @@ import polars as pl
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from validate_schema import validate_csv_against_contract
+from derivations import derive_column
+import canonical_schema as _cs
 
 # Tables that may be loaded from real data (data/raw/) in data_mode='real'.
 # Option A (chief-architect ruling): named AND contracted only. All other
@@ -90,6 +92,23 @@ def ingest(data_mode=None):
         
         # Clean and type cast for silver
         df = pl.read_csv(files["employees"], null_values=[""])
+        # Derived column (cycle 1b-i): real HRIS exports carry `nationality`,
+        # not `is_saudi`. Derive ONLY when the column is absent — a file that
+        # supplies it is taken at its word, which is also why demo (whose
+        # sample carries is_saudi) is unaffected. The rule is resolved from the
+        # registry by name and raises on any nationality it does not recognise;
+        # it never defaults to false, because this drives Saudization.
+        if "is_saudi" not in df.columns:
+            if "nationality" not in df.columns:
+                raise ValueError(
+                    "employees: neither 'is_saudi' nor 'nationality' is present; "
+                    "is_saudi cannot be derived."
+                )
+            spec = next(c for c in _cs.columns("employees") if c["name"] == "is_saudi")
+            derived = derive_column(spec, df["nationality"].to_list())
+            df = df.with_columns(pl.Series("is_saudi", derived, dtype=pl.Boolean))
+            print("[derive] employees.is_saudi derived from nationality "
+                  f"({sum(1 for x in derived if x)} Saudi / {len(derived)} rows).")
         df = df.with_columns([
             pl.col("is_saudi").cast(pl.Boolean, strict=False),
             pl.col("joining_date").str.to_date("%Y-%m-%d", strict=False),

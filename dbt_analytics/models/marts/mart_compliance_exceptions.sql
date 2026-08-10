@@ -109,11 +109,11 @@
     UNION ALL
     
     -- 13. Insurance Inactive
-    SELECT employee_id, employee_name, 'Insurance Inactive' AS issue_type, 
-           'Medical insurance coverage status is not active' AS description, 
+    SELECT employee_id, employee_name, 'Health Insurance Inactive' AS issue_type, 
+           'CCHI health insurance coverage status is not active' AS description, 
            'Critical' AS severity, 'Activate insurance profile in provider database' AS recommended_action 
     FROM {{ ref('base_compliance_current') }} 
-    WHERE insurance_status IS NULL OR insurance_status != 'Active'
+    WHERE health_insurance_status IS NULL OR health_insurance_status != 'Active'
     
     UNION ALL
     

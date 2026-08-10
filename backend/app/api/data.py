@@ -70,6 +70,20 @@ def compile_csv_to_parquet(csv_path: str, parquet_path: str, table_name: str):
         # Apply specific type casting based on table name.
         # Columns are only cast if present, since uploaded files may omit optional columns.
         if table_name == "employees":
+            # Same derived-column rule as scripts/ingest_raw.py. The UI upload
+            # is a second ingest path and a client is more likely to use it
+            # than data/raw/, so it must behave identically: derive is_saudi
+            # only when the column is absent, never guess an unknown value.
+            if "is_saudi" not in df.columns and "nationality" in df.columns:
+                scripts_dir = get_scripts_dir()
+                if scripts_dir not in sys.path:
+                    sys.path.insert(0, scripts_dir)
+                from derivations import derive_column
+                import canonical_schema as _cs
+                spec = next(c for c in _cs.columns("employees")
+                            if c["name"] == "is_saudi")
+                derived = derive_column(spec, df["nationality"].to_list())
+                df = df.with_columns(pl.Series("is_saudi", derived, dtype=pl.Boolean))
             date_cols = ["joining_date", "termination_date", "contract_end_date"]
             numeric_cols = ["basic_salary", "housing_allowance", "transport_allowance"]
             df = df.with_columns(

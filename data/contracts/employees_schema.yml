@@ -29,6 +29,9 @@ columns:
   type: VARCHAR
   required: true
   unique: true
+  # Primary key. A duplicate here is structural, not a row-level
+  # exception: it corrupts every join and inflates every aggregate.
+  primary_key: true
   description_en: Unique identifier of the employee within the company.
   description_ar: المعرّف الفريد للموظف داخل الشركة.
   example: EMP001
@@ -52,15 +55,15 @@ columns:
   name_en: Saudi National
   name_ar: سعودي
   type: BOOLEAN
-  required: true
-  # Declared derivation. Real HRIS exports carry `nationality`, not this
+  required: false
+  # Derived when absent. Real HRIS exports carry `nationality`, not this
   # boolean. The rule is resolved from the registry in scripts/derivations.py
   # by NAME — contracts never carry executable expressions — and raises on any
-  # nationality value it does not recognise rather than defaulting to false.
+  # nationality value it does not recognise rather than defaulting to false,
+  # because this field drives Saudization and Nitaqat banding.
   #
-  # NOT YET ACTIVE: `required` stays true this cycle because flipping it would
-  # change what the validator accepts, which the Phase 1 guardrail forbids.
-  # Cycle 1b flips it to false and wires derive_column() into ingest_raw.py.
+  # ACTIVE as of cycle 1b-i: ingest derives this ONLY when the column is absent
+  # from the file. A file that supplies it is taken at its word.
   derived_from: nationality
   derivation: nationality_is_saudi
   description_en: Whether the employee counts as Saudi for Saudization. Derived from nationality when the column is absent.
@@ -245,10 +248,11 @@ columns:
   name_ar: نوع نهاية الخدمة
   type: VARCHAR
   required: false
-  description_en: 'Reason employment ended. Populated only for employees whose
-    status is Terminated; leave empty for active employees. NOT YET CONDITIONALLY
-    VALIDATED: making this required when status=Terminated is a validator
-    behaviour change, queued for cycle 1b.'
+  description_en: 'Reason employment ended. Required when status is Terminated;
+    leave empty for active employees.'
+  required_when:
+    column: status
+    equals: Terminated
   description_ar: >-
     سبب انتهاء الخدمة. يعبأ فقط للموظفين المنتهية خدمتهم، ويترك فارغاً للموظفين
     على رأس العمل.
@@ -280,9 +284,9 @@ columns:
     Article 81:
       en: Article 81
       ar: ترك العمل مع الاحتفاظ بالحقوق — المادة ٨١
-    # UNCONFIRMED: the Labor Law article governing probation-period termination
-    # has deliberately NOT been asserted here. Awaiting practitioner
-    # confirmation before any article number is attached to this value.
+    # Article 53 confirmed by the practitioner (2026-08-10): establishes the
+    # 90-day probation period, extendable to 180 by written agreement, during
+    # which either party may terminate.
     Probation:
-      en: Probation
-      ar: إنهاء خلال فترة التجربة
+      en: Probation - Article 53
+      ar: إنهاء خلال فترة التجربة — المادة ٥٣

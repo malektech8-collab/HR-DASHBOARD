@@ -104,8 +104,15 @@ def build_cases(table):
     row = [value_for(c) for c in cols]
     cases = {}
 
+    # Two rows, distinct on every unique/primary-key column. Writing the same
+    # row twice would duplicate the primary key, which is NOT a conformant
+    # file - the fixture must represent what it claims to.
+    row2 = list(row)
+    for i, c in enumerate(cols):
+        if c.get("unique") or c.get("primary_key"):
+            row2[i] = "{}-2".format(row[i])
     p = os.path.join(CASES_DIR, "{}__conformant.csv".format(table))
-    write_csv(p, names, [row, row])
+    write_csv(p, names, [row, row2])
     cases["conformant"] = p
 
     required = [c["name"] for c in cols if c.get("required")]
@@ -211,7 +218,10 @@ def compare(before_path, after_path, renames=None):
             removed.remove(o)
             added.remove(n)
             print("  {:<12} RENAMED {} -> {}  (declared)".format(t, o, n))
-        reordered = (not removed and not added and bcols != acols)
+        # Compare order with declared renames applied, so a rename in place is
+        # not mislabelled as a reordering.
+        bcols_renamed = [declared.get(c, c) for c in bcols]
+        reordered = (not removed and not added and bcols_renamed != acols)
         if removed:
             failed = True
             print("  {:<12} DROPPED {}  <-- FAILURE".format(t, removed))
@@ -294,8 +304,9 @@ def main():
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "compare":
-        if len(sys.argv) != 4:
-            print("usage: verify_contract_parity.py compare <before.json> <after.json>")
+        if len(sys.argv) < 4:
+            print("usage: verify_contract_parity.py compare <before.json> "
+                  "<after.json> [--expect-rename table.old:table.new ...]")
             sys.exit(2)
         sys.exit(compare(sys.argv[2], sys.argv[3], _parse_renames(sys.argv[4:])))
     main()

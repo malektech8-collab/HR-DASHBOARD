@@ -44,7 +44,7 @@ For each field in a source file, the Data Steward must validate the following pa
 *   `employee_id`, `attendance_date`, `scheduled_start`, `scheduled_end`, `actual_check_in`, `actual_check_out`, `late_minutes`, `excused_late_minutes`, `overtime_hours`, `absence_flag`
 
 ### 3.4 Compliance
-*   `employee_id`, `gosi_status`, `wps_status`, `qiwa_contract_status`, `iqama_expiry_date`, `work_permit_expiry_date`, `insurance_status`
+*   `employee_id`, `gosi_status`, `wps_status`, `qiwa_contract_status`, `iqama_expiry_date`, `work_permit_expiry_date`, `health_insurance_status`
 
 ### 3.5 Employee Relations
 *   `case_id`, `subject_employee_id`, `case_owner_id`, `case_type`, `case_status`, `created_date`, `target_due_date`, `closed_date`, `escalation_flag`

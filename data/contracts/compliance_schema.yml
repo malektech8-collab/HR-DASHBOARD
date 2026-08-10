@@ -128,13 +128,13 @@ columns:
   description_en: Iqama expiry date. Empty for Saudi nationals.
   description_ar: تاريخ انتهاء الإقامة. يترك فارغاً للسعوديين.
   example: '2027-02-20'
-- name: insurance_status
-  name_en: Insurance Status
-  name_ar: حالة التأمين الطبي
+- name: health_insurance_status
+  name_en: Health Insurance Status
+  name_ar: حالة التأمين الصحي
   type: VARCHAR
   required: true
-  description_en: Medical insurance coverage status.
-  description_ar: حالة تغطية التأمين الطبي.
+  description_en: CCHI health insurance coverage status. Distinct from gosi_status, which carries the GOSI social-insurance side.
+  description_ar: حالة تغطية التأمين الصحي (مجلس الضمان الصحي). تختلف عن حالة التأمينات الاجتماعية.
   example: Active
   observed_values:
   - Active

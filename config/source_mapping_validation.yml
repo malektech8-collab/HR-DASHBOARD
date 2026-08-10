@@ -286,7 +286,7 @@ domains:
         privacy_classification: "Legal Sensitive Data"
         masking_rule: "None"
         mapping_status: "Approved by Source Owner"
-      - canonical_field: "insurance_status"
+      - canonical_field: "health_insurance_status"
         source_field: "med_insurance"
         data_type: "VARCHAR"
         transformation: "None"
