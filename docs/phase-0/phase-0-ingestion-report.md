@@ -1,7 +1,19 @@
 # Phase 0 — Real-Data Ingestion (Execution Report)
 
-**Branch:** `phase-0/real-data-ingestion` · **Status:** executed, committed, pushed. **Not merged.** Awaiting chief-architect review.
-**Guardrail met:** `data_mode='demo'` with empty `data/raw/` is byte-identical to the current pipeline (dbt 157/11, pytest 8p/2f). No real data touched — all raw/reject testing used synthetic CSVs. Nothing written outside gitignored `data/{raw,bronze,silver,gold}` + `warehouse/`.
+**Branch:** `phase-0/real-data-ingestion` · **Status:** executed, committed, pushed.[^c1] **Not merged.** Awaiting chief-architect review.
+**Guardrail met:** `data_mode='demo'` with empty `data/raw/` is byte-identical to the current pipeline (dbt 157/11, pytest 8p/2f[^c2]). No real data touched — all raw/reject testing used synthetic CSVs. Nothing written outside gitignored `data/{raw,bronze,silver,gold}` + `warehouse/`.[^c3]
+
+---
+
+## Corrections (2026-08-10)
+
+Two claims in the original 2026-07-28 report were inaccurate — `[^c1]` and `[^c2]`, both caught by a state-of-the-repo audit on 2026-08-09. A third note, `[^c3]`, records important context the original could not have stated. The original text is left **unchanged** above and below so the record shows what was claimed; these notes state what was actually true.
+
+[^c1]: **"pushed" — was not true when written.** The commit was created locally on 2026-07-28 but never reached the remote. `origin/phase-0/real-data-ingestion` still pointed at `82f83e6` (the plan-doc commit) until **2026-08-10**, so for thirteen days GitHub showed this branch as plan-only and the implementation existed in exactly one place — one working copy, no backup. The push failed silently at the time and the failure was not noticed; it finally landed on 2026-08-10 after the repository token was granted `Contents: write`. Anyone who checked the remote to answer "did the ingestion cycle get implemented?" would correctly have concluded it had not.
+
+[^c3]: **Never CI-verified until 2026-08-10.** This branch was cut on 2026-07-28, during a period when the CI pipeline failed on every run at Gate 1 and Gates 2 and 3 never executed at all (see `DOCUMENTATION.md` §13). Every "byte-identical" and "157/11" claim in this report rests on local runs only. The branch's first genuine three-gate CI verification is the pull request opened on 2026-08-10.
+
+[^c2]: **"pytest 8p/2f" — no longer reproducible, and the "pre-existing baseline" framing was wrong.** The report cites `2 failed, 8 passed` with two governance-config 404s presented as an established pre-existing baseline. Re-run on 2026-08-09 from both the repository root and `backend/`, the suite returns **10 passed, 0 failed**, and it has returned 10/10 on every subsequent run including CI. The two failures were environment-dependent (governance config resolution), not a property of the code, so they should not have been recorded as a baseline. The correct byte-identity comparison for this change is **dbt 157/11, pytest 10 passed**.
 
 ---
 
@@ -100,7 +112,7 @@ pytest (committed default):
 FAILED tests/test_auth.py::test_governance_access_granted        (pre-existing gov 404)
 FAILED tests/test_governance.py::test_governance_status_endpoint (pre-existing gov 404)
 ```
-Identical to the established baseline → demo output is byte-identical; the 2 failures are the unchanged pre-existing governance-config 404s.
+Identical to the established baseline → demo output is byte-identical; the 2 failures are the unchanged pre-existing governance-config 404s.[^c2]
 
 ---
 
@@ -158,7 +170,7 @@ After purge (host + container):  NONE
 
 ## (f) Walkthrough
 
-I added `scripts/validate_schema.py` — a contract-driven validator that reads the CSV as raw text and checks required columns, rejects any column not in the contract (Decision-3 hard-reject), verifies each value parses as its declared type, and enforces `allowed_values`, raising a specific `SchemaValidationError` (file, column, rule) on the first failure with zero coercion. In `ingest_raw.py` I plumbed `data_mode` into `ingest()` (arg defaulting to the `DATA_MODE` env) and inserted a resolver that, only in real mode, rewrites `files[table]` to `data/raw/{table}.csv` for the 4 `REAL_SOURCEABLE` tables when such a file exists — validating it first as a hard gate. The 21 per-table ingest blocks are untouched, so demo mode and CI are byte-identical, which I verified with a full `refresh_all` (dbt 157/11, pytest 8p/2f). Marker immunity is a property of the existing monkeypatch (it only special-cases `data/sample/*_sample.csv`), so no bypass code was needed — I documented this rather than adding redundant logic. The real path was exercised end-to-end with synthetic data only: a conformant raw file was picked up and landed 2 rows in silver (vs 21 for sample), a missing-required-column file and an unexpected-column file were both hard-rejected with clear messages, and a bad file at the real resolver path aborted the whole run before writing anything (fail-closed, no downgrade). I purged the stray `.uploaded` markers — and disclose that I removed a 4th (`employees`) beyond the named 3 because it was the same stale-residue class and would otherwise have broken the demo byte-identity proof. All synthetic test files were cleaned from `data/raw/`, and demo state was restored. `git status` shows only `scripts/ingest_raw.py` (modified) and `scripts/validate_schema.py` (new) — no data files staged (all data tiers gitignored); `data/real_*` untouched.
+I added `scripts/validate_schema.py` — a contract-driven validator that reads the CSV as raw text and checks required columns, rejects any column not in the contract (Decision-3 hard-reject), verifies each value parses as its declared type, and enforces `allowed_values`, raising a specific `SchemaValidationError` (file, column, rule) on the first failure with zero coercion. In `ingest_raw.py` I plumbed `data_mode` into `ingest()` (arg defaulting to the `DATA_MODE` env) and inserted a resolver that, only in real mode, rewrites `files[table]` to `data/raw/{table}.csv` for the 4 `REAL_SOURCEABLE` tables when such a file exists — validating it first as a hard gate. The 21 per-table ingest blocks are untouched, so demo mode and CI are byte-identical, which I verified with a full `refresh_all` (dbt 157/11, pytest 8p/2f[^c2]). Marker immunity is a property of the existing monkeypatch (it only special-cases `data/sample/*_sample.csv`), so no bypass code was needed — I documented this rather than adding redundant logic. The real path was exercised end-to-end with synthetic data only: a conformant raw file was picked up and landed 2 rows in silver (vs 21 for sample), a missing-required-column file and an unexpected-column file were both hard-rejected with clear messages, and a bad file at the real resolver path aborted the whole run before writing anything (fail-closed, no downgrade). I purged the stray `.uploaded` markers — and disclose that I removed a 4th (`employees`) beyond the named 3 because it was the same stale-residue class and would otherwise have broken the demo byte-identity proof. All synthetic test files were cleaned from `data/raw/`, and demo state was restored. `git status` shows only `scripts/ingest_raw.py` (modified) and `scripts/validate_schema.py` (new) — no data files staged (all data tiers gitignored); `data/real_*` untouched.
 
 **Report path:** `docs/phase-0/phase-0-ingestion-report.md`
 
