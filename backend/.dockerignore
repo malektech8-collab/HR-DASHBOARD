@@ -1,0 +1,24 @@
+# Build inputs only. The Dockerfile does `COPY . .`, which today drags local
+# runtime residue into the image — backend/warehouse/hr_analytics.duckdb alone
+# is ~12 MB of stale database. None of it is tracked in git, and at runtime
+# docker-compose bind-mounts the real ./warehouse and ./data over /app.
+warehouse
+data
+
+# Python caches
+__pycache__
+**/__pycache__
+*.py[cod]
+.pytest_cache
+
+# Local env / logs — never belong in an image layer
+.env
+.env.*
+!.env.example
+*.log
+
+# Docker's own file
+.dockerignore
+
+# Deliberately NOT ignored: requirements.txt and app/ are build inputs.
+# tests/ is kept so the image can run its own suite if ever needed.

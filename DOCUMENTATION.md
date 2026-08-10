@@ -197,7 +197,18 @@ Hard rules (from `AGENTS.md`), binding on all contributors/agents:
 | Frontend unit | Vitest + React Testing Library | `frontend/src/**/*.test.tsx` (e.g. `GovernanceWidget.test.tsx`) | Component-level rendering/behavior |
 | Frontend E2E | Playwright | `frontend/e2e/governance.spec.ts` | Fail-closed landing page, HR Analyst 403 flow, System Admin login → telemetry grid |
 
-CI (`.github/workflows/ci-cd-pipeline.yml`) runs three gated jobs on every push/PR to `main`: **lint & typecheck** (oxlint, tsc, flake8) → **test suite** (Vitest, full data-pipeline refresh, Pytest) → **Docker build verification** (both images, cached via GitHub Actions cache).
+CI (`.github/workflows/ci-cd-pipeline.yml`) runs three gated jobs on every push/PR to `main`: **lint & typecheck** (oxlint, tsc, flake8) → **test suite** (Vitest, full data-pipeline refresh, Pytest) → **Docker build verification** (both images, cached via GitHub Actions cache). Each gate is chained with `needs:`, so a failure stops the ones after it.
+
+Backend test collection is scoped by `pytest.ini` (`testpaths = backend/tests`). Bare `pytest` at the repo root would otherwise recurse into the debug scripts now kept in `scripts/debug/`, which have module-level side effects.
+
+#### CI history — correction
+
+**Until 2026-08-10 this section described the pipeline as it was designed, not as it behaved.** The three-gate pipeline was added on 2026-07-06 and **failed on every run from then until 2026-08-10**. Gate 1 died in ~20s at `npm run lint`, so **Gate 2 never executed and Gate 3 never executed once** — the "test suite" and "Docker build verification" described above were aspirational for that entire period. Two defects were responsible, the second hidden behind the first:
+
+1. **Gate 1** — the workflow pinned `node-version: 18`, while `oxlint` and its native bindings, `vite@8`, `@vitejs/plugin-react@6`, `vitest@4` and `jsdom@29` all require `^20.19.0 || >=22.12.0`. npm silently skips `optionalDependencies` that fail the `engines` check, so no oxlint platform binding was ever installed and lint failed with `Cannot find module './oxlint.linux-x64-gnu.node'`. The lockfile was never at fault. Fixed by moving both jobs to Node 22 (PR #4, merged `d0f35b0`).
+2. **Gate 2** — with Gate 1 green, the first-ever Gate 2 run exposed a latent dbt DAG bug: `base_command_center_exception_sources` referenced seven sibling models by bare table name instead of `{{ ref(...) }}`, so dbt built no dependency edge and the model was built before its inputs existed (`PASS=152 ERROR=1 SKIP=4`). Invisible locally, because a developer's persistent `warehouse/hr_analytics.duckdb` already contains those views regardless of build order; only CI's empty warehouse exposes it. Fixed by PR #5 (merged `108f708`).
+
+**First fully green three-gate run: 2026-08-10** ([run 31362588242](https://github.com/malektech8-collab/HR-DASHBOARD/actions/runs/31362588242)) — Gate 1 pass, Gate 2 `dbt run` 157/157 and `dbt test` 11/11 with reconciliation checks passed and Pytest 10/10, Gate 3 both images built. That was the first execution of Gate 3 in the project's history. Everything stated above about CI is true as of that date; treat pre-2026-08-10 green-CI claims elsewhere in the docs as unverified.
 
 ## 14. Configuration
 
