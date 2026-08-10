@@ -52,9 +52,19 @@ This is the whole answer to the masking concern. Once divergence is a build fail
 
 ### 0.3 A simplification this enables
 
+> **Correction (2026-08-10).** The reasoning originally given here was **wrong**, and is preserved below with the measurement that replaces it.
+>
+> The original claim was: *"An undeclared domain has an empty mart, so `not_null` passes vacuously."* **The marts are not empty.** Measured at `declared: [employees]` and again at `declared: [payroll]`, every tested mart emits **exactly one row** of `COALESCE`d values — `mart_exec_kpis` → `('2026-06', 19, 0.0)`, `mart_payroll_kpis` → `(0.0, 0)`, `mart_attendance_kpis` → `(0.0, 494.0)`. The tests therefore pass on **fabricated values**, not vacuously.
+>
+> **Ruling 4 is unaffected: the 11 dbt tests stay untouched and no spike is needed.** But the correct justification is the measured result — **157/157 and 11/11 in both directions, with no null rows and no false aborts** — and not the zero-row claim.
+>
+> The fabricated values themselves are a separate defect, now tracked as **P0-3** (`p0-3-mart-fabrication-plan.md`). `absence_days = 494.0` is not a harmless zero: it states that every employee was absent every workday of a period the client never uploaded.
+
+*Original text, superseded:*
+
 With the guard in place, **templated dbt test severity is probably unnecessary.**
 
-An undeclared domain has an empty mart, so `not_null` passes vacuously. Normally that vacuous pass *is* the masking problem — but the guard has already proved the emptiness is declared and intentional. Declared-but-empty can never reach dbt, because the guard aborts first.
+~~An undeclared domain has an empty mart, so `not_null` passes vacuously. Normally that vacuous pass *is* the masking problem — but the guard has already proved the emptiness is declared and intentional. Declared-but-empty can never reach dbt, because the guard aborts first.~~
 
 So the recommended approach is: **leave the 11 dbt tests exactly as they are.** No per-domain severity, no conditional configuration, no generated `schema.yml`.
 

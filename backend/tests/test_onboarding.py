@@ -142,3 +142,31 @@ def test_empty_table_overwrites_previous_rows(tmp_path):
     assert pl.read_parquet(str(p)).height == 1
     onb.write_empty_table("payroll", silver_dir=str(tmp_path))
     assert pl.read_parquet(str(p)).height == 0
+
+
+# --------------------------------------------------------------------------
+# the undeclared sentinel is an invariant, not a convention
+# --------------------------------------------------------------------------
+
+def test_undeclared_sentinel_directory_must_not_exist():
+    """Control flow carried by a filesystem convention is the .uploaded pattern.
+
+    Undeclared domains are skipped because their `files` entry points at a
+    directory that cannot exist. If that directory were ever created, every
+    undeclared domain would silently ingest whatever it contained — the same
+    class of failure as the .uploaded marker that froze employees ingest and
+    zeroed four Attendance widgets.
+    """
+    import ingest_raw
+    assert not os.path.exists(ingest_raw.UNDECLARED_SENTINEL_DIR), (
+        "{} exists on disk. Undeclared domains would ingest from it instead of "
+        "being skipped.".format(ingest_raw.UNDECLARED_SENTINEL_DIR))
+
+
+def test_undeclared_sentinel_is_a_named_constant():
+    """Not an inline literal, so it cannot drift between the two use sites."""
+    import ingest_raw
+    assert ingest_raw.UNDECLARED_SENTINEL_DIR == "data/raw/__undeclared__"
+    src = open(os.path.join(_ROOT, "scripts", "ingest_raw.py"),
+               encoding="utf-8").read()
+    assert src.count('"data/raw/__undeclared__"') == 1,         "the sentinel path should appear once, as the constant definition"

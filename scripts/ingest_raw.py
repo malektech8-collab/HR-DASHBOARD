@@ -14,6 +14,22 @@ import onboarding as _onb
 # page. Gitignored; real-path only.
 NEWLINE = chr(10)
 
+# Sentinel directory for undeclared domains. It MUST NEVER EXIST ON DISK.
+#
+# In real mode an undeclared domain must ingest nothing, so its entry in the
+# `files` map is pointed here. The per-table ingest blocks are all guarded by
+# `os.path.exists(files[table])`, so a path that cannot exist makes them skip.
+# The typed zero-row silver table is written afterwards, in the finalisation
+# loop, where nothing can overwrite it.
+#
+# Naming it is deliberate. Control flow carried by a filesystem convention is
+# exactly the `.uploaded` marker pattern — a trick that worked until someone
+# created the file by accident and froze a table's ingest indefinitely. A named
+# constant plus a test asserting the directory's absence makes this an
+# invariant rather than a coincidence. If this directory is ever created, every
+# undeclared domain would silently ingest whatever it contains.
+UNDECLARED_SENTINEL_DIR = "data/raw/__undeclared__"
+
 
 class OnboardingIncompleteError(RuntimeError):
     """Real mode cannot proceed: contracted domains are missing or undeclared."""
@@ -218,7 +234,7 @@ def ingest(data_mode=None):
         # the fallback this change removes. The typed zero-row tables are
         # written after those blocks, in _finalise_undeclared().
         for table in empty_domains:
-            files[table] = f"data/raw/__undeclared__/{table}.csv"
+            files[table] = f"{UNDECLARED_SENTINEL_DIR}/{table}.csv"
 
     if contract_exceptions:
         _write_contract_exceptions(contract_exceptions)
