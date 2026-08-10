@@ -10,4 +10,4 @@ SELECT
         e.is_saudi
     FROM {{ ref('stg_payroll') }} p
     LEFT JOIN {{ ref('base_active_workforce') }} e ON p.employee_id = e.employee_id
-    WHERE p.payroll_period = (SELECT strftime(CAST(MAX(payroll_period) || '-01' AS DATE) - INTERVAL 1 MONTH, '%Y-%m') FROM {{ ref('stg_payroll') }})
+    WHERE p.payroll_period = strftime(CAST('{{ var('report_month') }}-01' AS DATE) - INTERVAL 1 MONTH, '%Y-%m')

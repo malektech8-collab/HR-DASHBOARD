@@ -2,9 +2,8 @@
 
 WITH anchor AS (
         SELECT 
-            CAST(MAX(payroll_period) || '-01' AS DATE) AS month_start,
-            last_day(CAST(MAX(payroll_period) || '-01' AS DATE)) AS month_end
-        FROM {{ ref('stg_payroll') }}
+            CAST('{{ var('report_month') }}-01' AS DATE) AS month_start,
+            last_day(CAST('{{ var('report_month') }}-01' AS DATE)) AS month_end
     ),
     att_ot AS (
         SELECT employee_id, COALESCE(SUM(overtime_hours), 0.0) AS ot_hours
@@ -96,7 +95,7 @@ WITH anchor AS (
         'Critical' AS severity, 'Remove duplicate {{ ref('stg_payroll') }} line' AS recommended_action
     FROM {{ ref('stg_payroll') }} p
     LEFT JOIN {{ ref('base_active_workforce') }} e ON p.employee_id = e.employee_id
-    WHERE p.payroll_period = (SELECT MAX(payroll_period) FROM {{ ref('stg_payroll') }})
+    WHERE p.payroll_period = '{{ var('report_month') }}'
     GROUP BY p.employee_id, p.payroll_period, e.employee_name
     HAVING COUNT(*) > 1
     UNION ALL

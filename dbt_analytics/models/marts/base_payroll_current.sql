@@ -10,4 +10,4 @@ SELECT
         e.is_saudi
     FROM {{ ref('stg_payroll') }} p
     LEFT JOIN {{ ref('base_active_workforce') }} e ON p.employee_id = e.employee_id
-    WHERE p.payroll_period = (SELECT MAX(payroll_period) FROM {{ ref('stg_payroll') }})
+    WHERE p.payroll_period = '{{ var('report_month') }}'

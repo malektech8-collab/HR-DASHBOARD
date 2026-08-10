@@ -42,8 +42,13 @@
 # ANCHOR DEPENDENCY (found in step 2a). Eight models derive their reporting
 # anchor from MAX(payroll_period). With payroll absent the anchor is NULL,
 # every date-window comparison collapses, and the count reads 0 — a fabricated
-# zero even on a DECLARED domain. Step 1 mapped workforce probation_count and
-# contract_expiring_30 as [employees]; both are corrected to include payroll.
+# zero even on a DECLARED domain.
+#
+# RESOLVED IN 2a.5. All seven anchor sites were converged on var('report_month'),
+# matching the idiom base_document_expiry already used. The payroll terms those
+# metrics briefly carried were an artefact of the old idiom and have been
+# reverted to their true domains. base_command_center_data_freshness keeps its
+# MAX(payroll_period): there it is the freshness METRIC, not an anchor.
 
 version: 2
 
@@ -99,9 +104,9 @@ marts:
       saudi_headcount: [employees]
       non_saudi_headcount: [employees]
       saudization_rate: [employees]
-      probation_count: [employees, payroll]         # ANCHOR: the 90-day window is measured from MAX(payroll_period). With payroll absent the anchor is NULL and this reads 0 - a fabricated zero on a DECLARED domain. Corrected from [employees] in step 1.
-      contract_expiring_30: [employees, payroll]    # ANCHOR - see probation_count
-      iqama_expiring_30: [employees, compliance, payroll] # LEFT JOINs stg_compliance for iqama_expiry, plus the payroll ANCHOR
+      probation_count: [employees]          # REVERTED in 2a.5: the payroll term was the ANCHOR, now var('report_month')
+      contract_expiring_30: [employees]     # REVERTED in 2a.5 - see probation_count
+      iqama_expiring_30: [employees, compliance]  # payroll REVERTED in 2a.5; compliance is REAL (LEFT JOINs stg_compliance)
       missing_manager_count: [employees]
       missing_project_count: [employees]
       missing_cost_center_count: [employees]
@@ -305,8 +310,16 @@ marts:
     # graph resolves no domain. Treated by analogy with ruling 1: scoped, not
     # suppressed. Suppressing it would hide the exceptions a client most needs
     # DURING onboarding — the rows that tell them which of their uploaded
-    # records are wrong. Rows are filtered to provided domains instead.
+    # records are wrong.
+    #
+    # SCOPE MEANS FILTER, NOT PASS THROUGH. Rows whose source domain is not
+    # provided MUST be removed. Unfiltered, this becomes the route the entire
+    # fabricated exception set takes to the client — measured at
+    # declared:[employees] as attendance 494, compliance 135, payroll 19,
+    # against a demo baseline of 667 — on the screen they read most closely
+    # during onboarding. Implemented in step 4.
     scope_to_provided: true
+    scope_filter: source_table
 
   mart_document_expiry:
     mode: payload
@@ -479,7 +492,7 @@ marts:
 
   mart_workforce_contract_expiry:
     mode: payload
-    domains: [employees, payroll]
+    domains: [employees]
     # ANCHOR from MAX(payroll_period)
 
   mart_workforce_distribution:
@@ -497,7 +510,7 @@ marts:
 
   mart_workforce_iqama_expiry:
     mode: payload
-    domains: [compliance, employees, payroll]
+    domains: [compliance, employees]
     # ANCHOR from MAX(payroll_period)
 
   mart_workforce_plan_vs_actual:
