@@ -8,12 +8,26 @@ This register lists all known baseline technical debt, TypeScript compiler warni
 
 ### TD-001 — Test Suite Network Dependency
 
-- **Status**: CLOSED/RESOLVED
+- **Status**: **REOPENED** (2026-08-09) — previously marked CLOSED/RESOLVED
 - **Category**: Backend Testing
 - **Description**: Several legacy root tests (e.g. `test_payroll_api.py`, `test_talent_api.py`) make live HTTP requests (`urlopen`) targeting `http://127.0.0.1:8000`. These tests fail if the FastAPI server is not running on port 8000.
 - **Impact**: Pytest runs fail globally when the local server is offline.
 - **Remediation**: Refactor legacy tests to use FastAPI's `TestClient` or mock the requests.
-- **Resolution Notes**: Python test boundaries have been refactored to use FastAPI TestClient, removing any network/local-server dependency.
+- **Original Resolution Notes (partial — see reopening)**: Python test boundaries have been refactored to use FastAPI TestClient, removing any network/local-server dependency.
+
+#### Reopening note (2026-08-09)
+
+The original closure covered **`backend/tests/` only**. The 15 legacy `test_*.py` scripts at the repository root were never addressed, so the debt described above is still live outside that directory:
+
+- `test_payroll_500.py` still calls `urllib.request.urlopen("http://127.0.0.1:8000/api/payroll/summary")` **at module level**, so the call fires on import (collection), not inside a test function.
+- `trigger_api.py` does the same against the refresh endpoint.
+- Most of the remaining root scripts open `warehouse/hr_analytics.duckdb` **read-write at import time**. Measured locally, a bare `pytest` at the repo root stalled indefinitely (killed at a 300s timeout), while `pytest backend/tests` passed 10/10 in under 2s.
+
+These are debug scripts, not tests — they carry module-level side effects and define no assertions. Because CI's Gate 2 ran a bare `pytest`, this was a latent pipeline failure that only became reachable once Gate 1 was fixed.
+
+- **Interim mitigation (landed)**: `pytest.ini` sets `testpaths = backend/tests`, and the Gate 2 CI step is scoped to `pytest backend/tests`. Collection no longer reaches the root scripts. See [docs/ci/ci-repair-plan.md](ci/ci-repair-plan.md) §2.
+- **Outstanding remediation**: move the 15 scripts to `scripts/debug/` and drop the `test_` prefix, so no future tool with a default glob rediscovers them. Scheduled as a follow-up commit once CI is verified green.
+- **Closure criterion**: no `test_*.py` file outside `backend/tests/`, and no module-level network or read-write database access in any retained debug script.
 
 ### TD-002 — TypeScript Compilation Errors
 
