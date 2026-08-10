@@ -19,11 +19,26 @@ CONTRACT_EXCEPTION_SCHEMA = {
     "source_column": pl.Utf8, "rule": pl.Utf8,
 }
 
-# Tables that may be loaded from real data (data/raw/) in data_mode='real'.
-# Option A (chief-architect ruling): named AND contracted only. All other
-# tables (synthetic-only or not-yet-contracted, incl. employee_relations and
-# hr_requests) always use sample data regardless of mode.
-REAL_SOURCEABLE = {"employees", "payroll", "attendance", "compliance"}
+def real_sourceable_tables():
+    """Tables that may be loaded from real data (data/raw/) in data_mode='real'.
+
+    DERIVED from data/contracts/, not hardcoded (cycle 1b-ii).
+
+    Phase 0 Decision-1 ("Option A") required a table to be both NAMED here and
+    contracted. That is SUPERSEDED: a contract is precisely the artifact that
+    makes a table safe to real-source, because it is what the hard gate
+    validates against. Keeping a second hand-maintained list meant a contract
+    could exist that nothing could use — the gap employee_relations sat in, and
+    the reason hr_requests stayed unreachable despite being contracted since
+    Phase 0.
+
+    The safety property is unchanged in substance but now has one owner: a
+    table is real-sourceable IFF a contract exists to validate it. Authoring a
+    contract is therefore the deliberate act that opens a real-data path, so
+    the resolved set is printed on every real-mode run rather than left
+    implicit.
+    """
+    return set(_cs.available_tables())
 
 
 
@@ -125,7 +140,10 @@ def ingest(data_mode=None):
 
     contract_exceptions = []
     if data_mode == "real":
-        for table in sorted(REAL_SOURCEABLE):
+        real_sourceable = real_sourceable_tables()
+        print(f"[real] real-sourceable tables (derived from contracts): "
+              f"{sorted(real_sourceable)}")
+        for table in sorted(real_sourceable):
             raw_path = f"data/raw/{table}.csv"
             if original_exists(raw_path):
                 # Hard schema gate. Any REJECT-severity violation raises and

@@ -160,3 +160,22 @@ def test_gold_keeps_the_six_columns_the_marts_select():
     assert list(validate_data.GOLD_SCHEMA)[:6] == [
         "employee_id", "employee_name", "issue_type", "description",
         "severity", "recommended_action"]
+
+
+# --------------------------------------------------------------------------
+# real-sourceable set — derived, not hand-maintained
+# --------------------------------------------------------------------------
+
+def test_real_sourceable_is_exactly_the_contracted_set(monkeypatch):
+    """A contract is what makes a table safe to real-source, so the two must
+    not be able to drift. A hand-maintained list is how employee_relations
+    ended up contracted but unreachable, and hr_requests before it."""
+    monkeypatch.chdir(_ROOT)
+    import canonical_schema as cs
+    assert ingest_raw.real_sourceable_tables() == set(cs.available_tables())
+
+
+def test_employee_relations_is_real_sourceable(monkeypatch):
+    monkeypatch.chdir(_ROOT)
+    assert "employee_relations" in ingest_raw.real_sourceable_tables()
+    assert "hr_requests" in ingest_raw.real_sourceable_tables()
