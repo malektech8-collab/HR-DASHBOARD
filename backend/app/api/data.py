@@ -5,7 +5,6 @@ import sys
 import subprocess
 import shutil
 import polars as pl
-import yaml
 from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, File, UploadFile, HTTPException, Query, status
 from fastapi.responses import FileResponse, Response
@@ -129,8 +128,7 @@ def compile_csv_to_parquet(csv_path: str, parquet_path: str, table_name: str):
 # generator (instructions sheet, dropdowns, example rows) is the Phase 1
 # deliverable and replaces this.
 #
-# NOTE: this reads the contract YAML directly. It is repointed at the shared
-# canonical-schema loader in a later commit of this same cycle.
+# Column names come from the shared canonical-schema loader (scripts/canonical_schema.py).
 
 CRLF = chr(13) + chr(10)
 
@@ -143,21 +141,35 @@ TEMPLATE_CATALOGUE = [
 ]
 
 
+def _canonical_schema():
+    """Import the shared canonical-schema loader from scripts/.
+
+    Phase 1a placement: the loader lives in scripts/ because the backend image
+    build context is ./backend and cannot see a repo-root package. compose
+    bind-mounts ./scripts to /app/scripts. Promotion to an hr_schema/ package
+    is cycle 1b.
+    """
+    scripts_dir = get_scripts_dir()
+    if scripts_dir not in sys.path:
+        sys.path.insert(0, scripts_dir)
+    import canonical_schema
+    return canonical_schema
+
+
 def _contract_columns(table: str) -> Optional[List[str]]:
     """Canonical column names for a table, or None when no contract exists.
 
     Returning None (rather than falling back to sample data) is deliberate: a
     domain without a contract has no template, and serving fabricated rows in
-    its place is the exact defect this change removes.
+    its place is the exact defect this endpoint no longer has.
     """
-    path = os.path.join(get_contracts_dir(), f"{table}_schema.yml")
-    if not os.path.exists(path):
+    cs = _canonical_schema()
+    if not cs.has_schema(table):
         return None
-    with open(path, "r", encoding="utf-8") as f:
-        spec = yaml.safe_load(f) or {}
-    cols = spec.get("columns") or []
-    names = [c["name"] for c in cols if isinstance(c, dict) and c.get("name")]
-    return names or None
+    try:
+        return cs.column_names(table)
+    except cs.SchemaNotFoundError:
+        return None
 
 
 def _header_only_csv(columns: List[str]) -> str:

@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api import executive, data_quality, workforce, payroll, attendance, compliance, er, recruitment, talent, command_center, data
 from app.api.endpoints import governance
 from app.schemas.kpi import RefreshStatusResponse, AppConfigResponse
+from fastapi import HTTPException, Query
+from typing import Optional
 from app.config import settings
 import os
 from datetime import datetime
@@ -49,6 +51,26 @@ def get_refresh_status():
 @app.get("/api/meta/app-config", response_model=AppConfigResponse)
 def get_app_config():
     return AppConfigResponse(data_mode=settings.DATA_MODE)
+
+# Canonical schema endpoint — labels/metadata for the UI. Never returns data.
+@app.get("/api/meta/schema")
+def get_meta_schema(
+    table: Optional[str] = Query(None, description="Single table; omit for all"),
+    locale: str = Query("en", description="Label locale: en or ar"),
+):
+    """Bilingual canonical schema, for UI labels and localized messages.
+
+    One definition, four consumers (template, validation, labels, errors) —
+    this is the labels consumer. Contains column metadata only; no row data.
+    """
+    from app.api.data import _canonical_schema
+    cs = _canonical_schema()
+    if table:
+        if not cs.has_schema(table):
+            raise HTTPException(status_code=404, detail=f"No contract for table '{table}'")
+        return cs.describe(table, locale)
+    return {"locale": locale if locale in cs.LOCALES else cs.DEFAULT_LOCALE,
+            "tables": cs.describe_all(locale)}
 
 # Include API routers
 app.include_router(executive.router, prefix="/api/executive", tags=["Executive"])
