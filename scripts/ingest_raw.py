@@ -1,7 +1,20 @@
 import os
+import sys
 import polars as pl
 
-def ingest():
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from validate_schema import validate_csv_against_contract
+
+# Tables that may be loaded from real data (data/raw/) in data_mode='real'.
+# Option A (chief-architect ruling): named AND contracted only. All other
+# tables (synthetic-only or not-yet-contracted, incl. employee_relations and
+# hr_requests) always use sample data regardless of mode.
+REAL_SOURCEABLE = {"employees", "payroll", "attendance", "compliance"}
+
+
+def ingest(data_mode=None):
+    if data_mode is None:
+        data_mode = os.getenv("DATA_MODE", "demo")
     original_exists = os.path.exists
     def custom_exists(path):
         if isinstance(path, str) and path.startswith("data/sample/") and path.endswith("_sample.csv"):
@@ -45,6 +58,29 @@ def ingest():
         "employee_skills": "data/sample/employee_skills_sample.csv",
         "career_paths": "data/sample/career_paths_sample.csv"
     }
+
+    # --- Real-data resolver (Phase 0): prefer data/raw/{table}.csv in real mode ---
+    # Only the 4 REAL_SOURCEABLE tables are eligible. In demo mode (or when no
+    # data/raw/{table}.csv is present) every entry stays the sample path, so the
+    # rest of this function — and CI — is byte-identical to before.
+    #
+    # Marker immunity is BY CONSTRUCTION, not an explicit bypass: the .uploaded
+    # freeze in custom_exists() below only special-cases paths that both start
+    # with "data/sample/" and end with "_sample.csv". A data/raw/{table}.csv path
+    # matches neither, so os.path.exists() on it never consults a marker and the
+    # raw file is always (re)ingested on every run.
+    if data_mode == "real":
+        for table in sorted(REAL_SOURCEABLE):
+            raw_path = f"data/raw/{table}.csv"
+            if original_exists(raw_path):
+                # Hard schema gate. Any violation raises and aborts the whole
+                # run (fail-closed) — no partial load, no silent downgrade to
+                # sample for this table.
+                validate_csv_against_contract(raw_path, table)
+                files[table] = raw_path
+                print(f"[real] {table}: ingesting from {raw_path} (contract-validated).")
+            else:
+                print(f"[real] {table}: no {raw_path}; falling back to sample.")
 
     # 1. Employees
     if os.path.exists(files["employees"]):
