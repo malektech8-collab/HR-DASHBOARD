@@ -65,12 +65,29 @@ def test_templates_endpoints():
     invalid_response = client.get("/api/data/templates?name=nonexistent")
     assert invalid_response.status_code == 404
 
-    # 4. A catalogued domain with no contract is reported unavailable and must
-    #    fail loudly rather than fall back to sample data.
-    er = next(t for t in templates if t["name"] == "employee_relations")
-    assert er["available"] is False
-    no_contract = client.get("/api/data/templates?name=employee_relations")
-    assert no_contract.status_code == 409
+    # 4. The catalogue is DERIVED from data/contracts/ (cycle 1b-ii), so it is
+    #    exactly the set of contracted domains. This assertion previously
+    #    checked that employee_relations was unavailable and returned 409; that
+    #    was true only because the domain had no contract despite having a
+    #    dashboard page, a sample file and 15 exception checks. 1b-ii authored
+    #    the contract, so it now resolves like any other domain.
+    import yaml as _yaml
+    from app.api.data import get_contracts_dir as _gcd
+    contracted = sorted(
+        f[: -len("_schema.yml")]
+        for f in os.listdir(_gcd()) if f.endswith("_schema.yml")
+    )
+    assert sorted(t["name"] for t in templates) == contracted
+    assert all(t["available"] for t in templates)
+    assert "hr_requests" in contracted, "contracted but previously missing from the catalogue"
+
+    er = client.get("/api/data/templates?name=employee_relations")
+    assert er.status_code == 200
+    assert len([r for r in er.text.splitlines() if r.strip()]) == 1, "header only"
+
+    # A domain with no contract has no template at all.
+    assert client.get("/api/data/templates?name=not_a_domain").status_code == 404
+    assert _yaml is not None
 
 def test_upload_endpoints_validation():
     # 1. Forbidden file extension

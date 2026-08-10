@@ -3,15 +3,71 @@ import sys
 import polars as pl
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from validate_schema import validate_csv_against_contract
+from validate_schema import (validate_csv, SchemaValidationError, dq_severity, dq_recommended_action,
+                             SEVERITY_EXCEPTION)
 from derivations import derive_column
 import canonical_schema as _cs
 
-# Tables that may be loaded from real data (data/raw/) in data_mode='real'.
-# Option A (chief-architect ruling): named AND contracted only. All other
-# tables (synthetic-only or not-yet-contracted, incl. employee_relations and
-# hr_requests) always use sample data regardless of mode.
-REAL_SOURCEABLE = {"employees", "payroll", "attendance", "compliance"}
+# Transport for EXCEPTION-severity contract violations: written here, merged
+# into the gold DQ report by validate_data.py so they reach the Data Quality
+# page. Gitignored; real-path only.
+CONTRACT_EXCEPTIONS_PATH = "data/gold/contract_exceptions.parquet"
+CONTRACT_EXCEPTION_SCHEMA = {
+    "employee_id": pl.Utf8, "employee_name": pl.Utf8, "issue_type": pl.Utf8,
+    "description": pl.Utf8, "severity": pl.Utf8, "recommended_action": pl.Utf8,
+    "source": pl.Utf8, "source_table": pl.Utf8, "source_row": pl.Int64,
+    "source_column": pl.Utf8, "rule": pl.Utf8,
+}
+
+def real_sourceable_tables():
+    """Tables that may be loaded from real data (data/raw/) in data_mode='real'.
+
+    DERIVED from data/contracts/, not hardcoded (cycle 1b-ii).
+
+    Phase 0 Decision-1 ("Option A") required a table to be both NAMED here and
+    contracted. That is SUPERSEDED: a contract is precisely the artifact that
+    makes a table safe to real-source, because it is what the hard gate
+    validates against. Keeping a second hand-maintained list meant a contract
+    could exist that nothing could use — the gap employee_relations sat in, and
+    the reason hr_requests stayed unreachable despite being contracted since
+    Phase 0.
+
+    The safety property is unchanged in substance but now has one owner: a
+    table is real-sourceable IFF a contract exists to validate it. Authoring a
+    contract is therefore the deliberate act that opens a real-data path, so
+    the resolved set is printed on every real-mode run rather than left
+    implicit.
+    """
+    return set(_cs.available_tables())
+
+
+
+def _write_contract_exceptions(violations):
+    """Persist EXCEPTION-severity violations for the data-quality layer.
+
+    Shape matches the gold DQ report so they render alongside the existing
+    checks. entity_id is left empty when a row cannot be attributed to an
+    employee — an ID is never invented.
+    """
+    rows = []
+    for v in violations:
+        rows.append({
+            "employee_id": "",
+            "employee_name": "Unknown",
+            "issue_type": "Contract: {}".format(v.rule),
+            "description": v.message_en,
+            "severity": dq_severity(v),
+            "recommended_action": dq_recommended_action(v),
+            "source": "contract",
+            "source_table": v.table,
+            "source_row": v.row,
+            "source_column": v.column,
+            "rule": v.rule,
+        })
+    pl.DataFrame(rows, schema=CONTRACT_EXCEPTION_SCHEMA).write_parquet(
+        CONTRACT_EXCEPTIONS_PATH)
+    print("[contract] wrote {} exception row(s) to {}".format(
+        len(rows), CONTRACT_EXCEPTIONS_PATH))
 
 
 def ingest(data_mode=None):
@@ -71,18 +127,45 @@ def ingest(data_mode=None):
     # with "data/sample/" and end with "_sample.csv". A data/raw/{table}.csv path
     # matches neither, so os.path.exists() on it never consults a marker and the
     # raw file is always (re)ingested on every run.
+    # STALENESS GUARD — unconditional, every run, every mode.
+    # If this file is left behind, yesterday's exceptions reappear against data
+    # that has since been fixed, and a demo run would inherit a previous real
+    # run's exceptions. This is the .uploaded marker bug in a new costume: that
+    # marker froze a table's ingest indefinitely and zeroed four Attendance
+    # widgets. Clear first, then decide whether to write.
+    os.makedirs("data/gold", exist_ok=True)
+    if original_exists(CONTRACT_EXCEPTIONS_PATH):
+        os.remove(CONTRACT_EXCEPTIONS_PATH)
+        print(f"[contract] cleared stale {CONTRACT_EXCEPTIONS_PATH}")
+
+    contract_exceptions = []
     if data_mode == "real":
-        for table in sorted(REAL_SOURCEABLE):
+        real_sourceable = real_sourceable_tables()
+        print(f"[real] real-sourceable tables (derived from contracts): "
+              f"{sorted(real_sourceable)}")
+        for table in sorted(real_sourceable):
             raw_path = f"data/raw/{table}.csv"
             if original_exists(raw_path):
-                # Hard schema gate. Any violation raises and aborts the whole
-                # run (fail-closed) — no partial load, no silent downgrade to
-                # sample for this table.
-                validate_csv_against_contract(raw_path, table)
+                # Hard schema gate. Any REJECT-severity violation raises and
+                # aborts the whole run (fail-closed) — no partial load, no
+                # silent downgrade to sample for this table. EXCEPTION-severity
+                # violations do not block: the file loads and the rows are
+                # routed to the data-quality layer.
+                result = validate_csv(raw_path, table)
+                if result.rejects:
+                    raise SchemaValidationError(result.rejects[0].message_en,
+                                                result.violations)
+                contract_exceptions.extend(result.exceptions)
                 files[table] = raw_path
                 print(f"[real] {table}: ingesting from {raw_path} (contract-validated).")
+                if result.exceptions:
+                    print(f"[contract] {table}: {len(result.exceptions)} "
+                          f"exception-severity violation(s) -> data quality layer.")
             else:
                 print(f"[real] {table}: no {raw_path}; falling back to sample.")
+
+    if contract_exceptions:
+        _write_contract_exceptions(contract_exceptions)
 
     # 1. Employees
     if os.path.exists(files["employees"]):

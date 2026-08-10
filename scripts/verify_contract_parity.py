@@ -42,7 +42,15 @@ from validate_schema import validate_csv_against_contract, SchemaValidationError
 
 SCRATCH = tempfile.mkdtemp(prefix="contract_parity_")
 CASES_DIR = os.path.join(SCRATCH, "cases")
-TABLES = ["employees", "payroll", "attendance", "compliance", "hr_requests"]
+# Derived, not hardcoded. A hardcoded list here was a fourth place the domain
+# list was written down, and it silently excluded any newly contracted table
+# from the harness entirely.
+def _tables(directory):
+    return sorted(f[: -len("_schema.yml")] for f in os.listdir(directory)
+                  if f.endswith("_schema.yml"))
+
+
+TABLES = []          # populated in main() once the contracts dir is known
 
 # Deterministic, type-appropriate synthetic values. Not real data.
 SAMPLE_VALUE = {
@@ -138,13 +146,14 @@ def build_cases(table):
         write_csv(p, names, [bad])
         cases["bad_type__{}".format(target["name"])] = p
 
-    enum = [c for c in cols if c.get("allowed_values")]
-    if enum:
-        target = enum[0]
+    # One case per enum column. Testing only the first meant that adding a new
+    # enum earlier in the column order silently removed coverage of the ones
+    # after it — which is exactly what happened to employees.status in 1b-ii.
+    for target in [c for c in cols if c.get("allowed_values")]:
         idx = names.index(target["name"])
         bad = list(row)
         bad[idx] = "NOT_A_VALID_ENUM_VALUE"
-        p = os.path.join(CASES_DIR, "{}__bad_enum.csv".format(table))
+        p = os.path.join(CASES_DIR, "{}__bad_enum__{}.csv".format(table, target["name"]))
         write_csv(p, names, [bad])
         cases["bad_enum__{}".format(target["name"])] = p
 
@@ -265,6 +274,8 @@ def main():
     if len(sys.argv) > 2:
         CONTRACTS_DIR = sys.argv[2]
     print("contracts: {}".format(CONTRACTS_DIR))
+    global TABLES
+    TABLES = _tables(CONTRACTS_DIR)
     os.makedirs(CASES_DIR, exist_ok=True)
     results = {}
     inventory = {}

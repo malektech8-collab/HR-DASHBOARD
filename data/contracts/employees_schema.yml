@@ -141,8 +141,33 @@ columns:
   description_en: Full-time, part-time, or contract.
   description_ar: دوام كامل أو جزئي أو تعاقد.
   example: Full-time
-  observed_values:
+  # Vocabulary authored by the practitioner, not derived from samples.
+  # EXCEPTION severity: an unexpected value surfaces as a data quality
+  # exception rather than refusing the client's whole file. Tighten to
+  # REJECT once real files confirm the list.
+  on_violation: exception
+  allowed_values:
   - Full-time
+  - Part-time
+  - Contract
+  - Temporary
+  - Intern
+  value_labels:
+    Full-time:
+      en: Full-time
+      ar: دوام كامل
+    Part-time:
+      en: Part-time
+      ar: دوام جزئي
+    Contract:
+      en: Contract
+      ar: تعاقد
+    Temporary:
+      en: Temporary
+      ar: مؤقت
+    Intern:
+      en: Intern
+      ar: متدرب
 - name: contract_type
   name_en: Contract Type
   name_ar: نوع العقد
@@ -151,9 +176,21 @@ columns:
   description_en: Limited or unlimited term contract.
   description_ar: عقد محدد المدة أو غير محدد المدة.
   example: Unlimited
-  observed_values:
+  # Vocabulary authored by the practitioner, not derived from samples.
+  # EXCEPTION severity: an unexpected value surfaces as a data quality
+  # exception rather than refusing the client's whole file. Tighten to
+  # REJECT once real files confirm the list.
+  on_violation: exception
+  allowed_values:
   - Limited
   - Unlimited
+  value_labels:
+    Limited:
+      en: Limited
+      ar: محدد المدة
+    Unlimited:
+      en: Unlimited
+      ar: غير محدد المدة
 - name: joining_date
   name_en: Joining Date
   name_ar: تاريخ الانضمام

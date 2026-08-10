@@ -1,0 +1,188 @@
+# Canonical bilingual schema - employee_relations
+#
+# Single source of truth for: the downloadable template, the validation rules,
+# the UI labels, and the error messages. See docs/PRODUCT-ARCHITECTURE.md section 4.
+#
+# BACKWARD COMPATIBILITY: scripts/validate_schema.py reads `columns` and, per
+# column, name / required / type / allowed_values / on_violation / unique /
+# primary_key / min_value / required_when. Other keys are display metadata.
+#
+# allowed_values MUST stay a flat list of strings - the validator compares raw
+# cell values against set(allowed_values). Bilingual display lives in the
+# parallel `value_labels` map.
+#
+# Authored in cycle 1b-ii. The domain already had a dashboard page, a sample
+# file, an ingest block and 15 exception checks, but no contract, so it could
+# never be real-sourced. Types match the casts already applied in
+# scripts/ingest_raw.py and backend/app/api/data.py.
+
+version: 1
+table: employee_relations
+label_en: Employee Relations
+label_ar: علاقات الموظفين
+description_en: One row per employee relations case - disciplinary actions, grievances and labor cases.
+description_ar: صف واحد لكل قضية من قضايا علاقات الموظفين - الإجراءات التأديبية والتظلمات وقضايا العمل.
+columns:
+- name: case_id
+  name_en: Case ID
+  name_ar: رقم القضية
+  type: VARCHAR
+  required: true
+  unique: true
+  # Primary key. A duplicate here is structural, not a row-level
+  # exception: it corrupts every join and inflates every aggregate.
+  primary_key: true
+  description_en: Unique identifier of the case.
+  description_ar: المعرّف الفريد للقضية.
+  example: ER001
+- name: employee_id
+  name_en: Employee ID
+  name_ar: الرقم الوظيفي
+  type: VARCHAR
+  required: true
+  description_en: Employee the case relates to.
+  description_ar: الموظف المعني بالقضية.
+  example: EMP001
+- name: case_type
+  name_en: Case Type
+  name_ar: نوع القضية
+  type: VARCHAR
+  required: true
+  description_en: Category of the case. Drives the SLA target applied to it.
+  description_ar: تصنيف القضية. يحدد المدة المستهدفة المطبقة عليها.
+  example: Grievance
+  # REJECT severity, deliberately. config/business_rules.yml keys
+  # er_rules.sla_days on exactly these three values; a fourth would silently
+  # take the default SLA and mis-classify every breach on that case.
+  allowed_values:
+  - Disciplinary
+  - Grievance
+  - Labor Case
+  value_labels:
+    Disciplinary:
+      en: Disciplinary
+      ar: إجراء تأديبي
+    Grievance:
+      en: Grievance
+      ar: تظلم
+    Labor Case:
+      en: Labor Case
+      ar: قضية عمالية
+- name: case_status
+  name_en: Case Status
+  name_ar: حالة القضية
+  type: VARCHAR
+  required: true
+  description_en: Whether the case is still open.
+  description_ar: ما إذا كانت القضية لا تزال مفتوحة.
+  example: Open
+  on_violation: exception
+  allowed_values:
+  - Open
+  - Closed
+  value_labels:
+    Open:
+      en: Open
+      ar: مفتوحة
+    Closed:
+      en: Closed
+      ar: مغلقة
+- name: priority
+  name_en: Priority
+  name_ar: الأولوية
+  type: VARCHAR
+  required: true
+  description_en: Case priority.
+  description_ar: أولوية القضية.
+  example: Medium
+  on_violation: exception
+  allowed_values:
+  - High
+  - Medium
+  - Low
+  value_labels:
+    High:
+      en: High
+      ar: عالية
+    Medium:
+      en: Medium
+      ar: متوسطة
+    Low:
+      en: Low
+      ar: منخفضة
+- name: created_date
+  name_en: Created Date
+  name_ar: تاريخ الفتح
+  type: DATE
+  required: true
+  description_en: Date the case was opened.
+  description_ar: تاريخ فتح القضية.
+  example: '2026-06-01'
+- name: target_due_date
+  name_en: Target Due Date
+  name_ar: التاريخ المستهدف للإغلاق
+  type: DATE
+  required: false
+  description_en: Target resolution date. Derived from the SLA for the case type when absent.
+  description_ar: التاريخ المستهدف للإنجاز. يُشتق من المدة المستهدفة لنوع القضية عند غيابه.
+  example: '2026-06-15'
+- name: closed_date
+  name_en: Closed Date
+  name_ar: تاريخ الإغلاق
+  type: DATE
+  required: false
+  description_en: Date the case was closed. Required when the case status is Closed.
+  description_ar: تاريخ إغلاق القضية. مطلوب عندما تكون حالة القضية مغلقة.
+  example: '2026-06-10'
+  # A closed case with no closing date breaks every ageing and SLA metric.
+  required_when:
+    column: case_status
+    equals: Closed
+- name: owner_id
+  name_en: Owner ID
+  name_ar: الرقم الوظيفي للمسؤول
+  type: VARCHAR
+  required: true
+  description_en: Employee ID of the HR owner handling the case.
+  description_ar: الرقم الوظيفي لموظف الموارد البشرية المسؤول عن القضية.
+  example: EMP003
+- name: escalated
+  name_en: Escalated
+  name_ar: تم التصعيد
+  type: BOOLEAN
+  required: true
+  description_en: Whether the case has been escalated.
+  description_ar: ما إذا تم تصعيد القضية.
+  example: 'false'
+- name: escalation_reason
+  name_en: Escalation Reason
+  name_ar: سبب التصعيد
+  type: VARCHAR
+  required: false
+  description_en: Why the case was escalated. Leave empty when not escalated.
+  description_ar: سبب تصعيد القضية. يُترك فارغاً إذا لم يتم التصعيد.
+  example: Escalated to legal department
+- name: legal_reference
+  name_en: Legal Reference
+  name_ar: المرجع القانوني
+  type: VARCHAR
+  required: false
+  description_en: External legal or labor office reference, where one exists.
+  description_ar: المرجع القانوني أو مرجع مكتب العمل الخارجي، إن وُجد.
+  example: LR-8877
+- name: case_number
+  name_en: Case Number
+  name_ar: رقم الملف
+  type: VARCHAR
+  required: false
+  description_en: External case or file number, where one exists.
+  description_ar: رقم الملف أو القضية الخارجي، إن وُجد.
+  example: CASE-123
+- name: description
+  name_en: Description
+  name_ar: الوصف
+  type: VARCHAR
+  required: false
+  description_en: Free-text summary of the case.
+  description_ar: ملخص نصي للقضية.
+  example: Attendance related warning
