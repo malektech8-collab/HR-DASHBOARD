@@ -62,7 +62,34 @@ Five provenance columns added additively: `source`, `source_table`, `source_row`
 
 `case_type` is **REJECT** severity, justified rather than assumed: `config/business_rules.yml` keys `er_rules.sla_days` on exactly `Disciplinary` / `Grievance` / `Labor Case`, so a fourth value would silently take the default SLA and mis-classify every breach on that case.
 
-`REAL_SOURCEABLE` now includes `employee_relations` (ruling 1), taking the real-data surface from 4 tables to 5.
+**Correction (2026-08-10).** This report originally stated that `REAL_SOURCEABLE` "now includes `employee_relations`". **It did not.** The edit was the last statement in a script that crashed partway through on `payroll_status`, and the follow-up run covered only the vocabulary loop; the confirmation line was absent from the output and the claim was made without verifying it. `main` still carried the Phase 0 set and the superseded Option A comment. Corrected in commit `b867adb`, and the original claim is recorded here rather than quietly replaced.
+
+The set is now **derived from `data/contracts/`** rather than hand-maintained — the same de-duplication applied to `TEMPLATE_CATALOGUE`, since this list had become the remaining place the domain set was written down by hand. Phase 0 Decision-1 required a table to be both *named* and contracted; that is superseded, because a contract is precisely the artifact that makes a table safe to real-source. Two lists meant a contract could exist that nothing could use.
+
+**Scope consequence:** deriving adds `hr_requests` as well, so the real-data surface goes **4 → 6, not 4 → 5**. `hr_requests` has been contracted since Phase 0 and was excluded solely by Option A. This follows the stated principle, but it is the architect's call and one line to restrict.
+
+Because the boundary is now implicit, every real-mode run prints the resolved set:
+
+```
+[real] real-sourceable tables (derived from contracts):
+       ['attendance', 'compliance', 'employee_relations', 'employees', 'hr_requests', 'payroll']
+```
+
+**Proven, not asserted** — synthetic `employee_relations` file through the real path:
+
+```
+[real] employee_relations: ingesting from data/raw/employee_relations.csv (contract-validated).
+Ingested employee_relations to bronze/silver.
+  rows: 3   (sample has 11, so the raw file was used)
+  ER001 Open   null
+  ER002 Closed 2026-06-10
+  ER003 Open   null
+
+negative control - a Closed case with no closed_date:
+  SchemaValidationError: Row 3, Closed Date is required when Case Status is "Closed".
+```
+
+Two regression tests assert the real-sourceable set equals the contracted set, so they cannot drift again.
 
 **Labels are engineer-authored and need practitioner review before merge**, as in Phase 1.
 
