@@ -7,6 +7,7 @@ entry becomes invisible rather than fabricated. That is the safe failure
 direction, but it is still a failure, and CI should say so at the point the
 column is added rather than when someone notices a blank on a dashboard.
 """
+import io
 import os
 import sys
 
@@ -19,6 +20,7 @@ sys.path.insert(0, os.path.join(_ROOT, "scripts"))
 PROVENANCE_PATH = os.path.join(_ROOT, "config", "metric_provenance.yml")
 DICTIONARY_PATH = os.path.join(_ROOT, "config", "metrics_dictionary.yml")
 WAREHOUSE = os.path.join(_ROOT, "warehouse", "hr_analytics.duckdb")
+NEWLINE = chr(10)
 
 KPI_MART_SQL = (
     "SELECT view_name FROM duckdb_views() "
@@ -90,6 +92,11 @@ def test_every_kpi_mart_column_is_mapped(registry):
     """
     actual = _warehouse_kpi_columns()
     mapped = registry["metrics"]
+    n_empty = sum(1 for entries in mapped.values() for e in entries.values()
+                  if not _entry_domains(e))
+    n_total = sum(len(v) for v in mapped.values())
+    print(NEWLINE + "[provenance] {} mapped columns; {} source-free (`domains: []`) "
+          "— these bypass suppression by design".format(n_total, n_empty))
     missing = []
     for mart, cols in actual.items():
         entries = mapped.get(mart)
@@ -132,6 +139,26 @@ def test_every_referenced_domain_is_declared(registry, known_domains):
         + "\n  ".join(unknown))
 
 
+def test_empty_domain_lists_carry_a_reason():
+    """Under default-deny, `[]` is the only way to silence a coverage failure
+    without reviewing the metric. Every one must say why, in a comment on the
+    same line, so the list stays small and visible rather than becoming a
+    dumping ground for anything awkward to classify.
+
+    Read as raw text, because YAML parsing discards comments.
+    """
+    lines = io.open(PROVENANCE_PATH, encoding="utf-8").read().splitlines()
+    uncommented = []
+    for n, line in enumerate(lines, 1):
+        stripped = line.strip()
+        if not stripped.startswith("#") and ": []" in stripped:
+            if "#" not in line.split(": []", 1)[1]:
+                uncommented.append("line {}: {}".format(n, stripped))
+    assert not uncommented, (
+        "every `domains: []` entry must state why it has no source domain:"
+        + NEWLINE + "  " + (NEWLINE + "  ").join(uncommented))
+
+
 def test_empty_domain_lists_are_deliberate(registry):
     """`domains: []` means "no source domain", which is a real answer for a
     period label or a timestamp — but it must be a small, reviewable set."""
@@ -141,6 +168,8 @@ def test_empty_domain_lists_are_deliberate(registry):
         for col, entry in entries.items()
         if not _entry_domains(entry)
     ]
+    print(NEWLINE + "[provenance] source-free (`domains: []`) entries: {} -> {}"
+          .format(len(empties), sorted(empties)))
     assert set(empties) == {
         "mart_exec_kpis.report_month",
         "mart_command_center_overview.modules_healthy",
