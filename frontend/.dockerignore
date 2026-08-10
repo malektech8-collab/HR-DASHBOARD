@@ -1,0 +1,23 @@
+# Build inputs only. The Dockerfile runs `npm ci` inside the image, then
+# `COPY . .` — without this file the host's node_modules (Windows-native
+# binaries) overwrites the image's Linux install and the build breaks.
+# CI never hit this because a fresh checkout has no node_modules.
+node_modules
+dist
+test-results
+playwright-report
+
+# Local env / logs — never belong in an image layer
+.env
+.env.*
+!.env.example
+*.log
+npm-debug.log*
+
+# Docker's own file
+.dockerignore
+
+# Deliberately NOT ignored: nginx.conf (copied in stage 2), index.html, src,
+# public, and every tsconfig/vite/tailwind/postcss config — all build inputs.
+# e2e/ and playwright.config.ts are kept too: `npm run build` runs `tsc -b`,
+# and excluding files a tsconfig project may reference risks breaking it.
