@@ -4,7 +4,7 @@ from fastapi.testclient import TestClient
 
 # Add backend to python path
 sys.path.append(
-    os.path.abspath(os.path.join(os.path.dirname(__file__), "backend"))
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "backend"))
 )
 
 from app.main import app
