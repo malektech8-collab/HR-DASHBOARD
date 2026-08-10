@@ -4,6 +4,8 @@
 **Status:** executed, committed, pushed. **Not merged.** Awaiting chief-architect review.
 **Plan:** [`canonical-schema-plan.md`](canonical-schema-plan.md) · **Governing reference:** [`PRODUCT-ARCHITECTURE.md`](../PRODUCT-ARCHITECTURE.md) §4
 
+> **Correction (2026-08-10).** This document originally stated a total of **84 columns**, and listed `payroll` as 14. Both figures were wrong: the real total is **73** (employees 21, payroll 13, attendance 15, compliance 13, hr_requests 11). The per-column enumerations below were always correct — only the counts were not. Verified against `main`: column names and order are identical between the original and extended contracts, so nothing was lost. Corrected in place below; this note records what was originally claimed. Note that 73 is the total **as this cycle was executed** — PR #10 subsequently added two optional employees columns (`work_unit`, `end_of_service_type`), so the current total on `main` is **75**. The figures in this document describe the state it reports on and are not updated as the schema grows.
+
 **Guardrails met:** `data_mode=demo` byte-identical (full pipeline from an *empty* warehouse: dbt 157/157, 11/11, reconciliation PASSED, no tracked-file drift). No validator behaviour change — proven by the parity harness, not asserted. No real data: every input synthetic, nothing written outside gitignored paths.
 
 ---
@@ -14,7 +16,7 @@
 |---|---|---|
 | 1 | `eb40618` | Commit `PRODUCT-ARCHITECTURE.md` to version control |
 | 2 | `90a56d3` | **Hotfix** — templates served from contracts, not sample data |
-| 3 | `f0d77a6` | Bilingual canonical schema extension (5 contracts, 84 columns) + parity harness |
+| 3 | `f0d77a6` | Bilingual canonical schema extension (5 contracts, 73 columns) + parity harness |
 | 4 | `a7f37d7` | 1a loader in `scripts/` + `GET /api/meta/schema` |
 | 5 | `89b0359` | Declared-derivation mechanism for `is_saudi` |
 
@@ -108,7 +110,7 @@ Regression locked in by tests: header-only assertion, an explicit check that `EM
 
 ### 4.1 Extended contracts (commit 3)
 
-Per column: `name_en`, `name_ar`, `description_en`, `description_ar`, `example`. Per table: `version`, `table`, `label_en`, `label_ar`, `description_en/ar`. 84 columns across employees (21), payroll (14), attendance (15), compliance (13), hr_requests (11).
+Per column: `name_en`, `name_ar`, `description_en`, `description_ar`, `example`. Per table: `version`, `table`, `label_en`, `label_ar`, `description_en/ar`. 73 columns across employees (21), payroll (13), attendance (15), compliance (13), hr_requests (11).
 
 `allowed_values` stays a **flat list of strings** — the validator does `set(allowed)` against raw cell values, so objects would fail Rule 4 on every row. Bilingual display lives in the parallel `value_labels` map.
 
@@ -221,7 +223,7 @@ Local runs used the scratchpad driver that swaps the stale `.venv/Scripts/dbt.ex
 | De-duplicate `generate_sample_data.py` / `ingest_raw.py` / `compile_csv_to_parquet` onto the loader | 1c, each with its own empty-warehouse proof |
 | Nitaqat inputs, bands, entity size/sector | own cycle, immediately after Phase 1 |
 | `employee_relations` contract decision (§7) | chief-architect ruling |
-| Arabic label review by an HR practitioner | **before merge** — 84 `name_ar` values are engineer-authored |
+| Arabic label review by an HR practitioner | **before merge** — 73 `name_ar` values are engineer-authored |
 
 ---
 
