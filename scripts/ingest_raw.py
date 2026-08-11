@@ -194,6 +194,56 @@ def check_payroll_period_matches_report_month(payroll_csv, exists=os.path.exists
         periods["payroll_period"].to_list(), month=month)
 
 
+# Date-grained domains and the column that carries their grain. The coverage
+# window is declared against this column, and every row must fall inside it.
+COVERAGE_COLUMNS = {
+    "attendance": "attendance_date",
+}
+
+
+def check_rows_within_declared_coverage(table, csv_path, coverage=None,
+                                        exists=os.path.exists):
+    """Rows outside the declared coverage window are a contradiction.
+
+    The symmetric arm of assert_coverage_declared. If the client declares
+    1-14 August and the file carries the 20th, either the declaration or the
+    file is wrong, and neither may be guessed at: silently widening the window
+    would restore the inference the declaration exists to constrain, and
+    silently dropping the row would lose real attendance.
+    """
+    column = COVERAGE_COLUMNS.get(table)
+    if column is None or not exists(csv_path):
+        return None
+    coverage = _onb.load_coverage() if coverage is None else coverage
+    window = coverage.get(table)
+    if not window:
+        return None
+    start, end = window
+    try:
+        frame = pl.read_csv(csv_path, columns=[column])
+    except Exception:
+        return None
+    dates = [str(v)[:10] for v in frame[column].to_list() if v]
+    outside = sorted({d for d in dates
+                      if d < start.isoformat() or d > end.isoformat()})
+    if not outside:
+        return window
+    shown = ", ".join(outside[:5]) + (" (+{} more)".format(len(outside) - 5)
+                                      if len(outside) > 5 else "")
+    raise _onb.OnboardingError(
+        "{table}: {n} row(s) fall outside the declared coverage window "
+        "{start}..{end}. Dates: {shown}.".format(
+            table=table, n=len(outside), start=start, end=end, shown=shown)
+        + NEWLINE +
+        "Either widen coverage.{table} or remove those rows. The window is not "
+        "widened automatically: it is the declaration that makes a missing day "
+        "mean 'absent' rather than 'not sent yet'.".format(table=table)
+        + NEWLINE +
+        "صفوف خارج فترة التغطية المعرّفة {start}..{end} في {table}.".format(
+            table=table, start=start, end=end)
+    )
+
+
 def ingest(data_mode=None):
     if data_mode is None:
         data_mode = os.getenv("DATA_MODE", "demo")
@@ -309,6 +359,10 @@ def ingest(data_mode=None):
                 )
             targets = sorted(declared)
             empty_domains = [t for t in real_sourceable if t not in declared]
+            # Category F: a date-grained domain must say which DAYS it covers.
+            # Declared-but-not-covered fails loudly, exactly as
+            # declared-but-empty does — both are a claim the data cannot back.
+            _onb.assert_coverage_declared(declared)
 
         for table in targets:
             raw_path = f"data/raw/{table}.csv"
@@ -321,6 +375,7 @@ def ingest(data_mode=None):
                 raise SchemaValidationError(result.rejects[0].message_en,
                                             result.violations)
             contract_exceptions.extend(result.exceptions)
+            check_rows_within_declared_coverage(table, raw_path)
             files[table] = raw_path
             print(f"[real] {table}: ingesting from {raw_path} (contract-validated).")
             if result.exceptions:

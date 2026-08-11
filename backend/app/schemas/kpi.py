@@ -23,7 +23,10 @@ class SuppressionItem(BaseModel):
 class KPIItem(BaseModel):
     key: str
     label: str
-    value: float
+    # Category F: null when the metric is genuinely UNMEASURABLE - the domain
+    # was provided, but not for the days it would need. Distinct from a
+    # suppressed card, which is absent from the list and named in `suppressed`.
+    value: Optional[float] = None
     unit: str
     trend_value: Optional[float] = None
     trend_direction: Optional[str] = None  # "up", "down", "flat"

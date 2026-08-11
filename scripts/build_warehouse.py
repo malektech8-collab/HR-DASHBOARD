@@ -58,9 +58,13 @@ def _write_domain_provenance(conn, data_mode):
     uncontracted = domain_spec.get("uncontracted") or {}
 
     declared = set()
+    coverage = {}
+    history = {}
     if data_mode == "real":
         import onboarding as _onb
         declared = _onb.load_declared(contracted=set(_cs_available_tables()))
+        coverage = _onb.load_coverage()
+        history = _onb.load_history_depth()
 
     def count(table):
         try:
@@ -68,16 +72,24 @@ def _write_domain_provenance(conn, data_mode):
         except Exception:
             return 0
 
+    # Category F: coverage_start/end say WHICH DAYS a date-grained domain
+    # covers, and history_since how far back a point-in-time derivation may
+    # reach. NULL in demo and for period-grained domains, which the readers
+    # take to mean "the whole reporting period".
     rows = []
     for domain, tables in sorted(contracted.items()):
+        window = coverage.get(domain)
         rows.append((domain, "contracted",
                      data_mode != "real" or domain in declared,
                      sum(count(t) for t in tables),
-                     data_mode != "real" or domain in declared))
+                     data_mode != "real" or domain in declared,
+                     window[0] if window else None,
+                     window[1] if window else None,
+                     history.get(domain)))
     for domain, tables in sorted(uncontracted.items()):
         rows.append((domain, "uncontracted", False,
                      sum(count(t) for t in tables),
-                     data_mode != "real"))
+                     data_mode != "real", None, None, None))
 
     conn.execute("DROP TABLE IF EXISTS domain_provenance;")
     conn.execute("""
@@ -86,12 +98,15 @@ def _write_domain_provenance(conn, data_mode):
         kind VARCHAR,
         declared BOOLEAN,
         row_count BIGINT,
-        provided BOOLEAN
+        provided BOOLEAN,
+        coverage_start DATE,
+        coverage_end DATE,
+        history_since DATE
     );
     """)
     conn.executemany(
-        "INSERT INTO domain_provenance VALUES (?, ?, ?, ?, ?);", rows)
-    withheld = sorted(d for d, _k, _d, _n, p in rows if not p)
+        "INSERT INTO domain_provenance VALUES (?, ?, ?, ?, ?, ?, ?, ?);", rows)
+    withheld = sorted(row[0] for row in rows if not row[4])
     print("Domain provenance written ({} domains, mode={}). Not provided: {}"
           .format(len(rows), data_mode, withheld or "none"))
 
@@ -214,6 +229,32 @@ def build_warehouse():
           f"[source: {cc_report_month_source}]")
     print(f"Derived trend anchors: {cc_trend_m1}, {cc_trend_m2}")
 
+    # --- Category F windows ------------------------------------------------
+    # Attendance coverage: the days the client DECLARED they have reported.
+    # Undeclared (and always in demo) it is the whole reporting period, which
+    # is the pre-Category-F behaviour and keeps demo byte-identical.
+    #
+    # History depth: how far back a point-in-time headcount may reach. Real
+    # mode with nothing declared resolves to the reporting period START, so
+    # every historical trend month falls before it and renders NULL rather
+    # than a derived-but-understated figure (ruling 2, as amended). Demo
+    # resolves to a date before any sample record, so demo shows its history.
+    cc_attendance_coverage_start = cc_report_month_start
+    cc_attendance_coverage_end = cc_report_month_end
+    cc_employees_history_since = "1900-01-01"
+    if os.getenv("DATA_MODE", "demo") == "real":
+        import onboarding as _onb_f
+        _coverage = _onb_f.load_coverage().get("attendance")
+        if _coverage:
+            cc_attendance_coverage_start = _coverage[0].isoformat()
+            cc_attendance_coverage_end = _coverage[1].isoformat()
+        _history = _onb_f.load_history_depth().get("employees")
+        cc_employees_history_since = (
+            _history.isoformat() if _history else cc_report_month_start)
+    print(f"Attendance coverage: {cc_attendance_coverage_start}"
+          f"..{cc_attendance_coverage_end}")
+    print(f"Employees history since: {cc_employees_history_since}")
+
     # Create placeholders for table-backed views to prevent dbt compilation errors
     conn.execute("""
     CREATE TABLE IF NOT EXISTS command_center_module_checks (
@@ -265,6 +306,17 @@ def build_warehouse():
         _onb.assert_declared_matches_populated(row_counts)
         print(f"Declared-domain guard passed. Row counts: {row_counts}")
 
+        # Declared-but-unsupported: history claimed deeper than the file can
+        # back. Same failure shape as declared-but-empty, and just as silent
+        # if allowed through — a trend chart would present months the file
+        # cannot speak to.
+        try:
+            _earliest = conn.execute(
+                "SELECT MIN(joining_date) FROM employees").fetchone()[0]
+        except Exception:
+            _earliest = None
+        _onb.assert_history_supported("employees", _earliest)
+
     # --- Domain provenance for the API (Phase 2 P0-3, step 2b) ------------
     # The suppression layer has to answer "was this domain provided?" on every
     # request, and it must get the same answer the pipeline did. Writing it
@@ -304,6 +356,11 @@ def build_warehouse():
         # close was not 2026-06 got a correct report_month and a June window.
         "start_date_str": cc_report_month_start,
         "end_date_str": cc_report_month_end,
+        # Category F: the declared attendance coverage window, and how far
+        # back a point-in-time headcount may legitimately reach.
+        "attendance_coverage_start": cc_attendance_coverage_start,
+        "attendance_coverage_end": cc_attendance_coverage_end,
+        "employees_history_since": cc_employees_history_since,
         # Trend anchors, derived above from the same resolved period.
         "trend_m1": cc_trend_m1,
         "trend_m1_end": cc_trend_m1_end,

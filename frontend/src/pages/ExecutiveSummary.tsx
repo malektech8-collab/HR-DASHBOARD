@@ -78,7 +78,7 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({ onNavigate }
 
   // Find overall data quality KPI to show warning
   const dqKpi = dataKpisRows.find(k => k.key === 'data_quality_score');
-  const isDqLow = dqKpi && dqKpi.value < 95.0;
+  const isDqLow = dqKpi && dqKpi.value !== null && dqKpi.value < 95.0;
 
   // Filter top 3 exceptions requiring action (Critical severity first)
   const exceptionsRequiringAction = [...(exceptions ?? [])]

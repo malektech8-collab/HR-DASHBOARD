@@ -1,5 +1,12 @@
 {{ config(materialized='view') }}
 
+-- Category F: every branch reading base_expected_attendance is confined to
+-- DECLARED-COVERED days. `Missing Workday Attendance` is the 494/513 generator
+-- -- one exception per employee per unreported working day, each of which tells
+-- a client their staff were absent when the truth is that we have not been sent
+-- that week. The predicate is explicit on every branch rather than relying on
+-- NULL comparison semantics, so the intent survives the next edit.
+
 -- 1. Missing check-in
     SELECT 
         employee_id,
@@ -9,7 +16,7 @@
         'Warning' AS severity,
         'Request employee to provide check-in time' AS recommended_action
     FROM {{ ref('base_expected_attendance') }}
-    WHERE actual_check_in IS NULL AND actual_check_out IS NOT NULL
+    WHERE coverage_status = 'covered' AND actual_check_in IS NULL AND actual_check_out IS NOT NULL
 
     UNION ALL
 
@@ -22,7 +29,7 @@
         'Warning' AS severity,
         'Request employee to provide check-out time' AS recommended_action
     FROM {{ ref('base_expected_attendance') }}
-    WHERE actual_check_in IS NOT NULL AND actual_check_out IS NULL
+    WHERE coverage_status = 'covered' AND actual_check_in IS NOT NULL AND actual_check_out IS NULL
 
     UNION ALL
 
@@ -35,7 +42,7 @@
         'Warning' AS severity,
         'Record absence or collect punch times' AS recommended_action
     FROM {{ ref('base_expected_attendance') }}
-    WHERE actual_check_in IS NULL AND actual_check_out IS NULL AND absence_days = 0
+    WHERE coverage_status = 'covered' AND actual_check_in IS NULL AND actual_check_out IS NULL AND absence_days = 0
 
     UNION ALL
 
@@ -48,8 +55,11 @@
         'Warning' AS severity,
         'Reconcile check-in or check-out time' AS recommended_action
     FROM {{ ref('base_expected_attendance') }}
-    WHERE (actual_check_in IS NULL AND actual_check_out IS NOT NULL) 
-       OR (actual_check_in IS NOT NULL AND actual_check_out IS NULL)
+    -- The OR needs its own parentheses: AND binds tighter, so without them the
+    -- coverage guard would apply to the first arm only.
+    WHERE coverage_status = 'covered'
+      AND ((actual_check_in IS NULL AND actual_check_out IS NOT NULL)
+        OR (actual_check_in IS NOT NULL AND actual_check_out IS NULL))
 
     UNION ALL
 
@@ -62,7 +72,7 @@
         'Warning' AS severity,
         'Follow up with manager for excuse authorization' AS recommended_action
     FROM {{ ref('base_expected_attendance') }}
-    WHERE calculated_late_minutes > 0 AND (excused_late_minutes IS NULL OR excused_late_minutes = 0)
+    WHERE coverage_status = 'covered' AND calculated_late_minutes > 0 AND (excused_late_minutes IS NULL OR excused_late_minutes = 0)
 
     UNION ALL
 
@@ -75,7 +85,7 @@
         'Warning' AS severity,
         'Review and adjust excused late minutes' AS recommended_action
     FROM {{ ref('base_expected_attendance') }}
-    WHERE excused_late_minutes > calculated_late_minutes
+    WHERE coverage_status = 'covered' AND excused_late_minutes > calculated_late_minutes
 
     UNION ALL
 
@@ -179,4 +189,4 @@
         'Warning' AS severity,
         'Confirm if employee was absent, on leave, or missed punch' AS recommended_action
     FROM {{ ref('base_expected_attendance') }}
-    WHERE attendance_date IS NULL
+    WHERE coverage_status = 'covered' AND attendance_date IS NULL

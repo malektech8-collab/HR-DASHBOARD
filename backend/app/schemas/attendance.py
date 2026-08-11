@@ -27,8 +27,9 @@ class AttendanceTrendsResponse(BaseModel):
 class AttendanceByProjectItem(BaseModel):
     project: str
     headcount: int
-    attendance_compliance_pct: float
-    absence_days: float
+    # Category F: null when no day in this group was reported on.
+    attendance_compliance_pct: Optional[float] = None
+    absence_days: Optional[float] = None
     late_minutes: float
     missing_punches: int
     overtime_hours: float
@@ -43,8 +44,9 @@ class AttendanceByProjectResponse(BaseModel):
 class AttendanceByDepartmentItem(BaseModel):
     department: str
     headcount: int
-    attendance_compliance_pct: float
-    absence_days: float
+    # Category F: null when no day in this group was reported on.
+    attendance_compliance_pct: Optional[float] = None
+    absence_days: Optional[float] = None
     late_minutes: float
     net_late_minutes: float
     missing_punches: int

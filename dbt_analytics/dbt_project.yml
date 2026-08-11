@@ -56,6 +56,16 @@ vars:
   # whatever period the pipeline resolved.
   start_date_str: "2026-06-01"
   end_date_str: "2026-06-30"
+  # Category F. The days the client DECLARED their attendance file covers.
+  # Outside this window a working day with no attendance row is NOT an
+  # absence — it is unreported, and absence_days is NULL. Overridden per run
+  # from the onboarding registry; the default is the demo period.
+  attendance_coverage_start: "2026-06-01"
+  attendance_coverage_end: "2026-06-30"
+  # How far back a point-in-time headcount may legitimately reach. Trend
+  # months ending before this are NULL, never a derived-but-understated
+  # figure. Demo default reaches before any sample record.
+  employees_history_since: "1900-01-01"
   # Trend historical-anchor months for the 2 HYBRID-COMPUTED headcount marts:
   # report_month minus 2 and minus 1. Overridden per run (step 2a.5) — the
   # resolver cycle (5a) noted the intent here and did not carry it out.
