@@ -335,8 +335,50 @@ The standing ruling: Category F enters step 2b **only** if the enumeration shows
 
 So, per the ruling: **the count is 3, and this needs a decision before 2b.** The recommendation is *not* to fold it in. 2b is 110 mechanical annotations with one suppression dependency, and Category F changes what a suppression dependency *is* — from per-domain to per-domain-per-period. Adding it would make the suppression contract change shape mid-cycle. The natural home is a step of its own after 2b, once null-payload semantics are settled, sharing the period-aware series shape sketched in §F.3.
 
-**Open questions for that step**
+**Open questions for that step — ALL RULED 2026-08-11. Settled semantics; the step starts from here.**
 
-6. **Trend depth.** Should a trend mart emit points only for periods the client has actually reported on (a 1-point chart on a first close), or all three with nulls? A 1-point chart is honest but looks broken; three points with two nulls is honest and looks deliberate. Recommend the latter, consistent with the "`null`, never `[]`" ruling.
-7. **`headcount_months` (F2).** A headcount computed from `joining_date`/`termination_date` for an unreported period is *derivable* from data the client did provide. Is that fabrication or legitimate derivation? It differs from the payroll side, which has no data at all. Product decision, and the answer probably differs between the two axes of the same chart.
-8. **Partial-period uploads (F.5).** Does a partial attendance upload suppress the absence measure, scope it to the days uploaded, or render with an explicit coverage caveat? Scoping to uploaded days is the only one that yields a usable number, and it needs a coverage window per domain in the registry.
+### Ruling 1 — trend depth: three points, with nulls
+
+A trend mart emits a point for every period in its window. A period the client has not reported on carries `null`, not a missing point and not a zero.
+
+Consistent with the step-2a ruling *"a suppressed series returns `null`, NEVER `[]`"*. A single-point chart reads as **"no history exists"**; three points with two nulls reads as **"not yet loaded"**, which is the true statement.
+
+### Ruling 2 — `headcount_months` is NOT fabrication, with one condition
+
+Point-in-time headcount computed from client-provided `joining_date` / `termination_date` is **legitimate derivation**, not fabrication. The client gave the facts; the mart is reading them as of a date.
+
+**Condition, and it is the whole ruling:** for a period entirely before the client's earliest data, emit **`NULL`, not `0`**.
+
+> Zero asserts *"nobody worked here"*. Null says *"we don't know"*. **That is the line between derivation and fabrication** — and it is the same tell as every other finding in this cycle: a default supplied where data is absent.
+
+So the two axes of the same chart are ruled differently, and correctly so: `payroll_cost` has no data at all for an unreported month and is suppressed (ruling 1); `active_headcount` is derivable and is emitted — until the derivation runs off the front of the client's data, at which point it is null rather than zero.
+
+### Ruling 3 — partial-period uploads: DECLARED coverage, never inferred
+
+Each domain upload declares its **coverage period**, on the same registry substrate as the declared-domain registry. Absence measures are scoped to declared coverage.
+
+**Do NOT infer coverage from `MIN`/`MAX(attendance_date)`.** That is the inferred-signal trap this codebase has already paid for twice — the `.uploaded` marker, and inferring populated-ness instead of reading a declaration. A client uploading half a month would have the rest **silently dropped** instead of flagged, which converts a loud error into a quiet wrong number.
+
+Declared-but-not-covered **fails loudly**, exactly as declared-but-empty does today in `assert_declared_matches_populated`.
+
+---
+
+## F.7 Boundary — `base_expected_attendance` is a Phase 2 blocker
+
+**Ruled 2026-08-11.** Category F is a separate step after 2b, *except* for `base_expected_attendance`, whose period-fabrication **must land before any real attendance data is loaded**. It is a Phase 2 blocker, not a backlog item.
+
+It outranks the other two Category F members for a reason that is not about chart quality:
+
+> **Fabricated absences are legally consequential in KSA.** Absence records feed **Article 80** dismissal grounds and payroll deduction. A client acting on 51 phantom absences is a **harm vector, not a chart defect.**
+
+`mart_exec_trends` and `mart_workforce_headcount_trend` produce a misleading chart. `base_expected_attendance` produces a record that can be cited in a termination file. The other two can wait for the step after 2b; this one gates real attendance onboarding.
+
+Sequencing that follows:
+
+| | Work | Gate |
+|---|---|---|
+| 1 | **Step 2b** — per-domain suppression (110 annotations, stable contract) | in progress |
+| 2 | **`base_expected_attendance` period-fabrication** | **before any real attendance data is loaded** — Phase 2 exit |
+| 3 | Category F for `mart_exec_trends` + `mart_workforce_headcount_trend` | after 2b, rulings 1–2 above |
+
+Rulings 1–3 are settled, so step 3 does not reopen semantics; step 2 inherits ruling 3 (declared coverage) as its mechanism.
