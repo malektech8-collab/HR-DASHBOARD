@@ -14,6 +14,33 @@ from app.api.data import get_silver_dir
 
 client = TestClient(app)
 
+
+def auth_headers():
+    """P0-2 step 1c: upload and refresh now require an authenticated operator.
+
+    The synthetic-JWT layer itself is untouched and logged as Phase 3
+    hardening; this only exercises the login the app already ships.
+    """
+    from app.core.security import MOCK_USER_DB
+
+    email = next(iter(MOCK_USER_DB))
+    token = client.post(
+        "/api/governance/token",
+        data={"username": email,
+              "password": MOCK_USER_DB[email]["hashed_password"]},
+    ).json()["access_token"]
+    return {"Authorization": "Bearer {}".format(token)}
+
+
+def test_the_mutating_data_routes_require_authentication():
+    """They mutate client data and were reachable unauthenticated, while
+    /api/governance/* has required a token since it was written."""
+    csv_bytes = b"employee_id" + bytes([10]) + b"EMP999"
+    anonymous = client.post("/api/data/upload?table=employees",
+                            files={"file": ("employees.csv", csv_bytes, "text/csv")})
+    assert anonymous.status_code == 401
+    assert client.post("/api/data/refresh").status_code == 401
+
 @pytest.fixture(autouse=True)
 def setup_and_teardown():
     """
@@ -100,33 +127,37 @@ def test_upload_refuses_what_the_filename_used_to_decide():
 
     # 1. a table is required - it is no longer inferred from the filename
     r = client.post("/api/data/upload",
-                    files={"file": ("employees.csv", csv_bytes, "text/csv")})
+                    files={"file": ("employees.csv", csv_bytes, "text/csv")},
+                    headers=auth_headers())
     assert r.status_code == 400
     assert "no longer inferred from the filename" in r.json()["detail"]
 
     # 2. the table must be contracted
     r = client.post("/api/data/upload?table=not_a_domain",
-                    files={"file": ("employees.csv", csv_bytes, "text/csv")})
+                    files={"file": ("employees.csv", csv_bytes, "text/csv")},
+                    headers=auth_headers())
     assert r.status_code == 400
     assert "no contract" in r.json()["detail"]
 
     # 3. parquet is refused - NOT YET, with the precondition in the message
     r = client.post("/api/data/upload?table=employees",
-                    files={"file": ("employees.parquet", b"PAR1", "application/octet-stream")})
+                    files={"file": ("employees.parquet", b"PAR1", "application/octet-stream")},
+                    headers=auth_headers())
     assert r.status_code == 400
     detail = r.json()["detail"]
     assert "not accepted yet" in detail and "dataframe" in detail
 
     # 4. anything else is still refused
     r = client.post("/api/data/upload?table=employees",
-                    files={"file": ("test.txt", b"plain", "text/plain")})
+                    files={"file": ("test.txt", b"plain", "text/plain")},
+                    headers=auth_headers())
     assert r.status_code == 400
     assert "Forbidden file type" in r.json()["detail"]
 
 
 def test_refresh_trigger():
     # Trigger pipeline refresh via subprocess
-    response = client.post("/api/data/refresh")
+    response = client.post("/api/data/refresh", headers=auth_headers())
     assert response.status_code == 200
     data = response.json()
     assert "status" in data

@@ -6,9 +6,16 @@ import subprocess
 import shutil
 import polars as pl
 from typing import List, Dict, Any, Optional
-from fastapi import APIRouter, File, UploadFile, HTTPException, Query, status
+from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Query, status
 from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
+
+# P0-2 step 1c. Upload and refresh MUTATE client data and were reachable
+# unauthenticated, while /api/governance/* has required a token since it was
+# written. This makes the mutating data routes consistent with that; it does
+# not touch the JWT layer itself, which is logged as Phase 3 hardening
+# (docs/phase-2/p0-2-upload-validation-plan.md).
+from app.api.dependencies.auth import get_current_user
 
 router = APIRouter()
 
@@ -303,6 +310,7 @@ def _validated_extension(filename: Optional[str]) -> str:
 def upload_data_file(
     file: UploadFile = File(...),
     table: Optional[str] = Query(None, description="Target contracted domain"),
+    current_user: Dict[str, Any] = Depends(get_current_user),
 ):
     """
     Upload a CSV data file directly to the /app/data/silver/ directory.
@@ -351,7 +359,7 @@ def upload_data_file(
     }
 
 @router.post("/refresh", response_model=RefreshReport)
-def trigger_refresh():
+def trigger_refresh(current_user: Dict[str, Any] = Depends(get_current_user)):
     """
     Systematically run scripts/refresh_all.py via Python subprocess and return pipeline health report.
     """
