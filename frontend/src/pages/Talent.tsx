@@ -31,6 +31,7 @@ import type {
 import { KpiCard } from '../components/cards/KpiCard';
 import { ExceptionTable } from '../components/tables/ExceptionTable';
 import { Star, AlertTriangle } from 'lucide-react';
+import { NotProvided, collectSuppressions } from '../components/ui/NotProvided';
 
 const CATEGORY_COLORS: Record<string, string> = {
   'Outstanding': '#10b981',
@@ -65,7 +66,7 @@ export const Talent: React.FC = () => {
   const [succession, setSuccession] = useState<SuccessionCoverageData | null>(null);
   const [readiness, setReadiness] = useState<SuccessorReadinessData | null>(null);
   const [riskData, setRiskData] = useState<TalentRiskData | null>(null);
-  const [exceptions, setExceptions] = useState<DQExceptionItem[]>([]);
+  const [exceptions, setExceptions] = useState<DQExceptionItem[] | null>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -133,8 +134,31 @@ export const Talent: React.FC = () => {
     );
   }
 
+  // Step 2b: a null container means the client has not provided that
+  // domain. Bind, then guard - the compiler narrows these for the
+  // whole render, so nothing below can draw a zero in their place.
+  const byDepartmentDepartmentsRows = byDepartment?.departments;
+  const byProjectProjectsRows = byProject?.projects;
+  const competencyGapsGapsRows = competencyGaps?.gaps;
+  const distributionDistributionRows = distribution?.distribution;
+  const goalsGoalsRows = goals?.goals;
+  const learningCompletionRows = learning?.completion;
+  const readinessReadinessRows = readiness?.readiness;
+  const riskDataRisksRows = riskData?.risks;
+  const successionCoverageRows = succession?.coverage;
+  const summaryKpisRows = summary?.kpis;
+  const trendsTrendsRows = trends?.trends;
+  if (!byDepartmentDepartmentsRows || !byProjectProjectsRows || !competencyGapsGapsRows || !distributionDistributionRows || !goalsGoalsRows || !learningCompletionRows || !readinessReadinessRows || !riskDataRisksRows || !successionCoverageRows || !summaryKpisRows || !trendsTrendsRows || !exceptions) {
+    return (
+      <NotProvided
+        title="Talent"
+        items={collectSuppressions(byDepartment, byProject, competencyGaps, distribution, goals, learning, readiness, riskData, succession, summary, trends)}
+      />
+    );
+  }
+
   // ---- KPI lookups ----
-  const getKpi = (key: string) => summary?.kpis.find(k => k.key === key);
+  const getKpi = (key: string) => summaryKpisRows.find(k => k.key === key);
 
   const kpiKeys = [
     'employees_reviewed', 'review_completion_pct', 'average_performance_rating',
@@ -144,8 +168,8 @@ export const Talent: React.FC = () => {
   ];
 
   // ---- Chart: Performance Distribution ----
-  const distCategories = distribution?.distribution.map(d => d.performance_category) || [];
-  const distValues = distribution?.distribution.map(d => d.employee_count) || [];
+  const distCategories = distributionDistributionRows.map(d => d.performance_category) || [];
+  const distValues = distributionDistributionRows.map(d => d.employee_count) || [];
   const distColors = distCategories.map(c => CATEGORY_COLORS[c] || '#6366f1');
 
   const distOption = {
@@ -167,9 +191,9 @@ export const Talent: React.FC = () => {
   };
 
   // ---- Chart: Review Trend ----
-  const trendPeriods = trends?.trends.map(t => t.period) || [];
-  const trendRatings = trends?.trends.map(t => t.avg_rating) || [];
-  const trendPcts = trends?.trends.map(t => t.completion_pct) || [];
+  const trendPeriods = trendsTrendsRows.map(t => t.period) || [];
+  const trendRatings = trendsTrendsRows.map(t => t.avg_rating) || [];
+  const trendPcts = trendsTrendsRows.map(t => t.completion_pct) || [];
 
   const trendOption = {
     backgroundColor: 'transparent',
@@ -188,9 +212,9 @@ export const Talent: React.FC = () => {
   };
 
   // ---- Chart: Performance by Department ----
-  const deptNames = byDepartment?.departments.map(d => d.department) || [];
-  const deptHigh = byDepartment?.departments.map(d => d.high_performers) || [];
-  const deptLow = byDepartment?.departments.map(d => d.low_performers) || [];
+  const deptNames = byDepartmentDepartmentsRows.map(d => d.department) || [];
+  const deptHigh = byDepartmentDepartmentsRows.map(d => d.high_performers) || [];
+  const deptLow = byDepartmentDepartmentsRows.map(d => d.low_performers) || [];
 
 
   const deptOption = {
@@ -207,10 +231,10 @@ export const Talent: React.FC = () => {
   };
 
   // ---- Chart: Goal Completion by Department ----
-  const goalDepts = goals?.goals.map(g => g.department) || [];
-  const goalCompleted = goals?.goals.map(g => g.completed_goals) || [];
-  const goalOverdue = goals?.goals.map(g => g.overdue_goals) || [];
-  const goalInProgress = goals?.goals.map(g => g.in_progress_goals) || [];
+  const goalDepts = goalsGoalsRows.map(g => g.department) || [];
+  const goalCompleted = goalsGoalsRows.map(g => g.completed_goals) || [];
+  const goalOverdue = goalsGoalsRows.map(g => g.overdue_goals) || [];
+  const goalInProgress = goalsGoalsRows.map(g => g.in_progress_goals) || [];
 
   const goalOption = {
     backgroundColor: 'transparent',
@@ -227,9 +251,9 @@ export const Talent: React.FC = () => {
   };
 
   // ---- Chart: Competency Gaps ----
-  const compNames = competencyGaps?.gaps.map(g => g.competency_name) || [];
-  const compRequired = competencyGaps?.gaps.map(g => g.avg_required) || [];
-  const compActual = competencyGaps?.gaps.map(g => g.avg_actual) || [];
+  const compNames = competencyGapsGapsRows.map(g => g.competency_name) || [];
+  const compRequired = competencyGapsGapsRows.map(g => g.avg_required) || [];
+  const compActual = competencyGapsGapsRows.map(g => g.avg_actual) || [];
 
   const compOption = {
     backgroundColor: 'transparent',
@@ -245,10 +269,10 @@ export const Talent: React.FC = () => {
   };
 
   // ---- Chart: Learning by Category ----
-  const learnCats = learning?.completion.map(l => l.category) || [];
-  const learnCompleted = learning?.completion.map(l => l.completed_enrollments) || [];
-  const learnTotal = learning?.completion.map(l => l.eligible_enrollments) || [];
-  const learnHours = learning?.completion.map(l => l.total_hours) || [];
+  const learnCats = learningCompletionRows.map(l => l.category) || [];
+  const learnCompleted = learningCompletionRows.map(l => l.completed_enrollments) || [];
+  const learnTotal = learningCompletionRows.map(l => l.eligible_enrollments) || [];
+  const learnHours = learningCompletionRows.map(l => l.total_hours) || [];
 
   const learnOption = {
     backgroundColor: 'transparent',
@@ -268,8 +292,8 @@ export const Talent: React.FC = () => {
   };
 
   // ---- Chart: Successor Readiness ----
-  const readLabels = readiness?.readiness.map(r => r.readiness) || [];
-  const readCounts = readiness?.readiness.map(r => r.successor_count) || [];
+  const readLabels = readinessReadinessRows.map(r => r.readiness) || [];
+  const readCounts = readinessReadinessRows.map(r => r.successor_count) || [];
 
   const readOption = {
     backgroundColor: 'transparent',
@@ -287,7 +311,7 @@ export const Talent: React.FC = () => {
   };
 
   // ---- Chart: Talent Risk Distribution ----
-  const riskSummary = riskData?.risks.reduce<Record<string, number>>((acc, r) => {
+  const riskSummary = riskDataRisksRows.reduce<Record<string, number>>((acc, r) => {
     acc[r.risk_category] = (acc[r.risk_category] || 0) + 1;
     return acc;
   }, {}) || {};
@@ -349,14 +373,14 @@ export const Talent: React.FC = () => {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <div className="bg-card border border-border rounded-xl p-5 transition-theme">
           <h2 className="text-foreground font-semibold text-base mb-4">Performance Distribution</h2>
-          {distribution && distribution.distribution.length > 0
+          {distribution && distributionDistributionRows.length > 0
             ? <ReactECharts option={distOption} style={{ height: 260 }} />
             : <p className="text-muted-foreground text-sm text-center py-16">No data available</p>
           }
         </div>
         <div className="bg-card border border-border rounded-xl p-5 transition-theme">
           <h2 className="text-foreground font-semibold text-base mb-4">Review Completion Trend</h2>
-          {trends && trends.trends.length > 0
+          {trends && trendsTrendsRows.length > 0
             ? <ReactECharts option={trendOption} style={{ height: 260 }} />
             : <p className="text-muted-foreground text-sm text-center py-16">No data available</p>
           }
@@ -367,14 +391,14 @@ export const Talent: React.FC = () => {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <div className="bg-card border border-border rounded-xl p-5 transition-theme">
           <h2 className="text-foreground font-semibold text-base mb-4">Performance by Department</h2>
-          {byDepartment && byDepartment.departments.length > 0
+          {byDepartment && byDepartmentDepartmentsRows.length > 0
             ? <ReactECharts option={deptOption} style={{ height: 260 }} />
             : <p className="text-muted-foreground text-sm text-center py-16">No data available</p>
           }
         </div>
         <div className="bg-card border border-border rounded-xl p-5 transition-theme">
           <h2 className="text-foreground font-semibold text-base mb-4">Goal Completion by Department</h2>
-          {goals && goals.goals.length > 0
+          {goals && goalsGoalsRows.length > 0
             ? <ReactECharts option={goalOption} style={{ height: 260 }} />
             : <p className="text-muted-foreground text-sm text-center py-16">No data available</p>
           }
@@ -385,14 +409,14 @@ export const Talent: React.FC = () => {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <div className="bg-card border border-border rounded-xl p-5 transition-theme">
           <h2 className="text-foreground font-semibold text-base mb-4">Competency Gaps</h2>
-          {competencyGaps && competencyGaps.gaps.length > 0
+          {competencyGaps && competencyGapsGapsRows.length > 0
             ? <ReactECharts option={compOption} style={{ height: 280 }} />
             : <p className="text-muted-foreground text-sm text-center py-16">No data available</p>
           }
         </div>
         <div className="bg-card border border-border rounded-xl p-5 transition-theme">
           <h2 className="text-foreground font-semibold text-base mb-4">Learning Completion by Category</h2>
-          {learning && learning.completion.length > 0
+          {learning && learningCompletionRows.length > 0
             ? <ReactECharts option={learnOption} style={{ height: 280 }} />
             : <p className="text-muted-foreground text-sm text-center py-16">No data available</p>
           }
@@ -402,7 +426,7 @@ export const Talent: React.FC = () => {
       {/* Row 4: Succession Coverage Table */}
       <div className="bg-card border border-border rounded-xl p-5 transition-theme">
         <h2 className="text-foreground font-semibold text-base mb-4">Succession Plan Coverage — Critical Roles</h2>
-        {succession && succession.coverage.length > 0 ? (
+        {succession && successionCoverageRows.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -413,7 +437,7 @@ export const Talent: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {succession.coverage.map((row, i) => (
+                {successionCoverageRows.map((row, i) => (
                   <tr key={i} className="border-b border-border/60 hover:bg-muted/50 transition">
                     <td className="py-2 px-3 text-foreground">{row.role_title}</td>
                     <td className="py-2 px-3 text-right text-muted-foreground">{row.valid_successor_count}</td>
@@ -440,14 +464,14 @@ export const Talent: React.FC = () => {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <div className="bg-card border border-border rounded-xl p-5 transition-theme">
           <h2 className="text-foreground font-semibold text-base mb-4">Successor Readiness</h2>
-          {readiness && readiness.readiness.length > 0
+          {readiness && readinessReadinessRows.length > 0
             ? <ReactECharts option={readOption} style={{ height: 240 }} />
             : <p className="text-muted-foreground text-sm text-center py-16">No data available</p>
           }
         </div>
         <div className="bg-card border border-border rounded-xl p-5 transition-theme">
           <h2 className="text-foreground font-semibold text-base mb-4">Talent Risk Profile</h2>
-          {riskData && riskData.risks.length > 0
+          {riskData && riskDataRisksRows.length > 0
             ? <ReactECharts option={riskOption} style={{ height: 240 }} />
             : <p className="text-muted-foreground text-sm text-center py-16">No data available</p>
           }
@@ -457,7 +481,7 @@ export const Talent: React.FC = () => {
       {/* Performance by Project Table */}
       <div className="bg-card border border-border rounded-xl p-5 transition-theme">
         <h2 className="text-foreground font-semibold text-base mb-4">Performance by Project</h2>
-        {byProject && byProject.projects.length > 0 ? (
+        {byProject && byProjectProjectsRows.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -470,7 +494,7 @@ export const Talent: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {byProject.projects.map((row, i) => (
+                {byProjectProjectsRows.map((row, i) => (
                   <tr key={i} className="border-b border-border/60 hover:bg-muted/50 transition">
                     <td className="py-2 px-3 text-foreground">{row.project}</td>
                     <td className="py-2 px-3 text-right text-muted-foreground">{row.reviewed_count}</td>

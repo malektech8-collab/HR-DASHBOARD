@@ -6,6 +6,7 @@ import { LineChartCard } from '../components/charts/LineChartCard';
 import { BarChartCard } from '../components/charts/BarChartCard';
 import { formatCurrency, formatNumber } from '../lib/formatters';
 import { AlertCircle, ArrowRight, ShieldAlert, Sparkles } from 'lucide-react';
+import { NotProvided, collectSuppressions } from '../components/ui/NotProvided';
 
 interface ExecutiveSummaryProps {
   onNavigate: (page: string) => void;
@@ -13,7 +14,7 @@ interface ExecutiveSummaryProps {
 
 export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({ onNavigate }) => {
   const [data, setData] = useState<ExecutiveSummaryData | null>(null);
-  const [exceptions, setExceptions] = useState<DQExceptionItem[]>([]);
+  const [exceptions, setExceptions] = useState<DQExceptionItem[] | null>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -62,12 +63,25 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({ onNavigate }
     );
   }
 
+  // Step 2b: a null container means the client has not provided that
+  // domain. Bind, then guard - the compiler narrows these for the
+  // whole render, so nothing below can draw a zero in their place.
+  const dataKpisRows = data?.kpis;
+  if (!dataKpisRows) {
+    return (
+      <NotProvided
+        title="The executive summary"
+        items={collectSuppressions(data)}
+      />
+    );
+  }
+
   // Find overall data quality KPI to show warning
-  const dqKpi = data.kpis.find(k => k.key === 'data_quality_score');
+  const dqKpi = dataKpisRows.find(k => k.key === 'data_quality_score');
   const isDqLow = dqKpi && dqKpi.value < 95.0;
 
   // Filter top 3 exceptions requiring action (Critical severity first)
-  const exceptionsRequiringAction = [...exceptions]
+  const exceptionsRequiringAction = [...(exceptions ?? [])]
     .sort((a, b) => {
       if (a.severity.toLowerCase() === 'critical' && b.severity.toLowerCase() !== 'critical') return -1;
       if (a.severity.toLowerCase() !== 'critical' && b.severity.toLowerCase() === 'critical') return 1;
@@ -113,7 +127,7 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({ onNavigate }
 
       {/* KPI Cards Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {data.kpis.map((kpi) => (
+        {dataKpisRows.map((kpi) => (
           <KpiCard
             key={kpi.key}
             label={kpi.label}

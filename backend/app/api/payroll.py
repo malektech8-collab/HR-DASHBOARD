@@ -20,11 +20,12 @@ from app.schemas.payroll import (
 from app.schemas.kpi import KPIItem, DQExceptionItem
 from app.api._report_period import get_report_month
 from typing import List
+from app.api._provenance import Provenance, get_provenance, suppressible
 
 router = APIRouter()
 
 @router.get("/summary", response_model=PayrollSummaryResponse)
-def get_payroll_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), report_month: str = Depends(get_report_month)):
+def get_payroll_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), report_month: str = Depends(get_report_month), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_payroll_kpis").fetchone()
@@ -33,11 +34,16 @@ def get_payroll_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connect
         kpis_cols = [desc[0] for desc in conn.description]
         row_dict = dict(zip(kpis_cols, res))
         
-        recon_res = conn.execute("SELECT * FROM mart_payroll_reconciliation").fetchone()
-        if not recon_res:
-            raise HTTPException(status_code=404, detail="No payroll reconciliation records found")
-        recon_cols = [desc[0] for desc in conn.description]
-        recon_dict = dict(zip(recon_cols, recon_res))
+        # Reconciliation is a separate payload-mode mart; it suppresses on its
+        # own rather than taking the KPI cards down with it.
+        recon_res = prov.rows(
+            "mart_payroll_reconciliation",
+            lambda: conn.execute(
+                "SELECT * FROM mart_payroll_reconciliation").fetchone())
+        recon_dict = None
+        if recon_res is not None:
+            recon_cols = [desc[0] for desc in conn.description]
+            recon_dict = dict(zip(recon_cols, recon_res))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
 
@@ -50,84 +56,84 @@ def get_payroll_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connect
     elif variance_pct < -0.001:
         trend_dir = "down"
 
-    kpis = [
-        KPIItem(
-            key="total_payroll_cost",
-            label="Total Payroll Cost",
-            value=row_dict["total_payroll_cost"],
-            unit="SAR",
-            trend_value=round(abs(variance_pct) * 100, 2),
-            trend_direction=trend_dir,
-            status="warning" if abs(variance_pct) > 0.10 else "neutral"
-        ),
-        KPIItem(
-            key="net_payroll",
-            label="Net Payroll",
-            value=row_dict["net_payroll"],
-            unit="SAR",
-            status="healthy"
-        ),
-        KPIItem(
-            key="employees_paid",
-            label="Employees Paid",
-            value=row_dict["employees_paid"],
-            unit="employees",
-            status="healthy"
-        ),
-        KPIItem(
-            key="avg_cost_per_employee",
-            label="Average Cost per Employee",
-            value=round(row_dict["avg_cost_per_employee"], 2),
-            unit="SAR",
-            status="neutral"
-        ),
-        KPIItem(
-            key="payroll_variance_pct",
-            label="Payroll Variance vs Previous Month",
-            value=round(variance_pct * 100, 2),
-            unit="%",
-            trend_value=round(abs(variance_pct) * 100, 2),
-            trend_direction=trend_dir,
-            status="warning" if abs(variance_pct) > 0.10 else "healthy"
-        ),
-        KPIItem(
-            key="basic_salary_cost",
-            label="Basic Salary Cost",
-            value=row_dict["basic_salary_cost"],
-            unit="SAR",
-            status="neutral"
-        ),
-        KPIItem(
-            key="allowances_cost",
-            label="Allowances Cost",
-            value=row_dict["allowances_cost"],
-            unit="SAR",
-            status="neutral"
-        ),
-        KPIItem(
-            key="overtime_cost",
-            label="Overtime Cost",
-            value=row_dict["overtime_cost"],
-            unit="SAR",
-            status="warning" if row_dict["overtime_cost"] > 10000 else "healthy"
-        ),
-        KPIItem(
-            key="deductions",
-            label="Deductions",
-            value=row_dict["deductions"],
-            unit="SAR",
-            status="neutral"
-        ),
-        KPIItem(
-            key="payroll_exception_count",
-            label="Payroll Exception Count",
-            value=row_dict["payroll_exception_count"],
-            unit="issues",
-            status="critical" if row_dict["payroll_exception_count"] > 0 else "healthy"
-        )
-    ]
+    kpis = prov.kpis("mart_payroll_kpis", [
+        ("total_payroll_cost", lambda: KPIItem(
+                key="total_payroll_cost",
+                label="Total Payroll Cost",
+                value=row_dict["total_payroll_cost"],
+                unit="SAR",
+                trend_value=round(abs(variance_pct) * 100, 2),
+                trend_direction=trend_dir,
+                status="warning" if abs(variance_pct) > 0.10 else "neutral"
+            )),
+        ("net_payroll", lambda: KPIItem(
+                key="net_payroll",
+                label="Net Payroll",
+                value=row_dict["net_payroll"],
+                unit="SAR",
+                status="healthy"
+            )),
+        ("employees_paid", lambda: KPIItem(
+                key="employees_paid",
+                label="Employees Paid",
+                value=row_dict["employees_paid"],
+                unit="employees",
+                status="healthy"
+            )),
+        ("avg_cost_per_employee", lambda: KPIItem(
+                key="avg_cost_per_employee",
+                label="Average Cost per Employee",
+                value=round(row_dict["avg_cost_per_employee"], 2),
+                unit="SAR",
+                status="neutral"
+            )),
+        ("payroll_variance_pct", lambda: KPIItem(
+                key="payroll_variance_pct",
+                label="Payroll Variance vs Previous Month",
+                value=round(variance_pct * 100, 2),
+                unit="%",
+                trend_value=round(abs(variance_pct) * 100, 2),
+                trend_direction=trend_dir,
+                status="warning" if abs(variance_pct) > 0.10 else "healthy"
+            )),
+        ("basic_salary_cost", lambda: KPIItem(
+                key="basic_salary_cost",
+                label="Basic Salary Cost",
+                value=row_dict["basic_salary_cost"],
+                unit="SAR",
+                status="neutral"
+            )),
+        ("allowances_cost", lambda: KPIItem(
+                key="allowances_cost",
+                label="Allowances Cost",
+                value=row_dict["allowances_cost"],
+                unit="SAR",
+                status="neutral"
+            )),
+        ("overtime_cost", lambda: KPIItem(
+                key="overtime_cost",
+                label="Overtime Cost",
+                value=row_dict["overtime_cost"],
+                unit="SAR",
+                status="warning" if row_dict["overtime_cost"] > 10000 else "healthy"
+            )),
+        ("deductions", lambda: KPIItem(
+                key="deductions",
+                label="Deductions",
+                value=row_dict["deductions"],
+                unit="SAR",
+                status="neutral"
+            )),
+        ("payroll_exception_count", lambda: KPIItem(
+                key="payroll_exception_count",
+                label="Payroll Exception Count",
+                value=row_dict["payroll_exception_count"],
+                unit="issues",
+                status="critical" if row_dict["payroll_exception_count"] > 0 else "healthy"
+            )),
+    ])
 
-    reconciliation = PayrollReconciliationResponse(
+    reconciliation = None if recon_dict is None else PayrollReconciliationResponse(
         total_gross_payroll=recon_dict["total_gross_payroll"],
         sum_displayed_components=recon_dict["sum_displayed_components"],
         unreconciled_component_difference=recon_dict["unreconciled_component_difference"],
@@ -143,11 +149,13 @@ def get_payroll_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connect
     return PayrollSummaryResponse(
         report_month=report_month,
         kpis=kpis,
-        reconciliation=reconciliation
+        reconciliation=reconciliation,
+        suppressed=prov.block()
     )
 
 @router.get("/trends", response_model=PayrollTrendsResponse)
-def get_payroll_trends(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(PayrollTrendsResponse, "mart_payroll_trend")
+def get_payroll_trends(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_payroll_trend ORDER BY month").fetchall()
@@ -173,7 +181,8 @@ def get_payroll_trends(conn: duckdb.DuckDBPyConnection = Depends(get_db_connecti
     return PayrollTrendsResponse(trends=trends)
 
 @router.get("/by-project", response_model=PayrollByProjectResponse)
-def get_payroll_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(PayrollByProjectResponse, "mart_payroll_by_project")
+def get_payroll_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_payroll_by_project").fetchall()
@@ -195,7 +204,8 @@ def get_payroll_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_conn
     return PayrollByProjectResponse(projects=projects)
 
 @router.get("/by-department", response_model=PayrollByDepartmentResponse)
-def get_payroll_by_department(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(PayrollByDepartmentResponse, "mart_payroll_by_department")
+def get_payroll_by_department(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_payroll_by_department").fetchall()
@@ -217,7 +227,8 @@ def get_payroll_by_department(conn: duckdb.DuckDBPyConnection = Depends(get_db_c
     return PayrollByDepartmentResponse(departments=departments)
 
 @router.get("/components", response_model=PayrollComponentsResponse)
-def get_payroll_components(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(PayrollComponentsResponse, "mart_payroll_components")
+def get_payroll_components(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_payroll_components").fetchall()
@@ -237,22 +248,28 @@ def get_payroll_components(conn: duckdb.DuckDBPyConnection = Depends(get_db_conn
     return PayrollComponentsResponse(components=components)
 
 @router.get("/variance", response_model=PayrollVarianceResponse)
-def get_payroll_variance(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+def get_payroll_variance(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
-        # Query components variance
-        comp_res = conn.execute("SELECT * FROM mart_payroll_variance_components").fetchall()
-        comp_cols = [desc[0] for desc in conn.description]
-        
-        # Query employees variance
-        emp_res = conn.execute("SELECT * FROM mart_payroll_variance_employees ORDER BY ABS(change_amount) DESC LIMIT 100").fetchall()
-        emp_cols = [desc[0] for desc in conn.description]
+        # Two marts, suppressed independently.
+        comp_res = prov.rows(
+            "mart_payroll_variance_components",
+            lambda: conn.execute(
+                "SELECT * FROM mart_payroll_variance_components").fetchall())
+        comp_cols = [desc[0] for desc in conn.description] if comp_res is not None else []
+
+        emp_res = prov.rows(
+            "mart_payroll_variance_employees",
+            lambda: conn.execute(
+                "SELECT * FROM mart_payroll_variance_employees ORDER BY ABS(change_amount) DESC LIMIT 100"
+            ).fetchall())
+        emp_cols = [desc[0] for desc in conn.description] if emp_res is not None else []
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
 
 
-    components = []
-    for row in comp_res:
+    components = None if comp_res is None else []
+    for row in (comp_res or []):
         row_dict = dict(zip(comp_cols, row))
         components.append(PayrollComponentVarianceItem(
             component=row_dict["component"],
@@ -262,8 +279,8 @@ def get_payroll_variance(conn: duckdb.DuckDBPyConnection = Depends(get_db_connec
             change_pct=row_dict["change_pct"]
         ))
 
-    employees = []
-    for row in emp_res:
+    employees = None if emp_res is None else []
+    for row in (emp_res or []):
         row_dict = dict(zip(emp_cols, row))
         employees.append(PayrollEmployeeVarianceItem(
             employee_id=row_dict["employee_id"],
@@ -274,10 +291,11 @@ def get_payroll_variance(conn: duckdb.DuckDBPyConnection = Depends(get_db_connec
             change_pct=row_dict["change_pct"]
         ))
 
-    return PayrollVarianceResponse(components=components, employees=employees)
+    return PayrollVarianceResponse(components=components, employees=employees, suppressed=prov.block())
 
 @router.get("/exceptions", response_model=PayrollExceptionsResponse)
-def get_payroll_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(PayrollExceptionsResponse, "mart_payroll_exceptions")
+def get_payroll_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_payroll_exceptions").fetchall()

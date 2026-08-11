@@ -38,6 +38,7 @@ import {
   Layers,
   Sparkles
 } from 'lucide-react';
+import { NotProvided, collectSuppressions } from '../components/ui/NotProvided';
 
 interface CommandCenterProps {
   onNavigate: (page: string) => void;
@@ -45,11 +46,11 @@ interface CommandCenterProps {
 
 export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
   const [overview, setOverview] = useState<CommandCenterOverviewData | null>(null);
-  const [modules, setModules] = useState<ModuleHealthItem[]>([]);
-  const [alerts, setAlerts] = useState<PriorityAlertItem[]>([]);
-  const [exceptions, setExceptions] = useState<ExceptionSummaryItem[]>([]);
-  const [freshness, setFreshness] = useState<FreshnessItem[]>([]);
-  const [qaIndex, setQaIndex] = useState<QaIndexItem[]>([]);
+  const [modules, setModules] = useState<ModuleHealthItem[] | null>([]);
+  const [alerts, setAlerts] = useState<PriorityAlertItem[] | null>([]);
+  const [exceptions, setExceptions] = useState<ExceptionSummaryItem[] | null>([]);
+  const [freshness, setFreshness] = useState<FreshnessItem[] | null>([]);
+  const [qaIndex, setQaIndex] = useState<QaIndexItem[] | null>([]);
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -116,6 +117,18 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
           Retry Connection
         </button>
       </div>
+    );
+  }
+
+  // Step 2b: a null container means the client has not provided that
+  // domain. Bind, then guard - the compiler narrows these for the
+  // whole render, so nothing below can draw a zero in their place.
+  if (!alerts || !exceptions || !freshness || !modules || !qaIndex) {
+    return (
+      <NotProvided
+        title="The command centre"
+        items={collectSuppressions()}
+      />
     );
   }
 

@@ -25,13 +25,14 @@ from app.schemas.recruitment import (
 )
 from app.schemas.kpi import KPIItem, DQExceptionItem
 from app.api._report_period import get_report_month
+from app.api._provenance import Provenance, get_provenance, suppressible
 
 router = APIRouter()
 
 
 
 @router.get("/summary", response_model=RecruitmentSummaryResponse)
-def get_recruitment_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), report_month: str = Depends(get_report_month)):
+def get_recruitment_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), report_month: str = Depends(get_report_month), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_recruitment_kpis").fetchone()
@@ -43,90 +44,91 @@ def get_recruitment_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_con
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
 
 
-    kpis = [
-        KPIItem(
-            key="open_requisitions",
-            label="Open Requisitions",
-            value=float(row_dict["open_requisitions"]),
-            unit="requisitions",
-            status="neutral"
-        ),
-        KPIItem(
-            key="approved_vacancies",
-            label="Approved Vacancies",
-            value=float(row_dict["approved_vacancies"]),
-            unit="vacancies",
-            status="neutral"
-        ),
-        KPIItem(
-            key="candidates_in_pipeline",
-            label="Candidates in Pipeline",
-            value=float(row_dict["candidates_in_pipeline"]),
-            unit="candidates",
-            status="healthy" if row_dict["candidates_in_pipeline"] > 0 else "warning"
-        ),
-        KPIItem(
-            key="interviews_scheduled",
-            label="Interviews Scheduled",
-            value=float(row_dict["interviews_scheduled"]),
-            unit="interviews",
-            status="neutral"
-        ),
-        KPIItem(
-            key="offers_extended",
-            label="Offers Extended",
-            value=float(row_dict["offers_extended"]),
-            unit="offers",
-            status="neutral"
-        ),
-        KPIItem(
-            key="offer_acceptance_pct",
-            label="Offer Acceptance %",
-            value=float(row_dict["offer_acceptance_pct"]),
-            unit="%",
-            status="healthy" if row_dict["offer_acceptance_pct"] >= 80.0 else "warning"
-        ),
-        KPIItem(
-            key="hires_this_month",
-            label="Hires This Month",
-            value=float(row_dict["hires_this_month"]),
-            unit="hires",
-            status="neutral"
-        ),
-        KPIItem(
-            key="average_time_to_fill",
-            label="Average Time to Fill",
-            value=float(row_dict["average_time_to_fill"]),
-            unit="days",
-            status="warning" if row_dict["average_time_to_fill"] > 45 else "healthy"
-        ),
-        KPIItem(
-            key="overdue_requisitions",
-            label="Overdue Requisitions",
-            value=float(row_dict["overdue_requisitions"]),
-            unit="requisitions",
-            status="critical" if row_dict["overdue_requisitions"] > 0 else "healthy"
-        ),
-        KPIItem(
-            key="workforce_plan_fulfillment_pct",
-            label="Workforce Plan Fulfillment %",
-            value=float(row_dict["workforce_plan_fulfillment_pct"]),
-            unit="%",
-            status="healthy" if row_dict["workforce_plan_fulfillment_pct"] >= 90.0 else "warning"
-        ),
-        KPIItem(
-            key="recruitment_exception_count",
-            label="Recruitment Exception Count",
-            value=float(row_dict["recruitment_exception_count"]),
-            unit="alerts",
-            status="critical" if row_dict["recruitment_exception_count"] > 0 else "healthy"
-        )
-    ]
+    kpis = prov.kpis("mart_recruitment_kpis", [
+        ("open_requisitions", lambda: KPIItem(
+                key="open_requisitions",
+                label="Open Requisitions",
+                value=float(row_dict["open_requisitions"]),
+                unit="requisitions",
+                status="neutral"
+            )),
+        ("approved_vacancies", lambda: KPIItem(
+                key="approved_vacancies",
+                label="Approved Vacancies",
+                value=float(row_dict["approved_vacancies"]),
+                unit="vacancies",
+                status="neutral"
+            )),
+        ("candidates_in_pipeline", lambda: KPIItem(
+                key="candidates_in_pipeline",
+                label="Candidates in Pipeline",
+                value=float(row_dict["candidates_in_pipeline"]),
+                unit="candidates",
+                status="healthy" if row_dict["candidates_in_pipeline"] > 0 else "warning"
+            )),
+        ("interviews_scheduled", lambda: KPIItem(
+                key="interviews_scheduled",
+                label="Interviews Scheduled",
+                value=float(row_dict["interviews_scheduled"]),
+                unit="interviews",
+                status="neutral"
+            )),
+        ("offers_extended", lambda: KPIItem(
+                key="offers_extended",
+                label="Offers Extended",
+                value=float(row_dict["offers_extended"]),
+                unit="offers",
+                status="neutral"
+            )),
+        ("offer_acceptance_pct", lambda: KPIItem(
+                key="offer_acceptance_pct",
+                label="Offer Acceptance %",
+                value=float(row_dict["offer_acceptance_pct"]),
+                unit="%",
+                status="healthy" if row_dict["offer_acceptance_pct"] >= 80.0 else "warning"
+            )),
+        ("hires_this_month", lambda: KPIItem(
+                key="hires_this_month",
+                label="Hires This Month",
+                value=float(row_dict["hires_this_month"]),
+                unit="hires",
+                status="neutral"
+            )),
+        ("average_time_to_fill", lambda: KPIItem(
+                key="average_time_to_fill",
+                label="Average Time to Fill",
+                value=float(row_dict["average_time_to_fill"]),
+                unit="days",
+                status="warning" if row_dict["average_time_to_fill"] > 45 else "healthy"
+            )),
+        ("overdue_requisitions", lambda: KPIItem(
+                key="overdue_requisitions",
+                label="Overdue Requisitions",
+                value=float(row_dict["overdue_requisitions"]),
+                unit="requisitions",
+                status="critical" if row_dict["overdue_requisitions"] > 0 else "healthy"
+            )),
+        ("workforce_plan_fulfillment_pct", lambda: KPIItem(
+                key="workforce_plan_fulfillment_pct",
+                label="Workforce Plan Fulfillment %",
+                value=float(row_dict["workforce_plan_fulfillment_pct"]),
+                unit="%",
+                status="healthy" if row_dict["workforce_plan_fulfillment_pct"] >= 90.0 else "warning"
+            )),
+        ("recruitment_exception_count", lambda: KPIItem(
+                key="recruitment_exception_count",
+                label="Recruitment Exception Count",
+                value=float(row_dict["recruitment_exception_count"]),
+                unit="alerts",
+                status="critical" if row_dict["recruitment_exception_count"] > 0 else "healthy"
+            )),
+    ])
 
-    return RecruitmentSummaryResponse(report_month=report_month, kpis=kpis)
+    return RecruitmentSummaryResponse(report_month=report_month, kpis=kpis, suppressed=prov.block())
 
 @router.get("/pipeline", response_model=RecruitmentPipelineResponse)
-def get_recruitment_pipeline(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(RecruitmentPipelineResponse, "mart_recruitment_pipeline")
+def get_recruitment_pipeline(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_recruitment_pipeline").fetchall()
@@ -137,7 +139,8 @@ def get_recruitment_pipeline(conn: duckdb.DuckDBPyConnection = Depends(get_db_co
 
 
 @router.get("/trends", response_model=RecruitmentTrendsResponse)
-def get_recruitment_trends(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(RecruitmentTrendsResponse, "mart_recruitment_trends")
+def get_recruitment_trends(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_recruitment_trends ORDER BY period ASC").fetchall()
@@ -148,7 +151,8 @@ def get_recruitment_trends(conn: duckdb.DuckDBPyConnection = Depends(get_db_conn
 
 
 @router.get("/by-project", response_model=RecruitmentByProjectResponse)
-def get_recruitment_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(RecruitmentByProjectResponse, "mart_recruitment_by_project")
+def get_recruitment_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_recruitment_by_project").fetchall()
@@ -167,7 +171,8 @@ def get_recruitment_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_
 
 
 @router.get("/by-department", response_model=RecruitmentByDepartmentResponse)
-def get_recruitment_by_department(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(RecruitmentByDepartmentResponse, "mart_recruitment_by_department")
+def get_recruitment_by_department(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_recruitment_by_department").fetchall()
@@ -186,7 +191,8 @@ def get_recruitment_by_department(conn: duckdb.DuckDBPyConnection = Depends(get_
 
 
 @router.get("/time-to-fill", response_model=TimeToFillResponse)
-def get_time_to_fill(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(TimeToFillResponse, "mart_recruitment_time_to_fill")
+def get_time_to_fill(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_recruitment_time_to_fill").fetchall()
@@ -204,7 +210,8 @@ def get_time_to_fill(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection
 
 
 @router.get("/source-effectiveness", response_model=SourceEffectivenessResponse)
-def get_source_effectiveness(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(SourceEffectivenessResponse, "mart_recruitment_source_effectiveness")
+def get_source_effectiveness(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_recruitment_source_effectiveness").fetchall()
@@ -222,7 +229,8 @@ def get_source_effectiveness(conn: duckdb.DuckDBPyConnection = Depends(get_db_co
 
 
 @router.get("/offers", response_model=OfferAcceptanceResponse)
-def get_offer_acceptance(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(OfferAcceptanceResponse, "mart_offer_acceptance")
+def get_offer_acceptance(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_offer_acceptance").fetchall()
@@ -233,7 +241,8 @@ def get_offer_acceptance(conn: duckdb.DuckDBPyConnection = Depends(get_db_connec
 
 
 @router.get("/onboarding", response_model=OnboardingStatusResponse)
-def get_onboarding_status(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(OnboardingStatusResponse, "mart_onboarding_status")
+def get_onboarding_status(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_onboarding_status").fetchall()
@@ -244,7 +253,8 @@ def get_onboarding_status(conn: duckdb.DuckDBPyConnection = Depends(get_db_conne
 
 
 @router.get("/workforce-plan", response_model=WorkforcePlanVsActualResponse)
-def get_workforce_plan_vs_actual(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(WorkforcePlanVsActualResponse, "mart_workforce_plan_vs_actual")
+def get_workforce_plan_vs_actual(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_workforce_plan_vs_actual").fetchall()
@@ -263,7 +273,8 @@ def get_workforce_plan_vs_actual(conn: duckdb.DuckDBPyConnection = Depends(get_d
 
 
 @router.get("/exceptions", response_model=RecruitmentExceptionsResponse)
-def get_recruitment_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(RecruitmentExceptionsResponse, "mart_recruitment_exceptions")
+def get_recruitment_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_recruitment_exceptions").fetchall()

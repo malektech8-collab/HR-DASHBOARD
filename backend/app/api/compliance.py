@@ -19,13 +19,14 @@ from app.schemas.compliance import (
 )
 from app.schemas.kpi import KPIItem, DQExceptionItem
 from app.api._report_period import get_report_month
+from app.api._provenance import Provenance, get_provenance, suppressible
 
 router = APIRouter()
 
 
 
 @router.get("/summary", response_model=ComplianceSummaryResponse)
-def get_compliance_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), report_month: str = Depends(get_report_month)):
+def get_compliance_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), report_month: str = Depends(get_report_month), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_compliance_kpis").fetchone()
@@ -36,90 +37,91 @@ def get_compliance_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_conn
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
 
-    kpis = [
-        KPIItem(
-            key="saudization_pct",
-            label="Saudization %",
-            value=row_dict["saudization_pct"],
-            unit="%",
-            status="healthy" if row_dict["saudization_pct"] >= 30.0 else ("warning" if row_dict["saudization_pct"] >= 15.0 else "critical")
-        ),
-        KPIItem(
-            key="saudi_headcount",
-            label="Saudi Headcount",
-            value=float(row_dict["saudi_headcount"]),
-            unit="employees",
-            status="neutral"
-        ),
-        KPIItem(
-            key="non_saudi_headcount",
-            label="Non-Saudi Headcount",
-            value=float(row_dict["non_saudi_headcount"]),
-            unit="employees",
-            status="neutral"
-        ),
-        KPIItem(
-            key="employees_missing_nationality",
-            label="Employees Missing Nationality",
-            value=float(row_dict["employees_missing_nationality"]),
-            unit="employees",
-            status="critical" if row_dict["employees_missing_nationality"] > 0 else "healthy"
-        ),
-        KPIItem(
-            key="iqamas_expiring_30",
-            label="Iqamas Expiring in 30 Days",
-            value=float(row_dict["iqamas_expiring_30"]),
-            unit="documents",
-            status="warning" if row_dict["iqamas_expiring_30"] > 0 else "healthy"
-        ),
-        KPIItem(
-            key="work_permits_expiring_30",
-            label="Work Permits Expiring in 30 Days",
-            value=float(row_dict["work_permits_expiring_30"]),
-            unit="documents",
-            status="warning" if row_dict["work_permits_expiring_30"] > 0 else "healthy"
-        ),
-        KPIItem(
-            key="iqamas_expired",
-            label="Expired Iqamas",
-            value=float(row_dict["iqamas_expired"]),
-            unit="documents",
-            status="critical" if row_dict["iqamas_expired"] > 0 else "healthy"
-        ),
-        KPIItem(
-            key="work_permits_expired",
-            label="Expired Work Permits",
-            value=float(row_dict["work_permits_expired"]),
-            unit="documents",
-            status="critical" if row_dict["work_permits_expired"] > 0 else "healthy"
-        ),
-        KPIItem(
-            key="gosi_missing_count",
-            label="GOSI Missing / Not Registered Count",
-            value=float(row_dict["gosi_missing_count"]),
-            unit="employees",
-            status="critical" if row_dict["gosi_missing_count"] > 0 else "healthy"
-        ),
-        KPIItem(
-            key="wps_exception_count",
-            label="WPS Exception Count",
-            value=float(row_dict["wps_exception_count"]),
-            unit="employees",
-            status="critical" if row_dict["wps_exception_count"] > 0 else "healthy"
-        ),
-        KPIItem(
-            key="compliance_exception_count",
-            label="Compliance Exception Count",
-            value=float(row_dict["compliance_exception_count"]),
-            unit="issues",
-            status="critical" if row_dict["compliance_exception_count"] > 0 else "healthy"
-        )
-    ]
+    kpis = prov.kpis("mart_compliance_kpis", [
+        ("saudization_pct", lambda: KPIItem(
+                key="saudization_pct",
+                label="Saudization %",
+                value=row_dict["saudization_pct"],
+                unit="%",
+                status="healthy" if row_dict["saudization_pct"] >= 30.0 else ("warning" if row_dict["saudization_pct"] >= 15.0 else "critical")
+            )),
+        ("saudi_headcount", lambda: KPIItem(
+                key="saudi_headcount",
+                label="Saudi Headcount",
+                value=float(row_dict["saudi_headcount"]),
+                unit="employees",
+                status="neutral"
+            )),
+        ("non_saudi_headcount", lambda: KPIItem(
+                key="non_saudi_headcount",
+                label="Non-Saudi Headcount",
+                value=float(row_dict["non_saudi_headcount"]),
+                unit="employees",
+                status="neutral"
+            )),
+        ("employees_missing_nationality", lambda: KPIItem(
+                key="employees_missing_nationality",
+                label="Employees Missing Nationality",
+                value=float(row_dict["employees_missing_nationality"]),
+                unit="employees",
+                status="critical" if row_dict["employees_missing_nationality"] > 0 else "healthy"
+            )),
+        ("iqamas_expiring_30", lambda: KPIItem(
+                key="iqamas_expiring_30",
+                label="Iqamas Expiring in 30 Days",
+                value=float(row_dict["iqamas_expiring_30"]),
+                unit="documents",
+                status="warning" if row_dict["iqamas_expiring_30"] > 0 else "healthy"
+            )),
+        ("work_permits_expiring_30", lambda: KPIItem(
+                key="work_permits_expiring_30",
+                label="Work Permits Expiring in 30 Days",
+                value=float(row_dict["work_permits_expiring_30"]),
+                unit="documents",
+                status="warning" if row_dict["work_permits_expiring_30"] > 0 else "healthy"
+            )),
+        ("iqamas_expired", lambda: KPIItem(
+                key="iqamas_expired",
+                label="Expired Iqamas",
+                value=float(row_dict["iqamas_expired"]),
+                unit="documents",
+                status="critical" if row_dict["iqamas_expired"] > 0 else "healthy"
+            )),
+        ("work_permits_expired", lambda: KPIItem(
+                key="work_permits_expired",
+                label="Expired Work Permits",
+                value=float(row_dict["work_permits_expired"]),
+                unit="documents",
+                status="critical" if row_dict["work_permits_expired"] > 0 else "healthy"
+            )),
+        ("gosi_missing_count", lambda: KPIItem(
+                key="gosi_missing_count",
+                label="GOSI Missing / Not Registered Count",
+                value=float(row_dict["gosi_missing_count"]),
+                unit="employees",
+                status="critical" if row_dict["gosi_missing_count"] > 0 else "healthy"
+            )),
+        ("wps_exception_count", lambda: KPIItem(
+                key="wps_exception_count",
+                label="WPS Exception Count",
+                value=float(row_dict["wps_exception_count"]),
+                unit="employees",
+                status="critical" if row_dict["wps_exception_count"] > 0 else "healthy"
+            )),
+        ("compliance_exception_count", lambda: KPIItem(
+                key="compliance_exception_count",
+                label="Compliance Exception Count",
+                value=float(row_dict["compliance_exception_count"]),
+                unit="issues",
+                status="critical" if row_dict["compliance_exception_count"] > 0 else "healthy"
+            )),
+    ])
 
-    return ComplianceSummaryResponse(report_month=report_month, kpis=kpis)
+    return ComplianceSummaryResponse(report_month=report_month, kpis=kpis, suppressed=prov.block())
 
 @router.get("/saudization", response_model=SaudizationSummaryResponse)
-def get_saudization(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(SaudizationSummaryResponse, "mart_saudization_summary")
+def get_saudization(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_saudization_summary ORDER BY period ASC").fetchall()
@@ -141,7 +143,8 @@ def get_saudization(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)
     return SaudizationSummaryResponse(trends=trends)
 
 @router.get("/saudization-by-project", response_model=SaudizationByProjectResponse)
-def get_saudization_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(SaudizationByProjectResponse, "mart_saudization_by_project")
+def get_saudization_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_saudization_by_project ORDER BY project ASC").fetchall()
@@ -164,7 +167,8 @@ def get_saudization_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_
     return SaudizationByProjectResponse(projects=projects)
 
 @router.get("/saudization-by-department", response_model=SaudizationByDepartmentResponse)
-def get_saudization_by_department(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(SaudizationByDepartmentResponse, "mart_saudization_by_department")
+def get_saudization_by_department(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_saudization_by_department ORDER BY department ASC").fetchall()
@@ -187,7 +191,8 @@ def get_saudization_by_department(conn: duckdb.DuckDBPyConnection = Depends(get_
     return SaudizationByDepartmentResponse(departments=departments)
 
 @router.get("/document-expiry", response_model=DocumentExpiryResponse)
-def get_document_expiry(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(DocumentExpiryResponse, "mart_document_expiry")
+def get_document_expiry(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_document_expiry").fetchall()
@@ -207,7 +212,8 @@ def get_document_expiry(conn: duckdb.DuckDBPyConnection = Depends(get_db_connect
     return DocumentExpiryResponse(buckets=buckets)
 
 @router.get("/gosi", response_model=GosiStatusResponse)
-def get_gosi(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(GosiStatusResponse, "mart_gosi_status")
+def get_gosi(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_gosi_status ORDER BY gosi_status ASC").fetchall()
@@ -245,7 +251,8 @@ def get_wps(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     return WpsStatusResponse(statuses=statuses)
 
 @router.get("/exceptions", response_model=ComplianceExceptionsResponse)
-def get_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(ComplianceExceptionsResponse, "mart_compliance_exceptions")
+def get_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_compliance_exceptions").fetchall()

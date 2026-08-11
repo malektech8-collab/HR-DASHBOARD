@@ -1,23 +1,29 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional
-from app.schemas.kpi import KPIItem, DQExceptionItem
+from app.schemas.kpi import KPIItem, DQExceptionItem, SuppressionItem
 
 class PayrollReconciliationResponse(BaseModel):
-    total_gross_payroll: float
-    sum_displayed_components: float
-    unreconciled_component_difference: float
-    net_payroll: float
-    gross_minus_deductions: float
-    net_unreconciled_difference: float
-    project_payroll_total: float
-    department_payroll_total: float
-    employees_paid_count: int
-    payroll_exception_count: int
+    total_gross_payroll: Optional[float] = None
+    sum_displayed_components: Optional[float] = None
+    unreconciled_component_difference: Optional[float] = None
+    net_payroll: Optional[float] = None
+    gross_minus_deductions: Optional[float] = None
+    net_unreconciled_difference: Optional[float] = None
+    project_payroll_total: Optional[float] = None
+    department_payroll_total: Optional[float] = None
+    employees_paid_count: Optional[int] = None
+    payroll_exception_count: Optional[int] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class PayrollSummaryResponse(BaseModel):
     report_month: str
-    kpis: List[KPIItem]
-    reconciliation: PayrollReconciliationResponse
+    kpis: Optional[List[KPIItem]] = None
+    reconciliation: Optional[PayrollReconciliationResponse] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class PayrollTrendItem(BaseModel):
     month: str
@@ -30,7 +36,10 @@ class PayrollTrendItem(BaseModel):
     headcount: int
 
 class PayrollTrendsResponse(BaseModel):
-    trends: List[PayrollTrendItem]
+    trends: Optional[List[PayrollTrendItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class PayrollByProjectItem(BaseModel):
     project: str
@@ -39,7 +48,10 @@ class PayrollByProjectItem(BaseModel):
     overtime_cost: float
 
 class PayrollByProjectResponse(BaseModel):
-    projects: List[PayrollByProjectItem]
+    projects: Optional[List[PayrollByProjectItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class PayrollByDepartmentItem(BaseModel):
     department: str
@@ -48,14 +60,20 @@ class PayrollByDepartmentItem(BaseModel):
     overtime_cost: float
 
 class PayrollByDepartmentResponse(BaseModel):
-    departments: List[PayrollByDepartmentItem]
+    departments: Optional[List[PayrollByDepartmentItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class PayrollComponentItem(BaseModel):
     component: str
     amount: float
 
 class PayrollComponentsResponse(BaseModel):
-    components: List[PayrollComponentItem]
+    components: Optional[List[PayrollComponentItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class PayrollComponentVarianceItem(BaseModel):
     component: str
@@ -73,8 +91,13 @@ class PayrollEmployeeVarianceItem(BaseModel):
     change_pct: float
 
 class PayrollVarianceResponse(BaseModel):
-    components: List[PayrollComponentVarianceItem]
-    employees: List[PayrollEmployeeVarianceItem]
+    components: Optional[List[PayrollComponentVarianceItem]] = None
+    employees: Optional[List[PayrollEmployeeVarianceItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class PayrollExceptionsResponse(BaseModel):
-    exceptions: List[DQExceptionItem]
+    exceptions: Optional[List[DQExceptionItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)

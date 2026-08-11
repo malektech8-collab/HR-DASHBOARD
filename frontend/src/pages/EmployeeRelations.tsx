@@ -25,6 +25,7 @@ import type {
 import { KpiCard } from '../components/cards/KpiCard';
 import { ExceptionTable } from '../components/tables/ExceptionTable';
 import { Scale, ShieldAlert, FileText, RefreshCw } from 'lucide-react';
+import { NotProvided, collectSuppressions } from '../components/ui/NotProvided';
 
 export const EmployeeRelations: React.FC = () => {
   const [summary, setSummary] = useState<ErSummaryData | null>(null);
@@ -35,7 +36,7 @@ export const EmployeeRelations: React.FC = () => {
   const [caseStatus, setCaseStatus] = useState<ErCaseStatusData | null>(null);
   const [slaPerf, setSlaPerf] = useState<ErSlaPerformanceData | null>(null);
   const [agingBuckets, setAgingBuckets] = useState<ErAgingBucketData | null>(null);
-  const [exceptions, setExceptions] = useState<DQExceptionItem[]>([]);
+  const [exceptions, setExceptions] = useState<DQExceptionItem[] | null>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -103,9 +104,29 @@ export const EmployeeRelations: React.FC = () => {
     );
   }
 
+  // Step 2b: a null container means the client has not provided that
+  // domain. Bind, then guard - the compiler narrows these for the
+  // whole render, so nothing below can draw a zero in their place.
+  const agingBucketsBucketsRows = agingBuckets?.buckets;
+  const byDepartmentDepartmentsRows = byDepartment?.departments;
+  const byProjectProjectsRows = byProject?.projects;
+  const caseStatusStatusesRows = caseStatus?.statuses;
+  const caseTypesCaseTypesRows = caseTypes?.case_types;
+  const slaPerfPerformanceRows = slaPerf?.performance;
+  const summaryKpisRows = summary?.kpis;
+  const trendsTrendsRows = trends?.trends;
+  if (!agingBucketsBucketsRows || !byDepartmentDepartmentsRows || !byProjectProjectsRows || !caseStatusStatusesRows || !caseTypesCaseTypesRows || !slaPerfPerformanceRows || !summaryKpisRows || !trendsTrendsRows) {
+    return (
+      <NotProvided
+        title="Employee relations"
+        items={collectSuppressions(agingBuckets, byDepartment, byProject, caseStatus, caseTypes, slaPerf, summary, trends)}
+      />
+    );
+  }
+
   // Map KPIs lists to easy-to-read cards
   const getKpi = (key: string) => {
-    return summary.kpis.find(k => k.key === key) || {
+    return summaryKpisRows.find(k => k.key === key) || {
       key,
       label: key.replace(/_/g, ' '),
       value: 0,
@@ -127,9 +148,9 @@ export const EmployeeRelations: React.FC = () => {
   const erExceptionKpi = getKpi("er_exception_count");
 
   // Chart 1: Monthly Cases Trend Options
-  const trendMonths = trends?.trends.map(t => t.period) || [];
-  const trendNewCases = trends?.trends.map(t => t.new_cases) || [];
-  const trendClosedCases = trends?.trends.map(t => t.closed_cases) || [];
+  const trendMonths = trendsTrendsRows.map(t => t.period) || [];
+  const trendNewCases = trendsTrendsRows.map(t => t.new_cases) || [];
+  const trendClosedCases = trendsTrendsRows.map(t => t.closed_cases) || [];
 
   const trendOption = {
     backgroundColor: 'transparent',
@@ -178,9 +199,9 @@ export const EmployeeRelations: React.FC = () => {
   };
 
   // Chart 2: Cases by Project (Horizontal Bar)
-  const projectLabels = byProject?.projects.map(p => p.project) || [];
-  const projectTotal = byProject?.projects.map(p => p.total_cases) || [];
-  const projectOpen = byProject?.projects.map(p => p.open_cases) || [];
+  const projectLabels = byProjectProjectsRows.map(p => p.project) || [];
+  const projectTotal = byProjectProjectsRows.map(p => p.total_cases) || [];
+  const projectOpen = byProjectProjectsRows.map(p => p.open_cases) || [];
 
   const projectOption = {
     backgroundColor: 'transparent',
@@ -226,9 +247,9 @@ export const EmployeeRelations: React.FC = () => {
   };
 
   // Chart 3: Cases by Department (Vertical Bar)
-  const deptLabels = byDepartment?.departments.map(d => d.department) || [];
-  const deptTotal = byDepartment?.departments.map(d => d.total_cases) || [];
-  const deptCompliance = byDepartment?.departments.map(d => d.compliance_pct) || [];
+  const deptLabels = byDepartmentDepartmentsRows.map(d => d.department) || [];
+  const deptTotal = byDepartmentDepartmentsRows.map(d => d.total_cases) || [];
+  const deptCompliance = byDepartmentDepartmentsRows.map(d => d.compliance_pct) || [];
 
   const departmentOption = {
     backgroundColor: 'transparent',
@@ -290,7 +311,7 @@ export const EmployeeRelations: React.FC = () => {
   };
 
   // Chart 4: Case Type Donut
-  const caseTypeData = caseTypes?.case_types.map(t => ({
+  const caseTypeData = caseTypesCaseTypesRows.map(t => ({
     name: t.case_type,
     value: t.case_count
   })) || [];
@@ -327,7 +348,7 @@ export const EmployeeRelations: React.FC = () => {
   };
 
   // Chart 5: Case Status Donut
-  const caseStatusData = caseStatus?.statuses.map(s => ({
+  const caseStatusData = caseStatusStatusesRows.map(s => ({
     name: s.case_status,
     value: s.case_count
   })) || [];
@@ -364,8 +385,8 @@ export const EmployeeRelations: React.FC = () => {
   };
 
   // Chart 6: SLA Performance Breakdown (Separate ER vs HR)
-  const erSlaItems = slaPerf?.performance.filter(p => p.category_type === 'ER') || [];
-  const hrSlaItems = slaPerf?.performance.filter(p => p.category_type === 'HR_REQ') || [];
+  const erSlaItems = slaPerfPerformanceRows.filter(p => p.category_type === 'ER') || [];
+  const hrSlaItems = slaPerfPerformanceRows.filter(p => p.category_type === 'HR_REQ') || [];
 
   const slaCategories = [...erSlaItems.map(p => p.category), ...hrSlaItems.map(p => p.category)];
   const slaValues = [...erSlaItems.map(p => p.compliance_pct), ...hrSlaItems.map(p => p.compliance_pct)];
@@ -424,7 +445,7 @@ export const EmployeeRelations: React.FC = () => {
   const bucketOrder = ['0_3_days', '4_7_days', '8_14_days', '15_30_days', '30_plus_days'];
   const bucketLabels = ['0-3 Days', '4-7 Days', '8-14 Days', '15-30 Days', '30+ Days'];
   const bucketCounts = bucketOrder.map(b => {
-    const found = agingBuckets?.buckets.find(item => item.aging_bucket === b);
+    const found = agingBucketsBucketsRows.find(item => item.aging_bucket === b);
     return found ? found.case_count : 0;
   });
 

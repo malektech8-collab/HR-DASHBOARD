@@ -22,6 +22,7 @@ import { KpiCard } from '../components/cards/KpiCard';
 import { ExceptionTable } from '../components/tables/ExceptionTable';
 import { Sparkles, ShieldAlert, TrendingUp, TrendingDown } from 'lucide-react';
 import { formatCurrency, formatPercent, formatNumber } from '../lib/formatters';
+import { NotProvided, collectSuppressions } from '../components/ui/NotProvided';
 
 export const Payroll: React.FC = () => {
   const [summary, setSummary] = useState<PayrollSummaryData | null>(null);
@@ -30,7 +31,7 @@ export const Payroll: React.FC = () => {
   const [departments, setDepartments] = useState<PayrollByDepartmentData | null>(null);
   const [components, setComponents] = useState<PayrollComponentsData | null>(null);
   const [variance, setVariance] = useState<PayrollVarianceData | null>(null);
-  const [exceptions, setExceptions] = useState<DQExceptionItem[]>([]);
+  const [exceptions, setExceptions] = useState<DQExceptionItem[] | null>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -89,9 +90,27 @@ export const Payroll: React.FC = () => {
     );
   }
 
+  // Step 2b: a null container means the client has not provided that
+  // domain. Bind, then guard - the compiler narrows these for the
+  // whole render, so nothing below can draw a zero in their place.
+  const componentsComponentsRows = components?.components;
+  const departmentsDepartmentsRows = departments?.departments;
+  const projectsProjectsRows = projects?.projects;
+  const summaryKpisRows = summary?.kpis;
+  const trendsTrendsRows = trends?.trends;
+  const varianceEmployeesRows = variance?.employees;
+  if (!componentsComponentsRows || !departmentsDepartmentsRows || !projectsProjectsRows || !summaryKpisRows || !trendsTrendsRows || !varianceEmployeesRows) {
+    return (
+      <NotProvided
+        title="Payroll"
+        items={collectSuppressions(components, departments, projects, summary, trends, variance)}
+      />
+    );
+  }
+
   // Helper to find KPI by key safely
   const getKpi = (key: string) => {
-    return summary.kpis.find(k => k.key === key) || {
+    return summaryKpisRows.find(k => k.key === key) || {
       key,
       label: key.replace(/_/g, ' '),
       value: 0,
@@ -151,7 +170,7 @@ export const Payroll: React.FC = () => {
     grid: { top: '8%', left: '3%', right: '4%', bottom: '15%', containLabel: true },
     xAxis: {
       type: 'category',
-      data: trends.trends.map(t => t.month),
+      data: trendsTrendsRows.map(t => t.month),
       axisLine: { lineStyle: { color: '#1e293b' } },
       axisLabel: { color: '#64748b', fontSize: 11, fontFamily: 'Inter, sans-serif' }
     },
@@ -163,7 +182,7 @@ export const Payroll: React.FC = () => {
     series: [
       {
         name: 'Total Payroll Cost',
-        data: trends.trends.map(t => t.total_payroll_cost),
+        data: trendsTrendsRows.map(t => t.total_payroll_cost),
         type: 'line',
         smooth: 0.3,
         itemStyle: { color: '#38bdf8' },
@@ -177,7 +196,7 @@ export const Payroll: React.FC = () => {
       },
       {
         name: 'Net Payroll',
-        data: trends.trends.map(t => t.net_payroll),
+        data: trendsTrendsRows.map(t => t.net_payroll),
         type: 'line',
         smooth: 0.3,
         itemStyle: { color: '#10b981' },
@@ -241,7 +260,7 @@ export const Payroll: React.FC = () => {
           }
         },
         labelLine: { show: false },
-        data: components.components
+        data: componentsComponentsRows
           .filter(c => c.component !== 'Deductions' && c.component !== 'Unreconciled / Exception Amount') // Exclude deductions and negative unreconciled amount from pie sectors
           .map(c => ({
             name: c.component,
@@ -263,7 +282,7 @@ export const Payroll: React.FC = () => {
       textStyle: { color: '#f8fafc', fontSize: 12, fontFamily: 'Inter, sans-serif' },
       formatter: (params: any) => {
         const item = params[0];
-        const projData = projects.projects[item.dataIndex];
+        const projData = projectsProjectsRows[item.dataIndex];
         return `
           <div style="padding: 4px 8px;">
             <div style="color: #64748b; font-size: 10px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px;">${item.name}</div>
@@ -276,7 +295,7 @@ export const Payroll: React.FC = () => {
     grid: { top: '8%', left: '3%', right: '4%', bottom: '5%', containLabel: true },
     xAxis: {
       type: 'category',
-      data: projects.projects.map(p => p.project),
+      data: projectsProjectsRows.map(p => p.project),
       axisLine: { lineStyle: { color: '#1e293b' } },
       axisLabel: { color: '#64748b', fontSize: 11, fontFamily: 'Inter, sans-serif' }
     },
@@ -288,7 +307,7 @@ export const Payroll: React.FC = () => {
     series: [
       {
         name: 'Project Payroll Cost',
-        data: projects.projects.map(p => p.total_payroll_cost),
+        data: projectsProjectsRows.map(p => p.total_payroll_cost),
         type: 'bar',
         barWidth: '35%',
         itemStyle: {
@@ -310,7 +329,7 @@ export const Payroll: React.FC = () => {
       textStyle: { color: '#f8fafc', fontSize: 12, fontFamily: 'Inter, sans-serif' },
       formatter: (params: any) => {
         const item = params[0];
-        const deptData = departments.departments[item.dataIndex];
+        const deptData = departmentsDepartmentsRows[item.dataIndex];
         return `
           <div style="padding: 4px 8px;">
             <div style="color: #64748b; font-size: 10px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px;">${item.name}</div>
@@ -323,7 +342,7 @@ export const Payroll: React.FC = () => {
     grid: { top: '8%', left: '3%', right: '4%', bottom: '5%', containLabel: true },
     xAxis: {
       type: 'category',
-      data: departments.departments.map(d => d.department),
+      data: departmentsDepartmentsRows.map(d => d.department),
       axisLine: { lineStyle: { color: '#1e293b' } },
       axisLabel: { color: '#64748b', fontSize: 11, fontFamily: 'Inter, sans-serif' }
     },
@@ -335,7 +354,7 @@ export const Payroll: React.FC = () => {
     series: [
       {
         name: 'Department Payroll Cost',
-        data: departments.departments.map(d => d.total_payroll_cost),
+        data: departmentsDepartmentsRows.map(d => d.total_payroll_cost),
         type: 'bar',
         barWidth: '35%',
         itemStyle: {
@@ -368,7 +387,7 @@ export const Payroll: React.FC = () => {
     grid: { top: '8%', left: '3%', right: '4%', bottom: '5%', containLabel: true },
     xAxis: {
       type: 'category',
-      data: projects.projects.map(p => p.project),
+      data: projectsProjectsRows.map(p => p.project),
       axisLine: { lineStyle: { color: '#1e293b' } },
       axisLabel: { color: '#64748b', fontSize: 11, fontFamily: 'Inter, sans-serif' }
     },
@@ -380,7 +399,7 @@ export const Payroll: React.FC = () => {
     series: [
       {
         name: 'Overtime Cost',
-        data: projects.projects.map(p => p.overtime_cost),
+        data: projectsProjectsRows.map(p => p.overtime_cost),
         type: 'bar',
         barWidth: '35%',
         itemStyle: {
@@ -392,7 +411,7 @@ export const Payroll: React.FC = () => {
   };
 
   // Filter out negative values from employee variance for highlighting anomalies
-  const topVariances = variance.employees.slice(0, 5);
+  const topVariances = varianceEmployeesRows.slice(0, 5);
 
   return (
     <div className="space-y-8 animate-fadeIn text-foreground">

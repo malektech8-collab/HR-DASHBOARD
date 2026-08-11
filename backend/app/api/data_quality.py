@@ -2,11 +2,12 @@ from fastapi import APIRouter, HTTPException, Depends
 from app.db.duckdb_client import get_db_connection
 import duckdb
 from app.schemas.kpi import DataQualitySummaryResponse, DQExceptionsResponse, DQExceptionItem
+from app.api._provenance import Provenance, get_provenance, suppressible
 
 router = APIRouter()
 
 @router.get("/summary", response_model=DataQualitySummaryResponse)
-def get_data_quality_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+def get_data_quality_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_data_quality_summary").fetchone()
@@ -17,18 +18,32 @@ def get_data_quality_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_co
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
 
+    # Column mode: each counter is nulled on its own. data_quality_score is
+    # scope_to_provided (ruling 1) and passes through; scoping it to the
+    # provided domains is step 4.
+    mart = "mart_data_quality_summary"
     return DataQualitySummaryResponse(
-        data_quality_score=round(row_dict["data_quality_score"] * 100, 2),
-        missing_manager_count=row_dict["missing_manager_count"],
-        missing_project_count=row_dict["missing_project_count"],
-        missing_cost_center_count=row_dict["missing_cost_center_count"],
-        missing_nationality_count=row_dict["missing_nationality_count"],
-        duplicate_employee_count=row_dict["duplicate_employee_count"],
-        invalid_payroll_count=row_dict["invalid_payroll_count"]
+        data_quality_score=prov.value(
+            mart, "data_quality_score",
+            round(row_dict["data_quality_score"] * 100, 2)),
+        missing_manager_count=prov.value(
+            mart, "missing_manager_count", row_dict["missing_manager_count"]),
+        missing_project_count=prov.value(
+            mart, "missing_project_count", row_dict["missing_project_count"]),
+        missing_cost_center_count=prov.value(
+            mart, "missing_cost_center_count", row_dict["missing_cost_center_count"]),
+        missing_nationality_count=prov.value(
+            mart, "missing_nationality_count", row_dict["missing_nationality_count"]),
+        duplicate_employee_count=prov.value(
+            mart, "duplicate_employee_count", row_dict["duplicate_employee_count"]),
+        invalid_payroll_count=prov.value(
+            mart, "invalid_payroll_count", row_dict["invalid_payroll_count"]),
+        suppressed=prov.block()
     )
 
 @router.get("/exceptions", response_model=DQExceptionsResponse)
-def get_data_quality_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(DQExceptionsResponse, "mart_data_quality_exceptions")
+def get_data_quality_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_data_quality_exceptions").fetchall()
