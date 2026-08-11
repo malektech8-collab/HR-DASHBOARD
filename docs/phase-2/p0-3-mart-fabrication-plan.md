@@ -105,6 +105,8 @@ Checked and cleared, so the fix does not over-reach:
 
 **The only structural fabricator is `base_expected_attendance`.** Everything else in categories B–D is `COALESCE`/`COUNT` over an empty input — pervasive, but uniform and therefore addressable in one place.
 
+> **Superseded in part, 2026-08-11.** That sentence is true of *domain* absence and false of *period* absence. Two more structural fabricators exist — `mart_exec_trends` and `mart_workforce_headcount_trend` — and they fabricate for periods rather than for domains, which is why this audit did not see them: their domain is declared and populated. See **Category F** at the end of this document.
+
 ---
 
 ## (a) Suppression at the API layer
@@ -211,3 +213,130 @@ Phase 2's exit criterion is *real workforce, Saudization and payroll figures ren
 ---
 
 **Prepared for chief-architect review. No implementation performed.**
+
+---
+
+# Category F — period-level fabrication
+
+**Added 2026-08-11**, after step 2a.5 merged (`7dc423b`). **Open item. Not fixed, not scoped into 2b** — see §F.6.
+Raised by the chief architect on reviewing the 2a.5 diff.
+
+## F.1 The finding
+
+`mart_exec_trends`, final select:
+
+```sql
+WITH payroll_months AS (
+        SELECT payroll_period AS month, SUM(gross_pay) AS payroll_cost
+        FROM {{ ref('stg_payroll') }}
+        GROUP BY payroll_period
+    ),
+    headcount_months AS (
+        SELECT '{{ var('trend_m1') }}' AS month, COUNT(DISTINCT employee_id) …
+        UNION ALL
+        SELECT '{{ var('trend_m2') }}' AS month, COUNT(DISTINCT employee_id) …
+        UNION ALL
+        SELECT '{{ var('report_month') }}' AS month, COUNT(DISTINCT employee_id) …
+    )
+    SELECT hm.month, hm.active_headcount,
+           COALESCE(pm.payroll_cost, 0.0) AS payroll_cost      -- <-- here
+    FROM headcount_months hm
+    LEFT JOIN payroll_months pm ON hm.month = pm.month
+```
+
+Step 2a.5 fixed the labels — `trend_m1`/`trend_m2` now derive as `report_month` minus 2 and minus 1 instead of sitting on the repo's `2026-04`/`2026-05` literals. **The join did not change.** It is still a LEFT JOIN from three generated month rows onto whatever payroll months happen to exist.
+
+## F.2 The one-month-close scenario
+
+A client uploads **one month of payroll** — the ordinary first real close. Everything the system checks is satisfied:
+
+| check | result |
+|---|---|
+| `report_month` resolution | correct, derived from that close |
+| trend anchor labels | correct, the two preceding months |
+| period coverage gate (2a.5 §13.4) | passes — payroll covers the reporting period |
+| declared-domain guard | passes — payroll declared and populated |
+| `metric_provenance.yml` | `mart_exec_trends` is payload-mode with payroll present, so nothing suppresses |
+| dbt | 157/157, 11/11 |
+
+And both historical `payroll_cost` values are `COALESCE`d to `0.0`. **The chart reads as a business that paid nobody for two months.**
+
+Before 2a.5: wrong labels *and* zeros. After: right labels, same zeros, **more credible**. That is the third instance this cycle of a correct fix making a fabricated number more plausible, with the same tell each time — **a default supplied where data is absent**.
+
+`headcount_months` has the same shape from the other side. It computes historical headcount from `joining_date`/`termination_date` against the employee master, so it asserts a headcount for two periods the client never reported on. Derived from real rows, but still a claim about an unreported period — and unlike the payroll side it has no `COALESCE`, so it produces a *confident* number rather than a zero.
+
+## F.3 Why this is structural, and why it is not a 2a.5 fix
+
+`config/metric_provenance.yml` answers one question:
+
+> **was this domain provided?**
+
+Category F asks a different one:
+
+> **was this domain provided FOR THIS PERIOD?**
+
+Domain coverage and period coverage are not the same question, and only the first is modelled. Every mechanism built so far — the declared-domain registry, the provenance registry, the guard, and 2a.5's own period coverage gate — resolves to a single answer per domain. A trend mart needs an answer *per period per domain*, and there is nowhere in the current design to put one.
+
+The 2a.5 coverage gate is the closest thing and it is deliberately weaker: it asserts the uploaded file **overlaps** the reporting period. It says nothing about the two preceding periods, and it cannot, because they are not periods the client claimed to be reporting on.
+
+**Suppression must become period-aware.** A suppressed series returns `null`, never `[]` (ruling, step 2a) — the period-aware form of that is a series whose *points* can be null individually, not only the series as a whole. `[{m: '2026-05', cost: null}, {m: '2026-06', cost: null}, {m: '2026-07', cost: 446175}]` is the honest shape, and it is not expressible today.
+
+## F.4 The enumeration
+
+Mechanical, not hand-searched: regex over all 157 model sources for **(a)** rows generated for a period — a `range()`/`generate_series`, a `SELECT '{{ var(X) }}' AS …` where `X` is one of the twelve date-shaped vars in `dbt_project.yml`, or a date literal as a column — and **(b)** what is then done with them. The discriminator is that the generated rows are *periods*: a `'Saudi'`/`'Non-Saudi'` literal in `mart_workforce_distribution` is a category label, not a period, and is correctly excluded.
+
+The first pass required a LEFT JOIN and **missed `mart_workforce_headcount_trend`**, which has no join at all. Category F is therefore two sub-shapes.
+
+### F1 — generated period rows, joined to a source that can miss
+
+| Model | Generates | Join | Default on miss |
+|---|---|---|---|
+| `mart_exec_trends` | `var(trend_m1, trend_m2, report_month)` | LEFT | `COALESCE(…, 0.0)` |
+| `base_expected_attendance` | `range()` over the reporting month | CROSS + LEFT | `CASE WHEN … IS NULL THEN 1.0` |
+
+### F2 — generated period rows, computed directly, nothing to miss
+
+| Model | Generates | Source |
+|---|---|---|
+| `mart_workforce_headcount_trend` | `var(trend_m1, trend_m2, report_month)` | `stg_employees`, `base_active_workforce` |
+
+### Same shape, but gated to demo — not Category F in real mode
+
+Five marts generate historical rows from hard-coded literals inside `{% if var('data_mode') == 'demo' %}`. In real mode they emit exactly one row, for `report_month`:
+
+`mart_attendance_trend` · `mart_er_case_trend` · `mart_recruitment_trends` · `mart_saudization_summary` · `mart_talent_review_trends`
+
+Listed because the jinja gate is the *only* thing separating them from Category F. Ungating any of them — or adding a sixth trend mart without the gate — recreates it. `mart_exec_trends` and `mart_workforce_headcount_trend` are precisely the two that were built without the gate, which is why they are the two that carry the defect.
+
+### Cleared on inspection
+
+- `base_command_center_report_context` — emits the period as metadata. No measure.
+- `mart_exec_kpis` — labels a single current-period row with `report_month`; its date literals are window bounds, not generated rows.
+
+## F.5 `base_expected_attendance` is Category F as well as Category A
+
+The audit above records it as Category A: at `declared: [employees]`, attendance absent, it manufactures `absence_days` (re-measured in 2a.5 §13.3 as `working days in the period × active employees` — 494 at 19 employees in June, 513 in August). Domain-level suppression handles that case.
+
+It is **also** Category F, and domain-level suppression does not handle that case. With attendance **declared, populated, and covering the reporting period** — so the 2a.5 gate passes — a *partial* upload still generates an expected row for every working day. Measured, 2 employees over July 2026 with a 2-row attendance file:
+
+```
+attendance rows uploaded      : 2      (both valid, both inside the period)
+expected-attendance rows      : 52     (26 working days × 2 employees)
+of those, marked absent       : 51
+```
+
+51 fabricated absences from a domain that passes every check the system has. This is the strongest argument that period-awareness has to be modelled rather than approximated: a mid-month or partial upload is ordinary onboarding behaviour, not misuse.
+
+## F.6 Scope ruling and the count
+
+The standing ruling: Category F enters step 2b **only** if the enumeration shows it is larger than `mart_exec_trends` and `mart_workforce_headcount_trend`, in which case the count goes to the architect first.
+
+**It is larger, by one: three models, not two.** `base_expected_attendance` is the third, it was already known as Category A, and it is the largest by magnitude — 51 fabricated rows in the measurement above versus two fabricated points per trend chart.
+
+So, per the ruling: **the count is 3, and this needs a decision before 2b.** The recommendation is *not* to fold it in. 2b is 110 mechanical annotations with one suppression dependency, and Category F changes what a suppression dependency *is* — from per-domain to per-domain-per-period. Adding it would make the suppression contract change shape mid-cycle. The natural home is a step of its own after 2b, once null-payload semantics are settled, sharing the period-aware series shape sketched in §F.3.
+
+**Open questions for that step**
+
+6. **Trend depth.** Should a trend mart emit points only for periods the client has actually reported on (a 1-point chart on a first close), or all three with nulls? A 1-point chart is honest but looks broken; three points with two nulls is honest and looks deliberate. Recommend the latter, consistent with the "`null`, never `[]`" ruling.
+7. **`headcount_months` (F2).** A headcount computed from `joining_date`/`termination_date` for an unreported period is *derivable* from data the client did provide. Is that fabrication or legitimate derivation? It differs from the payroll side, which has no data at all. Product decision, and the answer probably differs between the two axes of the same chart.
+8. **Partial-period uploads (F.5).** Does a partial attendance upload suppress the absence measure, scope it to the days uploaded, or render with an explicit coverage caveat? Scoping to uploaded days is the only one that yields a usable number, and it needs a coverage window per domain in the registry.
