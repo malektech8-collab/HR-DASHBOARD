@@ -1,8 +1,7 @@
 {{ config(materialized='view') }}
 
 WITH anchor AS (
-        SELECT last_day(CAST(MAX(payroll_period) || '-01' AS DATE)) AS anchor_date
-        FROM {{ ref('stg_payroll') }}
+        SELECT last_day(CAST('{{ var('report_month') }}-01' AS DATE)) AS anchor_date
     ),
     emp_stats AS (
         SELECT 

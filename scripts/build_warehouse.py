@@ -20,7 +20,6 @@ sys.path.append(_backend_dir)
 # scripts/ on the path so the guard can import onboarding/canonical_schema
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from app.db.duckdb_client import configure_s3
-from app.config import settings
 
 
 
@@ -93,7 +92,10 @@ def build_warehouse():
 
     # --- Cycle 5a: resolve report_month from the DATA (single source of truth) ---
     # Prefer payroll_period (the canonical, always-complete monthly HR close),
-    # then compliance period; fall back to the ONE system-wide default in config.
+    # then compliance period. Returns None when neither is available — the
+    # DECISION about what to do with that is not made here; it belongs to
+    # report_period.resolve_report_month(), which fails closed in real mode
+    # rather than reaching for a constant (Phase 2 P0-3, step 2a.5).
     def _derive_report_month():
         for query in (
             "SELECT CAST(MAX(payroll_period) AS VARCHAR) FROM payroll",
@@ -105,20 +107,44 @@ def build_warehouse():
                     return str(row[0])[:7]
             except Exception:
                 pass
-        return settings.DEFAULT_REPORT_MONTH
+        return None
 
-    cc_report_month = _derive_report_month()
+    import report_period as _rp
     try:
-        year, month = map(int, cc_report_month.split("-"))
-    except Exception:
-        cc_report_month = settings.DEFAULT_REPORT_MONTH
-        year, month = map(int, cc_report_month.split("-"))
+        cc_report_month, cc_report_month_source = _rp.resolve_report_month(
+            _derive_report_month())
+    except _rp.ReportMonthError:
+        # Abort BEFORE dbt, and close the connection first so the DuckDB file
+        # is not left locked by a failed run.
+        conn.close()
+        raise
+    year, month = map(int, cc_report_month.split("-"))
     last_day = calendar.monthrange(year, month)[1]
     cc_report_month_end = f"{cc_report_month}-{last_day:02d}"
     cc_report_month_start = f"{cc_report_month}-01"
     # Item 5: talent period now tracks the same resolved month (drops the old
     # separate talent_report_month + hardcoded '-30' last-day bug) — see dbt_vars.
-    print(f"Resolved report_month from data: {cc_report_month} ({cc_report_month_start}..{cc_report_month_end})")
+
+    # Trend anchors: the two months preceding the reporting period. dbt_project.yml
+    # declared these as literals with a note saying they were "to be replaced by
+    # report_month-relative derivation in the resolver cycle (5a)". That never
+    # happened, so mart_exec_trends and mart_workforce_headcount_trend labelled
+    # their history 2026-04 / 2026-05 whatever the client's period was — and
+    # mart_exec_trends LEFT JOINs payroll on that label, so the cost silently
+    # came back 0. Derived here from the one resolved period (step 2a.5).
+    def _month_before(offset):
+        index = year * 12 + (month - 1) - offset
+        y, m = divmod(index, 12)
+        m += 1
+        return f"{y:04d}-{m:02d}", f"{y:04d}-{m:02d}-{calendar.monthrange(y, m)[1]:02d}"
+
+    cc_trend_m1, cc_trend_m1_end = _month_before(2)
+    cc_trend_m2, cc_trend_m2_end = _month_before(1)
+
+    print(f"Resolved report_month: {cc_report_month} "
+          f"({cc_report_month_start}..{cc_report_month_end}) "
+          f"[source: {cc_report_month_source}]")
+    print(f"Derived trend anchors: {cc_trend_m1}, {cc_trend_m2}")
 
     # Create placeholders for table-backed views to prevent dbt compilation errors
     conn.execute("""
@@ -190,6 +216,21 @@ def build_warehouse():
         # Item 5: talent period tracks the resolved month via the same monthrange end.
         "talent_month_start": cc_report_month_start,
         "talent_month_end": cc_report_month_end,
+        # The attendance window. Same resolved period, no second idiom — these
+        # ARE report_month_start/end, passed under the names the two attendance
+        # models happen to read. Until step 2a.5 they were left at the
+        # dbt_project.yml literals, so base_attendance_current filtered to June
+        # 2026 and base_expected_attendance generated a June calendar no matter
+        # what period the pipeline had just resolved. Unlike the payroll case
+        # that needed no operator override to go wrong: any client whose payroll
+        # close was not 2026-06 got a correct report_month and a June window.
+        "start_date_str": cc_report_month_start,
+        "end_date_str": cc_report_month_end,
+        # Trend anchors, derived above from the same resolved period.
+        "trend_m1": cc_trend_m1,
+        "trend_m1_end": cc_trend_m1_end,
+        "trend_m2": cc_trend_m2,
+        "trend_m2_end": cc_trend_m2_end,
         "default_sla_days": rules.get("recruitment_rules", {}).get("default_sla_days", 45),
         "disciplinary_sla_days": rules.get("er_rules", {}).get("sla_days", {}).get("Disciplinary", 14),
         "grievance_sla_days": rules.get("er_rules", {}).get("sla_days", {}).get("Grievance", 10),

@@ -1,8 +1,7 @@
 {{ config(materialized='view') }}
 
 WITH anchor AS (
-        SELECT last_day(CAST(MAX(payroll_period) || '-01' AS DATE)) AS anchor_date
-        FROM {{ ref('stg_payroll') }}
+        SELECT last_day(CAST('{{ var('report_month') }}-01' AS DATE)) AS anchor_date
     )
     -- 1. Missing Manager
     SELECT 
@@ -70,7 +69,7 @@ WITH anchor AS (
         'Hold {{ ref('stg_payroll') }} run and check termination status/period logic' AS recommended_action
     FROM {{ ref('stg_payroll') }} p
     JOIN {{ ref('stg_employees') }} e ON p.employee_id = e.employee_id
-    WHERE e.status IN ('Inactive', 'Terminated') AND p.payroll_period = (SELECT MAX(payroll_period) FROM {{ ref('stg_payroll') }})
+    WHERE e.status IN ('Inactive', 'Terminated') AND p.payroll_period = '{{ var('report_month') }}'
     UNION ALL
     -- 9. Active employee missing contract end date
     SELECT 

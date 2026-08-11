@@ -14,10 +14,23 @@ class Settings(BaseSettings):
     # 'real' is set locally (uncommitted, via .env / env var) for real-data use.
     DATA_MODE: str = "demo"
 
-    # The ONE hardcoded report-month fallback for the whole system (cycle 5a).
-    # Mirrors the dbt_project.yml `report_month` default. Both the pipeline
-    # (build_warehouse.py) derivation fallback and the API resolver's no-row/
-    # error fallback read THIS value, so they can never drift apart.
+    # The reporting period the whole system reports on, when the operator sets
+    # it explicitly. Honoured in BOTH modes and it OVERRIDES derivation from the
+    # data — a reporting period is an operator decision, not a data artefact.
+    # Unset (None) means "derive it". Format: YYYY-MM.
+    REPORT_MONTH: str | None = None
+
+    # DEMO ONLY. The sample-data report month, mirroring dbt_project.yml's
+    # `report_month` default.
+    #
+    # This was the system-wide fallback until Phase 2 P0-3 (2a.5). It is no
+    # longer reachable in real mode, and that is the point: with payroll and
+    # compliance both absent, derivation used to land here, so a client
+    # onboarding employees-only got every date window silently anchored to a
+    # constant in this repo. Before anchor convergence that produced a NULL
+    # anchor and a zero that LOOKED wrong; after it, a stale-but-plausible
+    # number that looks RIGHT. Real mode now aborts and names REPORT_MONTH
+    # instead. See scripts/report_period.py.
     DEFAULT_REPORT_MONTH: str = "2026-06"
 
     # S3 / Cloud Storage configurations

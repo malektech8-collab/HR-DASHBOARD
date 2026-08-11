@@ -8,7 +8,7 @@ WITH payroll_months AS (
         GROUP BY payroll_period
     ),
     headcount_months AS (
-        -- Historical anchors are placeholders; to be replaced by report_month-relative derivation in the resolver cycle (5a).
+        -- Historical anchors: report_month minus 2 and minus 1, derived in build_warehouse.py (step 2a.5).
         SELECT
             '{{ var('trend_m1') }}' AS month,
             COUNT(DISTINCT employee_id) AS active_headcount

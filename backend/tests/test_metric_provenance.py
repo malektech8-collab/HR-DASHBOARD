@@ -337,3 +337,61 @@ def test_registry_shape(registry):
 def test_contracted_domains_match_the_contracts_directory(registry):
     import canonical_schema as cs
     assert set(registry["domains"]["contracted"]) == set(cs.available_tables())
+
+
+# --------------------------------------------------------------------------
+# anchor convergence (step 2a.5)
+# --------------------------------------------------------------------------
+
+MODELS_DIR = os.path.join(_ROOT, "dbt_analytics", "models")
+
+# The only legitimate MAX(payroll_period) in the codebase: there it IS the
+# freshness measurement (max_source_date per module), one of seven parallel
+# per-module MAXes, not an anchor. Converging it would replace a measurement
+# with a constant and destroy the data-freshness feature.
+ANCHOR_EXEMPT = {"base_command_center_data_freshness.sql"}
+
+
+def _model_files():
+    for root, _dirs, files in os.walk(MODELS_DIR):
+        for fn in files:
+            if fn.endswith(".sql"):
+                yield fn, os.path.join(root, fn)
+
+
+def test_no_model_derives_an_anchor_from_max_payroll_period():
+    """Two anchor idioms are a duplicate source of truth for the reporting
+    date — the same class as .uploaded, the hardcoded REAL_SOURCEABLE, and the
+    four dead report_month resolvers. They agree on demo data and diverge when
+    payroll is absent, which silently zeroed probation_count on a DECLARED
+    domain. There is one idiom now: var('report_month').
+    """
+    offenders = []
+    for fn, path in _model_files():
+        if fn in ANCHOR_EXEMPT:
+            continue
+        if "MAX(payroll_period)" in io.open(path, encoding="utf-8").read():
+            offenders.append(fn)
+    assert not offenders, (
+        "model(s) still derive a value from MAX(payroll_period) instead of "
+        "var('report_month'):" + NEWLINE + "  " + (NEWLINE + "  ").join(sorted(offenders)))
+
+
+def test_the_freshness_exemption_still_needs_its_max():
+    """Guards the exemption itself: if data_freshness stops using
+    MAX(payroll_period), the exemption is stale and should be removed."""
+    path = os.path.join(MODELS_DIR, "marts", "base_command_center_data_freshness.sql")
+    assert "MAX(payroll_period)" in io.open(path, encoding="utf-8").read(), (
+        "the anchor exemption for base_command_center_data_freshness is stale")
+
+
+def test_converged_models_use_the_canonical_idiom():
+    """All anchor sites must match base_document_expiry's existing idiom."""
+    expected = "var('report_month')"
+    for fn in ("mart_workforce_kpis.sql", "mart_workforce_contract_expiry.sql",
+               "mart_workforce_iqama_expiry.sql", "mart_workforce_exceptions.sql",
+               "mart_payroll_exceptions.sql", "base_payroll_current.sql",
+               "base_payroll_previous.sql"):
+        path = os.path.join(MODELS_DIR, "marts", fn)
+        text = io.open(path, encoding="utf-8").read()
+        assert expected in text, "{} does not use {}".format(fn, expected)

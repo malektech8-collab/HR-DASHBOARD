@@ -8,6 +8,7 @@ from validate_schema import (validate_csv, SchemaValidationError, dq_severity, d
 from derivations import derive_column
 import canonical_schema as _cs
 import onboarding as _onb
+import report_period as _rp
 
 # Transport for EXCEPTION-severity contract violations: written here, merged
 # into the gold DQ report by validate_data.py so they reach the Data Quality
@@ -92,6 +93,105 @@ def _write_contract_exceptions(violations):
         CONTRACT_EXCEPTIONS_PATH)
     print("[contract] wrote {} exception row(s) to {}".format(
         len(rows), CONTRACT_EXCEPTIONS_PATH))
+
+
+# Domains whose models narrow to the reporting period, and the column that
+# carries it. See report_period.assert_period_is_covered for what each one
+# loses when its file does not cover that period.
+PERIOD_COLUMNS = {
+    "payroll": "payroll_period",
+    "compliance": "period",
+    "attendance": "attendance_date",
+}
+
+
+def _periods_in_csv(path, column, exists):
+    """The period labels present in an uploaded file, or None if unreadable."""
+    if not exists(path):
+        return None
+    try:
+        frame = pl.read_csv(path, columns=[column])
+    except Exception:
+        # Column absent. In real mode the contract gate has already rejected
+        # the file; there is nothing to compare here.
+        return None
+    return [v for v in frame[column].to_list() if v]
+
+
+def resolve_ingest_report_month(files, exists=os.path.exists):
+    """The period the pipeline WILL resolve, computed from the files at hand.
+
+    build_warehouse resolves it after ingest, from silver. To gate at ingest we
+    need it before, so this mirrors report_period's precedence exactly —
+    operator, then payroll close, then compliance — over the same files that
+    are about to become silver. Any divergence between this and the pipeline's
+    resolution would make the gate test a period the marts do not use, which is
+    why it reads the same columns in the same order rather than guessing.
+    """
+    operator = _rp.operator_report_month()
+    if operator:
+        return operator, _rp.SOURCE_OPERATOR
+    for table, column in (("payroll", "payroll_period"), ("compliance", "period")):
+        values = _periods_in_csv(files[table], column, exists) or []
+        months = sorted({m for m in (_rp.normalise_month(v) for v in values) if m})
+        if months:
+            return months[-1], _rp.SOURCE_DATA
+    return None, None
+
+
+def check_period_coverage(files, exists=os.path.exists):
+    """Every period-narrowed domain must cover the reporting period.
+
+    Returns (month, source, checked-domains). A domain with no file, or an
+    undeclared one pointing at the sentinel path, is skipped.
+
+    Under pure derivation the payroll check is vacuous — the period IS payroll's
+    latest close — and that is the point: the same rule covers the derivation
+    and override cases without a special case for either. Compliance and
+    attendance are NOT vacuous under derivation: the period comes from the
+    payroll close, and nothing obliges a client's compliance or attendance file
+    to be the same month.
+    """
+    month, source = resolve_ingest_report_month(files, exists=exists)
+    if not month:
+        return None, None, []
+    checked = []
+    for table in sorted(PERIOD_COLUMNS):
+        values = _periods_in_csv(files[table], PERIOD_COLUMNS[table], exists)
+        if values is None:
+            continue
+        _rp.assert_period_is_covered(values, month=month, source=table)
+        checked.append(table)
+    return month, source, checked
+
+
+def check_payroll_period_matches_report_month(payroll_csv, exists=os.path.exists):
+    """Reject an operator period the uploaded payroll file does not contain.
+
+    Step 2a.5 replaced `payroll_period = (SELECT MAX(payroll_period) ...)` with
+    `payroll_period = '{{ var("report_month") }}'` at every anchor site. Under
+    derivation those are the same value by construction. Under an operator
+    override they need not be, and the filter then matches NOTHING:
+
+        payroll declared, payroll populated, silver correct,
+        declared-domain guard green, dbt green, payroll cost 0.
+
+    Every check passes and the number is a lie. So the disagreement is caught
+    here, at ingest, with both periods named — never discovered downstream as
+    an empty result. No operator period set means derivation is in charge, and
+    derivation cannot disagree with itself.
+    """
+    month = _rp.operator_report_month()
+    if not month or not exists(payroll_csv):
+        return None
+    try:
+        periods = pl.read_csv(payroll_csv, columns=["payroll_period"])
+    except Exception:
+        # No payroll_period column. In real mode the contract gate has already
+        # rejected the file; there is nothing to compare here.
+        return None
+    return _rp.assert_payroll_period_matches(
+        periods["payroll_period"].to_list(), month=month)
 
 
 def ingest(data_mode=None):
@@ -235,6 +335,16 @@ def ingest(data_mode=None):
         # written after those blocks, in _finalise_undeclared().
         for table in empty_domains:
             files[table] = f"{UNDECLARED_SENTINEL_DIR}/{table}.csv"
+
+    # Reporting period vs every domain whose models narrow to it. Runs in BOTH
+    # modes and after the contract gate, so `files[...]` already points at
+    # whichever file will actually be ingested — or, for an undeclared domain,
+    # at the sentinel path that cannot exist, which makes it a no-op.
+    period, period_source, period_checked = check_period_coverage(
+        files, exists=original_exists)
+    if period:
+        print(f"[report_month] period {period} [{period_source}] covered by: "
+              f"{', '.join(period_checked) or 'no period-bearing domain'}.")
 
     if contract_exceptions:
         _write_contract_exceptions(contract_exceptions)
