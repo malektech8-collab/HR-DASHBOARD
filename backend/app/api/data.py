@@ -6,7 +6,8 @@ import subprocess
 import shutil
 import polars as pl
 from typing import List, Dict, Any, Optional
-from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Query, status
+from fastapi import (APIRouter, Body, Depends, File, HTTPException, Query,
+                     UploadFile, status)
 from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
 
@@ -67,76 +68,19 @@ class RefreshReport(BaseModel):
     stderr: str
     execution_time_seconds: float
 
-def compile_csv_to_parquet(csv_path: str, parquet_path: str, table_name: str):
-    """
-    Reads a CSV file and compiles it to Parquet, enforcing types matching ingest_raw.py.
-    """
-    try:
-        df = pl.read_csv(csv_path, null_values=[""])
-        
-        # Apply specific type casting based on table name.
-        # Columns are only cast if present, since uploaded files may omit optional columns.
-        if table_name == "employees":
-            # Same derived-column rule as scripts/ingest_raw.py. The UI upload
-            # is a second ingest path and a client is more likely to use it
-            # than data/raw/, so it must behave identically: derive is_saudi
-            # only when the column is absent, never guess an unknown value.
-            if "is_saudi" not in df.columns and "nationality" in df.columns:
-                scripts_dir = get_scripts_dir()
-                if scripts_dir not in sys.path:
-                    sys.path.insert(0, scripts_dir)
-                from derivations import derive_column
-                import canonical_schema as _cs
-                spec = next(c for c in _cs.columns("employees")
-                            if c["name"] == "is_saudi")
-                derived = derive_column(spec, df["nationality"].to_list())
-                df = df.with_columns(pl.Series("is_saudi", derived, dtype=pl.Boolean))
-            date_cols = ["joining_date", "termination_date", "contract_end_date"]
-            numeric_cols = ["basic_salary", "housing_allowance", "transport_allowance"]
-            df = df.with_columns(
-                [pl.col(c).str.to_date("%Y-%m-%d", strict=False) for c in date_cols if c in df.columns] +
-                [pl.col(c).cast(pl.Float64, strict=False) for c in numeric_cols if c in df.columns] +
-                ([pl.col("is_saudi").cast(pl.Boolean, strict=False)] if "is_saudi" in df.columns else [])
-            )
-        elif table_name == "payroll":
-            numeric_cols = [
-                "basic_salary", "housing_allowance", "transport_allowance",
-                "other_allowances", "overtime_amount", "deductions",
-                "gross_pay", "net_pay"
-            ]
-            df = df.with_columns([
-                pl.col(c).cast(pl.Float64, strict=False) for c in numeric_cols if c in df.columns
-            ])
-        elif table_name == "attendance":
-            date_cols = ["attendance_date"]
-            datetime_cols = ["scheduled_start", "scheduled_end", "actual_check_in", "actual_check_out"]
-            int_cols = ["late_minutes", "excused_late_minutes", "net_late_minutes", "missing_punch_count"]
-            float_cols = ["absence_days", "overtime_hours"]
-            df = df.with_columns(
-                [pl.col(c).str.to_date("%Y-%m-%d", strict=False) for c in date_cols if c in df.columns] +
-                [pl.col(c).str.to_datetime("%Y-%m-%d %H:%M:%S", strict=False) for c in datetime_cols if c in df.columns] +
-                [pl.col(c).cast(pl.Int64, strict=False) for c in int_cols if c in df.columns] +
-                [pl.col(c).cast(pl.Float64, strict=False) for c in float_cols if c in df.columns] +
-                ([pl.col("overtime_approved").cast(pl.Boolean, strict=False)] if "overtime_approved" in df.columns else [])
-            )
-        elif table_name == "compliance":
-            numeric_cols = ["gosi_salary", "payroll_basic_salary"]
-            date_cols = ["work_permit_expiry", "iqama_expiry"]
-            df = df.with_columns(
-                [pl.col(c).cast(pl.Float64, strict=False) for c in numeric_cols if c in df.columns] +
-                [pl.col(c).str.to_date("%Y-%m-%d", strict=False) for c in date_cols if c in df.columns] +
-                ([pl.col("contract_authenticated").cast(pl.Boolean, strict=False)] if "contract_authenticated" in df.columns else [])
-            )
-        elif table_name == "employee_relations":
-            date_cols = ["created_date", "target_due_date", "closed_date"]
-            df = df.with_columns(
-                [pl.col(c).str.to_date("%Y-%m-%d", strict=False) for c in date_cols if c in df.columns] +
-                ([pl.col("escalated").cast(pl.Boolean, strict=False)] if "escalated" in df.columns else [])
-            )
-            
-        df.write_parquet(parquet_path)
-    except Exception as e:
-        raise ValueError(f"Polars compilation to Parquet failed: {str(e)}")
+# compile_csv_to_parquet WAS HERE, and is deleted rather than fixed.
+#
+# It was a SECOND implementation of scripts/ingest_raw.py's typing, with a
+# comment claiming the two must "behave identically". Measured, they did not:
+# ingest_raw types 21 tables and this typed 5, so 17 - including the
+# CONTRACTED hr_requests - reached data/silver as all-strings. It also carried
+# its own copy of the is_saudi derivation, which had already drifted:
+# ingest_raw RAISES when neither is_saudi nor nationality is present, this
+# silently skipped.
+#
+# Fixing it would mean maintaining the 21-table type map twice. Deleting it
+# means the upload path has no opinion about types at all: a committed file
+# goes to data/raw/ and scripts/ingest_raw.py does the work, once.
 
 # --- Template generation (Phase 1 hotfix) -------------------------------------
 # The template served to a client MUST NOT contain data. Before this change the
@@ -306,102 +250,316 @@ def _validated_extension(filename: Optional[str]) -> str:
     return ext
 
 
-@router.post("/upload")
-def upload_data_file(
+class StagedUpload(BaseModel):
+    upload_id: str
+    table: str
+    original_filename: str
+    size_bytes: int
+    sha256: str
+    staged_at: str
+    committed_at: Optional[str] = None
+
+
+class ViolationOut(BaseModel):
+    rule: str
+    row: Optional[int] = None
+    column: Optional[str] = None
+    message_en: str
+    message_ar: str
+
+
+class UploadPreview(BaseModel):
+    upload: StagedUpload
+    row_count: int
+    columns_present: List[str]
+    columns_missing: List[str]
+    columns_unexpected: List[str]
+    rejects: List[ViolationOut]
+    exceptions: List[ViolationOut]
+    can_commit: bool
+    # Category F: SUGGESTED, never applied. Ruling 3 says coverage is declared,
+    # and a pre-filled value a human confirms IS a declaration - an inferred
+    # value applied silently is not.
+    suggested_coverage_start: Optional[str] = None
+    suggested_coverage_end: Optional[str] = None
+    coverage_required: bool = False
+    history_required: bool = False
+
+
+class CommitDeclaration(BaseModel):
+    coverage_start: Optional[str] = None
+    coverage_end: Optional[str] = None
+    history_since: Optional[str] = None
+
+
+def _scripts():
+    scripts_dir = get_scripts_dir()
+    if scripts_dir not in sys.path:
+        sys.path.insert(0, scripts_dir)
+    import onboarding
+    import staging
+    import validate_schema
+    return staging, validate_schema, onboarding
+
+
+def _violation_out(v):
+    return ViolationOut(rule=v.rule, row=v.row, column=v.column,
+                        message_en=v.message_en, message_ar=v.message_ar)
+
+
+def get_raw_dir() -> str:
+    container = "/app/data/raw"
+    if os.path.isdir(container):
+        return container
+    local = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                         "../../../data/raw"))
+    os.makedirs(local, exist_ok=True)
+    return local
+
+
+@router.post("/uploads", response_model=StagedUpload)
+def stage_upload(
     file: UploadFile = File(...),
     table: Optional[str] = Query(None, description="Target contracted domain"),
     current_user: Dict[str, Any] = Depends(get_current_user),
 ):
+    """STAGE. Receive the bytes and do nothing else.
+
+    Deliberately no validation here: validation is a separate, repeatable read
+    (GET below), so a client who fixes their file re-uploads rather than
+    re-running a hidden step, and staging never holds a half-validated state.
+
+    A staged file is INERT. It is not in data/silver, so nothing serves it, and
+    not in data/raw either, so no pipeline run picks it up.
     """
-    Upload a CSV data file directly to the /app/data/silver/ directory.
-    """
-    filename = file.filename
-    _validated_extension(filename)
+    _validated_extension(file.filename)
     table_name = _validated_table(table)
-    ext = ".csv"
+    staging, _vs, _onb = _scripts()
+    manifest = staging.stage(table_name, file.filename, file.file)
+    return StagedUpload(**manifest)
 
-    safe_filename = os.path.basename(filename)
-    dest_dir = get_silver_dir()
-    os.makedirs(dest_dir, exist_ok=True)
-    
+
+@router.get("/uploads", response_model=List[StagedUpload])
+def list_uploads(current_user: Dict[str, Any] = Depends(get_current_user)):
+    staging, _vs, _onb = _scripts()
+    return [StagedUpload(**m) for m in staging.listing()]
+
+
+@router.get("/uploads/{upload_id}", response_model=UploadPreview)
+def preview_upload(upload_id: str,
+                   current_user: Dict[str, Any] = Depends(get_current_user)):
+    """PREVIEW. The SAME validate_csv that ingest runs, read-only.
+
+    Same function, not an equivalent one: a preview that agrees with ingest
+    only by intention is the defect this cycle removed from the write path.
+    """
+    staging, validate_schema, onboarding = _scripts()
     try:
-        if ext == ".csv":
-            # Direct disk compilation: write temporary CSV first, compile using Polars to Parquet
-            temp_csv_path = os.path.join(dest_dir, f"{table_name}_temp.csv")
-            with open(temp_csv_path, "wb") as buffer:
-                shutil.copyfileobj(file.file, buffer)
-            
-            # Destination path is parquet in silver folder
-            dest_parquet_path = os.path.join(dest_dir, f"{table_name}.parquet")
-            compile_csv_to_parquet(temp_csv_path, dest_parquet_path, table_name)
-            
-            # Clean up temp file
-            if os.path.exists(temp_csv_path):
-                os.remove(temp_csv_path)
-            
-            dest_path = dest_parquet_path
-        else:  # pragma: no cover - _validated_extension permits only .csv
-            raise HTTPException(status_code=400, detail=PARQUET_REFUSAL)
+        manifest = staging.load(upload_id)
+        path = staging.data_path(upload_id)
+    except staging.StagingError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
 
-        # Generate .uploaded companion marker file
-        marker_path = f"{dest_path}.uploaded"
-        with open(marker_path, "w") as f:
-            f.write(f"Uploaded: {safe_filename}")
-            
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to write/compile file to disk: {str(e)}")
-        
-    return {
-        "status": "success",
-        "filename": f"{table_name}.parquet",
-        "destination_path": dest_path,
-        "size_bytes": os.path.getsize(dest_path)
-    }
+    table = manifest["table"]
+    cs = _canonical_schema()
+    contracted = cs.column_names(table)
 
-@router.post("/refresh", response_model=RefreshReport)
-def trigger_refresh(current_user: Dict[str, Any] = Depends(get_current_user)):
+    try:
+        frame = pl.read_csv(path, null_values=[""])
+        present = list(frame.columns)
+        row_count = frame.height
+    except Exception as exc:
+        raise HTTPException(status_code=400,
+                            detail="Unreadable CSV: {}".format(exc))
+
+    result = validate_schema.validate_csv(path, table)
+
+    suggested_start = suggested_end = None
+    coverage_required = table in onboarding.DATE_GRAINED
+    if coverage_required:
+        column = {"attendance": "attendance_date"}.get(table)
+        if column and column in present:
+            values = sorted(str(v)[:10] for v in frame[column].to_list() if v)
+            if values:
+                suggested_start, suggested_end = values[0], values[-1]
+
+    return UploadPreview(
+        upload=StagedUpload(**manifest),
+        row_count=row_count,
+        columns_present=present,
+        columns_missing=[c for c in contracted if c not in present],
+        columns_unexpected=[c for c in present if c not in contracted],
+        rejects=[_violation_out(v) for v in result.rejects],
+        exceptions=[_violation_out(v) for v in result.exceptions],
+        can_commit=not result.rejects,
+        suggested_coverage_start=suggested_start,
+        suggested_coverage_end=suggested_end,
+        coverage_required=coverage_required,
+        history_required=table in onboarding.HISTORY_DECLARING,
+    )
+
+
+@router.delete("/uploads/{upload_id}")
+def discard_upload(upload_id: str,
+                   current_user: Dict[str, Any] = Depends(get_current_user)):
+    staging, _vs, _onb = _scripts()
+    try:
+        removed = staging.discard(upload_id)
+    except staging.StagingError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    if not removed:
+        raise HTTPException(status_code=404, detail="no staged upload")
+    return {"status": "discarded", "upload_id": upload_id}
+
+
+@router.post("/uploads/{upload_id}/commit", response_model=RefreshReport)
+def commit_upload(
+    upload_id: str,
+    declaration: CommitDeclaration = Body(default=CommitDeclaration()),
+    current_user: Dict[str, Any] = Depends(get_current_user),
+):
+    """COMMIT. Declare, move to data/raw, and run the pipeline that already exists.
+
+    Nothing here writes silver, types a column, or applies a contract rule.
+    data/raw + scripts/ingest_raw.py does all of it, which is the point: one
+    ingest path, so the two cannot diverge again.
+
+    Recoverable rather than transactional: the previous raw file and registry
+    are kept until the pipeline exits 0, and restored if it does not.
     """
-    Systematically run scripts/refresh_all.py via Python subprocess and return pipeline health report.
-    """
+    staging, _validate_schema, onboarding = _scripts()
+    try:
+        manifest = staging.load(upload_id)
+        staged_path = staging.data_path(upload_id)
+    except staging.StagingError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+    table = manifest["table"]
+
+    # The declaration is REQUIRED for the domains Category F named, and it is
+    # checked here so the client gets a 400 naming the field rather than a
+    # pipeline abort.
+    if table in onboarding.DATE_GRAINED and not (
+            declaration.coverage_start and declaration.coverage_end):
+        raise HTTPException(
+            status_code=400,
+            detail="'{}' is date-grained: coverage_start and coverage_end are "
+                   "required. A working day outside the declared window is not "
+                   "an absence, it is unreported - so the window cannot be "
+                   "guessed from the file.".format(table))
+    if table in onboarding.HISTORY_DECLARING and not declaration.history_since:
+        raise HTTPException(
+            status_code=400,
+            detail="'{}' feeds point-in-time history: history_since is "
+                   "required. Without it, historical months are null rather "
+                   "than a derived-but-understated figure.".format(table))
+
+    raw_dir = get_raw_dir()
+    raw_path = os.path.join(raw_dir, "{}.csv".format(table))
+    registry_path = os.path.join(get_scripts_dir(), "..", "data", "onboarding",
+                                 "declared_domains.yml")
+    registry_path = os.path.abspath(registry_path)
+    if os.path.isdir("/app/data/onboarding"):
+        registry_path = "/app/data/onboarding/declared_domains.yml"
+
+    raw_existed = os.path.exists(raw_path)
+    registry_existed = os.path.exists(registry_path)
+    previous_raw = raw_path + ".previous" if raw_existed else None
+    previous_registry = registry_path + ".previous" if registry_existed else None
+    if previous_raw:
+        shutil.copy2(raw_path, previous_raw)
+    if previous_registry:
+        shutil.copy2(registry_path, previous_registry)
+
+    def _restore():
+        """Put both back exactly as they were - including NOT EXISTING.
+
+        The first version restored a previous file but left a NEW one behind,
+        so a failed first-ever commit left a declaration with no data. The
+        declared-domain guard would then abort every subsequent run with
+        "declared but EMPTY" - loud, but a mess the operator has to clean up by
+        hand for a commit that was supposed to have rolled back.
+        """
+        if previous_raw and os.path.exists(previous_raw):
+            shutil.move(previous_raw, raw_path)
+        elif not raw_existed and os.path.exists(raw_path):
+            os.remove(raw_path)
+        if previous_registry and os.path.exists(previous_registry):
+            shutil.move(previous_registry, registry_path)
+        elif not registry_existed and os.path.exists(registry_path):
+            os.remove(registry_path)
+
+    try:
+        shutil.copy2(staged_path, raw_path)
+        onboarding.declare(
+            table,
+            declared_by=current_user.get("email"),
+            coverage_start=declaration.coverage_start,
+            coverage_end=declaration.coverage_end,
+            history_since=declaration.history_since,
+        )
+        report = _run_pipeline()
+    except Exception as exc:
+        _restore()
+        raise HTTPException(status_code=400,
+                            detail="Commit failed and was rolled back: {}".format(exc))
+
+    if report.return_code != 0:
+        _restore()
+        raise HTTPException(
+            status_code=400,
+            detail="Pipeline rejected the upload and it was rolled back. "
+                   + (report.stderr or "")[-2000:])
+
+    for leftover in (previous_raw, previous_registry):
+        if leftover and os.path.exists(leftover):
+            os.remove(leftover)
+    staging.mark_committed(upload_id)
+    return report
+
+
+# A full ingest + 158-model dbt build. The old 180s was already optimistic on
+# sample data and would not survive a real dataset; a timeout mid-run leaves
+# the warehouse in whatever state dbt reached, which is the worst outcome here.
+PIPELINE_TIMEOUT_SECONDS = 900
+
+
+def _run_pipeline() -> RefreshReport:
+    """The one way this API runs the pipeline. Used by /refresh and by commit."""
+    import time
+
     script_path = os.path.join(get_scripts_dir(), "refresh_all.py")
     if not os.path.exists(script_path):
-        raise HTTPException(status_code=500, detail=f"Refresh script not found at {script_path}")
-        
-    import time
+        raise HTTPException(status_code=500,
+                            detail="Refresh script not found at {}".format(script_path))
     start_time = time.time()
-    
     try:
-        # Run subprocess using system's executable python context
-        result = subprocess.run(
-            [sys.executable, script_path],
-            capture_output=True,
-            text=True,
-            timeout=180
-        )
-        
-        execution_time = time.time() - start_time
-        status_str = "success" if result.returncode == 0 else "failed"
-        
+        result = subprocess.run([sys.executable, script_path],
+                                capture_output=True, text=True,
+                                timeout=PIPELINE_TIMEOUT_SECONDS)
         return RefreshReport(
-            status=status_str,
+            status="success" if result.returncode == 0 else "failed",
             return_code=result.returncode,
-            stdout=result.stdout,
-            stderr=result.stderr,
-            execution_time_seconds=round(execution_time, 2)
+            # `or ""` because a None here would fail RefreshReport validation
+            # and turn a SUCCESSFUL pipeline run into a 500 - which is how a
+            # commit gets rolled back after its data has already landed.
+            stdout=result.stdout or "",
+            stderr=result.stderr or "",
+            execution_time_seconds=round(time.time() - start_time, 2),
         )
     except subprocess.TimeoutExpired as te:
         return RefreshReport(
-            status="failed",
-            return_code=-1,
-            stdout=te.stdout or "",
-            stderr="Pipeline execution timed out after 180 seconds.",
-            execution_time_seconds=round(time.time() - start_time, 2)
-        )
-    except Exception as e:
-        return RefreshReport(
-            status="failed",
-            return_code=-1,
-            stdout="",
-            stderr=str(e),
-            execution_time_seconds=round(time.time() - start_time, 2)
-        )
+            status="failed", return_code=-1, stdout=te.stdout or "",
+            stderr="Pipeline execution timed out after {} seconds.".format(
+                PIPELINE_TIMEOUT_SECONDS),
+            execution_time_seconds=round(time.time() - start_time, 2))
+    except Exception as exc:
+        return RefreshReport(status="failed", return_code=-1, stdout="",
+                             stderr=str(exc),
+                             execution_time_seconds=round(time.time() - start_time, 2))
+
+
+@router.post("/refresh", response_model=RefreshReport)
+def trigger_refresh(current_user: Dict[str, Any] = Depends(get_current_user)):
+    """Run scripts/refresh_all.py and return the pipeline health report."""
+    return _run_pipeline()

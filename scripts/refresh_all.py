@@ -14,8 +14,17 @@ def main():
     print("STARTING FULL HR DATA PIPELINE REFRESH")
     print("=========================================")
     
-    # 1. Generate fake sample data
-    create_sample_data()
+    # 1. Generate fake sample data - DEMO ONLY.
+    #
+    # In real mode this must not run: it writes data/sample/*.csv, and P0-1
+    # made real mode fail closed precisely so a contracted domain can never be
+    # served from sample. Regenerating sample during a real run is harmless
+    # today only because nothing reads it; leaving it unconditional is how that
+    # stops being true.
+    if os.getenv("DATA_MODE", "demo") == "real":
+        print("Real mode: skipping sample generation.")
+    else:
+        create_sample_data()
     
     # 2. Ingest CSVs to Parquet (bronze & silver)
     ingest()
