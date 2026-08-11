@@ -87,6 +87,8 @@ total_payroll_cost        : 0.0
 
 Everything green, payroll cost zero, three valid payroll rows in silver. The 11 surviving assertions agree with each other perfectly, because they are comparing a copy to its original. Had the deleted payroll #1 still been present it would have thrown here too — but on a `TypeError` from `SUM` over zero rows, not on its own message.
 
+**A second instance, found the day after this audit was written**, makes the point without needing anything disabled: `start_date_str`/`end_date_str` were never passed in `dbt_vars` at all, so the attendance window stayed pinned to June 2026 whatever period the pipeline resolved. Every one of the 11 survivors passes on that too — and so would the deleted attendance block, whose 8 assertions read only `mart_attendance_kpis`, `mart_attendance_exceptions`, `base_attendance_current`, `base_attendance_payroll_overtime` and `base_expected_attendance` — every one of them downstream of the same pinned window. The suite cannot see a window; it can only see whether two things downstream of the window agree.
+
 ---
 
 ## 4. The pattern the architect predicted
@@ -182,14 +184,46 @@ All 63, in original order, with the block they came from.
 
 ---
 
-## 6. What I would put to the architect
+## 6. Design brief for the rebuild — SOURCE-TO-MART
 
-Report only, so these are options rather than actions.
+**Ruled 2026-08-11.** Not now: after step 2b. Recorded here so the rebuild starts from the right shape rather than from the 63.
 
-1. **Restoration is cheap and mostly mechanical.** 61 of 62 subjects still exist and the assertions are pure SQL comparisons. As dbt singular tests (`dbt_analytics/tests/*.sql`) they would run inside `dbt test` and fail the pipeline the way they used to, with no Python in `build_warehouse.py`.
-2. **Additivity checks must become domain-aware before they are restored.** "Breakdown sums to total" is false by design once P0-3 step 2b suppresses a payload: a null breakdown beside a real total is correct, and a restored assertion would fail every partial onboarding. Restoring them ahead of 2b would make the suite fire constantly and then be switched off — which is how suites die.
-3. **The real gap is the one the suite never covered:** no check compares a KPI to the uploaded rows. The wrong-period scenario in §3 is caught this cycle at ingest, but only for that specific interaction. A general "KPI vs source" layer is a different and more valuable piece of work than restoring the 63.
-4. **Sequencing suggestion:** WPS hotfix (restore the model + its one assertion) → step 2b/3/4 → restore the additivity suite as dbt singular tests, domain-aware, once suppression semantics are settled.
+### The shape
+
+Every assertion in the old suite compared a mart to another mart. The suite to build compares **the uploaded rows to what the KPI reports**:
+
+> for each domain, the row count and the period range of the file the client uploaded must reconcile to the figure the mart publishes.
+
+That single shape is load-bearing in a way the 74 never were. It would have caught all three of this cycle's findings:
+
+| finding | how source-to-mart catches it |
+|---|---|
+| payroll period mismatch (§3) | 3 payroll rows uploaded, `total_payroll_cost` reports 0 |
+| attendance window pinned to June | attendance rows uploaded for August, `base_attendance_current` keeps 0 |
+| the 494 fabricated absences | 0 attendance rows uploaded, 494 attendance exceptions published |
+
+The 494 is the sharpest case: **no mart-to-mart check can ever catch it**, because every mart downstream of `base_expected_attendance` agrees perfectly that there were 494 absences. The disagreement only exists between the marts and the *absence of a file*, and nothing in the old suite could see a file.
+
+### Why it has to wait for 2b
+
+Suppression changes what "reconciles" means. Once a payload can be `null` because a domain was never provided, the correct assertion is three-way rather than two-way:
+
+```
+domain declared + populated  -> mart figure must reconcile to the uploaded rows
+domain not declared          -> mart figure must be SUPPRESSED, not zero, not 494
+domain declared + empty      -> already fatal at the declared-domain guard
+```
+
+Written before 2b, the middle row cannot be expressed, and the suite would either pass fabricated numbers or fail every partial onboarding.
+
+### Sequencing
+
+1. **WPS hotfix** — restore the model plus its one assertion (the only assertion whose subject is missing).
+2. **Steps 2b / 3 / 4** — suppression semantics settle.
+3. **Source-to-mart suite**, as dbt singular tests plus a Python row-count reconciliation for the source side, with the three-way rule above.
+4. **The additivity suite** last, if at all, and only domain-aware: "breakdown sums to total" is false by design once a payload is suppressed, and a suite that fires on every partial onboarding gets switched off — which is how suites die.
+
+Restoration of the 63 is cheap and mechanical (61 of 62 subjects still exist; they are pure SQL comparisons that would sit naturally in `dbt_analytics/tests/*.sql` with no Python in `build_warehouse.py`). Cheap is not the same as first.
 
 ---
 

@@ -300,3 +300,178 @@ def test_the_api_honours_an_operator_period_in_real_mode(monkeypatch):
     monkeypatch.setattr(settings, "DATA_MODE", "real", raising=False)
     monkeypatch.setattr(settings, "REPORT_MONTH", "2026-08", raising=False)
     assert api_rp.get_report_month(_DeadConnection()) == "2026-08"
+
+
+# --------------------------------------------------------------------------
+# the same guard for the other two period-narrowed domains
+#
+# Attendance and compliance are NOT the payroll case with different columns.
+# Payroll can only disagree under an operator override, because derivation
+# takes the period FROM payroll. These two disagree under pure derivation: the
+# period is the payroll close, and nothing obliges a client's attendance or
+# compliance file to be that same month.
+# --------------------------------------------------------------------------
+
+def test_attendance_that_misses_the_period_is_rejected():
+    with pytest.raises(rp.ReportMonthMismatchError) as excinfo:
+        rp.assert_period_is_covered(
+            ["2026-07-01", "2026-07-31"], month="2026-08", source="attendance")
+    message = str(excinfo.value)
+    assert "2026-08" in message and "2026-07" in message
+    # names the consequence, not merely the mismatch
+    assert "absent on every working day" in message
+    assert "غائبين" in message
+
+
+def test_attendance_partially_covering_the_period_passes():
+    """A mid-month upload is legitimate; only zero overlap is the failure."""
+    assert rp.assert_period_is_covered(
+        ["2026-07-30", "2026-08-01", "2026-08-02"],
+        month="2026-08", source="attendance") == "2026-08"
+
+
+def test_compliance_that_misses_the_period_is_rejected():
+    with pytest.raises(rp.ReportMonthMismatchError) as excinfo:
+        rp.assert_period_is_covered(["2026-06"], month="2026-08",
+                                    source="compliance")
+    message = str(excinfo.value)
+    assert "missing GOSI, Qiwa and insurance registration" in message
+
+
+def test_dates_and_month_labels_reduce_to_the_same_period():
+    assert rp.normalise_month("2026-08-14") == "2026-08"
+    assert rp.normalise_month("2026-08") == "2026-08"
+    assert rp.normalise_month("not a date") is None
+
+
+# --------------------------------------------------------------------------
+# resolving the period at ingest, the way the pipeline will resolve it later
+# --------------------------------------------------------------------------
+
+def _csv(tmp_path, name, column, values, extra="employee_id"):
+    path = tmp_path / name
+    pl.DataFrame({extra: ["E{}".format(i) for i in range(len(values))],
+                  column: list(values)}).write_csv(path)
+    return str(path)
+
+
+def _files(tmp_path, payroll=None, compliance=None, attendance=None):
+    missing = str(tmp_path / "__absent__.csv")
+    return {
+        "payroll": payroll or missing,
+        "compliance": compliance or missing,
+        "attendance": attendance or missing,
+    }
+
+
+def test_ingest_resolves_the_period_from_the_payroll_close(tmp_path):
+    import ingest_raw
+
+    files = _files(tmp_path, payroll=_csv(
+        tmp_path, "payroll.csv", "payroll_period", ["2026-06", "2026-08", "2026-07"]))
+    assert ingest_raw.resolve_ingest_report_month(files) == ("2026-08", rp.SOURCE_DATA)
+
+
+def test_ingest_falls_back_to_compliance_when_payroll_is_absent(tmp_path):
+    import ingest_raw
+
+    files = _files(tmp_path, compliance=_csv(
+        tmp_path, "compliance.csv", "period", ["2026-07"]))
+    assert ingest_raw.resolve_ingest_report_month(files) == ("2026-07", rp.SOURCE_DATA)
+
+
+def test_ingest_period_resolution_prefers_the_operator(tmp_path, monkeypatch):
+    import ingest_raw
+
+    _set_operator(monkeypatch, "2026-09")
+    files = _files(tmp_path, payroll=_csv(
+        tmp_path, "payroll.csv", "payroll_period", ["2026-06"]))
+    assert ingest_raw.resolve_ingest_report_month(files) == (
+        "2026-09", rp.SOURCE_OPERATOR)
+
+
+def test_ingest_has_no_period_when_nothing_carries_one(tmp_path):
+    import ingest_raw
+
+    assert ingest_raw.resolve_ingest_report_month(_files(tmp_path)) == (None, None)
+
+
+# --------------------------------------------------------------------------
+# the coverage gate as ingest calls it
+# --------------------------------------------------------------------------
+
+def test_attendance_from_another_month_is_caught_under_pure_derivation(tmp_path):
+    """No operator override anywhere. The period is July because that is the
+    payroll close; the attendance file is August. Nothing else in the system
+    would notice."""
+    import ingest_raw
+
+    files = _files(
+        tmp_path,
+        payroll=_csv(tmp_path, "payroll.csv", "payroll_period", ["2026-07"]),
+        attendance=_csv(tmp_path, "attendance.csv", "attendance_date",
+                        ["2026-08-03", "2026-08-04"]),
+    )
+    with pytest.raises(rp.ReportMonthMismatchError) as excinfo:
+        ingest_raw.check_period_coverage(files)
+    assert "2026-07" in str(excinfo.value) and "2026-08" in str(excinfo.value)
+
+
+def test_compliance_from_another_month_is_caught_under_pure_derivation(tmp_path):
+    import ingest_raw
+
+    files = _files(
+        tmp_path,
+        payroll=_csv(tmp_path, "payroll.csv", "payroll_period", ["2026-07"]),
+        compliance=_csv(tmp_path, "compliance.csv", "period", ["2026-05"]),
+    )
+    with pytest.raises(rp.ReportMonthMismatchError):
+        ingest_raw.check_period_coverage(files)
+
+
+def test_the_payroll_check_is_vacuous_under_derivation(tmp_path):
+    """Not a special case — the period IS payroll's latest close, so membership
+    holds by construction. Same rule, no exemption."""
+    import ingest_raw
+
+    files = _files(tmp_path, payroll=_csv(
+        tmp_path, "payroll.csv", "payroll_period", ["2026-06", "2026-07"]))
+    month, source, checked = ingest_raw.check_period_coverage(files)
+    assert (month, source, checked) == ("2026-07", rp.SOURCE_DATA, ["payroll"])
+
+
+def test_all_three_domains_agreeing_passes(tmp_path):
+    import ingest_raw
+
+    files = _files(
+        tmp_path,
+        payroll=_csv(tmp_path, "payroll.csv", "payroll_period", ["2026-08"]),
+        compliance=_csv(tmp_path, "compliance.csv", "period", ["2026-08"]),
+        attendance=_csv(tmp_path, "attendance.csv", "attendance_date",
+                        ["2026-08-03"]),
+    )
+    month, _, checked = ingest_raw.check_period_coverage(files)
+    assert month == "2026-08"
+    assert checked == ["attendance", "compliance", "payroll"]
+
+
+def test_no_resolvable_period_means_no_gate(tmp_path):
+    """Employees-only onboarding: nothing carries a period, and build_warehouse
+    aborts a few steps later. Reporting a mismatch here would be noise."""
+    import ingest_raw
+
+    files = _files(tmp_path, attendance=_csv(
+        tmp_path, "attendance.csv", "attendance_date", ["2026-08-03"]))
+    assert ingest_raw.check_period_coverage(files) == (None, None, [])
+
+
+def test_an_undeclared_domain_is_skipped_by_the_gate(tmp_path, monkeypatch):
+    import ingest_raw
+
+    _set_operator(monkeypatch, "2026-08")
+    files = _files(tmp_path, payroll=_csv(
+        tmp_path, "payroll.csv", "payroll_period", ["2026-08"]))
+    files["attendance"] = "{}/attendance.csv".format(
+        ingest_raw.UNDECLARED_SENTINEL_DIR)
+    month, _, checked = ingest_raw.check_period_coverage(files)
+    assert (month, checked) == ("2026-08", ["payroll"])

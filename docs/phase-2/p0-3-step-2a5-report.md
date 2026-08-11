@@ -1,10 +1,14 @@
 # P0-3 Step 2a.5 — Anchor Convergence (Execution Report)
 
-**Branch:** `phase-2/p0-3-anchor-convergence` off `main` @ `959d9fb` (2a merged) · **Date:** 2026-08-10, extended 2026-08-11
+**Branch:** `phase-2/p0-3-anchor-convergence` off `main` @ `959d9fb` (2a merged) · **Date:** 2026-08-10, extended 2026-08-11 (twice)
 **Status:** executed, committed, pushed. **Not merged.**
-**Scope:** dbt models, registry and tests — **plus, in the 2026-08-11 extension, the report-month resolver** (§11), which required `backend/app/config.py` and `backend/app/api/_report_period.py`. The original "no application code" guardrail could not hold once the fix was the resolution policy itself. Step 2b not started.
+**Scope:** dbt models, registry and tests — **plus, in the extensions, the report-month resolver** (§11) and **the dbt var surface it turned out to be only half of** (§13). The original "no application code" guardrail could not hold once the fix was the resolution policy itself; the API resolver change in §11.5 went beyond the stated scope and is called out there rather than buried. Step 2b not started.
 
-> **Review outcome, 2026-08-11.** The convergence was accepted; the cycle was **blocked from merging** on a finding it created: with payroll *and* compliance absent, `var('report_month')` resolves to `settings.DEFAULT_REPORT_MONTH` — a literal in this repository. §11 closes it. §4 carries a **second correction to my own evidence**, because the `0 → 2` proof below was itself computed against that constant.
+> **Review outcomes, 2026-08-11.** Two rounds, same failure class each time.
+>
+> **Round 1** accepted the convergence and blocked the merge: with payroll *and* compliance absent, `var('report_month')` resolved to `settings.DEFAULT_REPORT_MONTH`, a literal in this repository. §11 closes it. §4.1 corrects the `0 → 2` proof, which was itself computed against that constant.
+>
+> **Round 2** accepted §11 and blocked again: `start_date_str` / `end_date_str` were never passed in `dbt_vars` at all, so the **attendance window** stayed pinned to the June literals no matter what period the resolver produced — and unlike the payroll case, **no operator override was needed to trigger it**. §13 closes that, generalises the pin so the next one is caught mechanically, and reports what the generalised pin found: **not two vars, six.**
 
 ---
 
@@ -210,7 +214,11 @@ So the endpoint has returned 500 on every call since `7b86cc8`. Per ruling this 
 | Operator `REPORT_MONTH` honoured in both modes | **yes** — §11 |
 | Operator/payroll period mismatch | **validation error at ingest**, naming both — §11 |
 | `DEFAULT_REPORT_MONTH` reachable in real mode | **no** — swept, plus a structural pin on its readers |
-| pytest | **104 passed** (76 + 28 new) |
+| Date-shaped dbt vars pinned to a repo literal | **0 of 11 consumed** — was 6; §13.2 |
+| Attendance window follows the reporting period | **yes** — §13.1, identity-tested |
+| Period coverage gate | payroll, compliance, attendance — §13.4 |
+| Category A re-measured with vars unified | `494 = 26 × 19`, `513 = 27 × 19` — §13.3 |
+| pytest | **122 passed** (76 + 46 new) |
 | Application code touched | `config.py`, `api/_report_period.py` — see §11.5 |
 
 Synthetic artefacts removed; demo rebuilt and re-verified.
@@ -344,11 +352,13 @@ ARM B' REPORT_MONTH=2026-06, payroll covering 2026-06
 
 Design notes: the check runs in **both** modes (an operator override is just as capable of zeroing demo), but only when a period is explicitly set — derivation cannot disagree with itself. It compares against the **set** of periods in the file, not the max, because that is precisely what the SQL filter tests. An empty payroll file is not reported as a mismatch: zero rows is the declared-domain guard's job, and naming a period the file does not contain would be a worse message.
 
-### 11.5 The API resolver, which had the same hole
+### 11.5 The API resolver, which had the same hole — and was outside scope
 
-`get_report_month()` fell back to `DEFAULT_REPORT_MONTH` whenever `base_command_center_report_context` was unreadable — in real mode, labelling a client's page header with a period this repo chose. Fixing the pipeline and leaving this would have been fixing the visible half.
+`get_report_month()` fell back to `DEFAULT_REPORT_MONTH` whenever `base_command_center_report_context` was unreadable — in real mode, labelling a client's page header with a period this repo chose.
 
-Real mode now honours an explicit `REPORT_MONTH` and otherwise returns **503** naming the setting. Demo is untouched. This is the application code the original guardrail excluded; the alternative was shipping a resolver that fails closed in one layer and open in the next.
+Real mode now honours an explicit `REPORT_MONTH` and otherwise returns **503** naming the setting. Demo is untouched.
+
+**This was outside the stated "no application code" guardrail and I took it anyway.** Recording it here rather than leaving it in a diff: the alternative was shipping a resolver that fails closed in the pipeline and open in the layer the client actually reads, which is fixing the visible half. Confirmed at review as the right call.
 
 ### 11.6 Tests — 28 new, 104 total
 
@@ -394,6 +404,176 @@ Two findings worth more than the count:
 
 Report only, per ruling. Restoration is cheap and mostly mechanical as dbt singular tests, but additivity assertions must become domain-aware first: "breakdown sums to total" is false by design once 2b suppresses a payload, and a suite that fires on every partial onboarding gets switched off.
 
+**The design brief for the rebuild is now recorded in the audit doc: SOURCE-TO-MART.** One assertion of that shape — uploaded row count and period reconciling to what the KPI reports — would have caught the payroll mismatch, the attendance window, and the 494. See the audit's §6.
+
 ---
 
-**Not merged. Awaiting review of the abort path (§11.3) and the mismatch error (§11.4).**
+# The second 2026-08-11 extension
+
+## 13. The attendance window was pinned to a repo literal too
+
+### 13.1 Worse than the payroll case, because nothing had to go wrong first
+
+`dbt_vars` set six date vars. It never set `start_date_str` or `end_date_str`, so both stayed at the `dbt_project.yml` literals `2026-06-01` / `2026-06-30`. Two models read them:
+
+```sql
+base_attendance_current    WHERE a.attendance_date BETWEEN DATE '{{ var('start_date_str') }}'
+                                                       AND DATE '{{ var('end_date_str') }}'
+base_expected_attendance   range(DATE '{{ var('start_date_str') }}', DATE '{{ var('end_date_str') }}' + 1 DAY)
+```
+
+The payroll trap needed an operator override to fire. This one needs **nothing**. Under pure derivation, any client whose payroll close is not June 2026 gets a correctly resolved `report_month` and an attendance window this repository chose — attendance declared, populated, silver correct, guard green, dbt 157/157, attendance metrics wrong.
+
+`start_date_str`/`end_date_str` now pass through as `cc_report_month_start`/`cc_report_month_end`. Not a parallel derivation — the same two values under the names those models happen to read, so there is no second idiom that can drift. A test asserts the identity rather than mere presence.
+
+### 13.2 The generalised pin, and what it found
+
+`test_no_date_shaped_var_reaches_a_model_as_a_repo_literal` states the class instead of the instance:
+
+> a var declared in `dbt_project.yml` with a **date-shaped value**, **consumed** by at least one model, and **not overridden** in `dbt_vars` ⇒ every client's window is a period this repository chose.
+
+Detection is by **value shape**, not name — a name-based rule only finds vars someone already thought to call a date. Run against the pre-fix pipeline, this is what it reports:
+
+```
+[dbt vars] date-shaped declared : 12
+[dbt vars] of those, consumed   : 11
+[dbt vars] of those, overridden :  5
+[dbt vars]   PINNED   end_date_str         = 2026-06-30
+[dbt vars]   ok       report_anchor_date   = 2026-06-30
+[dbt vars]   ok       report_month         = 2026-06
+[dbt vars]   ok       report_month_end     = 2026-06-30
+[dbt vars]   ok       report_month_start   = 2026-06-01
+[dbt vars]   PINNED   start_date_str       = 2026-06-01
+[dbt vars]   ok       talent_month_end     = 2026-06-30
+[dbt vars]   unused   talent_month_start   = 2026-06-01
+[dbt vars]   PINNED   trend_m1             = 2026-04
+[dbt vars]   PINNED   trend_m1_end         = 2026-04-30
+[dbt vars]   PINNED   trend_m2             = 2026-05
+[dbt vars]   PINNED   trend_m2_end         = 2026-05-31
+```
+
+**Six, not two.** The four extra are the trend anchors behind `mart_exec_trends` and `mart_workforce_headcount_trend`, and their own `dbt_project.yml` comment named the defect:
+
+> *"Placeholder literals — to be replaced by report_month-relative derivation in the resolver cycle (5a)."*
+
+Cycle 5a wrote the note and did not carry it out. I fixed all six rather than the two named. Exempting four known-pinned vars in the cycle whose purpose is closing this class would have made the pin's exemption list the place the class goes to survive.
+
+The trend consequence is its own small Category C. Derivation, at a July close:
+
+```
+pre-fix  trend months: ['2026-04', '2026-05', '2026-08']   <- a "trend" that skips June and July
+post-fix trend months: ['2026-06', '2026-07', '2026-08']
+```
+
+and `mart_exec_trends` LEFT JOINs payroll on that month label, so the two historical points also returned a payroll cost of 0 — a chart with two zeroes in it, which reads as a business collapse rather than as a bug.
+
+`trend_m1`/`trend_m2` derive as `report_month` minus 2 and minus 1, tested across a year boundary and a leap February. On demo they reproduce the committed literals exactly, which is what keeps the gate byte-identical.
+
+`talent_month_start` is passed every run and read by no model. Not a correctness risk, so a second test **names** it rather than failing — a var that looks live in `build_warehouse.py` while nothing reads it is how someone concludes a window is derived when it is not.
+
+### 13.3 Re-measuring the 494
+
+The 494 was measured at `report_month` 2026-06 — the one period where the pinned window agrees with the resolved one. Four arms, same 19-employee population, `declared:[employees]`:
+
+| | pipeline | `REPORT_MONTH` | window | working days | attendance exceptions |
+|---|---|---|---|---|---|
+| A | pre-fix | 2026-06 | 2026-06-01 .. 2026-06-30 | 26 | **494** |
+| B | pre-fix | 2026-08 | 2026-06-01 .. 2026-06-30 | 26 | **494** |
+| C | fixed | 2026-08 | 2026-08-01 .. 2026-08-31 | 27 | **513** |
+| D | fixed | 2026-06 | 2026-06-01 .. 2026-06-30 | 26 | **494** |
+
+**A reproduces the original measurement exactly.** **B is the proof it was pinned:** the period moved to August and the number did not, because the window never left June. **C** is the number under a rig that cannot agree by coincidence. **D** shows the fix is a no-op when the period genuinely is June, which is why demo is untouched.
+
+So the 494 is **confirmed real**, and now has an exact mechanism rather than a magnitude:
+
+```
+attendance exceptions = working days in the reporting period × active employees
+494 = 26 × 19        513 = 27 × 19
+```
+
+`base_expected_attendance` CROSS JOINs the calendar with active employees and marks every row with no matching attendance as `absence_days = 1.0`. With attendance undeclared and empty, **every** row is an absence. It is not a distorted measurement of anything; it is 100% manufactured, and its size is set by a calendar. That is Category A at its purest, and it is what step 2b/3 has to suppress.
+
+Two incidental confirmations from the same rig: `talent` exceptions moved 28 → 44 between arms A and B and `recruitment` 25 → 23, because `talent_month_end` was already overridden and correctly tracks the period. The vars that were wired up behaved; the ones that were not, did not.
+
+### 13.4 Item 4 — attendance needed an equivalent guard, so it has one
+
+The question was whether the payroll mismatch guard needs an attendance counterpart once the window derives from the same resolver. **It does**, and the reasoning is worth stating because it is the opposite of the payroll case:
+
+- **Payroll can only disagree under an operator override.** Derivation takes the period *from* payroll, so `MAX(payroll_period)` is in the file by construction.
+- **Attendance can disagree under pure derivation.** The period is the payroll close. Nothing obliges a client's attendance file to be that same month, and a mid-cycle onboarding where payroll is closed for July and attendance is exported for August is ordinary, not perverse.
+
+Unifying the vars fixes *"the window is a repo constant"*. It does not fix *"the window is the payroll close and the attendance file is a different month"* — and after §13.1 that second case is live, because the window now actually moves.
+
+**Compliance turned out to have the same exposure**, found while reasoning about attendance: `base_compliance_current` LEFT JOINs on `c.period = var('report_month')`, so a compliance file from another month makes every employee read as unregistered for GOSI, Qiwa and insurance.
+
+So the guard is now one rule over three domains, replacing the payroll-only check:
+
+| domain | how the model narrows | rule |
+|---|---|---|
+| `payroll` | `payroll_period = report_month` | the period must be **present** |
+| `compliance` | `c.period = report_month` (JOIN) | the period must be **present** |
+| `attendance` | `attendance_date BETWEEN start .. end` | the period must **overlap** |
+
+Overlap rather than membership for attendance because the filter is a range: a mid-month upload is legitimate, and only *zero* overlap is the failure.
+
+**This widens the guard the review accepted.** It previously ran only when an operator period was set; it now runs against the resolved period whichever way it resolved. That is not a new special case — under derivation the payroll check is *vacuous*, because the period is payroll's own latest close. The same rule covers both paths without an exemption for either. Membership semantics are unchanged.
+
+Each message names the consequence, because "period mismatch" does not tell an operator what they were about to look at:
+
+```
+##########################################################################
+# ARM C - payroll close 2026-07, attendance file 2026-08, NO override
+##########################################################################
+  declared: ['employees', 'payroll', 'attendance']
+
+  REJECTED AT INGEST with ReportMonthMismatchError:
+    Reporting period mismatch. The reporting period is 2026-07, but the uploaded
+    attendance data covers 2026-08. Attendance is filtered to the reporting
+    period and absence is inferred from its absence, so this run would show
+    every employee absent on every working day.
+    Either set REPORT_MONTH to one of 2026-08, or upload the 2026-07 attendance file.
+    عدم تطابق فترة التقرير: فترة التقرير هي 2026-07 بينما ملف attendance المرفوع
+    يغطي 2026-08. سيؤدي ذلك إلى إظهار جميع الموظفين كغائبين في كل أيام العمل.
+```
+
+Agreement passes and the run proceeds:
+
+```
+ARM C' - the same run with a 2026-07 attendance file
+  [report_month] period 2026-07 [data] covered by: attendance, payroll.
+  report_month        : 2026-07
+  attendance window   : 2026-07-01 .. 2026-07-30      (07-31 is a Friday)
+  attendance rows kept: 2
+```
+
+The gate resolves the period the same way the pipeline will — operator, then payroll close, then compliance — over the files about to become silver. Any divergence between the two would make the gate test a period the marts do not use, so it reads the same columns in the same order rather than approximating.
+
+### 13.5 Demo gate — unchanged
+
+```
+[report_month] period 2026-06 [data] covered by: attendance, compliance, payroll.
+Resolved report_month: 2026-06 (2026-06-01..2026-06-30) [source: data]
+Derived trend anchors: 2026-04, 2026-05
+
+headline: (19, 446175.0, 50.0) | exceptions 667 | DQ 15   BYTE-IDENTICAL: True
+dbt run 157/157 · dbt test 11/11 · reconciliation checks PASSED
+pytest: 122 passed
+```
+
+Demo's three period-bearing sample files all cover 2026-06, so the new gate passes there rather than being skipped — the check is exercised by the gate, not merely absent from it.
+
+### 13.6 Tests added
+
+| Test | Pins |
+|---|---|
+| `test_no_date_shaped_var_reaches_a_model_as_a_repo_literal` | the whole class, by value shape; prints the full classification every run |
+| `test_date_shaped_vars_that_nothing_reads_are_named` | `talent_month_start`, so dead vars stay visible |
+| `test_the_attendance_window_is_the_reporting_period` | identity with `report_month_start`/`_end`, not just presence |
+| `test_the_trend_anchors_are_the_two_months_before_the_period` | year boundary, leap February, and the demo literals |
+| 14 further cases in `test_report_period.py` | attendance/compliance coverage, consequence text in both languages, ingest-side period resolution precedence, the vacuous-under-derivation property, undeclared-domain skip |
+
+**122 pass**, up from 104.
+
+---
+
+**Not merged. Awaiting review.**

@@ -21,6 +21,14 @@ models:
       +materialized: view
 
 vars:
+  # DEMO DEFAULTS ONLY. Every date-shaped var below is overridden per run by
+  # scripts/build_warehouse.py from the ONE resolved reporting period; the
+  # literals exist so `dbt compile` works standalone and so demo is
+  # reproducible. A date-shaped var declared here and consumed by a model but
+  # NOT overridden is a repo constant pinning a client's window — the failure
+  # class step 2a.5 closed. backend/tests/test_dbt_vars.py fails the build if
+  # one appears.
+  #
   # Data mode: 'demo' shows synthetic sample data + mock historical trend rows;
   # 'real' suppresses all fabricated rows. Committed default MUST stay 'demo'.
   # Overridden locally (uncommitted) via the DATA_MODE env var / .env.
@@ -42,11 +50,15 @@ vars:
   has_gosi_source_sql: "TRUE"
   has_wps_source_sql: "TRUE"
   critical_titles_sql: "'Chief Executive Officer', 'Engineering Director', 'Finance Director', 'HR Manager'"
+  # The attendance window read by base_attendance_current and
+  # base_expected_attendance. Overridden per run with report_month_start/end
+  # (step 2a.5); until then these literals filtered attendance to June 2026
+  # whatever period the pipeline resolved.
   start_date_str: "2026-06-01"
   end_date_str: "2026-06-30"
-  # Trend historical-anchor months for the 2 HYBRID-COMPUTED headcount marts.
-  # Placeholder literals — to be replaced by report_month-relative derivation in
-  # the resolver cycle (5a). Defaults equal today's hardcoded values (byte-identical).
+  # Trend historical-anchor months for the 2 HYBRID-COMPUTED headcount marts:
+  # report_month minus 2 and minus 1. Overridden per run (step 2a.5) — the
+  # resolver cycle (5a) noted the intent here and did not carry it out.
   trend_m1: "2026-04"
   trend_m1_end: "2026-04-30"
   trend_m2: "2026-05"

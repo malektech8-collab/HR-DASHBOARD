@@ -80,16 +80,22 @@ def data_mode(mode=None):
     return str(os.getenv("DATA_MODE", settings.DATA_MODE) or "demo").strip().lower()
 
 
-def _normalise(value):
-    """Return a valid YYYY-MM, or None. Never raises."""
+def normalise_month(value):
+    """Return a valid YYYY-MM, or None. Never raises.
+
+    Accepts a full date, so a `2026-08-14` attendance row and a `2026-08`
+    payroll label reduce to the same period.
+    """
     if value is None:
         return None
     text = str(value).strip()
     if not text:
         return None
-    # Accept a full date: MAX(payroll_period) may come back as YYYY-MM-DD.
     candidate = text[:7]
     return candidate if MONTH_RE.match(candidate) else None
+
+
+_normalise = normalise_month  # internal alias, kept for readability below
 
 
 def operator_report_month():
@@ -161,41 +167,75 @@ def resolve_report_month(derived=None, mode=None):
     return settings.DEFAULT_REPORT_MONTH, SOURCE_DEMO_DEFAULT
 
 
-def assert_payroll_period_matches(periods, month=None, source="payroll"):
-    """Guard the interaction step 2a.5's convergence created.
+# What a domain loses when its file does not cover the reporting period. Each
+# entry is the concrete consequence, named in the error, because "period
+# mismatch" alone does not tell an operator what they are about to look at.
+CONSEQUENCE_EN = {
+    "payroll": ("Every payroll figure filters on the reporting period, so this "
+                "run would report a payroll cost of 0 against a payroll file "
+                "that is present and valid."),
+    "compliance": ("Compliance records join to employees on the reporting "
+                   "period, so this run would show every employee as missing "
+                   "GOSI, Qiwa and insurance registration."),
+    "attendance": ("Attendance is filtered to the reporting period and absence "
+                   "is inferred from its absence, so this run would show every "
+                   "employee absent on every working day."),
+}
+CONSEQUENCE_AR = {
+    "payroll": "سيؤدي ذلك إلى عرض تكلفة رواتب صفرية رغم وجود ملف رواتب صالح.",
+    "compliance": ("سيؤدي ذلك إلى إظهار جميع الموظفين كغير مسجلين في التأمينات "
+                   "وقوى والتأمين الصحي."),
+    "attendance": "سيؤدي ذلك إلى إظهار جميع الموظفين كغائبين في كل أيام العمل.",
+}
 
-    Every converged site filters `payroll_period = var('report_month')`. Under
-    derivation the two agree by construction. Under an operator override they
-    can disagree, and then the filter matches nothing: payroll_cost 0 with
-    payroll DECLARED and POPULATED, and the declared-domain guard passing,
-    because silver is perfectly correct. A zero with every check green is worse
-    than a crash, so this is a validation error at ingest, naming both periods.
 
-    `periods` is the set of payroll_period values in the uploaded file. Returns
-    the agreed month, or None when no operator period is set (derivation cannot
-    disagree with itself).
+def assert_period_is_covered(values, month, source):
+    """The uploaded file must contain at least one row inside the period.
+
+    Guards the interaction step 2a.5's convergence created, in the three places
+    it exists. Every one of these narrows to the reporting period:
+
+        base_payroll_current      payroll_period   = var('report_month')
+        base_compliance_current   c.period         = var('report_month')   (JOIN)
+        base_attendance_current   attendance_date BETWEEN start .. end
+
+    When the file does not cover that period the filter matches nothing, and
+    the domain is DECLARED and POPULATED and silver is perfectly correct, so
+    the declared-domain guard passes and dbt is green. What reaches the client
+    is a zero, or a universal exception, that no check in the system disagrees
+    with. That is worse than a crash, so it is a validation error at ingest
+    with both periods named.
+
+    `values` are the file's period labels (`2026-08`) or dates (`2026-08-14`);
+    both reduce to a month. Returns the month on success.
     """
-    month = month or operator_report_month()
     if not month:
         return None
-    found = sorted({p for p in (_normalise(x) for x in periods) if p})
+    found = sorted({p for p in (normalise_month(x) for x in values) if p})
     if not found or month in found:
+        # No parseable periods at all is the declared-domain guard's business,
+        # not this one's; naming a range the file does not have would mislead.
         return month
     name = SETTING_NAME
     found_en = ", ".join(found)
     found_ar = "، ".join(found)
     raise ReportMonthMismatchError(
-        "Reporting period mismatch. {name} is set to {month}, but the uploaded "
-        "{source} data covers {found}. Every payroll figure filters on the "
-        "reporting period, so this run would report a payroll cost of 0 "
-        "against a payroll file that is present and valid.".format(
-            name=name, month=month, source=source, found=found_en)
+        "Reporting period mismatch. The reporting period is {month}, but the "
+        "uploaded {source} data covers {found}. {why}".format(
+            month=month, source=source, found=found_en,
+            why=CONSEQUENCE_EN.get(source, ""))
         + NEWLINE +
         "Either set {name} to one of {found}, or upload the {month} {source} "
         "file.".format(name=name, month=month, source=source, found=found_en)
         + NEWLINE +
-        "عدم تطابق فترة التقرير: الإعداد {name} محدد بـ {month} بينما ملف "
-        "{source} المرفوع يغطي {found}. سيؤدي ذلك إلى عرض تكلفة رواتب صفرية "
-        "رغم وجود ملف رواتب صالح.".format(
-            name=name, month=month, source=source, found=found_ar)
+        "عدم تطابق فترة التقرير: فترة التقرير هي {month} بينما ملف {source} "
+        "المرفوع يغطي {found}. {why}".format(
+            month=month, source=source, found=found_ar,
+            why=CONSEQUENCE_AR.get(source, ""))
     )
+
+
+def assert_payroll_period_matches(periods, month=None, source="payroll"):
+    """The payroll case, with the operator period as the default subject."""
+    month = month or operator_report_month()
+    return assert_period_is_covered(periods, month=month, source=source)
