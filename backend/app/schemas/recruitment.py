@@ -1,12 +1,15 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional
-from app.schemas.kpi import KPIItem, DQExceptionItem, SuppressionItem
+from app.schemas.kpi import KPIItem, DQExceptionItem, SuppressionItem, CoverageItem
 
 class RecruitmentSummaryResponse(BaseModel):
     report_month: str
     kpis: Optional[List[KPIItem]] = None
     # Withheld figures, named. Empty when nothing was suppressed.
     suppressed: List[SuppressionItem] = Field(default_factory=list)
+    # Present, but measured over less than the whole period. A SIBLING
+    # of `suppressed`, never a reason code inside it - see CoverageItem.
+    coverage_notes: List[CoverageItem] = Field(default_factory=list)
 
 
 class PipelineStageItem(BaseModel):
@@ -17,6 +20,9 @@ class RecruitmentPipelineResponse(BaseModel):
     pipeline: Optional[List[PipelineStageItem]] = None
     # Withheld figures, named. Empty when nothing was suppressed.
     suppressed: List[SuppressionItem] = Field(default_factory=list)
+    # Present, but measured over less than the whole period. A SIBLING
+    # of `suppressed`, never a reason code inside it - see CoverageItem.
+    coverage_notes: List[CoverageItem] = Field(default_factory=list)
 
 
 class RecruitmentTrendItem(BaseModel):
@@ -28,6 +34,9 @@ class RecruitmentTrendsResponse(BaseModel):
     trends: Optional[List[RecruitmentTrendItem]] = None
     # Withheld figures, named. Empty when nothing was suppressed.
     suppressed: List[SuppressionItem] = Field(default_factory=list)
+    # Present, but measured over less than the whole period. A SIBLING
+    # of `suppressed`, never a reason code inside it - see CoverageItem.
+    coverage_notes: List[CoverageItem] = Field(default_factory=list)
 
 
 class RecruitmentByProjectItem(BaseModel):
@@ -41,6 +50,9 @@ class RecruitmentByProjectResponse(BaseModel):
     projects: Optional[List[RecruitmentByProjectItem]] = None
     # Withheld figures, named. Empty when nothing was suppressed.
     suppressed: List[SuppressionItem] = Field(default_factory=list)
+    # Present, but measured over less than the whole period. A SIBLING
+    # of `suppressed`, never a reason code inside it - see CoverageItem.
+    coverage_notes: List[CoverageItem] = Field(default_factory=list)
 
 
 class RecruitmentByDepartmentItem(BaseModel):
@@ -54,6 +66,9 @@ class RecruitmentByDepartmentResponse(BaseModel):
     departments: Optional[List[RecruitmentByDepartmentItem]] = None
     # Withheld figures, named. Empty when nothing was suppressed.
     suppressed: List[SuppressionItem] = Field(default_factory=list)
+    # Present, but measured over less than the whole period. A SIBLING
+    # of `suppressed`, never a reason code inside it - see CoverageItem.
+    coverage_notes: List[CoverageItem] = Field(default_factory=list)
 
 
 class TimeToFillItem(BaseModel):
@@ -66,6 +81,9 @@ class TimeToFillResponse(BaseModel):
     time_to_fill: Optional[List[TimeToFillItem]] = None
     # Withheld figures, named. Empty when nothing was suppressed.
     suppressed: List[SuppressionItem] = Field(default_factory=list)
+    # Present, but measured over less than the whole period. A SIBLING
+    # of `suppressed`, never a reason code inside it - see CoverageItem.
+    coverage_notes: List[CoverageItem] = Field(default_factory=list)
 
 
 class SourceEffectivenessItem(BaseModel):
@@ -78,6 +96,9 @@ class SourceEffectivenessResponse(BaseModel):
     sources: Optional[List[SourceEffectivenessItem]] = None
     # Withheld figures, named. Empty when nothing was suppressed.
     suppressed: List[SuppressionItem] = Field(default_factory=list)
+    # Present, but measured over less than the whole period. A SIBLING
+    # of `suppressed`, never a reason code inside it - see CoverageItem.
+    coverage_notes: List[CoverageItem] = Field(default_factory=list)
 
 
 class OfferAcceptanceItem(BaseModel):
@@ -88,6 +109,9 @@ class OfferAcceptanceResponse(BaseModel):
     offers: Optional[List[OfferAcceptanceItem]] = None
     # Withheld figures, named. Empty when nothing was suppressed.
     suppressed: List[SuppressionItem] = Field(default_factory=list)
+    # Present, but measured over less than the whole period. A SIBLING
+    # of `suppressed`, never a reason code inside it - see CoverageItem.
+    coverage_notes: List[CoverageItem] = Field(default_factory=list)
 
 
 class OnboardingStatusItem(BaseModel):
@@ -98,6 +122,9 @@ class OnboardingStatusResponse(BaseModel):
     onboarding: Optional[List[OnboardingStatusItem]] = None
     # Withheld figures, named. Empty when nothing was suppressed.
     suppressed: List[SuppressionItem] = Field(default_factory=list)
+    # Present, but measured over less than the whole period. A SIBLING
+    # of `suppressed`, never a reason code inside it - see CoverageItem.
+    coverage_notes: List[CoverageItem] = Field(default_factory=list)
 
 
 class WorkforcePlanVsActualItem(BaseModel):
@@ -111,9 +138,15 @@ class WorkforcePlanVsActualResponse(BaseModel):
     plan: Optional[List[WorkforcePlanVsActualItem]] = None
     # Withheld figures, named. Empty when nothing was suppressed.
     suppressed: List[SuppressionItem] = Field(default_factory=list)
+    # Present, but measured over less than the whole period. A SIBLING
+    # of `suppressed`, never a reason code inside it - see CoverageItem.
+    coverage_notes: List[CoverageItem] = Field(default_factory=list)
 
 
 class RecruitmentExceptionsResponse(BaseModel):
     exceptions: Optional[List[DQExceptionItem]] = None
     # Withheld figures, named. Empty when nothing was suppressed.
     suppressed: List[SuppressionItem] = Field(default_factory=list)
+    # Present, but measured over less than the whole period. A SIBLING
+    # of `suppressed`, never a reason code inside it - see CoverageItem.
+    coverage_notes: List[CoverageItem] = Field(default_factory=list)

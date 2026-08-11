@@ -30,6 +30,7 @@ import { KpiCard } from '../components/cards/KpiCard';
 import { ExceptionTable } from '../components/tables/ExceptionTable';
 import { UserPlus, ShieldAlert, RefreshCw } from 'lucide-react';
 import { NotProvided, collectSuppressions } from '../components/ui/NotProvided';
+import { CoverageNote, collectCoverage } from '../components/ui/CoverageNote';
 
 export const Recruitment: React.FC = () => {
   const [summary, setSummary] = useState<RecruitmentSummaryData | null>(null);
@@ -293,6 +294,8 @@ export const Recruitment: React.FC = () => {
 
   return (
     <div className="p-6 space-y-6">
+      {/* Coverage: present but measured over less than the whole period. */}
+      <CoverageNote items={collectCoverage(byDepartment, byProject, offerAcceptance, onboardingStatus, pipeline, sourceEffectiveness, summary, timeToFill, trends, workforcePlan)} />
       {/* Title block */}
       <div className="flex items-center justify-between">
         <div>

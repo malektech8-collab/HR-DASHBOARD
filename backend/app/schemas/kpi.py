@@ -20,6 +20,32 @@ class SuppressionItem(BaseModel):
     message_en: str
     message_ar: str
 
+class CoverageItem(BaseModel):
+    """A figure that is PRESENT but measured over less than the whole period.
+
+    Deliberately NOT a fourth `suppressed` reason code. `suppressed` means
+    withheld, and it carries every P0 guarantee step 2b established: if it ever
+    also meant "shown but qualified", a reader could no longer infer absence
+    from a suppression, and the damage would stay invisible until somebody
+    trusted the wrong number.
+
+    `covered_days` counts WORKING DAYS INSIDE THE DECLARED WINDOW, not days
+    that happen to carry rows. A day inside the window with no row is a real
+    absence - that is Category F's inversion - so counting rows would
+    double-count what that design separated.
+    """
+    domain: str
+    domain_label_en: str
+    domain_label_ar: str
+    declared_start: Optional[str] = None
+    declared_end: Optional[str] = None
+    covered_days: int
+    expected_days: int
+    coverage_pct: float
+    message_en: str
+    message_ar: str
+
+
 class KPIItem(BaseModel):
     key: str
     label: str
@@ -39,6 +65,9 @@ class ExecutiveSummaryResponse(BaseModel):
     charts: Optional[Dict[str, Any]] = None
     # Withheld figures, named. Empty when nothing was suppressed.
     suppressed: List[SuppressionItem] = Field(default_factory=list)
+    # Present, but measured over less than the whole period. A SIBLING
+    # of `suppressed`, never a reason code inside it - see CoverageItem.
+    coverage_notes: List[CoverageItem] = Field(default_factory=list)
 
 
 class DataQualitySummaryResponse(BaseModel):
@@ -51,6 +80,9 @@ class DataQualitySummaryResponse(BaseModel):
     invalid_payroll_count: Optional[int] = None
     # Withheld figures, named. Empty when nothing was suppressed.
     suppressed: List[SuppressionItem] = Field(default_factory=list)
+    # Present, but measured over less than the whole period. A SIBLING
+    # of `suppressed`, never a reason code inside it - see CoverageItem.
+    coverage_notes: List[CoverageItem] = Field(default_factory=list)
 
 
 class DQExceptionItem(BaseModel):
@@ -65,6 +97,9 @@ class DQExceptionsResponse(BaseModel):
     exceptions: Optional[List[DQExceptionItem]] = None
     # Withheld figures, named. Empty when nothing was suppressed.
     suppressed: List[SuppressionItem] = Field(default_factory=list)
+    # Present, but measured over less than the whole period. A SIBLING
+    # of `suppressed`, never a reason code inside it - see CoverageItem.
+    coverage_notes: List[CoverageItem] = Field(default_factory=list)
 
 
 class RefreshStatusResponse(BaseModel):

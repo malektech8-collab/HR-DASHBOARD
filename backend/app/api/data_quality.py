@@ -8,6 +8,11 @@ router = APIRouter()
 
 @router.get("/summary", response_model=DataQualitySummaryResponse)
 def get_data_quality_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
+    # Column mode: @suppressible does not run here, so the coverage of
+    # every domain this mart reads is noted explicitly. The KPI strip is
+    # the most-read surface and the one carrying the em dash, so it is
+    # the last place a coverage note should be missing.
+    prov.note_coverage("mart_data_quality_summary")
     try:
 
         res = conn.execute("SELECT * FROM mart_data_quality_summary").fetchone()
@@ -38,7 +43,8 @@ def get_data_quality_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_co
             mart, "duplicate_employee_count", row_dict["duplicate_employee_count"]),
         invalid_payroll_count=prov.value(
             mart, "invalid_payroll_count", row_dict["invalid_payroll_count"]),
-        suppressed=prov.block()
+        suppressed=prov.block(),
+        coverage_notes=prov.coverage_block()
     )
 
 @router.get("/exceptions", response_model=DQExceptionsResponse)

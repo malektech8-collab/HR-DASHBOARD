@@ -24,6 +24,7 @@ import { KpiCard } from '../components/cards/KpiCard';
 import { ExceptionTable } from '../components/tables/ExceptionTable';
 import { ShieldCheck, ShieldAlert, FileText, CheckCircle2 } from 'lucide-react';
 import { NotProvided, collectSuppressions } from '../components/ui/NotProvided';
+import { CoverageNote, collectCoverage } from '../components/ui/CoverageNote';
 
 
 export const Compliance: React.FC = () => {
@@ -510,6 +511,8 @@ export const Compliance: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Coverage: present but measured over less than the whole period. */}
+      <CoverageNote items={collectCoverage(departments, expiry, gosi, projects, summary, trends, wps)} />
       {/* Title */}
       <div className="flex items-center justify-between">
         <div>

@@ -10,6 +10,25 @@
  * These are nullable on purpose: the compiler is what forces every call site
  * to decide what to draw instead of a number.
  */
+/**
+ * A figure that is PRESENT but measured over less than the whole period.
+ * A sibling of `suppressed`, never a reason code inside it: `suppressed`
+ * means withheld, and if it ever also meant "shown but qualified" a reader
+ * could no longer infer absence from a suppression.
+ */
+export interface CoverageItem {
+  domain: string;
+  domain_label_en: string;
+  domain_label_ar: string;
+  declared_start: string | null;
+  declared_end: string | null;
+  covered_days: number;
+  expected_days: number;
+  coverage_pct: number;
+  message_en: string;
+  message_ar: string;
+}
+
 export interface SuppressionItem {
   key: string;
   mart: string;
@@ -44,6 +63,7 @@ export interface ExecutiveSummaryData {
     payroll_trend: (number | null)[];
   };
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface DataQualitySummaryData {
@@ -55,6 +75,7 @@ export interface DataQualitySummaryData {
   duplicate_employee_count: number;
   invalid_payroll_count: number;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface DQExceptionItem {
@@ -69,6 +90,7 @@ export interface DQExceptionItem {
 export interface DQExceptionsData {
   exceptions: DQExceptionItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface RefreshStatus {
@@ -80,6 +102,7 @@ export interface WorkforceSummaryData {
   report_month: string;
   kpis: KPIItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface WorkforceTrendsData {
@@ -87,6 +110,7 @@ export interface WorkforceTrendsData {
   /** Ruling 2: a point before the declared history depth is null, not derived. */
   headcount_trend: (number | null)[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface CategoryDistribution {
@@ -101,6 +125,7 @@ export interface WorkforceDistributionData {
   employment_type: CategoryDistribution;
   status: CategoryDistribution;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface ExpiryAgingData {
@@ -111,6 +136,7 @@ export interface ExpiryAgingData {
   "90_plus": number;
   missing_date: number;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface PayrollReconciliationData {
@@ -125,6 +151,7 @@ export interface PayrollReconciliationData {
   employees_paid_count: number;
   payroll_exception_count: number;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface PayrollSummaryData {
@@ -132,6 +159,7 @@ export interface PayrollSummaryData {
   kpis: KPIItem[] | null;
   reconciliation: PayrollReconciliationData;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface PayrollTrendItem {
@@ -148,6 +176,7 @@ export interface PayrollTrendItem {
 export interface PayrollTrendsData {
   trends: PayrollTrendItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface PayrollByProjectItem {
@@ -160,6 +189,7 @@ export interface PayrollByProjectItem {
 export interface PayrollByProjectData {
   projects: PayrollByProjectItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface PayrollByDepartmentItem {
@@ -172,6 +202,7 @@ export interface PayrollByDepartmentItem {
 export interface PayrollByDepartmentData {
   departments: PayrollByDepartmentItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface PayrollComponentItem {
@@ -182,6 +213,7 @@ export interface PayrollComponentItem {
 export interface PayrollComponentsData {
   components: PayrollComponentItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface PayrollComponentVarianceItem {
@@ -205,17 +237,20 @@ export interface PayrollVarianceData {
   components: PayrollComponentVarianceItem[] | null;
   employees: PayrollEmployeeVarianceItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface PayrollExceptionsData {
   exceptions: DQExceptionItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface AttendanceSummaryData {
   report_month: string;
   kpis: KPIItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface AttendanceTrendItem {
@@ -231,6 +266,7 @@ export interface AttendanceTrendItem {
 export interface AttendanceTrendsData {
   trends: AttendanceTrendItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface AttendanceByProjectItem {
@@ -247,6 +283,7 @@ export interface AttendanceByProjectItem {
 export interface AttendanceByProjectData {
   projects: AttendanceByProjectItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface AttendanceByDepartmentItem {
@@ -264,6 +301,7 @@ export interface AttendanceByDepartmentItem {
 export interface AttendanceByDepartmentData {
   departments: AttendanceByDepartmentItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface AttendanceLateArrivalItem {
@@ -280,6 +318,7 @@ export interface AttendanceLateArrivalItem {
 export interface AttendanceLateArrivalData {
   late_arrivals: AttendanceLateArrivalItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface AttendanceOvertimeItem {
@@ -295,6 +334,7 @@ export interface AttendanceOvertimeItem {
 export interface AttendanceOvertimeData {
   overtime_records: AttendanceOvertimeItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface AttendanceMissingPunchesItem {
@@ -310,17 +350,20 @@ export interface AttendanceMissingPunchesItem {
 export interface AttendanceMissingPunchesData {
   missing_punches: AttendanceMissingPunchesItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface AttendanceExceptionsData {
   exceptions: DQExceptionItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface ComplianceSummaryData {
   report_month: string;
   kpis: KPIItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface SaudizationTrendItem {
@@ -334,6 +377,7 @@ export interface SaudizationTrendItem {
 export interface SaudizationSummaryData {
   trends: SaudizationTrendItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface SaudizationByProjectItem {
@@ -348,6 +392,7 @@ export interface SaudizationByProjectItem {
 export interface SaudizationByProjectData {
   projects: SaudizationByProjectItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface SaudizationByDepartmentItem {
@@ -362,6 +407,7 @@ export interface SaudizationByDepartmentItem {
 export interface SaudizationByDepartmentData {
   departments: SaudizationByDepartmentItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface DocumentExpiryItem {
@@ -373,6 +419,7 @@ export interface DocumentExpiryItem {
 export interface DocumentExpiryData {
   buckets: DocumentExpiryItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface GosiStatusItem {
@@ -383,6 +430,7 @@ export interface GosiStatusItem {
 export interface GosiStatusData {
   statuses: GosiStatusItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface WpsStatusItem {
@@ -393,17 +441,20 @@ export interface WpsStatusItem {
 export interface WpsStatusData {
   statuses: WpsStatusItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface ComplianceExceptionsData {
   exceptions: DQExceptionItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface ErSummaryData {
   report_month: string;
   kpis: KPIItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface ErTrendItem {
@@ -415,6 +466,7 @@ export interface ErTrendItem {
 export interface ErTrendsData {
   trends: ErTrendItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface ErCasesByProjectItem {
@@ -430,6 +482,7 @@ export interface ErCasesByProjectItem {
 export interface ErCasesByProjectData {
   projects: ErCasesByProjectItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface ErCasesByDepartmentItem {
@@ -445,6 +498,7 @@ export interface ErCasesByDepartmentItem {
 export interface ErCasesByDepartmentData {
   departments: ErCasesByDepartmentItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface ErCaseTypeItem {
@@ -455,6 +509,7 @@ export interface ErCaseTypeItem {
 export interface ErCaseTypeData {
   case_types: ErCaseTypeItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface ErCaseStatusItem {
@@ -465,6 +520,7 @@ export interface ErCaseStatusItem {
 export interface ErCaseStatusData {
   statuses: ErCaseStatusItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface ErSlaPerformanceItem {
@@ -479,6 +535,7 @@ export interface ErSlaPerformanceItem {
 export interface ErSlaPerformanceData {
   performance: ErSlaPerformanceItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface ErAgingBucketItem {
@@ -489,11 +546,13 @@ export interface ErAgingBucketItem {
 export interface ErAgingBucketData {
   buckets: ErAgingBucketItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface ErExceptionsData {
   exceptions: DQExceptionItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface PipelineStageItem {
@@ -504,6 +563,7 @@ export interface PipelineStageItem {
 export interface RecruitmentPipelineData {
   pipeline: PipelineStageItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface RecruitmentTrendItem {
@@ -515,6 +575,7 @@ export interface RecruitmentTrendItem {
 export interface RecruitmentTrendsData {
   trends: RecruitmentTrendItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface RecruitmentByProjectItem {
@@ -528,6 +589,7 @@ export interface RecruitmentByProjectItem {
 export interface RecruitmentByProjectData {
   projects: RecruitmentByProjectItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface RecruitmentByDepartmentItem {
@@ -541,6 +603,7 @@ export interface RecruitmentByDepartmentItem {
 export interface RecruitmentByDepartmentData {
   departments: RecruitmentByDepartmentItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface TimeToFillItem {
@@ -553,6 +616,7 @@ export interface TimeToFillItem {
 export interface TimeToFillData {
   time_to_fill: TimeToFillItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface SourceEffectivenessItem {
@@ -565,6 +629,7 @@ export interface SourceEffectivenessItem {
 export interface SourceEffectivenessData {
   sources: SourceEffectivenessItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface OfferAcceptanceItem {
@@ -575,6 +640,7 @@ export interface OfferAcceptanceItem {
 export interface OfferAcceptanceData {
   offers: OfferAcceptanceItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface OnboardingStatusItem {
@@ -585,6 +651,7 @@ export interface OnboardingStatusItem {
 export interface OnboardingStatusData {
   onboarding: OnboardingStatusItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface WorkforcePlanVsActualItem {
@@ -598,17 +665,20 @@ export interface WorkforcePlanVsActualItem {
 export interface WorkforcePlanVsActualData {
   plan: WorkforcePlanVsActualItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface RecruitmentExceptionsData {
   exceptions: DQExceptionItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface RecruitmentSummaryData {
   report_month: string;
   kpis: KPIItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 // Talent, Performance, Learning & Succession types
@@ -616,6 +686,7 @@ export interface TalentSummaryData {
   report_month: string;
   kpis: KPIItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface PerformanceDistributionItem {
@@ -626,6 +697,7 @@ export interface PerformanceDistributionItem {
 export interface PerformanceDistributionData {
   distribution: PerformanceDistributionItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface PerformanceTrendItem {
@@ -639,6 +711,7 @@ export interface PerformanceTrendItem {
 export interface PerformanceTrendsData {
   trends: PerformanceTrendItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface PerformanceByProjectItem {
@@ -652,6 +725,7 @@ export interface PerformanceByProjectItem {
 export interface PerformanceByProjectData {
   projects: PerformanceByProjectItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface PerformanceByDepartmentItem {
@@ -665,6 +739,7 @@ export interface PerformanceByDepartmentItem {
 export interface PerformanceByDepartmentData {
   departments: PerformanceByDepartmentItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface GoalCompletionItem {
@@ -680,6 +755,7 @@ export interface GoalCompletionItem {
 export interface GoalCompletionData {
   goals: GoalCompletionItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface CompetencyGapItem {
@@ -692,6 +768,7 @@ export interface CompetencyGapItem {
 export interface CompetencyGapData {
   gaps: CompetencyGapItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface LearningCompletionItem {
@@ -704,6 +781,7 @@ export interface LearningCompletionItem {
 export interface LearningCompletionData {
   completion: LearningCompletionItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface LearningByProjectItem {
@@ -716,6 +794,7 @@ export interface LearningByProjectItem {
 export interface LearningByProjectData {
   projects: LearningByProjectItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface SuccessionCoverageItem {
@@ -728,6 +807,7 @@ export interface SuccessionCoverageItem {
 export interface SuccessionCoverageData {
   coverage: SuccessionCoverageItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface SuccessorReadinessItem {
@@ -738,6 +818,7 @@ export interface SuccessorReadinessItem {
 export interface SuccessorReadinessData {
   readiness: SuccessorReadinessItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface TalentRiskItem {
@@ -753,11 +834,13 @@ export interface TalentRiskItem {
 export interface TalentRiskData {
   risks: TalentRiskItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface TalentExceptionsData {
   exceptions: DQExceptionItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface CommandCenterOverviewData {
@@ -774,6 +857,7 @@ export interface CommandCenterOverviewData {
   latest_source_business_date: string | null;
   data_quality_score: number;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface ModuleHealthItem {
@@ -796,6 +880,7 @@ export interface ModuleHealthItem {
 export interface ModuleHealthResponse {
   modules: ModuleHealthItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface PriorityAlertItem {
@@ -813,6 +898,7 @@ export interface PriorityAlertItem {
 export interface PriorityAlertResponse {
   alerts: PriorityAlertItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface ExceptionSummaryItem {
@@ -828,6 +914,7 @@ export interface ExceptionSummaryItem {
 export interface ExceptionSummaryResponse {
   exceptions: ExceptionSummaryItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface FreshnessItem {
@@ -843,6 +930,7 @@ export interface FreshnessItem {
 export interface FreshnessResponse {
   freshness: FreshnessItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface NavigationStatusItem {
@@ -855,6 +943,7 @@ export interface NavigationStatusItem {
 export interface NavigationStatusResponse {
   navigation: NavigationStatusItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface FilterOptionsResponse {
@@ -867,6 +956,7 @@ export interface FilterOptionsResponse {
   nationalities: string[] | null;
   modules: string[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 export interface QaIndexItem {
@@ -884,6 +974,7 @@ export interface QaIndexItem {
 export interface QaIndexResponse {
   qa_index: QaIndexItem[] | null;
   suppressed?: SuppressionItem[];
+  coverage_notes?: CoverageItem[];
 }
 
 declare global {

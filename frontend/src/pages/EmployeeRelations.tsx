@@ -26,6 +26,7 @@ import { KpiCard } from '../components/cards/KpiCard';
 import { ExceptionTable } from '../components/tables/ExceptionTable';
 import { Scale, ShieldAlert, FileText, RefreshCw } from 'lucide-react';
 import { NotProvided, collectSuppressions } from '../components/ui/NotProvided';
+import { CoverageNote, collectCoverage } from '../components/ui/CoverageNote';
 
 export const EmployeeRelations: React.FC = () => {
   const [summary, setSummary] = useState<ErSummaryData | null>(null);
@@ -483,6 +484,8 @@ export const EmployeeRelations: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Coverage: present but measured over less than the whole period. */}
+      <CoverageNote items={collectCoverage(agingBuckets, byDepartment, byProject, caseStatus, caseTypes, slaPerf, summary, trends)} />
       {/* Header Panel */}
       <div className="bg-card border border-border rounded-xl p-6 shadow-md flex items-center justify-between">
         <div className="flex items-center gap-3">

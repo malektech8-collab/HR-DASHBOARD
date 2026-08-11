@@ -1,7 +1,7 @@
 # Coverage Surface — making partial coverage visible (PLAN ONLY)
 
 **Branch:** `phase-2/coverage-surface` off `main` @ `98342a0` (Category F merged) · **Date:** 2026-08-11
-**Status:** plan only. Nothing implemented.
+**Status:** plan only when written; **executed 2026-08-11** — see [`coverage-surface-report.md`](coverage-surface-report.md).
 **Closes:** [`p0-3-category-f-report.md`](p0-3-category-f-report.md) open item 1.
 
 Category F made the numbers honest. It did not make them **explicable**. A client who uploads the first week of August now sees a thin month, correctly, and has nothing telling them why.
@@ -148,8 +148,25 @@ The 72-model sweep is the bulk of the diff and the least interesting part of it;
 ## 8. Risks
 
 1. **Note fatigue.** Three placements is already the maximum defensible. If the banner and the caption both fire on every chart, readers will filter them out and the em-dash case — the one that most needs an explanation — goes with them. The `covered < expected` rule is what keeps this survivable; it should not be softened into "always show coverage".
-2. **The 72-model sweep touching every response again.** Mechanical, but it is the second such sweep in three cycles. If a third field is ever needed, the right move is a shared `meta` envelope rather than a third parallel list — worth deciding now rather than after.
-3. **Arabic numerals in the message.** The example above uses Arabic-Indic digits (٦, ٢٧). The rest of the product renders Western digits in Arabic text. Pick one and apply it to all bilingual messages, including the ones step 2b and Category F already ship — this is the moment to settle it, not a third convention.
+2. **The 72-model sweep touching every response again.** Mechanical, but it is the second such sweep in three cycles.
+
+> ### DECISION — the meta envelope, and its trigger
+>
+> **Ruled 2026-08-11. Do not build an envelope now.** Two fields with different
+> semantics are not yet evidence of a shared shape, and an envelope changes the
+> API contract for every consumer — in a cycle already touching 72 response
+> models and the frontend.
+>
+> **Named trigger: the THIRD cross-cutting response field adopts a shared
+> `meta` envelope.** `suppressed` (step 2b) and `coverage` (this step) are the
+> first two. A third must not be added as a third parallel list by default;
+> reaching for one is the signal that the envelope is now owed, and the work
+> is to introduce `meta` and migrate all three together.
+>
+> Recorded here rather than in a commit message because a commit message is
+> not where a future contributor looks before adding a field.
+3. **Arabic numerals in the message.** The example above uses Arabic-Indic digits (٦, ٢٧). The rest of the product renders Western digits in Arabic text.
+   > **SETTLED at execution:** Western digits inside Arabic text, everywhere. Matches every bilingual message step 2b and Category F already ship, and a test asserts no Arabic-Indic digit appears in a coverage message.
 
 ---
 

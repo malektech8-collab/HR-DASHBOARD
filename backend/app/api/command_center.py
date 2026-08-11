@@ -21,6 +21,11 @@ router = APIRouter()
 
 @router.get("/overview", response_model=CommandCenterOverviewResponse)
 async def get_overview(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
+    # Column mode: @suppressible does not run here, so the coverage of
+    # every domain this mart reads is noted explicitly. The KPI strip is
+    # the most-read surface and the one carrying the em dash, so it is
+    # the last place a coverage note should be missing.
+    prov.note_coverage("mart_command_center_overview")
     try:
         cursor = conn.execute("SELECT * FROM mart_command_center_overview")
         row = cursor.fetchone()
@@ -41,6 +46,7 @@ async def get_overview(conn: duckdb.DuckDBPyConnection = Depends(get_db_connecti
             continue  # pipeline metadata, not a client figure
         data[column] = prov.value(mart, column, data[column])
     data["suppressed"] = prov.block()
+    data["coverage_notes"] = prov.coverage_block()
     return data
 
 

@@ -240,6 +240,13 @@ marts:
     mode: payload
     domains: []   # period metadata only - no client measures, so never suppressed
 
+  mart_attendance_coverage:
+    mode: payload
+    domains: [attendance]
+    # The coverage surface itself. Payload mode with [attendance] means it
+    # self-suppresses when attendance is absent - correct: the `suppressed`
+    # block is already saying so, and a coverage note beside it would be noise.
+
   mart_attendance_by_department:
     mode: payload
     domains: [attendance, employees, payroll]
