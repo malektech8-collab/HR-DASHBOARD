@@ -1,8 +1,10 @@
 # P0-3 Step 2a.5 — Anchor Convergence (Execution Report)
 
-**Branch:** `phase-2/p0-3-anchor-convergence` off `main` @ `959d9fb` (2a merged) · **Date:** 2026-08-10
+**Branch:** `phase-2/p0-3-anchor-convergence` off `main` @ `959d9fb` (2a merged) · **Date:** 2026-08-10, extended 2026-08-11
 **Status:** executed, committed, pushed. **Not merged.**
-**Scope:** dbt models, registry and tests only. **No application code.** Step 2b not started.
+**Scope:** dbt models, registry and tests — **plus, in the 2026-08-11 extension, the report-month resolver** (§11), which required `backend/app/config.py` and `backend/app/api/_report_period.py`. The original "no application code" guardrail could not hold once the fix was the resolution policy itself. Step 2b not started.
+
+> **Review outcome, 2026-08-11.** The convergence was accepted; the cycle was **blocked from merging** on a finding it created: with payroll *and* compliance absent, `var('report_month')` resolves to `settings.DEFAULT_REPORT_MONTH` — a literal in this repository. §11 closes it. §4 carries a **second correction to my own evidence**, because the `0 → 2` proof below was itself computed against that constant.
 
 ---
 
@@ -46,6 +48,8 @@ The ruling said "all 8". Seven were anchors; the eighth was a measurement wearin
 ### Why convergence is safe
 
 `report_month` is itself derived as `MAX(payroll_period)`, falling back to `MAX(period)` from compliance, then `DEFAULT_REPORT_MONTH` (`scripts/build_warehouse.py`). So on demo the two idioms are the *same value by construction*, and when payroll is absent the var still resolves while the raw `MAX` goes `NULL`. That is exactly the divergence, and exactly why the fix is convergence on the existing var rather than a new mechanism.
+
+> **Written before review, and incomplete as written.** "The var still resolves" was the whole problem: with payroll *and* compliance absent it resolved to a repo constant. The sentence describes the mechanism correctly and stops one link too early. §11 is the correction.
 
 ---
 
@@ -96,6 +100,23 @@ The *mechanism* is real — a `NULL` anchor makes every window comparison `NULL`
 `0 → 2` on a **declared** domain with payroll still absent. That is the finding demonstrated properly.
 
 Incidentally the fixture's first version used a `2030-01-01` contract end and was rejected by the 1b-i DATE range rule (`outside 1940-01-01 to 2028-08-10`) — the validator doing its job on my own test data.
+
+### 4.1 A second correction: the `2` was the repo's answer, not the client's
+
+**Added 2026-08-11, after review.** The run above resolved `report_month` to `2026-06`. With payroll absent and compliance absent, that did not come from the synthetic data — it came from `settings.DEFAULT_REPORT_MONTH` in `config.py`. So the anchor was `2026-06-30`, and the `2` is what those three employees look like *against a period this repository chose*.
+
+The same fixture, same code, with the period stated explicitly:
+
+```
+REPORT_MONTH=2026-06  (the old repo constant) -> probation_count 2, contract_expiring_30 2
+REPORT_MONTH=2026-08  (the actual month)      -> probation_count 0, contract_expiring_30 0
+```
+
+Two versus zero, from nothing but the period. It is August 2026, so `0` is the answer a client would have been owed and `2` is what the dashboard would have shown them.
+
+Both statements in §4 stand: the NULL anchor was a real bug, and convergence is the right fix. What does not stand is treating the post-fix number as correct. `0 → 2` is more precisely **`0` (broken) → `2` (stale constant) → an answer only the operator can supply**, which is why this cycle could not merge without §11.
+
+I have now had to correct the evidence in this section twice — first for citing a coincidental zero in step 2a, now for citing a constant-anchored two. Both times the mechanism was real and the number was not load-bearing in the way I claimed. The pattern is mine to fix: I was reading numbers that moved in the expected direction as confirmation, without asking what fixed the *other* variable.
 
 ---
 
@@ -170,6 +191,8 @@ Evidence:
 
 So the endpoint has returned 500 on every call since `7b86cc8`. Per ruling this is a separate hotfix branch; the fix is most likely a small `mart_wps_status` model over `base_government_status`, restoring the deleted reconciliation assertion alongside it.
 
+**The wider audit this prompted is [`reconciliation-audit-7b86cc8.md`](reconciliation-audit-7b86cc8.md)** — see §12 for the headline.
+
 ---
 
 ## 9. Verification
@@ -183,8 +206,12 @@ So the endpoint has returned 500 on every call since `7b86cc8`. Per ruling this 
 | Registry reversions | 5 entries |
 | DQ filter requirement | encoded (`scope_filter: source_table`) |
 | Mode-aware Pydantic | **110** (77 containers + 33 scalars) |
-| pytest | **76 passed** (73 + 3 new) |
-| Application code touched | **none** |
+| Real mode fails closed on `report_month` | **yes** — §11, proven by an aborted run |
+| Operator `REPORT_MONTH` honoured in both modes | **yes** — §11 |
+| Operator/payroll period mismatch | **validation error at ingest**, naming both — §11 |
+| `DEFAULT_REPORT_MONTH` reachable in real mode | **no** — swept, plus a structural pin on its readers |
+| pytest | **104 passed** (76 + 28 new) |
+| Application code touched | `config.py`, `api/_report_period.py` — see §11.5 |
 
 Synthetic artefacts removed; demo rebuilt and re-verified.
 
@@ -195,7 +222,178 @@ Synthetic artefacts removed; demo rebuilt and re-verified.
 1. **`mart_wps_status`** — separate hotfix branch; diagnosis above. Restore the reconciliation assertion with the model.
 2. **2b scope** — 110 fields; recommend a single cycle.
 3. `mart_workforce_exceptions` retains a real payroll dependency (inactive-employee pay checks), so it will suppress when payroll is absent. Correct, but worth knowing it behaves differently from its sibling workforce marts.
+4. **Restoring the 63 deleted reconciliation assertions** — §12. Should not happen before 2b settles suppression semantics; a "breakdown sums to total" assertion is false by design once a payload is suppressed.
 
 ---
 
-**Not merged. Awaiting review.**
+# The 2026-08-11 extension
+
+## 11. The reporting period fails closed in real mode
+
+### 11.1 The finding, restated in one line
+
+`var('report_month')` had a third fallback, and it was a literal in this repository.
+
+```python
+MAX(payroll_period) -> MAX(compliance.period) -> settings.DEFAULT_REPORT_MONTH  # "2026-06"
+```
+
+At `declared: [employees]` — an entirely ordinary employees-first onboarding — the first two are absent and the third answers. Convergence is what makes it reachable, so convergence has to close it:
+
+```
+before 2a.5 : NULL anchor     -> 0, wrong and it LOOKS wrong
+after  2a.5 : constant anchor -> 2, wrong and it LOOKS RIGHT
+```
+
+The second is strictly worse. Category C, self-inflicted, in the cycle whose purpose was to stop fabricated numbers reaching a client.
+
+### 11.2 The resolver
+
+New module `scripts/report_period.py` owns the decision. `build_warehouse._derive_report_month()` now returns `None` instead of a constant when it cannot derive — it reports what the data says, it does not decide what to do about it.
+
+Precedence, **in both modes**:
+
+| | source | behaviour |
+|---|---|---|
+| 1 | operator `REPORT_MONTH` | wins outright, over derivation too |
+| 2 | client data | `MAX(payroll_period)`, then compliance `MAX(period)` — unchanged, and good: it self-tracks the HR close |
+| 3 | neither | **real → ABORT**, demo → `DEFAULT_REPORT_MONTH` |
+
+A malformed `REPORT_MONTH` is an error in both modes rather than a silent fall-through — falling back on a typo is the same substitution this removes. A derived value that is not a period (a `payroll_period` column that does not hold periods) is treated as no value at all, so real mode aborts on it.
+
+### 11.3 The abort path
+
+Real mode, `declared: [employees]`, `REPORT_MONTH` unset. Full pipeline, not a unit test:
+
+```
+##########################################################################
+# ARM A - real mode, employees only, REPORT_MONTH unset
+##########################################################################
+  data/raw/employees.csv: 3 synthetic rows
+  declared: ['employees']
+
+  ABORTED with ReportMonthUnresolvedError:
+    Cannot determine the reporting period. No payroll or compliance data is
+    present to derive it from, and REPORT_MONTH is not set.
+    Set REPORT_MONTH=YYYY-MM (for example REPORT_MONTH=2026-08) in .env or the
+    environment, and re-run.
+    It cannot be guessed: the reporting period decides every date window on the
+    dashboard - probation, contract and Iqama expiry, payroll period. Defaulting
+    it would anchor a client's numbers to a period nobody chose, and the result
+    would look correct.
+    تعذّر تحديد فترة التقرير. لا توجد بيانات رواتب أو التزام لاشتقاقها منها،
+    والإعداد REPORT_MONTH غير محدد. الرجاء ضبط REPORT_MONTH=YYYY-MM
+    (مثال REPORT_MONTH=2026-08) ثم إعادة التشغيل. لا يمكن تخمين الفترة لأنها
+    تحدد كل النوافذ الزمنية في لوحة المعلومات.
+```
+
+It names the setting, gives the format and an example, says **why** it cannot be guessed rather than only that it failed, and is bilingual like every other operator-facing onboarding error. The abort happens before dbt, and closes the DuckDB connection first so a failed run does not leave the file locked.
+
+Same fixture, period supplied:
+
+```
+ARM A'  REPORT_MONTH=2026-08 -> report_month 2026-08, probation_count 0, contract_expiring_30 0
+ARM A'' REPORT_MONTH=2026-06 -> report_month 2026-06, probation_count 2, contract_expiring_30 2
+```
+
+That contrast is §4.1's evidence, and it is the whole argument for aborting: the period is not a detail of the answer, it *is* the answer.
+
+### 11.4 The mismatch this created — caught at ingest
+
+Every converged site now filters `payroll_period = '{{ var('report_month') }}'`. Under derivation the two agree by construction. Under an operator override they need not, and then the filter matches nothing.
+
+**What that looks like without the guard** (same run, new check disabled — a counterfactual, not a repo state):
+
+```
+Declared-domain guard passed. Row counts: {... 'payroll': 3}
+dbt run 157/157 · dbt test 11/11
+Command Center integration reconciliation checks PASSED.
+
+silver payroll rows       : 3
+silver payroll periods    : [('2026-06',)]
+report_month              : 2026-08
+base_payroll_current rows : 0
+total_payroll_cost        : 0.0
+employees_paid            : 0
+```
+
+Payroll declared, payroll populated, silver correct, every guard green, **payroll cost zero**. Nothing in the system disagrees with anything else, because the KPI and everything it could be checked against sit downstream of the same filter (§12 is about exactly that).
+
+**With the guard**, it never reaches dbt:
+
+```
+##########################################################################
+# ARM B - operator period 2026-08 vs a payroll file covering 2026-06
+##########################################################################
+  REJECTED AT INGEST with ReportMonthMismatchError:
+    Reporting period mismatch. REPORT_MONTH is set to 2026-08, but the uploaded
+    payroll data covers 2026-06. Every payroll figure filters on the reporting
+    period, so this run would report a payroll cost of 0 against a payroll file
+    that is present and valid.
+    Either set REPORT_MONTH to one of 2026-06, or upload the 2026-08 payroll file.
+    عدم تطابق فترة التقرير: الإعداد REPORT_MONTH محدد بـ 2026-08 بينما ملف payroll
+    المرفوع يغطي 2026-06. سيؤدي ذلك إلى عرض تكلفة رواتب صفرية رغم وجود ملف رواتب صالح.
+```
+
+Both periods named, both remedies offered, and it says what the client would otherwise have seen. Agreement passes cleanly:
+
+```
+ARM B' REPORT_MONTH=2026-06, payroll covering 2026-06
+       -> report_month 2026-06, total_payroll_cost 15000.0
+```
+
+Design notes: the check runs in **both** modes (an operator override is just as capable of zeroing demo), but only when a period is explicitly set — derivation cannot disagree with itself. It compares against the **set** of periods in the file, not the max, because that is precisely what the SQL filter tests. An empty payroll file is not reported as a mismatch: zero rows is the declared-domain guard's job, and naming a period the file does not contain would be a worse message.
+
+### 11.5 The API resolver, which had the same hole
+
+`get_report_month()` fell back to `DEFAULT_REPORT_MONTH` whenever `base_command_center_report_context` was unreadable — in real mode, labelling a client's page header with a period this repo chose. Fixing the pipeline and leaving this would have been fixing the visible half.
+
+Real mode now honours an explicit `REPORT_MONTH` and otherwise returns **503** naming the setting. Demo is untouched. This is the application code the original guardrail excluded; the alternative was shipping a resolver that fails closed in one layer and open in the next.
+
+### 11.6 Tests — 28 new, 104 total
+
+`backend/tests/test_report_period.py`. Beyond the four required behaviours:
+
+- **`test_default_report_month_is_unreachable_in_real_mode`** sweeps every real-mode input shape (`None`, `""`, whitespace, `"garbage"`, `"2026-13"`, `"2026"`) and asserts each aborts; then, with an operator period set, asserts the answer is the operator's for every derived value **including `DEFAULT_REPORT_MONTH` itself**.
+- **`test_the_demo_default_has_exactly_three_readers`** is a structural pin. "Demo-only" is a policy, and a policy is only durable if the set of code that reads the constant cannot quietly grow. It walks `backend/app`, `scripts` and `dbt_analytics` and asserts the readers are exactly the definition plus the two resolvers' demo branches. A fourth reader is a new fallback path and now has to be argued for in this test.
+- The API resolver is covered in all three states — demo default, real-mode 503, real-mode operator override.
+
+### 11.7 Demo gate — unchanged
+
+```
+headline: (19, 446175.0, 50.0) | exceptions 667 | DQ 15
+BYTE-IDENTICAL: True
+dbt run  -> PASS=157 WARN=0 ERROR=0 SKIP=0 TOTAL=157
+dbt test -> PASS=11  WARN=0 ERROR=0 SKIP=0 TOTAL=11
+Command Center integration reconciliation checks PASSED.
+Resolved report_month: 2026-06 (2026-06-01..2026-06-30) [source: data]
+```
+
+Demo derives from sample payroll, so it never reaches the changed branch — `[source: data]`, not `demo-default`. The gate holds by not being touched.
+
+---
+
+## 12. The `7b86cc8` reconciliation audit
+
+Full report: [`reconciliation-audit-7b86cc8.md`](reconciliation-audit-7b86cc8.md). The headline:
+
+```
+assertions BEFORE 7b86cc8 : 74
+assertions AFTER          : 11      (unchanged today)
+removed                   : 63
+with a surviving equivalent: 0
+```
+
+The 11 survivors are the Command Center integration block, untouched. Every other block went whole: payroll 7, attendance 8, compliance 9, ER 11, recruitment 13, talent 13, warehouse 2. The dbt suite did not absorb them — it is 11 `not_null`/`unique` tests on 5 marts, and **`not_null` passes on a fabricated zero**.
+
+Two findings worth more than the count:
+
+1. **Only one guarded object actually disappeared.** The deleted suite referenced 62 distinct `mart_`/`base_` objects; 61 still exist. The single exception is `mart_wps_status`. So WPS is not the tip of an iceberg of lost marts — this audit is what establishes that rather than assuming it. The iceberg is that 61 surviving objects lost their guard anyway.
+
+2. **None of the 74 ever compared a KPI to the uploaded rows.** Every check compares a mart to another mart or to a `base_` model — both sides downstream of the same filters. That makes the suite strong against a broken join and blind to a wrong shared upstream, which is exactly why §11.4's zero sailed past all 11 survivors. The gap the suite never covered is larger than the 63 it lost.
+
+Report only, per ruling. Restoration is cheap and mostly mechanical as dbt singular tests, but additivity assertions must become domain-aware first: "breakdown sums to total" is false by design once 2b suppresses a payload, and a suite that fires on every partial onboarding gets switched off.
+
+---
+
+**Not merged. Awaiting review of the abort path (§11.3) and the mismatch error (§11.4).**

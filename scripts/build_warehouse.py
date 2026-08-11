@@ -20,7 +20,6 @@ sys.path.append(_backend_dir)
 # scripts/ on the path so the guard can import onboarding/canonical_schema
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from app.db.duckdb_client import configure_s3
-from app.config import settings
 
 
 
@@ -93,7 +92,10 @@ def build_warehouse():
 
     # --- Cycle 5a: resolve report_month from the DATA (single source of truth) ---
     # Prefer payroll_period (the canonical, always-complete monthly HR close),
-    # then compliance period; fall back to the ONE system-wide default in config.
+    # then compliance period. Returns None when neither is available — the
+    # DECISION about what to do with that is not made here; it belongs to
+    # report_period.resolve_report_month(), which fails closed in real mode
+    # rather than reaching for a constant (Phase 2 P0-3, step 2a.5).
     def _derive_report_month():
         for query in (
             "SELECT CAST(MAX(payroll_period) AS VARCHAR) FROM payroll",
@@ -105,20 +107,26 @@ def build_warehouse():
                     return str(row[0])[:7]
             except Exception:
                 pass
-        return settings.DEFAULT_REPORT_MONTH
+        return None
 
-    cc_report_month = _derive_report_month()
+    import report_period as _rp
     try:
-        year, month = map(int, cc_report_month.split("-"))
-    except Exception:
-        cc_report_month = settings.DEFAULT_REPORT_MONTH
-        year, month = map(int, cc_report_month.split("-"))
+        cc_report_month, cc_report_month_source = _rp.resolve_report_month(
+            _derive_report_month())
+    except _rp.ReportMonthError:
+        # Abort BEFORE dbt, and close the connection first so the DuckDB file
+        # is not left locked by a failed run.
+        conn.close()
+        raise
+    year, month = map(int, cc_report_month.split("-"))
     last_day = calendar.monthrange(year, month)[1]
     cc_report_month_end = f"{cc_report_month}-{last_day:02d}"
     cc_report_month_start = f"{cc_report_month}-01"
     # Item 5: talent period now tracks the same resolved month (drops the old
     # separate talent_report_month + hardcoded '-30' last-day bug) — see dbt_vars.
-    print(f"Resolved report_month from data: {cc_report_month} ({cc_report_month_start}..{cc_report_month_end})")
+    print(f"Resolved report_month: {cc_report_month} "
+          f"({cc_report_month_start}..{cc_report_month_end}) "
+          f"[source: {cc_report_month_source}]")
 
     # Create placeholders for table-backed views to prevent dbt compilation errors
     conn.execute("""

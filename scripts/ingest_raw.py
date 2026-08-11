@@ -8,6 +8,7 @@ from validate_schema import (validate_csv, SchemaValidationError, dq_severity, d
 from derivations import derive_column
 import canonical_schema as _cs
 import onboarding as _onb
+import report_period as _rp
 
 # Transport for EXCEPTION-severity contract violations: written here, merged
 # into the gold DQ report by validate_data.py so they reach the Data Quality
@@ -92,6 +93,35 @@ def _write_contract_exceptions(violations):
         CONTRACT_EXCEPTIONS_PATH)
     print("[contract] wrote {} exception row(s) to {}".format(
         len(rows), CONTRACT_EXCEPTIONS_PATH))
+
+
+def check_payroll_period_matches_report_month(payroll_csv, exists=os.path.exists):
+    """Reject an operator period the uploaded payroll file does not contain.
+
+    Step 2a.5 replaced `payroll_period = (SELECT MAX(payroll_period) ...)` with
+    `payroll_period = '{{ var("report_month") }}'` at every anchor site. Under
+    derivation those are the same value by construction. Under an operator
+    override they need not be, and the filter then matches NOTHING:
+
+        payroll declared, payroll populated, silver correct,
+        declared-domain guard green, dbt green, payroll cost 0.
+
+    Every check passes and the number is a lie. So the disagreement is caught
+    here, at ingest, with both periods named — never discovered downstream as
+    an empty result. No operator period set means derivation is in charge, and
+    derivation cannot disagree with itself.
+    """
+    month = _rp.operator_report_month()
+    if not month or not exists(payroll_csv):
+        return None
+    try:
+        periods = pl.read_csv(payroll_csv, columns=["payroll_period"])
+    except Exception:
+        # No payroll_period column. In real mode the contract gate has already
+        # rejected the file; there is nothing to compare here.
+        return None
+    return _rp.assert_payroll_period_matches(
+        periods["payroll_period"].to_list(), month=month)
 
 
 def ingest(data_mode=None):
@@ -235,6 +265,16 @@ def ingest(data_mode=None):
         # written after those blocks, in _finalise_undeclared().
         for table in empty_domains:
             files[table] = f"{UNDECLARED_SENTINEL_DIR}/{table}.csv"
+
+    # Operator period vs uploaded payroll period. Runs in BOTH modes and after
+    # the contract gate, so `files["payroll"]` already points at whichever file
+    # will actually be ingested — or, for an undeclared domain, at the sentinel
+    # path that cannot exist, which makes this a no-op.
+    agreed = check_payroll_period_matches_report_month(
+        files["payroll"], exists=original_exists)
+    if agreed:
+        print(f"[report_month] operator period {agreed} confirmed present in "
+              f"{files['payroll']}.")
 
     if contract_exceptions:
         _write_contract_exceptions(contract_exceptions)
