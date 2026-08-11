@@ -26,7 +26,7 @@ import { getTemplateDownloadUrl } from '../lib/api';
 
 export const DataQuality: React.FC = () => {
   const [summary, setSummary] = useState<DataQualitySummaryData | null>(null);
-  const [exceptions, setExceptions] = useState<DQExceptionItem[]>([]);
+  const [exceptions, setExceptions] = useState<DQExceptionItem[] | null>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   

@@ -15,11 +15,12 @@ from app.schemas.command_center import (
     QaIndexResponse,
     QaIndexItem
 )
+from app.api._provenance import Provenance, get_provenance, suppressible
 
 router = APIRouter()
 
 @router.get("/overview", response_model=CommandCenterOverviewResponse)
-async def get_overview(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+async def get_overview(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
         cursor = conn.execute("SELECT * FROM mart_command_center_overview")
         row = cursor.fetchone()
@@ -27,13 +28,24 @@ async def get_overview(conn: duckdb.DuckDBPyConnection = Depends(get_db_connecti
             raise HTTPException(status_code=404, detail="Overview metrics not found")
         cols = [desc[0] for desc in cursor.description]
         data = dict(zip(cols, row))
-        return data
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+    # Column mode: the overview row mixes every domain in the product, which
+    # is precisely why it is the page a fabricated number does most damage on.
+    mart = "mart_command_center_overview"
+    for column in list(data):
+        if column in ("last_data_refresh", "latest_source_business_date"):
+            continue  # pipeline metadata, not a client figure
+        data[column] = prov.value(mart, column, data[column])
+    data["suppressed"] = prov.block()
+    return data
+
 
 @router.get("/module-health", response_model=ModuleHealthResponse)
-async def get_module_health(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+async def get_module_health(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
         cursor = conn.execute("SELECT * FROM mart_command_center_module_health")
         rows = cursor.fetchall()
@@ -45,7 +57,7 @@ async def get_module_health(conn: duckdb.DuckDBPyConnection = Depends(get_db_con
 
 
 @router.get("/priority-alerts", response_model=PriorityAlertResponse)
-async def get_priority_alerts(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+async def get_priority_alerts(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
         cursor = conn.execute("SELECT * FROM mart_command_center_priority_alerts")
         rows = cursor.fetchall()
@@ -57,7 +69,7 @@ async def get_priority_alerts(conn: duckdb.DuckDBPyConnection = Depends(get_db_c
 
 
 @router.get("/exceptions", response_model=ExceptionSummaryResponse)
-async def get_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+async def get_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
         cursor = conn.execute("SELECT * FROM mart_command_center_exception_summary")
         rows = cursor.fetchall()
@@ -69,7 +81,7 @@ async def get_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connec
 
 
 @router.get("/data-freshness", response_model=FreshnessResponse)
-async def get_data_freshness(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+async def get_data_freshness(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
         cursor = conn.execute("SELECT * FROM mart_command_center_data_freshness")
         rows = cursor.fetchall()
@@ -81,7 +93,7 @@ async def get_data_freshness(conn: duckdb.DuckDBPyConnection = Depends(get_db_co
 
 
 @router.get("/filter-options", response_model=FilterOptionsResponse)
-async def get_filter_options(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+async def get_filter_options(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
         cursor = conn.execute("SELECT * FROM mart_command_center_filter_options")
         row = cursor.fetchone()
@@ -95,7 +107,7 @@ async def get_filter_options(conn: duckdb.DuckDBPyConnection = Depends(get_db_co
 
 
 @router.get("/navigation-status", response_model=NavigationStatusResponse)
-async def get_navigation_status(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+async def get_navigation_status(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
         cursor = conn.execute("SELECT * FROM mart_command_center_navigation_status")
         rows = cursor.fetchall()
@@ -107,7 +119,7 @@ async def get_navigation_status(conn: duckdb.DuckDBPyConnection = Depends(get_db
 
 
 @router.get("/qa-index", response_model=QaIndexResponse)
-async def get_qa_index(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+async def get_qa_index(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
         rows = conn.execute("SELECT module_key, module_label, screenshot_path, qa_report_path FROM base_command_center_module_registry").fetchall()
         

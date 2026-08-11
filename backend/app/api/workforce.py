@@ -2,34 +2,40 @@ from fastapi import APIRouter, HTTPException, Depends
 from app.db.duckdb_client import get_db_connection
 import duckdb
 from app.schemas.workforce import (
-    WorkforceSummaryResponse, 
-    WorkforceTrendsResponse, 
-    WorkforceDistributionResponse, 
+    WorkforceSummaryResponse,
+    WorkforceTrendsResponse,
+    WorkforceDistributionResponse,
     ExpiryAgingResponse,
     CategoryDistribution
 )
 from app.schemas.kpi import KPIItem, DQExceptionsResponse, DQExceptionItem
 from app.api._report_period import get_report_month
+from app.api._provenance import Provenance, get_provenance
 
 router = APIRouter()
 
 @router.get("/summary", response_model=WorkforceSummaryResponse)
-def get_workforce_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), report_month: str = Depends(get_report_month)):
+def get_workforce_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), report_month: str = Depends(get_report_month), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_workforce_kpis").fetchone()
         if not res:
             raise HTTPException(status_code=404, detail="No workforce KPI records found")
-        
+
         cols = [desc[0] for desc in conn.description]
         row_dict = dict(zip(cols, res))
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
 
 
-    # Build KPIs list matching exactly the 10 KPIs requested
-    kpis = [
-        KPIItem(
+    # Column mode: this one row mixes provenance, so cards are built only for
+    # the columns whose domains were provided. Each entry is a FACTORY — a
+    # suppressed card is never constructed, so its arithmetic never runs
+    # against a fabricated value.
+    kpis = prov.kpis("mart_workforce_kpis", [
+        ("active_headcount", lambda: KPIItem(
             key="active_headcount",
             label="Active Headcount",
             value=row_dict["active_headcount"],
@@ -37,8 +43,8 @@ def get_workforce_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_conne
             trend_value=5.2,
             trend_direction="up",
             status="healthy"
-        ),
-        KPIItem(
+        )),
+        ("saudi_headcount", lambda: KPIItem(
             key="saudi_headcount",
             label="Saudi Headcount",
             value=row_dict["saudi_headcount"],
@@ -46,8 +52,8 @@ def get_workforce_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_conne
             trend_value=12.5,
             trend_direction="up",
             status="healthy"
-        ),
-        KPIItem(
+        )),
+        ("non_saudi_headcount", lambda: KPIItem(
             key="non_saudi_headcount",
             label="Non-Saudi Headcount",
             value=row_dict["non_saudi_headcount"],
@@ -55,8 +61,8 @@ def get_workforce_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_conne
             trend_value=0.0,
             trend_direction="flat",
             status="neutral"
-        ),
-        KPIItem(
+        )),
+        ("saudization_rate", lambda: KPIItem(
             key="saudization_rate",
             label="Saudization Rate",
             value=round(row_dict["saudization_rate"] * 100, 2),
@@ -64,81 +70,95 @@ def get_workforce_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_conne
             trend_value=2.4,
             trend_direction="up",
             status="healthy" if row_dict["saudization_rate"] >= 0.40 else "warning"
-        ),
-        KPIItem(
+        )),
+        ("probation_count", lambda: KPIItem(
             key="probation_count",
             label="Employees on Probation",
             value=row_dict["probation_count"],
             unit="employees",
             status="neutral"
-        ),
-        KPIItem(
+        )),
+        ("contract_expiring_30", lambda: KPIItem(
             key="contract_expiring_30",
             label="Contracts Expiring in 30 Days",
             value=row_dict["contract_expiring_30"],
             unit="contracts",
             status="warning" if row_dict["contract_expiring_30"] > 0 else "healthy"
-        ),
-        KPIItem(
+        )),
+        ("iqama_expiring_30", lambda: KPIItem(
             key="iqama_expiring_30",
             label="Iqamas Expiring in 30 Days",
             value=row_dict["iqama_expiring_30"],
             unit="iqamas",
             status="warning" if row_dict["iqama_expiring_30"] > 0 else "healthy"
-        ),
-        KPIItem(
+        )),
+        ("missing_manager_count", lambda: KPIItem(
             key="missing_manager_count",
             label="Missing Manager",
             value=row_dict["missing_manager_count"],
             unit="issues",
             status="warning" if row_dict["missing_manager_count"] > 0 else "healthy"
-        ),
-        KPIItem(
+        )),
+        ("missing_project_count", lambda: KPIItem(
             key="missing_project_count",
             label="Missing Project",
             value=row_dict["missing_project_count"],
             unit="issues",
             status="warning" if row_dict["missing_project_count"] > 0 else "healthy"
-        ),
-        KPIItem(
+        )),
+        ("missing_cost_center_count", lambda: KPIItem(
             key="missing_cost_center_count",
             label="Missing Cost Center",
             value=row_dict["missing_cost_center_count"],
             unit="issues",
             status="warning" if row_dict["missing_cost_center_count"] > 0 else "healthy"
-        )
-    ]
+        )),
+    ])
 
     return WorkforceSummaryResponse(
         report_month=report_month,
-        kpis=kpis
+        kpis=kpis,
+        suppressed=prov.block()
     )
 
 @router.get("/trends", response_model=WorkforceTrendsResponse)
-def get_workforce_trends(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+def get_workforce_trends(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
-
-        res = conn.execute("SELECT month, active_headcount FROM mart_workforce_headcount_trend").fetchall()
+        res = prov.rows(
+            "mart_workforce_headcount_trend",
+            lambda: conn.execute(
+                "SELECT month, active_headcount FROM mart_workforce_headcount_trend"
+            ).fetchall())
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
 
+    if res is None:
+        return WorkforceTrendsResponse(suppressed=prov.block())
 
     months = [r[0] for r in res]
     headcount = [r[1] for r in res]
 
     return WorkforceTrendsResponse(
         months=months,
-        headcount_trend=headcount
+        headcount_trend=headcount,
+        suppressed=prov.block()
     )
 
 @router.get("/distribution", response_model=WorkforceDistributionResponse)
-def get_workforce_distribution(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+def get_workforce_distribution(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
-
-        res = conn.execute("SELECT category, metric_value, headcount FROM mart_workforce_distribution").fetchall()
+        res = prov.rows(
+            "mart_workforce_distribution",
+            lambda: conn.execute(
+                "SELECT category, metric_value, headcount FROM mart_workforce_distribution"
+            ).fetchall())
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
 
+    # Five charts from one mart: they suppress together, as null, never as
+    # five empty charts.
+    if res is None:
+        return WorkforceDistributionResponse(suppressed=prov.block())
 
     # Split rows into respective categories
     dist_dict = {
@@ -162,21 +182,29 @@ def get_workforce_distribution(conn: duckdb.DuckDBPyConnection = Depends(get_db_
         project=CategoryDistribution(**dist_dict["project"]),
         nationality_group=CategoryDistribution(**dist_dict["nationality_group"]),
         employment_type=CategoryDistribution(**dist_dict["employment_type"]),
-        status=CategoryDistribution(**dist_dict["status"])
+        status=CategoryDistribution(**dist_dict["status"]),
+        suppressed=prov.block()
     )
 
 @router.get("/contract-expiry", response_model=ExpiryAgingResponse)
-def get_contract_expiry(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+def get_contract_expiry(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
-
-        res = conn.execute("SELECT * FROM mart_workforce_contract_expiry").fetchone()
-        if not res:
+        res = prov.rows(
+            "mart_workforce_contract_expiry",
+            lambda: conn.execute(
+                "SELECT * FROM mart_workforce_contract_expiry").fetchone())
+        if res is None and prov.payload("mart_workforce_contract_expiry"):
             raise HTTPException(status_code=404, detail="No contract expiry records found")
-        cols = [desc[0] for desc in conn.description]
-        row_dict = dict(zip(cols, res))
+        if res is not None:
+            cols = [desc[0] for desc in conn.description]
+            row_dict = dict(zip(cols, res))
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
 
+    if res is None:
+        return ExpiryAgingResponse(suppressed=prov.block())
 
     return ExpiryAgingResponse(
         expired=row_dict["expired"],
@@ -184,21 +212,29 @@ def get_contract_expiry(conn: duckdb.DuckDBPyConnection = Depends(get_db_connect
         bucket_31_60=row_dict["31_60"],
         bucket_61_90=row_dict["61_90"],
         bucket_90_plus=row_dict["90_plus"],
-        missing_date=row_dict["missing_date"]
+        missing_date=row_dict["missing_date"],
+        suppressed=prov.block()
     )
 
 @router.get("/iqama-expiry", response_model=ExpiryAgingResponse)
-def get_iqama_expiry(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+def get_iqama_expiry(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
-
-        res = conn.execute("SELECT * FROM mart_workforce_iqama_expiry").fetchone()
-        if not res:
+        res = prov.rows(
+            "mart_workforce_iqama_expiry",
+            lambda: conn.execute(
+                "SELECT * FROM mart_workforce_iqama_expiry").fetchone())
+        if res is None and prov.payload("mart_workforce_iqama_expiry"):
             raise HTTPException(status_code=404, detail="No iqama expiry records found")
-        cols = [desc[0] for desc in conn.description]
-        row_dict = dict(zip(cols, res))
+        if res is not None:
+            cols = [desc[0] for desc in conn.description]
+            row_dict = dict(zip(cols, res))
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
 
+    if res is None:
+        return ExpiryAgingResponse(suppressed=prov.block())
 
     return ExpiryAgingResponse(
         expired=row_dict["expired"],
@@ -206,14 +242,18 @@ def get_iqama_expiry(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection
         bucket_31_60=row_dict["31_60"],
         bucket_61_90=row_dict["61_90"],
         bucket_90_plus=row_dict["90_plus"],
-        missing_date=row_dict["missing_date"]
+        missing_date=row_dict["missing_date"],
+        suppressed=prov.block()
     )
 
 @router.get("/exceptions", response_model=DQExceptionsResponse)
-def get_workforce_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+def get_workforce_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
-
-        res = conn.execute("SELECT * FROM mart_workforce_exceptions").fetchall()
+        res = prov.rows(
+            "mart_workforce_exceptions",
+            lambda: conn.execute("SELECT * FROM mart_workforce_exceptions").fetchall())
+        if res is None:
+            return DQExceptionsResponse(suppressed=prov.block())
         exceptions = []
         for r in res:
             exceptions.append(DQExceptionItem(
@@ -228,4 +268,4 @@ def get_workforce_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_co
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
 
 
-    return DQExceptionsResponse(exceptions=exceptions)
+    return DQExceptionsResponse(exceptions=exceptions, suppressed=prov.block())

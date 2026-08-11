@@ -29,12 +29,13 @@ from app.schemas.talent import (
 )
 from app.schemas.kpi import KPIItem, DQExceptionItem
 from app.api._report_period import get_report_month
+from app.api._provenance import Provenance, get_provenance, suppressible
 
 router = APIRouter()
 
 
 @router.get("/summary", response_model=TalentSummaryResponse)
-def get_talent_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), report_month: str = Depends(get_report_month)):
+def get_talent_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), report_month: str = Depends(get_report_month), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_talent_kpis").fetchone()
@@ -48,91 +49,92 @@ def get_talent_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connecti
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
 
 
-    kpis = [
-        KPIItem(
-            key="employees_reviewed",
-            label="Employees Reviewed",
-            value=float(row_dict["employees_reviewed"]),
-            unit="employees",
-            status="healthy" if row_dict["employees_reviewed"] > 0 else "warning",
-        ),
-        KPIItem(
-            key="review_completion_pct",
-            label="Review Completion %",
-            value=float(row_dict["review_completion_pct"]),
-            unit="%",
-            status="healthy" if row_dict["review_completion_pct"] >= 80.0 else "warning",
-        ),
-        KPIItem(
-            key="average_performance_rating",
-            label="Average Performance Rating",
-            value=float(row_dict["average_performance_rating"] or 0.0),
-            unit="rating",
-            status="healthy" if (row_dict["average_performance_rating"] or 0) >= 3.5 else "warning",
-        ),
-        KPIItem(
-            key="high_performers",
-            label="High Performers",
-            value=float(row_dict["high_performers"]),
-            unit="employees",
-            status="healthy",
-        ),
-        KPIItem(
-            key="low_performers",
-            label="Low / At-Risk Performers",
-            value=float(row_dict["low_performers"]),
-            unit="employees",
-            status="critical" if row_dict["low_performers"] > 0 else "healthy",
-        ),
-        KPIItem(
-            key="goal_completion_pct",
-            label="Goal Completion %",
-            value=float(row_dict["goal_completion_pct"]),
-            unit="%",
-            status="healthy" if row_dict["goal_completion_pct"] >= 75.0 else "warning",
-        ),
-        KPIItem(
-            key="training_completion_pct",
-            label="Training Completion %",
-            value=float(row_dict["training_completion_pct"]),
-            unit="%",
-            status="healthy" if row_dict["training_completion_pct"] >= 70.0 else "warning",
-        ),
-        KPIItem(
-            key="average_training_hours",
-            label="Avg Training Hours / Employee",
-            value=float(row_dict["average_training_hours"]),
-            unit="hours",
-            status="neutral",
-        ),
-        KPIItem(
-            key="critical_roles_covered_pct",
-            label="Critical Roles Covered %",
-            value=float(row_dict["critical_roles_covered_pct"]),
-            unit="%",
-            status="healthy" if row_dict["critical_roles_covered_pct"] >= 80.0 else "critical",
-        ),
-        KPIItem(
-            key="ready_successors",
-            label="Ready Now Successors",
-            value=float(row_dict["ready_successors"]),
-            unit="employees",
-            status="healthy" if row_dict["ready_successors"] > 0 else "warning",
-        ),
-        KPIItem(
-            key="talent_exception_count",
-            label="Talent Data Exceptions",
-            value=float(row_dict["talent_exception_count"]),
-            unit="alerts",
-            status="critical" if row_dict["talent_exception_count"] > 0 else "healthy",
-        ),
-    ]
+    kpis = prov.kpis("mart_talent_kpis", [
+        ("employees_reviewed", lambda: KPIItem(
+                key="employees_reviewed",
+                label="Employees Reviewed",
+                value=float(row_dict["employees_reviewed"]),
+                unit="employees",
+                status="healthy" if row_dict["employees_reviewed"] > 0 else "warning",
+            )),
+        ("review_completion_pct", lambda: KPIItem(
+                key="review_completion_pct",
+                label="Review Completion %",
+                value=float(row_dict["review_completion_pct"]),
+                unit="%",
+                status="healthy" if row_dict["review_completion_pct"] >= 80.0 else "warning",
+            )),
+        ("average_performance_rating", lambda: KPIItem(
+                key="average_performance_rating",
+                label="Average Performance Rating",
+                value=float(row_dict["average_performance_rating"] or 0.0),
+                unit="rating",
+                status="healthy" if (row_dict["average_performance_rating"] or 0) >= 3.5 else "warning",
+            )),
+        ("high_performers", lambda: KPIItem(
+                key="high_performers",
+                label="High Performers",
+                value=float(row_dict["high_performers"]),
+                unit="employees",
+                status="healthy",
+            )),
+        ("low_performers", lambda: KPIItem(
+                key="low_performers",
+                label="Low / At-Risk Performers",
+                value=float(row_dict["low_performers"]),
+                unit="employees",
+                status="critical" if row_dict["low_performers"] > 0 else "healthy",
+            )),
+        ("goal_completion_pct", lambda: KPIItem(
+                key="goal_completion_pct",
+                label="Goal Completion %",
+                value=float(row_dict["goal_completion_pct"]),
+                unit="%",
+                status="healthy" if row_dict["goal_completion_pct"] >= 75.0 else "warning",
+            )),
+        ("training_completion_pct", lambda: KPIItem(
+                key="training_completion_pct",
+                label="Training Completion %",
+                value=float(row_dict["training_completion_pct"]),
+                unit="%",
+                status="healthy" if row_dict["training_completion_pct"] >= 70.0 else "warning",
+            )),
+        ("average_training_hours", lambda: KPIItem(
+                key="average_training_hours",
+                label="Avg Training Hours / Employee",
+                value=float(row_dict["average_training_hours"]),
+                unit="hours",
+                status="neutral",
+            )),
+        ("critical_roles_covered_pct", lambda: KPIItem(
+                key="critical_roles_covered_pct",
+                label="Critical Roles Covered %",
+                value=float(row_dict["critical_roles_covered_pct"]),
+                unit="%",
+                status="healthy" if row_dict["critical_roles_covered_pct"] >= 80.0 else "critical",
+            )),
+        ("ready_successors", lambda: KPIItem(
+                key="ready_successors",
+                label="Ready Now Successors",
+                value=float(row_dict["ready_successors"]),
+                unit="employees",
+                status="healthy" if row_dict["ready_successors"] > 0 else "warning",
+            )),
+        ("talent_exception_count", lambda: KPIItem(
+                key="talent_exception_count",
+                label="Talent Data Exceptions",
+                value=float(row_dict["talent_exception_count"]),
+                unit="alerts",
+                status="critical" if row_dict["talent_exception_count"] > 0 else "healthy",
+            )),
+    ])
 
-    return TalentSummaryResponse(report_month=report_month, kpis=kpis)
+    return TalentSummaryResponse(report_month=report_month, kpis=kpis, suppressed=prov.block())
 
 
 @router.get("/performance-distribution", response_model=PerformanceDistributionResponse)
-def get_performance_distribution(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(PerformanceDistributionResponse, "mart_performance_distribution")
+def get_performance_distribution(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_performance_distribution ORDER BY performance_category").fetchall()
@@ -150,7 +152,8 @@ def get_performance_distribution(conn: duckdb.DuckDBPyConnection = Depends(get_d
 
 
 @router.get("/trends", response_model=PerformanceTrendsResponse)
-def get_performance_trends(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(PerformanceTrendsResponse, "mart_talent_review_trends")
+def get_performance_trends(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute(
@@ -173,7 +176,8 @@ def get_performance_trends(conn: duckdb.DuckDBPyConnection = Depends(get_db_conn
 
 
 @router.get("/by-project", response_model=PerformanceByProjectResponse)
-def get_performance_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(PerformanceByProjectResponse, "mart_performance_by_project")
+def get_performance_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_performance_by_project ORDER BY project").fetchall()
@@ -194,7 +198,8 @@ def get_performance_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_
 
 
 @router.get("/by-department", response_model=PerformanceByDepartmentResponse)
-def get_performance_by_department(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(PerformanceByDepartmentResponse, "mart_performance_by_department")
+def get_performance_by_department(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_performance_by_department ORDER BY department").fetchall()
@@ -215,7 +220,8 @@ def get_performance_by_department(conn: duckdb.DuckDBPyConnection = Depends(get_
 
 
 @router.get("/goals", response_model=GoalCompletionResponse)
-def get_goal_completion(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(GoalCompletionResponse, "mart_goal_completion")
+def get_goal_completion(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_goal_completion ORDER BY department").fetchall()
@@ -238,7 +244,8 @@ def get_goal_completion(conn: duckdb.DuckDBPyConnection = Depends(get_db_connect
 
 
 @router.get("/competency-gaps", response_model=CompetencyGapResponse)
-def get_competency_gaps(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(CompetencyGapResponse, "mart_competency_gaps")
+def get_competency_gaps(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_competency_gaps ORDER BY avg_gap DESC").fetchall()
@@ -258,7 +265,8 @@ def get_competency_gaps(conn: duckdb.DuckDBPyConnection = Depends(get_db_connect
 
 
 @router.get("/learning", response_model=LearningCompletionResponse)
-def get_learning_completion(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(LearningCompletionResponse, "mart_learning_completion")
+def get_learning_completion(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_learning_completion ORDER BY category").fetchall()
@@ -278,7 +286,8 @@ def get_learning_completion(conn: duckdb.DuckDBPyConnection = Depends(get_db_con
 
 
 @router.get("/learning-by-project", response_model=LearningByProjectResponse)
-def get_learning_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(LearningByProjectResponse, "mart_learning_by_project")
+def get_learning_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_learning_by_project ORDER BY project, department").fetchall()
@@ -298,7 +307,8 @@ def get_learning_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_con
 
 
 @router.get("/succession", response_model=SuccessionCoverageResponse)
-def get_succession_coverage(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(SuccessionCoverageResponse, "mart_succession_coverage")
+def get_succession_coverage(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_succession_coverage ORDER BY role_title").fetchall()
@@ -318,7 +328,8 @@ def get_succession_coverage(conn: duckdb.DuckDBPyConnection = Depends(get_db_con
 
 
 @router.get("/succession-readiness", response_model=SuccessorReadinessResponse)
-def get_successor_readiness(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(SuccessorReadinessResponse, "mart_successor_readiness")
+def get_successor_readiness(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_successor_readiness ORDER BY readiness").fetchall()
@@ -336,7 +347,8 @@ def get_successor_readiness(conn: duckdb.DuckDBPyConnection = Depends(get_db_con
 
 
 @router.get("/risk", response_model=TalentRiskResponse)
-def get_talent_risk(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(TalentRiskResponse, "mart_talent_risk")
+def get_talent_risk(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_talent_risk ORDER BY risk_category, department").fetchall()
@@ -359,7 +371,8 @@ def get_talent_risk(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)
 
 
 @router.get("/exceptions", response_model=TalentExceptionsResponse)
-def get_talent_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(TalentExceptionsResponse, "mart_talent_exceptions")
+def get_talent_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute(

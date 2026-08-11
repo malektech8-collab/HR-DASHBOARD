@@ -19,12 +19,13 @@ from app.schemas.attendance import (
 )
 from app.schemas.kpi import KPIItem, DQExceptionItem
 from app.api._report_period import get_report_month
+from app.api._provenance import Provenance, get_provenance, suppressible
 
 router = APIRouter()
 
 
 @router.get("/summary", response_model=AttendanceSummaryResponse)
-def get_attendance_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), report_month: str = Depends(get_report_month)):
+def get_attendance_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), report_month: str = Depends(get_report_month), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_attendance_kpis").fetchone()
@@ -39,86 +40,88 @@ def get_attendance_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_conn
     # Determine status and trends
     compliance_pct = row_dict["attendance_compliance_pct"]
     
-    kpis = [
-        KPIItem(
-            key="attendance_compliance_pct",
-            label="Attendance Compliance %",
-            value=round(compliance_pct * 100, 2),
-            unit="%",
-            status="healthy" if compliance_pct >= 0.95 else ("warning" if compliance_pct >= 0.90 else "critical")
-        ),
-        KPIItem(
-            key="absence_days",
-            label="Absence Days",
-            value=row_dict["absence_days"],
-            unit="days",
-            status="warning" if row_dict["absence_days"] > 5 else "healthy"
-        ),
-        KPIItem(
-            key="late_minutes",
-            label="Late Minutes",
-            value=row_dict["late_minutes"],
-            unit="min",
-            status="warning" if row_dict["late_minutes"] > 120 else "healthy"
-        ),
-        KPIItem(
-            key="excused_late_minutes",
-            label="Excused Late Minutes",
-            value=row_dict["excused_late_minutes"],
-            unit="min",
-            status="neutral"
-        ),
-        KPIItem(
-            key="net_late_minutes",
-            label="Net Late Minutes",
-            value=row_dict["net_late_minutes"],
-            unit="min",
-            status="warning" if row_dict["net_late_minutes"] > 60 else "healthy"
-        ),
-        KPIItem(
-            key="early_leave_minutes",
-            label="Early Leave Minutes",
-            value=row_dict["early_leave_minutes"],
-            unit="min",
-            status="warning" if row_dict["early_leave_minutes"] > 120 else "healthy"
-        ),
-        KPIItem(
-            key="missing_punch_count",
-            label="Missing Punch Count",
-            value=row_dict["missing_punch_count"],
-            unit="punches",
-            status="critical" if row_dict["missing_punch_count"] > 0 else "healthy"
-        ),
-        KPIItem(
-            key="overtime_hours",
-            label="Overtime Hours",
-            value=row_dict["overtime_hours"],
-            unit="hrs",
-            status="neutral"
-        ),
-        KPIItem(
-            key="overtime_cost",
-            label="Overtime Cost",
-            value=row_dict["overtime_cost"],
-            unit="SAR",
-            status="neutral"
-        ),
-        KPIItem(
-            key="attendance_exception_count",
-            label="Attendance Exception Count",
-            value=row_dict["attendance_exception_count"],
-            unit="issues",
-            status="critical" if row_dict["attendance_exception_count"] > 0 else "healthy"
-        )
-    ]
+    kpis = prov.kpis("mart_attendance_kpis", [
+        ("attendance_compliance_pct", lambda: KPIItem(
+                key="attendance_compliance_pct",
+                label="Attendance Compliance %",
+                value=round(compliance_pct * 100, 2),
+                unit="%",
+                status="healthy" if compliance_pct >= 0.95 else ("warning" if compliance_pct >= 0.90 else "critical")
+            )),
+        ("absence_days", lambda: KPIItem(
+                key="absence_days",
+                label="Absence Days",
+                value=row_dict["absence_days"],
+                unit="days",
+                status="warning" if row_dict["absence_days"] > 5 else "healthy"
+            )),
+        ("late_minutes", lambda: KPIItem(
+                key="late_minutes",
+                label="Late Minutes",
+                value=row_dict["late_minutes"],
+                unit="min",
+                status="warning" if row_dict["late_minutes"] > 120 else "healthy"
+            )),
+        ("excused_late_minutes", lambda: KPIItem(
+                key="excused_late_minutes",
+                label="Excused Late Minutes",
+                value=row_dict["excused_late_minutes"],
+                unit="min",
+                status="neutral"
+            )),
+        ("net_late_minutes", lambda: KPIItem(
+                key="net_late_minutes",
+                label="Net Late Minutes",
+                value=row_dict["net_late_minutes"],
+                unit="min",
+                status="warning" if row_dict["net_late_minutes"] > 60 else "healthy"
+            )),
+        ("early_leave_minutes", lambda: KPIItem(
+                key="early_leave_minutes",
+                label="Early Leave Minutes",
+                value=row_dict["early_leave_minutes"],
+                unit="min",
+                status="warning" if row_dict["early_leave_minutes"] > 120 else "healthy"
+            )),
+        ("missing_punch_count", lambda: KPIItem(
+                key="missing_punch_count",
+                label="Missing Punch Count",
+                value=row_dict["missing_punch_count"],
+                unit="punches",
+                status="critical" if row_dict["missing_punch_count"] > 0 else "healthy"
+            )),
+        ("overtime_hours", lambda: KPIItem(
+                key="overtime_hours",
+                label="Overtime Hours",
+                value=row_dict["overtime_hours"],
+                unit="hrs",
+                status="neutral"
+            )),
+        ("overtime_cost", lambda: KPIItem(
+                key="overtime_cost",
+                label="Overtime Cost",
+                value=row_dict["overtime_cost"],
+                unit="SAR",
+                status="neutral"
+            )),
+        ("attendance_exception_count", lambda: KPIItem(
+                key="attendance_exception_count",
+                label="Attendance Exception Count",
+                value=row_dict["attendance_exception_count"],
+                unit="issues",
+                status="critical" if row_dict["attendance_exception_count"] > 0 else "healthy"
+            )),
+    ])
 
     return AttendanceSummaryResponse(
         report_month=report_month,
-        kpis=kpis
+        kpis=kpis,
+        suppressed=prov.block()
     )
 
 @router.get("/trends", response_model=AttendanceTrendsResponse)
-def get_attendance_trends(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(AttendanceTrendsResponse, "mart_attendance_trend")
+def get_attendance_trends(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_attendance_trend ORDER BY month").fetchall()
@@ -143,7 +146,8 @@ def get_attendance_trends(conn: duckdb.DuckDBPyConnection = Depends(get_db_conne
     return AttendanceTrendsResponse(trends=trends)
 
 @router.get("/by-project", response_model=AttendanceByProjectResponse)
-def get_attendance_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(AttendanceByProjectResponse, "mart_attendance_by_project")
+def get_attendance_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_attendance_by_project").fetchall()
@@ -169,7 +173,8 @@ def get_attendance_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_c
     return AttendanceByProjectResponse(projects=projects)
 
 @router.get("/by-department", response_model=AttendanceByDepartmentResponse)
-def get_attendance_by_department(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(AttendanceByDepartmentResponse, "mart_attendance_by_department")
+def get_attendance_by_department(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_attendance_by_department").fetchall()
@@ -196,7 +201,8 @@ def get_attendance_by_department(conn: duckdb.DuckDBPyConnection = Depends(get_d
     return AttendanceByDepartmentResponse(departments=departments)
 
 @router.get("/late-arrival", response_model=AttendanceLateArrivalResponse)
-def get_attendance_late_arrival(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(AttendanceLateArrivalResponse, "mart_attendance_late_arrival")
+def get_attendance_late_arrival(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_attendance_late_arrival ORDER BY total_late_minutes DESC").fetchall()
@@ -222,7 +228,8 @@ def get_attendance_late_arrival(conn: duckdb.DuckDBPyConnection = Depends(get_db
     return AttendanceLateArrivalResponse(late_arrivals=late_arrivals)
 
 @router.get("/overtime", response_model=AttendanceOvertimeResponse)
-def get_attendance_overtime(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(AttendanceOvertimeResponse, "mart_attendance_overtime")
+def get_attendance_overtime(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_attendance_overtime ORDER BY attendance_ot_hours DESC").fetchall()
@@ -247,7 +254,8 @@ def get_attendance_overtime(conn: duckdb.DuckDBPyConnection = Depends(get_db_con
     return AttendanceOvertimeResponse(overtime_records=overtime_records)
 
 @router.get("/missing-punches", response_model=AttendanceMissingPunchesResponse)
-def get_attendance_missing_punches(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(AttendanceMissingPunchesResponse, "mart_attendance_missing_punches")
+def get_attendance_missing_punches(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_attendance_missing_punches ORDER BY total_missing_punches DESC").fetchall()
@@ -272,7 +280,8 @@ def get_attendance_missing_punches(conn: duckdb.DuckDBPyConnection = Depends(get
     return AttendanceMissingPunchesResponse(missing_punches=missing_punches)
 
 @router.get("/exceptions", response_model=AttendanceExceptionsResponse)
-def get_attendance_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(AttendanceExceptionsResponse, "mart_attendance_exceptions")
+def get_attendance_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_attendance_exceptions").fetchall()

@@ -5,7 +5,12 @@ import { VirtualTable } from '../ui/VirtualTable';
 import type { VirtualTableColumn } from '../ui/VirtualTable';
 
 interface ExceptionTableProps {
-  data: DQExceptionItem[];
+  /**
+   * `null` means the domain was never provided, which is not the same thing
+   * as "no exceptions" (step 2b). An empty table would tell the client their
+   * data is clean; the caller renders <NotProvided> instead.
+   */
+  data: DQExceptionItem[] | null;
 }
 
 type SortField = keyof DQExceptionItem | '';
@@ -17,10 +22,11 @@ export const ExceptionTable: React.FC<ExceptionTableProps> = ({ data }) => {
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
 
   // Filter logic
+  const rows = data ?? [];
   const filteredData = useMemo(() => {
-    if (!globalFilter) return data;
+    if (!globalFilter) return rows;
     const term = globalFilter.toLowerCase();
-    return data.filter(item => 
+    return rows.filter(item => 
       String(item.employee_id || '').toLowerCase().includes(term) ||
       String(item.employee_name || '').toLowerCase().includes(term) ||
       String(item.issue_type || '').toLowerCase().includes(term) ||
@@ -28,7 +34,7 @@ export const ExceptionTable: React.FC<ExceptionTableProps> = ({ data }) => {
       String(item.severity || '').toLowerCase().includes(term) ||
       String(item.recommended_action || '').toLowerCase().includes(term)
     );
-  }, [data, globalFilter]);
+  }, [rows, globalFilter]);
 
   // Sort logic
   const sortedData = useMemo(() => {

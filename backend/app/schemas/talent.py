@@ -1,11 +1,13 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional
-from app.schemas.kpi import KPIItem, DQExceptionItem
+from app.schemas.kpi import KPIItem, DQExceptionItem, SuppressionItem
 
 
 class TalentSummaryResponse(BaseModel):
     report_month: str
-    kpis: List[KPIItem]
+    kpis: Optional[List[KPIItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
 
 
 class PerformanceDistributionItem(BaseModel):
@@ -14,7 +16,9 @@ class PerformanceDistributionItem(BaseModel):
 
 
 class PerformanceDistributionResponse(BaseModel):
-    distribution: List[PerformanceDistributionItem]
+    distribution: Optional[List[PerformanceDistributionItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
 
 
 class PerformanceTrendItem(BaseModel):
@@ -26,7 +30,9 @@ class PerformanceTrendItem(BaseModel):
 
 
 class PerformanceTrendsResponse(BaseModel):
-    trends: List[PerformanceTrendItem]
+    trends: Optional[List[PerformanceTrendItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
 
 
 class PerformanceByProjectItem(BaseModel):
@@ -38,7 +44,9 @@ class PerformanceByProjectItem(BaseModel):
 
 
 class PerformanceByProjectResponse(BaseModel):
-    projects: List[PerformanceByProjectItem]
+    projects: Optional[List[PerformanceByProjectItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
 
 
 class PerformanceByDepartmentItem(BaseModel):
@@ -50,7 +58,9 @@ class PerformanceByDepartmentItem(BaseModel):
 
 
 class PerformanceByDepartmentResponse(BaseModel):
-    departments: List[PerformanceByDepartmentItem]
+    departments: Optional[List[PerformanceByDepartmentItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
 
 
 class GoalCompletionItem(BaseModel):
@@ -64,7 +74,9 @@ class GoalCompletionItem(BaseModel):
 
 
 class GoalCompletionResponse(BaseModel):
-    goals: List[GoalCompletionItem]
+    goals: Optional[List[GoalCompletionItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
 
 
 class CompetencyGapItem(BaseModel):
@@ -75,7 +87,9 @@ class CompetencyGapItem(BaseModel):
 
 
 class CompetencyGapResponse(BaseModel):
-    gaps: List[CompetencyGapItem]
+    gaps: Optional[List[CompetencyGapItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
 
 
 class LearningCompletionItem(BaseModel):
@@ -86,7 +100,9 @@ class LearningCompletionItem(BaseModel):
 
 
 class LearningCompletionResponse(BaseModel):
-    completion: List[LearningCompletionItem]
+    completion: Optional[List[LearningCompletionItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
 
 
 class LearningByProjectItem(BaseModel):
@@ -97,7 +113,9 @@ class LearningByProjectItem(BaseModel):
 
 
 class LearningByProjectResponse(BaseModel):
-    projects: List[LearningByProjectItem]
+    projects: Optional[List[LearningByProjectItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
 
 
 class SuccessionCoverageItem(BaseModel):
@@ -108,7 +126,9 @@ class SuccessionCoverageItem(BaseModel):
 
 
 class SuccessionCoverageResponse(BaseModel):
-    coverage: List[SuccessionCoverageItem]
+    coverage: Optional[List[SuccessionCoverageItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
 
 
 class SuccessorReadinessItem(BaseModel):
@@ -117,7 +137,9 @@ class SuccessorReadinessItem(BaseModel):
 
 
 class SuccessorReadinessResponse(BaseModel):
-    readiness: List[SuccessorReadinessItem]
+    readiness: Optional[List[SuccessorReadinessItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
 
 
 class TalentRiskItem(BaseModel):
@@ -131,8 +153,12 @@ class TalentRiskItem(BaseModel):
 
 
 class TalentRiskResponse(BaseModel):
-    risks: List[TalentRiskItem]
+    risks: Optional[List[TalentRiskItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
 
 
 class TalentExceptionsResponse(BaseModel):
-    exceptions: List[DQExceptionItem]
+    exceptions: Optional[List[DQExceptionItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)

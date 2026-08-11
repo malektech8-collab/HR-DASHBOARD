@@ -21,13 +21,14 @@ from app.schemas.er import (
 )
 from app.schemas.kpi import KPIItem, DQExceptionItem
 from app.api._report_period import get_report_month
+from app.api._provenance import Provenance, get_provenance, suppressible
 
 router = APIRouter()
 
 
 
 @router.get("/summary", response_model=ErSummaryResponse)
-def get_er_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), report_month: str = Depends(get_report_month)):
+def get_er_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), report_month: str = Depends(get_report_month), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_er_kpis").fetchone()
@@ -39,90 +40,91 @@ def get_er_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection),
         raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
 
 
-    kpis = [
-        KPIItem(
-            key="total_open_er_cases",
-            label="Total Open ER Cases",
-            value=float(row_dict["total_open_er_cases"]),
-            unit="cases",
-            status="critical" if row_dict["total_open_er_cases"] > 5 else "healthy"
-        ),
-        KPIItem(
-            key="new_cases_this_month",
-            label="New Cases This Month",
-            value=float(row_dict["new_cases_this_month"]),
-            unit="cases",
-            status="neutral"
-        ),
-        KPIItem(
-            key="closed_cases_this_month",
-            label="Closed Cases This Month",
-            value=float(row_dict["closed_cases_this_month"]),
-            unit="cases",
-            status="neutral"
-        ),
-        KPIItem(
-            key="average_case_aging_days",
-            label="Average Case Aging Days",
-            value=float(row_dict["average_case_aging_days"]),
-            unit="days",
-            status="warning" if row_dict["average_case_aging_days"] > 14 else "healthy"
-        ),
-        KPIItem(
-            key="overdue_cases",
-            label="Overdue Cases",
-            value=float(row_dict["overdue_cases"]),
-            unit="cases",
-            status="critical" if row_dict["overdue_cases"] > 0 else "healthy"
-        ),
-        KPIItem(
-            key="sla_compliance_pct",
-            label="SLA Compliance %",
-            value=float(row_dict["sla_compliance_pct"]),
-            unit="%",
-            status="healthy" if row_dict["sla_compliance_pct"] >= 90.0 else ("warning" if row_dict["sla_compliance_pct"] >= 75.0 else "critical")
-        ),
-        KPIItem(
-            key="disciplinary_cases",
-            label="Disciplinary Cases",
-            value=float(row_dict["disciplinary_cases"]),
-            unit="cases",
-            status="neutral"
-        ),
-        KPIItem(
-            key="grievance_cases",
-            label="Grievance Cases",
-            value=float(row_dict["grievance_cases"]),
-            unit="cases",
-            status="neutral"
-        ),
-        KPIItem(
-            key="labor_cases",
-            label="Labor Cases",
-            value=float(row_dict["labor_cases"]),
-            unit="cases",
-            status="neutral"
-        ),
-        KPIItem(
-            key="escalated_cases",
-            label="Escalated Cases",
-            value=float(row_dict["escalated_cases"]),
-            unit="cases",
-            status="warning" if row_dict["escalated_cases"] > 0 else "healthy"
-        ),
-        KPIItem(
-            key="er_exception_count",
-            label="ER Exception Count",
-            value=float(row_dict["er_exception_count"]),
-            unit="issues",
-            status="critical" if row_dict["er_exception_count"] > 0 else "healthy"
-        )
-    ]
+    kpis = prov.kpis("mart_er_kpis", [
+        ("total_open_er_cases", lambda: KPIItem(
+                key="total_open_er_cases",
+                label="Total Open ER Cases",
+                value=float(row_dict["total_open_er_cases"]),
+                unit="cases",
+                status="critical" if row_dict["total_open_er_cases"] > 5 else "healthy"
+            )),
+        ("new_cases_this_month", lambda: KPIItem(
+                key="new_cases_this_month",
+                label="New Cases This Month",
+                value=float(row_dict["new_cases_this_month"]),
+                unit="cases",
+                status="neutral"
+            )),
+        ("closed_cases_this_month", lambda: KPIItem(
+                key="closed_cases_this_month",
+                label="Closed Cases This Month",
+                value=float(row_dict["closed_cases_this_month"]),
+                unit="cases",
+                status="neutral"
+            )),
+        ("average_case_aging_days", lambda: KPIItem(
+                key="average_case_aging_days",
+                label="Average Case Aging Days",
+                value=float(row_dict["average_case_aging_days"]),
+                unit="days",
+                status="warning" if row_dict["average_case_aging_days"] > 14 else "healthy"
+            )),
+        ("overdue_cases", lambda: KPIItem(
+                key="overdue_cases",
+                label="Overdue Cases",
+                value=float(row_dict["overdue_cases"]),
+                unit="cases",
+                status="critical" if row_dict["overdue_cases"] > 0 else "healthy"
+            )),
+        ("sla_compliance_pct", lambda: KPIItem(
+                key="sla_compliance_pct",
+                label="SLA Compliance %",
+                value=float(row_dict["sla_compliance_pct"]),
+                unit="%",
+                status="healthy" if row_dict["sla_compliance_pct"] >= 90.0 else ("warning" if row_dict["sla_compliance_pct"] >= 75.0 else "critical")
+            )),
+        ("disciplinary_cases", lambda: KPIItem(
+                key="disciplinary_cases",
+                label="Disciplinary Cases",
+                value=float(row_dict["disciplinary_cases"]),
+                unit="cases",
+                status="neutral"
+            )),
+        ("grievance_cases", lambda: KPIItem(
+                key="grievance_cases",
+                label="Grievance Cases",
+                value=float(row_dict["grievance_cases"]),
+                unit="cases",
+                status="neutral"
+            )),
+        ("labor_cases", lambda: KPIItem(
+                key="labor_cases",
+                label="Labor Cases",
+                value=float(row_dict["labor_cases"]),
+                unit="cases",
+                status="neutral"
+            )),
+        ("escalated_cases", lambda: KPIItem(
+                key="escalated_cases",
+                label="Escalated Cases",
+                value=float(row_dict["escalated_cases"]),
+                unit="cases",
+                status="warning" if row_dict["escalated_cases"] > 0 else "healthy"
+            )),
+        ("er_exception_count", lambda: KPIItem(
+                key="er_exception_count",
+                label="ER Exception Count",
+                value=float(row_dict["er_exception_count"]),
+                unit="issues",
+                status="critical" if row_dict["er_exception_count"] > 0 else "healthy"
+            )),
+    ])
 
-    return ErSummaryResponse(report_month=report_month, kpis=kpis)
+    return ErSummaryResponse(report_month=report_month, kpis=kpis, suppressed=prov.block())
 
 @router.get("/trends", response_model=ErTrendResponse)
-def get_er_trends(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(ErTrendResponse, "mart_er_case_trend")
+def get_er_trends(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_er_case_trend ORDER BY period ASC").fetchall()
@@ -142,7 +144,8 @@ def get_er_trends(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     return ErTrendResponse(trends=trends)
 
 @router.get("/by-project", response_model=ErCasesByProjectResponse)
-def get_er_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(ErCasesByProjectResponse, "mart_er_cases_by_project")
+def get_er_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_er_cases_by_project ORDER BY project ASC").fetchall()
@@ -166,7 +169,8 @@ def get_er_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_connectio
     return ErCasesByProjectResponse(projects=projects)
 
 @router.get("/by-department", response_model=ErCasesByDepartmentResponse)
-def get_er_by_department(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(ErCasesByDepartmentResponse, "mart_er_cases_by_department")
+def get_er_by_department(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_er_cases_by_department ORDER BY department ASC").fetchall()
@@ -190,7 +194,8 @@ def get_er_by_department(conn: duckdb.DuckDBPyConnection = Depends(get_db_connec
     return ErCasesByDepartmentResponse(departments=departments)
 
 @router.get("/case-types", response_model=ErCaseTypeResponse)
-def get_er_case_types(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(ErCaseTypeResponse, "mart_er_case_type_distribution")
+def get_er_case_types(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_er_case_type_distribution ORDER BY case_type ASC").fetchall()
@@ -209,7 +214,8 @@ def get_er_case_types(conn: duckdb.DuckDBPyConnection = Depends(get_db_connectio
     return ErCaseTypeResponse(case_types=case_types)
 
 @router.get("/status", response_model=ErCaseStatusResponse)
-def get_er_status(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(ErCaseStatusResponse, "mart_er_case_status_distribution")
+def get_er_status(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_er_case_status_distribution ORDER BY case_status ASC").fetchall()
@@ -228,7 +234,8 @@ def get_er_status(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     return ErCaseStatusResponse(statuses=statuses)
 
 @router.get("/sla", response_model=ErSlaPerformanceResponse)
-def get_er_sla(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(ErSlaPerformanceResponse, "mart_er_sla_performance")
+def get_er_sla(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_er_sla_performance ORDER BY category_type ASC, category ASC").fetchall()
@@ -251,7 +258,8 @@ def get_er_sla(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     return ErSlaPerformanceResponse(performance=performance)
 
 @router.get("/aging", response_model=ErAgingBucketResponse)
-def get_er_aging(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(ErAgingBucketResponse, "mart_er_aging_buckets")
+def get_er_aging(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_er_aging_buckets").fetchall()
@@ -270,7 +278,8 @@ def get_er_aging(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
     return ErAgingBucketResponse(buckets=buckets)
 
 @router.get("/exceptions", response_model=ErExceptionsResponse)
-def get_er_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection)):
+@suppressible(ErExceptionsResponse, "mart_er_exceptions")
+def get_er_exceptions(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
     try:
 
         res = conn.execute("SELECT * FROM mart_er_exceptions").fetchall()

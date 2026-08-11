@@ -20,6 +20,7 @@ import { BarChartCard } from '../components/charts/BarChartCard';
 import { ExceptionTable } from '../components/tables/ExceptionTable';
 import { ShieldAlert, Sparkles } from 'lucide-react';
 import { formatNumber } from '../lib/formatters';
+import { NotProvided, collectSuppressions } from '../components/ui/NotProvided';
 
 export const Workforce: React.FC = () => {
   const [summary, setSummary] = useState<WorkforceSummaryData | null>(null);
@@ -27,7 +28,7 @@ export const Workforce: React.FC = () => {
   const [distribution, setDistribution] = useState<WorkforceDistributionData | null>(null);
   const [contractExpiry, setContractExpiry] = useState<ExpiryAgingData | null>(null);
   const [iqamaExpiry, setIqamaExpiry] = useState<ExpiryAgingData | null>(null);
-  const [exceptions, setExceptions] = useState<DQExceptionItem[]>([]);
+  const [exceptions, setExceptions] = useState<DQExceptionItem[] | null>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -84,13 +85,28 @@ export const Workforce: React.FC = () => {
     );
   }
 
+  // Step 2b: a null container means the client has not provided that
+  // domain. Bind, then guard - the compiler narrows these for the
+  // whole render, so nothing below can draw a zero in their place.
+  const summaryKpisRows = summary?.kpis;
+  const trendsMonthsRows = trends?.months;
+  const trendsHeadcountRows = trends?.headcount_trend;
+  if (!summaryKpisRows || !trendsMonthsRows || !trendsHeadcountRows) {
+    return (
+      <NotProvided
+        title="Workforce"
+        items={collectSuppressions(summary, trends)}
+      />
+    );
+  }
+
   // Row 1: Primary KPIs
-  const primaryKpis = summary.kpis.filter(k => 
+  const primaryKpis = summaryKpisRows.filter(k => 
     ['active_headcount', 'saudi_headcount', 'non_saudi_headcount', 'saudization_rate', 'probation_count'].includes(k.key)
   );
 
   // Row 2: Risk and DQ KPIs
-  const riskKpis = summary.kpis.filter(k => 
+  const riskKpis = summaryKpisRows.filter(k => 
     ['contract_expiring_30', 'iqama_expiring_30', 'missing_manager_count', 'missing_project_count', 'missing_cost_center_count'].includes(k.key)
   );
 
@@ -171,8 +187,8 @@ export const Workforce: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <LineChartCard
           title="Active Headcount Growth Trend"
-          xAxisData={trends.months}
-          seriesData={trends.headcount_trend}
+          xAxisData={trendsMonthsRows}
+          seriesData={trendsHeadcountRows}
           seriesName="Headcount"
           color="#38bdf8"
           valueFormatter={(val) => `${formatNumber(val)} employees`}

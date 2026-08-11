@@ -1,10 +1,13 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional
-from app.schemas.kpi import KPIItem, DQExceptionItem
+from app.schemas.kpi import KPIItem, DQExceptionItem, SuppressionItem
 
 class ErSummaryResponse(BaseModel):
     report_month: str
-    kpis: List[KPIItem]
+    kpis: Optional[List[KPIItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class ErTrendItem(BaseModel):
     period: str
@@ -12,7 +15,10 @@ class ErTrendItem(BaseModel):
     closed_cases: int
 
 class ErTrendResponse(BaseModel):
-    trends: List[ErTrendItem]
+    trends: Optional[List[ErTrendItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class ErCasesByProjectItem(BaseModel):
     project: str
@@ -24,7 +30,10 @@ class ErCasesByProjectItem(BaseModel):
     compliance_pct: float
 
 class ErCasesByProjectResponse(BaseModel):
-    projects: List[ErCasesByProjectItem]
+    projects: Optional[List[ErCasesByProjectItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class ErCasesByDepartmentItem(BaseModel):
     department: str
@@ -36,21 +45,30 @@ class ErCasesByDepartmentItem(BaseModel):
     compliance_pct: float
 
 class ErCasesByDepartmentResponse(BaseModel):
-    departments: List[ErCasesByDepartmentItem]
+    departments: Optional[List[ErCasesByDepartmentItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class ErCaseTypeItem(BaseModel):
     case_type: str
     case_count: int
 
 class ErCaseTypeResponse(BaseModel):
-    case_types: List[ErCaseTypeItem]
+    case_types: Optional[List[ErCaseTypeItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class ErCaseStatusItem(BaseModel):
     case_status: str
     case_count: int
 
 class ErCaseStatusResponse(BaseModel):
-    statuses: List[ErCaseStatusItem]
+    statuses: Optional[List[ErCaseStatusItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class ErSlaPerformanceItem(BaseModel):
     category_type: str
@@ -61,14 +79,22 @@ class ErSlaPerformanceItem(BaseModel):
     compliance_pct: float
 
 class ErSlaPerformanceResponse(BaseModel):
-    performance: List[ErSlaPerformanceItem]
+    performance: Optional[List[ErSlaPerformanceItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class ErAgingBucketItem(BaseModel):
     aging_bucket: str
     case_count: int
 
 class ErAgingBucketResponse(BaseModel):
-    buckets: List[ErAgingBucketItem]
+    buckets: Optional[List[ErAgingBucketItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class ErExceptionsResponse(BaseModel):
-    exceptions: List[DQExceptionItem]
+    exceptions: Optional[List[DQExceptionItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)

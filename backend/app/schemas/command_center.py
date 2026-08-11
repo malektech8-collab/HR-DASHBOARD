@@ -1,21 +1,24 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import datetime
-from app.schemas.kpi import KPIItem
+from app.schemas.kpi import KPIItem, SuppressionItem
 
 class CommandCenterOverviewResponse(BaseModel):
-    active_headcount: int
-    payroll_cost: float
-    attendance_compliance_pct: float
-    saudization_pct: float
-    open_er_cases: int
-    open_requisitions: int
-    review_completion_pct: float
-    total_active_exceptions: int
-    modules_healthy: int
+    active_headcount: Optional[int] = None
+    payroll_cost: Optional[float] = None
+    attendance_compliance_pct: Optional[float] = None
+    saudization_pct: Optional[float] = None
+    open_er_cases: Optional[int] = None
+    open_requisitions: Optional[int] = None
+    review_completion_pct: Optional[float] = None
+    total_active_exceptions: Optional[int] = None
+    modules_healthy: Optional[int] = None
     last_data_refresh: datetime
     latest_source_business_date: Optional[str]
-    data_quality_score: float
+    data_quality_score: Optional[float] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class ModuleHealthItem(BaseModel):
     module_key: str
@@ -34,7 +37,10 @@ class ModuleHealthItem(BaseModel):
     qa_report_path: Optional[str]
 
 class ModuleHealthResponse(BaseModel):
-    modules: List[ModuleHealthItem]
+    modules: Optional[List[ModuleHealthItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class PriorityAlertItem(BaseModel):
     alert_id: str
@@ -48,7 +54,10 @@ class PriorityAlertItem(BaseModel):
     route_path: str
 
 class PriorityAlertResponse(BaseModel):
-    alerts: List[PriorityAlertItem]
+    alerts: Optional[List[PriorityAlertItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class ExceptionSummaryItem(BaseModel):
     module_key: str
@@ -60,7 +69,10 @@ class ExceptionSummaryItem(BaseModel):
     route_path: str
 
 class ExceptionSummaryResponse(BaseModel):
-    exceptions: List[ExceptionSummaryItem]
+    exceptions: Optional[List[ExceptionSummaryItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class FreshnessItem(BaseModel):
     module_key: str
@@ -72,7 +84,10 @@ class FreshnessItem(BaseModel):
     stale_reason: str
 
 class FreshnessResponse(BaseModel):
-    freshness: List[FreshnessItem]
+    freshness: Optional[List[FreshnessItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class NavigationStatusItem(BaseModel):
     module_key: str
@@ -81,17 +96,23 @@ class NavigationStatusItem(BaseModel):
     status: str
 
 class NavigationStatusResponse(BaseModel):
-    navigation: List[NavigationStatusItem]
+    navigation: Optional[List[NavigationStatusItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class FilterOptionsResponse(BaseModel):
     report_month: str
-    companies: List[str]
-    projects: List[str]
-    departments: List[str]
-    cost_centers: List[str]
-    locations: List[str]
-    nationalities: List[str]
-    modules: List[str]
+    companies: Optional[List[str]] = None
+    projects: Optional[List[str]] = None
+    departments: Optional[List[str]] = None
+    cost_centers: Optional[List[str]] = None
+    locations: Optional[List[str]] = None
+    nationalities: Optional[List[str]] = None
+    modules: Optional[List[str]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class QaIndexItem(BaseModel):
     module_key: str
@@ -105,4 +126,6 @@ class QaIndexItem(BaseModel):
     status: str
 
 class QaIndexResponse(BaseModel):
-    qa_index: List[QaIndexItem]
+    qa_index: Optional[List[QaIndexItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)

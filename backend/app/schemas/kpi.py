@@ -1,5 +1,24 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
+
+
+class SuppressionItem(BaseModel):
+    """One figure withheld because its source domain was not provided.
+
+    Step 2b. Every response carries a `suppressed` list of these, so a missing
+    number is never merely missing: it is named, attributed to the domains that
+    would make it real, and explained in both languages.
+
+    A null value with no entry here would be indistinguishable from a bug, and
+    a client who cannot tell those apart will assume the number is a bug and
+    ask for it to be "fixed" - which is how a fabricated number gets restored.
+    """
+    key: str                        # response field or metric key
+    mart: str                       # the mart that would have supplied it
+    missing_domains: List[str]      # what the client still has to provide
+    reason: str                     # "not_provided" | "not_mapped"
+    message_en: str
+    message_ar: str
 
 class KPIItem(BaseModel):
     key: str
@@ -13,17 +32,23 @@ class KPIItem(BaseModel):
 class ExecutiveSummaryResponse(BaseModel):
     report_month: str
     last_refresh_at: str
-    kpis: List[KPIItem]
-    charts: Dict[str, Any]
+    kpis: Optional[List[KPIItem]] = None
+    charts: Optional[Dict[str, Any]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class DataQualitySummaryResponse(BaseModel):
-    data_quality_score: float
-    missing_manager_count: int
-    missing_project_count: int
-    missing_cost_center_count: int
-    missing_nationality_count: int
-    duplicate_employee_count: int
-    invalid_payroll_count: int
+    data_quality_score: Optional[float] = None
+    missing_manager_count: Optional[int] = None
+    missing_project_count: Optional[int] = None
+    missing_cost_center_count: Optional[int] = None
+    missing_nationality_count: Optional[int] = None
+    duplicate_employee_count: Optional[int] = None
+    invalid_payroll_count: Optional[int] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class DQExceptionItem(BaseModel):
     employee_id: str
@@ -34,7 +59,10 @@ class DQExceptionItem(BaseModel):
     recommended_action: str
 
 class DQExceptionsResponse(BaseModel):
-    exceptions: List[DQExceptionItem]
+    exceptions: Optional[List[DQExceptionItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class RefreshStatusResponse(BaseModel):
     last_refresh_at: str

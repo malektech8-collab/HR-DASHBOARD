@@ -28,6 +28,74 @@ def _cs_available_tables():
     return canonical_schema.available_tables()
 
 
+PROVENANCE_REGISTRY = "config/metric_provenance.yml"
+
+
+def _write_domain_provenance(conn, data_mode):
+    """Record, per domain, whether the CLIENT provided it. Read by the API.
+
+    Four columns, and the distinction between the last two is the point:
+
+      declared   the client said they are providing this domain
+      row_count  what actually landed
+      provided   whether the API may serve figures sourced from it
+
+    In demo everything is provided, because sample data is the product being
+    demonstrated. In real mode a contracted domain is provided iff it was
+    DECLARED — never iff it has rows. The declared-domain guard has already
+    made those agree or aborted, so reading declared here is not a shortcut;
+    it is the reason a zero can be attributed to "not uploaded yet" rather
+    than to a load that silently dropped every row.
+
+    The 15 uncontracted tables are never provided in real mode. They have no
+    contract, so they always load from data/sample — serving them beside real
+    figures is the fabrication this whole step exists to stop.
+    """
+    with open(PROVENANCE_REGISTRY, "r", encoding="utf-8") as handle:
+        spec = yaml.safe_load(handle) or {}
+    domain_spec = spec.get("domains") or {}
+    contracted = domain_spec.get("contracted") or {}
+    uncontracted = domain_spec.get("uncontracted") or {}
+
+    declared = set()
+    if data_mode == "real":
+        import onboarding as _onb
+        declared = _onb.load_declared(contracted=set(_cs_available_tables()))
+
+    def count(table):
+        try:
+            return conn.execute("SELECT count(*) FROM {}".format(table)).fetchone()[0]
+        except Exception:
+            return 0
+
+    rows = []
+    for domain, tables in sorted(contracted.items()):
+        rows.append((domain, "contracted",
+                     data_mode != "real" or domain in declared,
+                     sum(count(t) for t in tables),
+                     data_mode != "real" or domain in declared))
+    for domain, tables in sorted(uncontracted.items()):
+        rows.append((domain, "uncontracted", False,
+                     sum(count(t) for t in tables),
+                     data_mode != "real"))
+
+    conn.execute("DROP TABLE IF EXISTS domain_provenance;")
+    conn.execute("""
+    CREATE TABLE domain_provenance (
+        domain VARCHAR PRIMARY KEY,
+        kind VARCHAR,
+        declared BOOLEAN,
+        row_count BIGINT,
+        provided BOOLEAN
+    );
+    """)
+    conn.executemany(
+        "INSERT INTO domain_provenance VALUES (?, ?, ?, ?, ?);", rows)
+    withheld = sorted(d for d, _k, _d, _n, p in rows if not p)
+    print("Domain provenance written ({} domains, mode={}). Not provided: {}"
+          .format(len(rows), data_mode, withheld or "none"))
+
+
 def build_warehouse():
     os.makedirs("warehouse", exist_ok=True)
     db_path = "warehouse/hr_analytics.duckdb"
@@ -196,6 +264,16 @@ def build_warehouse():
                 row_counts[t] = 0
         _onb.assert_declared_matches_populated(row_counts)
         print(f"Declared-domain guard passed. Row counts: {row_counts}")
+
+    # --- Domain provenance for the API (Phase 2 P0-3, step 2b) ------------
+    # The suppression layer has to answer "was this domain provided?" on every
+    # request, and it must get the same answer the pipeline did. Writing it
+    # here, into the warehouse the API already reads, keeps that to one source:
+    # the API cannot see data/onboarding/ (different image, different volume),
+    # and re-deriving provided-ness from row counts at request time would be
+    # the inference this design has refused twice — a broken load and a domain
+    # that was never uploaded are not the same thing.
+    _write_domain_provenance(conn, os.getenv("DATA_MODE", "demo"))
 
     # Close connection so dbt doesn't lock the DuckDB file
     conn.close()

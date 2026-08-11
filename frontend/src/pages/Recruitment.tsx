@@ -29,6 +29,7 @@ import type {
 import { KpiCard } from '../components/cards/KpiCard';
 import { ExceptionTable } from '../components/tables/ExceptionTable';
 import { UserPlus, ShieldAlert, RefreshCw } from 'lucide-react';
+import { NotProvided, collectSuppressions } from '../components/ui/NotProvided';
 
 export const Recruitment: React.FC = () => {
   const [summary, setSummary] = useState<RecruitmentSummaryData | null>(null);
@@ -41,7 +42,7 @@ export const Recruitment: React.FC = () => {
   const [offerAcceptance, setOfferAcceptance] = useState<OfferAcceptanceData | null>(null);
   const [onboardingStatus, setOnboardingStatus] = useState<OnboardingStatusData | null>(null);
   const [workforcePlan, setWorkforcePlan] = useState<WorkforcePlanVsActualData | null>(null);
-  const [exceptions, setExceptions] = useState<DQExceptionItem[]>([]);
+  const [exceptions, setExceptions] = useState<DQExceptionItem[] | null>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -113,8 +114,30 @@ export const Recruitment: React.FC = () => {
     );
   }
 
+  // Step 2b: a null container means the client has not provided that
+  // domain. Bind, then guard - the compiler narrows these for the
+  // whole render, so nothing below can draw a zero in their place.
+  const byDepartmentDepartmentsRows = byDepartment?.departments;
+  const byProjectProjectsRows = byProject?.projects;
+  const offerAcceptanceOffersRows = offerAcceptance?.offers;
+  const onboardingStatusOnboardingRows = onboardingStatus?.onboarding;
+  const pipelinePipelineRows = pipeline?.pipeline;
+  const sourceEffectivenessSourcesRows = sourceEffectiveness?.sources;
+  const summaryKpisRows = summary?.kpis;
+  const timeToFillTimeToFillRows = timeToFill?.time_to_fill;
+  const trendsTrendsRows = trends?.trends;
+  const workforcePlanPlanRows = workforcePlan?.plan;
+  if (!byDepartmentDepartmentsRows || !byProjectProjectsRows || !offerAcceptanceOffersRows || !onboardingStatusOnboardingRows || !pipelinePipelineRows || !sourceEffectivenessSourcesRows || !summaryKpisRows || !timeToFillTimeToFillRows || !trendsTrendsRows || !workforcePlanPlanRows) {
+    return (
+      <NotProvided
+        title="Recruitment"
+        items={collectSuppressions(byDepartment, byProject, offerAcceptance, onboardingStatus, pipeline, sourceEffectiveness, summary, timeToFill, trends, workforcePlan)}
+      />
+    );
+  }
+
   // Find specific KPIs
-  const getKpi = (key: string) => summary.kpis.find(k => k.key === key);
+  const getKpi = (key: string) => summaryKpisRows.find(k => k.key === key);
 
   const openReqsKpi = getKpi('open_requisitions');
   const approvedVacKpi = getKpi('approved_vacancies');
@@ -129,7 +152,7 @@ export const Recruitment: React.FC = () => {
   const exceptionsKpi = getKpi('recruitment_exception_count');
 
   // Chart options configurations
-  const pipelineData = pipeline?.pipeline.map(p => ({
+  const pipelineData = pipelinePipelineRows.map(p => ({
     name: p.pipeline_stage,
     value: p.candidate_count
   })) || [];
@@ -165,11 +188,11 @@ export const Recruitment: React.FC = () => {
     backgroundColor: 'transparent',
     tooltip: { trigger: 'axis' },
     legend: { data: ['Requisitions Opened', 'Hires'], textStyle: { color: 'var(--foreground)' } },
-    xAxis: { type: 'category', data: trends?.trends.map(t => t.period) || [], axisLabel: { color: 'var(--foreground)' } },
+    xAxis: { type: 'category', data: trendsTrendsRows.map(t => t.period) || [], axisLabel: { color: 'var(--foreground)' } },
     yAxis: { type: 'value', axisLabel: { color: 'var(--foreground)' } },
     series: [
-      { name: 'Requisitions Opened', type: 'line', smooth: true, data: trends?.trends.map(t => t.requisitions_opened) || [] },
-      { name: 'Hires', type: 'line', smooth: true, data: trends?.trends.map(t => t.hires) || [] }
+      { name: 'Requisitions Opened', type: 'line', smooth: true, data: trendsTrendsRows.map(t => t.requisitions_opened) || [] },
+      { name: 'Hires', type: 'line', smooth: true, data: trendsTrendsRows.map(t => t.hires) || [] }
     ]
   };
 
@@ -187,7 +210,7 @@ export const Recruitment: React.FC = () => {
         label: { show: false },
         emphasis: { label: { show: true, fontSize: 16, fontWeight: 'bold' } },
         labelLine: { show: false },
-        data: offerAcceptance?.offers.map(o => ({ name: o.offer_status, value: o.offer_count })) || []
+        data: offerAcceptanceOffersRows.map(o => ({ name: o.offer_status, value: o.offer_count })) || []
       }
     ]
   };
@@ -197,10 +220,10 @@ export const Recruitment: React.FC = () => {
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
     legend: { textStyle: { color: 'var(--foreground)' } },
     xAxis: { type: 'value', axisLabel: { color: 'var(--foreground)' } },
-    yAxis: { type: 'category', data: byProject?.projects.map(p => p.project) || [], axisLabel: { color: 'var(--foreground)' } },
+    yAxis: { type: 'category', data: byProjectProjectsRows.map(p => p.project) || [], axisLabel: { color: 'var(--foreground)' } },
     series: [
-      { name: 'Total Requisitions', type: 'bar', data: byProject?.projects.map(p => p.total_requisitions) || [] },
-      { name: 'Open Requisitions', type: 'bar', data: byProject?.projects.map(p => p.open_requisitions) || [] }
+      { name: 'Total Requisitions', type: 'bar', data: byProjectProjectsRows.map(p => p.total_requisitions) || [] },
+      { name: 'Open Requisitions', type: 'bar', data: byProjectProjectsRows.map(p => p.open_requisitions) || [] }
     ]
   };
 
@@ -208,21 +231,21 @@ export const Recruitment: React.FC = () => {
     backgroundColor: 'transparent',
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
     legend: { textStyle: { color: 'var(--foreground)' } },
-    xAxis: { type: 'category', data: byDepartment?.departments.map(d => d.department) || [], axisLabel: { color: 'var(--foreground)' } },
+    xAxis: { type: 'category', data: byDepartmentDepartmentsRows.map(d => d.department) || [], axisLabel: { color: 'var(--foreground)' } },
     yAxis: { type: 'value', axisLabel: { color: 'var(--foreground)' } },
     series: [
-      { name: 'Total Requisitions', type: 'bar', data: byDepartment?.departments.map(d => d.total_requisitions) || [] },
-      { name: 'Open Requisitions', type: 'bar', data: byDepartment?.departments.map(d => d.open_requisitions) || [] }
+      { name: 'Total Requisitions', type: 'bar', data: byDepartmentDepartmentsRows.map(d => d.total_requisitions) || [] },
+      { name: 'Open Requisitions', type: 'bar', data: byDepartmentDepartmentsRows.map(d => d.open_requisitions) || [] }
     ]
   };
 
   const ttfOption = {
     backgroundColor: 'transparent',
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-    xAxis: { type: 'category', data: timeToFill?.time_to_fill.map(t => `${t.department}\n(${t.project})`) || [], axisLabel: { color: 'var(--foreground)', interval: 0, rotate: 15 } },
+    xAxis: { type: 'category', data: timeToFillTimeToFillRows.map(t => `${t.department}\n(${t.project})`) || [], axisLabel: { color: 'var(--foreground)', interval: 0, rotate: 15 } },
     yAxis: { type: 'value', name: 'Days', axisLabel: { color: 'var(--foreground)' }, nameTextStyle: { color: 'var(--foreground)' } },
     series: [
-      { name: 'Avg Days to Fill', type: 'bar', data: timeToFill?.time_to_fill.map(t => t.average_time_to_fill) || [], itemStyle: { color: '#3b82f6' } }
+      { name: 'Avg Days to Fill', type: 'bar', data: timeToFillTimeToFillRows.map(t => t.average_time_to_fill) || [], itemStyle: { color: '#3b82f6' } }
     ]
   };
 
@@ -236,7 +259,7 @@ export const Recruitment: React.FC = () => {
         type: 'pie',
         radius: '60%',
         center: ['50%', '45%'],
-        data: sourceEffectiveness?.sources.map(s => ({ name: s.source, value: s.candidate_count })) || []
+        data: sourceEffectivenessSourcesRows.map(s => ({ name: s.source, value: s.candidate_count })) || []
       }
     ]
   };
@@ -251,7 +274,7 @@ export const Recruitment: React.FC = () => {
         type: 'pie',
         radius: '60%',
         center: ['50%', '45%'],
-        data: onboardingStatus?.onboarding.map(o => ({ name: o.onboarding_status, value: o.hire_count })) || []
+        data: onboardingStatusOnboardingRows.map(o => ({ name: o.onboarding_status, value: o.hire_count })) || []
       }
     ]
   };
@@ -260,11 +283,11 @@ export const Recruitment: React.FC = () => {
     backgroundColor: 'transparent',
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
     legend: { textStyle: { color: 'var(--foreground)' } },
-    xAxis: { type: 'category', data: workforcePlan?.plan.map(p => `${p.project}\n(${p.department})`) || [], axisLabel: { color: 'var(--foreground)', interval: 0, rotate: 15 } },
+    xAxis: { type: 'category', data: workforcePlanPlanRows.map(p => `${p.project}\n(${p.department})`) || [], axisLabel: { color: 'var(--foreground)', interval: 0, rotate: 15 } },
     yAxis: { type: 'value', axisLabel: { color: 'var(--foreground)' } },
     series: [
-      { name: 'Planned Headcount', type: 'bar', data: workforcePlan?.plan.map(p => p.planned_headcount) || [] },
-      { name: 'Actual Headcount', type: 'bar', data: workforcePlan?.plan.map(p => p.actual_headcount) || [] }
+      { name: 'Planned Headcount', type: 'bar', data: workforcePlanPlanRows.map(p => p.planned_headcount) || [] },
+      { name: 'Actual Headcount', type: 'bar', data: workforcePlanPlanRows.map(p => p.actual_headcount) || [] }
     ]
   };
 

@@ -23,6 +23,7 @@ import type {
 import { KpiCard } from '../components/cards/KpiCard';
 import { ExceptionTable } from '../components/tables/ExceptionTable';
 import { ShieldCheck, ShieldAlert, FileText, CheckCircle2 } from 'lucide-react';
+import { NotProvided, collectSuppressions } from '../components/ui/NotProvided';
 
 
 export const Compliance: React.FC = () => {
@@ -33,7 +34,7 @@ export const Compliance: React.FC = () => {
   const [expiry, setExpiry] = useState<DocumentExpiryData | null>(null);
   const [gosi, setGosi] = useState<GosiStatusData | null>(null);
   const [wps, setWps] = useState<WpsStatusData | null>(null);
-  const [exceptions, setExceptions] = useState<DQExceptionItem[]>([]);
+  const [exceptions, setExceptions] = useState<DQExceptionItem[] | null>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -94,8 +95,27 @@ export const Compliance: React.FC = () => {
     );
   }
 
+  // Step 2b: a null container means the client has not provided that
+  // domain. Bind, then guard - the compiler narrows these for the
+  // whole render, so nothing below can draw a zero in their place.
+  const departmentsDepartmentsRows = departments?.departments;
+  const expiryBucketsRows = expiry?.buckets;
+  const gosiStatusesRows = gosi?.statuses;
+  const projectsProjectsRows = projects?.projects;
+  const summaryKpisRows = summary?.kpis;
+  const trendsTrendsRows = trends?.trends;
+  const wpsStatusesRows = wps?.statuses;
+  if (!departmentsDepartmentsRows || !expiryBucketsRows || !gosiStatusesRows || !projectsProjectsRows || !summaryKpisRows || !trendsTrendsRows || !wpsStatusesRows) {
+    return (
+      <NotProvided
+        title="Compliance"
+        items={collectSuppressions(departments, expiry, gosi, projects, summary, trends, wps)}
+      />
+    );
+  }
+
   const getKpi = (key: string) => {
-    return summary.kpis.find(k => k.key === key) || {
+    return summaryKpisRows.find(k => k.key === key) || {
       key,
       label: key,
       value: 0,
@@ -134,7 +154,7 @@ export const Compliance: React.FC = () => {
     grid: { top: '15%', left: '3%', right: '4%', bottom: '15%', containLabel: true },
     xAxis: {
       type: 'category',
-      data: trends.trends.map(t => t.period),
+      data: trendsTrendsRows.map(t => t.period),
       axisLine: { lineStyle: { color: '#1e293b' } },
       axisLabel: { color: '#64748b', fontSize: 11, fontFamily: 'Inter, sans-serif' }
     },
@@ -163,14 +183,14 @@ export const Compliance: React.FC = () => {
         name: 'Saudi Headcount',
         type: 'bar',
         stack: 'headcount',
-        data: trends.trends.map(t => t.saudi_headcount),
+        data: trendsTrendsRows.map(t => t.saudi_headcount),
         itemStyle: { color: '#10b981' }
       },
       {
         name: 'Non-Saudi Headcount',
         type: 'bar',
         stack: 'headcount',
-        data: trends.trends.map(t => t.non_saudi_headcount),
+        data: trendsTrendsRows.map(t => t.non_saudi_headcount),
         itemStyle: { color: '#3b82f6' }
       },
       {
@@ -179,7 +199,7 @@ export const Compliance: React.FC = () => {
         yAxisIndex: 1,
         smooth: true,
         symbolSize: 8,
-        data: trends.trends.map(t => t.saudization_pct),
+        data: trendsTrendsRows.map(t => t.saudization_pct),
         itemStyle: { color: '#f59e0b' },
         lineStyle: { width: 3 }
       }
@@ -257,7 +277,7 @@ export const Compliance: React.FC = () => {
     },
     yAxis: {
       type: 'category',
-      data: projects.projects.map(p => p.project),
+      data: projectsProjectsRows.map(p => p.project),
       axisLine: { lineStyle: { color: '#1e293b' } },
       axisLabel: { color: '#64748b', fontSize: 11 }
     },
@@ -265,7 +285,7 @@ export const Compliance: React.FC = () => {
       {
         name: 'Saudization %',
         type: 'bar',
-        data: projects.projects.map(p => p.saudization_pct),
+        data: projectsProjectsRows.map(p => p.saudization_pct),
         itemStyle: {
           color: {
             type: 'linear',
@@ -308,7 +328,7 @@ export const Compliance: React.FC = () => {
     },
     yAxis: {
       type: 'category',
-      data: departments.departments.map(d => d.department),
+      data: departmentsDepartmentsRows.map(d => d.department),
       axisLine: { lineStyle: { color: '#1e293b' } },
       axisLabel: { color: '#64748b', fontSize: 11 }
     },
@@ -316,7 +336,7 @@ export const Compliance: React.FC = () => {
       {
         name: 'Saudization %',
         type: 'bar',
-        data: departments.departments.map(d => d.saudization_pct),
+        data: departmentsDepartmentsRows.map(d => d.saudization_pct),
         itemStyle: {
           color: {
             type: 'linear',
@@ -384,7 +404,7 @@ export const Compliance: React.FC = () => {
         name: 'Iqama Expiry',
         type: 'bar',
         data: expiryBuckets.map(eb => {
-          const item = expiry.buckets.find(b => b.expiry_bucket === eb);
+          const item = expiryBucketsRows.find(b => b.expiry_bucket === eb);
           return item ? item.iqama_count : 0;
         }),
         itemStyle: { color: '#f59e0b', borderRadius: [4, 4, 0, 0] }
@@ -393,7 +413,7 @@ export const Compliance: React.FC = () => {
         name: 'Work Permit Expiry',
         type: 'bar',
         data: expiryBuckets.map(eb => {
-          const item = expiry.buckets.find(b => b.expiry_bucket === eb);
+          const item = expiryBucketsRows.find(b => b.expiry_bucket === eb);
           return item ? item.work_permit_count : 0;
         }),
         itemStyle: { color: '#ec4899', borderRadius: [4, 4, 0, 0] }
@@ -430,7 +450,7 @@ export const Compliance: React.FC = () => {
           fontSize: 10,
           formatter: '{b}\n({c})'
         },
-        data: gosi.statuses.map(s => {
+        data: gosiStatusesRows.map(s => {
           let color = '#3b82f6';
           if (s.gosi_status === 'Registered') color = '#10b981';
           if (s.gosi_status === 'Not Registered') color = '#f59e0b';
@@ -473,7 +493,7 @@ export const Compliance: React.FC = () => {
           fontSize: 10,
           formatter: '{b}\n({c})'
         },
-        data: wps.statuses.map(s => {
+        data: wpsStatusesRows.map(s => {
           let color = '#3b82f6';
           if (s.wps_status === 'Compliant') color = '#10b981';
           if (s.wps_status === 'Non-Compliant') color = '#ef4444';

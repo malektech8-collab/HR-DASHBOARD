@@ -1,10 +1,13 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional
-from app.schemas.kpi import KPIItem, DQExceptionItem
+from app.schemas.kpi import KPIItem, DQExceptionItem, SuppressionItem
 
 class AttendanceSummaryResponse(BaseModel):
     report_month: str
-    kpis: List[KPIItem]
+    kpis: Optional[List[KPIItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class AttendanceTrendItem(BaseModel):
     month: str
@@ -16,7 +19,10 @@ class AttendanceTrendItem(BaseModel):
     overtime_hours: float
 
 class AttendanceTrendsResponse(BaseModel):
-    trends: List[AttendanceTrendItem]
+    trends: Optional[List[AttendanceTrendItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class AttendanceByProjectItem(BaseModel):
     project: str
@@ -29,7 +35,10 @@ class AttendanceByProjectItem(BaseModel):
     overtime_cost: float
 
 class AttendanceByProjectResponse(BaseModel):
-    projects: List[AttendanceByProjectItem]
+    projects: Optional[List[AttendanceByProjectItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class AttendanceByDepartmentItem(BaseModel):
     department: str
@@ -43,7 +52,10 @@ class AttendanceByDepartmentItem(BaseModel):
     overtime_cost: float
 
 class AttendanceByDepartmentResponse(BaseModel):
-    departments: List[AttendanceByDepartmentItem]
+    departments: Optional[List[AttendanceByDepartmentItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class AttendanceLateArrivalItem(BaseModel):
     employee_id: str
@@ -56,7 +68,10 @@ class AttendanceLateArrivalItem(BaseModel):
     late_arrival_incidents_count: int
 
 class AttendanceLateArrivalResponse(BaseModel):
-    late_arrivals: List[AttendanceLateArrivalItem]
+    late_arrivals: Optional[List[AttendanceLateArrivalItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class AttendanceOvertimeItem(BaseModel):
     employee_id: str
@@ -68,7 +83,10 @@ class AttendanceOvertimeItem(BaseModel):
     reconciliation_status: str
 
 class AttendanceOvertimeResponse(BaseModel):
-    overtime_records: List[AttendanceOvertimeItem]
+    overtime_records: Optional[List[AttendanceOvertimeItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class AttendanceMissingPunchesItem(BaseModel):
     employee_id: str
@@ -80,7 +98,12 @@ class AttendanceMissingPunchesItem(BaseModel):
     total_missing_punches: int
 
 class AttendanceMissingPunchesResponse(BaseModel):
-    missing_punches: List[AttendanceMissingPunchesItem]
+    missing_punches: Optional[List[AttendanceMissingPunchesItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)
+
 
 class AttendanceExceptionsResponse(BaseModel):
-    exceptions: List[DQExceptionItem]
+    exceptions: Optional[List[DQExceptionItem]] = None
+    # Withheld figures, named. Empty when nothing was suppressed.
+    suppressed: List[SuppressionItem] = Field(default_factory=list)

@@ -24,6 +24,7 @@ import { KpiCard } from '../components/cards/KpiCard';
 import { ExceptionTable } from '../components/tables/ExceptionTable';
 import { Sparkles, ShieldAlert, Clock } from 'lucide-react';
 import { formatCurrency, formatPercent } from '../lib/formatters';
+import { NotProvided, collectSuppressions } from '../components/ui/NotProvided';
 
 export const Attendance: React.FC = () => {
   const [summary, setSummary] = useState<AttendanceSummaryData | null>(null);
@@ -33,7 +34,7 @@ export const Attendance: React.FC = () => {
   const [lateArrivals, setLateArrivals] = useState<AttendanceLateArrivalData | null>(null);
   const [overtime, setOvertime] = useState<AttendanceOvertimeData | null>(null);
   const [missingPunches, setMissingPunches] = useState<AttendanceMissingPunchesData | null>(null);
-  const [exceptions, setExceptions] = useState<DQExceptionItem[]>([]);
+  const [exceptions, setExceptions] = useState<DQExceptionItem[] | null>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -94,9 +95,25 @@ export const Attendance: React.FC = () => {
     );
   }
 
+  // Step 2b: a null container means the client has not provided that
+  // domain. Bind, then guard - the compiler narrows these for the
+  // whole render, so nothing below can draw a zero in their place.
+  const departmentsDepartmentsRows = departments?.departments;
+  const projectsProjectsRows = projects?.projects;
+  const summaryKpisRows = summary?.kpis;
+  const trendsTrendsRows = trends?.trends;
+  if (!departmentsDepartmentsRows || !projectsProjectsRows || !summaryKpisRows || !trendsTrendsRows) {
+    return (
+      <NotProvided
+        title="Attendance"
+        items={collectSuppressions(departments, projects, summary, trends)}
+      />
+    );
+  }
+
   // Helper to find KPI by key safely
   const getKpi = (key: string) => {
-    return summary.kpis.find(k => k.key === key) || {
+    return summaryKpisRows.find(k => k.key === key) || {
       key,
       label: key.replace(/_/g, ' '),
       value: 0,
@@ -129,7 +146,7 @@ export const Attendance: React.FC = () => {
     grid: { top: '15%', left: '3%', right: '4%', bottom: '5%', containLabel: true },
     xAxis: {
       type: 'category',
-      data: trends.trends.map(t => t.month),
+      data: trendsTrendsRows.map(t => t.month),
       axisLine: { lineStyle: { color: '#1e293b' } },
       axisLabel: { color: '#64748b', fontSize: 11, fontFamily: 'Inter, sans-serif' }
     },
@@ -143,7 +160,7 @@ export const Attendance: React.FC = () => {
     series: [
       {
         name: 'Attendance Compliance %',
-        data: trends.trends.map(t => t.attendance_compliance_pct),
+        data: trendsTrendsRows.map(t => t.attendance_compliance_pct),
         type: 'line',
         smooth: true,
         symbolSize: 6,
@@ -185,7 +202,7 @@ export const Attendance: React.FC = () => {
     grid: { top: '15%', left: '3%', right: '4%', bottom: '5%', containLabel: true },
     xAxis: {
       type: 'category',
-      data: trends.trends.map(t => t.month),
+      data: trendsTrendsRows.map(t => t.month),
       axisLine: { lineStyle: { color: '#1e293b' } },
       axisLabel: { color: '#64748b', fontSize: 11, fontFamily: 'Inter, sans-serif' }
     },
@@ -197,7 +214,7 @@ export const Attendance: React.FC = () => {
     series: [
       {
         name: 'Absence Days',
-        data: trends.trends.map(t => t.absence_days),
+        data: trendsTrendsRows.map(t => t.absence_days),
         type: 'line',
         smooth: true,
         symbolSize: 6,
@@ -239,7 +256,7 @@ export const Attendance: React.FC = () => {
     grid: { top: '15%', left: '3%', right: '4%', bottom: '5%', containLabel: true },
     xAxis: {
       type: 'category',
-      data: projects.projects.map(p => p.project),
+      data: projectsProjectsRows.map(p => p.project),
       axisLine: { lineStyle: { color: '#1e293b' } },
       axisLabel: { color: '#64748b', fontSize: 11, fontFamily: 'Inter, sans-serif' }
     },
@@ -251,7 +268,7 @@ export const Attendance: React.FC = () => {
     series: [
       {
         name: 'Late Minutes',
-        data: projects.projects.map(p => p.late_minutes),
+        data: projectsProjectsRows.map(p => p.late_minutes),
         type: 'bar',
         barWidth: '35%',
         itemStyle: {
@@ -284,7 +301,7 @@ export const Attendance: React.FC = () => {
     grid: { top: '15%', left: '3%', right: '4%', bottom: '5%', containLabel: true },
     xAxis: {
       type: 'category',
-      data: departments.departments.map(d => d.department),
+      data: departmentsDepartmentsRows.map(d => d.department),
       axisLine: { lineStyle: { color: '#1e293b' } },
       axisLabel: { color: '#64748b', fontSize: 11, fontFamily: 'Inter, sans-serif' }
     },
@@ -296,7 +313,7 @@ export const Attendance: React.FC = () => {
     series: [
       {
         name: 'Net Late Minutes',
-        data: departments.departments.map(d => d.net_late_minutes),
+        data: departmentsDepartmentsRows.map(d => d.net_late_minutes),
         type: 'bar',
         barWidth: '35%',
         itemStyle: {
@@ -329,7 +346,7 @@ export const Attendance: React.FC = () => {
     grid: { top: '15%', left: '3%', right: '4%', bottom: '5%', containLabel: true },
     xAxis: {
       type: 'category',
-      data: projects.projects.map(p => p.project),
+      data: projectsProjectsRows.map(p => p.project),
       axisLine: { lineStyle: { color: '#1e293b' } },
       axisLabel: { color: '#64748b', fontSize: 10, fontFamily: 'Inter, sans-serif' }
     },
@@ -341,7 +358,7 @@ export const Attendance: React.FC = () => {
     series: [
       {
         name: 'Missing Punches',
-        data: projects.projects.map(p => p.missing_punches),
+        data: projectsProjectsRows.map(p => p.missing_punches),
         type: 'bar',
         barWidth: '40%',
         itemStyle: {
@@ -374,7 +391,7 @@ export const Attendance: React.FC = () => {
     grid: { top: '15%', left: '3%', right: '4%', bottom: '5%', containLabel: true },
     xAxis: {
       type: 'category',
-      data: projects.projects.map(p => p.project),
+      data: projectsProjectsRows.map(p => p.project),
       axisLine: { lineStyle: { color: '#1e293b' } },
       axisLabel: { color: '#64748b', fontSize: 10, fontFamily: 'Inter, sans-serif' }
     },
@@ -386,7 +403,7 @@ export const Attendance: React.FC = () => {
     series: [
       {
         name: 'Overtime Hours',
-        data: projects.projects.map(p => p.overtime_hours),
+        data: projectsProjectsRows.map(p => p.overtime_hours),
         type: 'bar',
         barWidth: '40%',
         itemStyle: {
@@ -419,7 +436,7 @@ export const Attendance: React.FC = () => {
     grid: { top: '15%', left: '3%', right: '4%', bottom: '5%', containLabel: true },
     xAxis: {
       type: 'category',
-      data: projects.projects.map(p => p.project),
+      data: projectsProjectsRows.map(p => p.project),
       axisLine: { lineStyle: { color: '#1e293b' } },
       axisLabel: { color: '#64748b', fontSize: 10, fontFamily: 'Inter, sans-serif' }
     },
@@ -431,7 +448,7 @@ export const Attendance: React.FC = () => {
     series: [
       {
         name: 'Overtime Cost',
-        data: projects.projects.map(p => p.overtime_cost),
+        data: projectsProjectsRows.map(p => p.overtime_cost),
         type: 'bar',
         barWidth: '40%',
         itemStyle: {
