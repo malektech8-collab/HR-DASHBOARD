@@ -154,7 +154,7 @@ def test_an_unmapped_mart_is_suppressed():
     provenance = prov("employees", "payroll", "attendance")
     assert provenance.payload("mart_that_nobody_mapped") is False
     entry = provenance.block()[0]
-    assert entry["reason"] == p.NOT_MAPPED
+    assert entry.reason == p.NOT_MAPPED
 
 
 def test_an_unmapped_column_is_suppressed():
@@ -170,18 +170,18 @@ def test_every_withheld_figure_is_named_with_its_missing_domains():
     provenance = prov("employees")
     provenance.payload("mart_breakdown")
     provenance.column("mart_kpis", "absence_days")
-    block = {item["key"]: item for item in provenance.block()}
-    assert block["mart_breakdown"]["missing_domains"] == ["payroll"]
-    assert block["absence_days"]["missing_domains"] == ["attendance"]
+    block = {item.key: item for item in provenance.block()}
+    assert block["mart_breakdown"].missing_domains == ["payroll"]
+    assert block["absence_days"].missing_domains == ["attendance"]
 
 
 def test_the_message_is_bilingual_and_names_the_domain_in_words():
     provenance = prov("employees")
     provenance.payload("mart_breakdown")
     entry = provenance.block()[0]
-    assert "Payroll" in entry["message_en"]
-    assert "الرواتب" in entry["message_ar"]
-    assert entry["reason"] == p.NOT_PROVIDED
+    assert "Payroll" in entry.message_en
+    assert "الرواتب" in entry.message_ar
+    assert entry.reason == p.NOT_PROVIDED
 
 
 def test_the_block_does_not_repeat_a_figure():

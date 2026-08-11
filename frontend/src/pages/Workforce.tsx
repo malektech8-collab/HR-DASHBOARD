@@ -21,6 +21,7 @@ import { ExceptionTable } from '../components/tables/ExceptionTable';
 import { ShieldAlert, Sparkles } from 'lucide-react';
 import { formatNumber } from '../lib/formatters';
 import { NotProvided, collectSuppressions } from '../components/ui/NotProvided';
+import { CoverageNote, collectCoverage } from '../components/ui/CoverageNote';
 
 export const Workforce: React.FC = () => {
   const [summary, setSummary] = useState<WorkforceSummaryData | null>(null);
@@ -132,6 +133,8 @@ export const Workforce: React.FC = () => {
 
   return (
     <div className="space-y-8 animate-fadeIn text-foreground">
+      {/* Coverage: present but measured over less than the whole period. */}
+      <CoverageNote items={collectCoverage(summary, trends)} />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

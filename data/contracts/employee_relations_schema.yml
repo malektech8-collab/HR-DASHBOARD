@@ -140,7 +140,7 @@ columns:
     equals: Closed
 - name: owner_id
   name_en: Owner ID
-  name_ar: الرقم الوظيفي للمسؤول
+  name_ar: المسؤول
   type: VARCHAR
   required: true
   description_en: Employee ID of the HR owner handling the case.

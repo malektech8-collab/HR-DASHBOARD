@@ -7,6 +7,7 @@ import { BarChartCard } from '../components/charts/BarChartCard';
 import { formatCurrency, formatNumber } from '../lib/formatters';
 import { AlertCircle, ArrowRight, ShieldAlert, Sparkles } from 'lucide-react';
 import { NotProvided, collectSuppressions } from '../components/ui/NotProvided';
+import { CoverageNote, collectCoverage } from '../components/ui/CoverageNote';
 
 interface ExecutiveSummaryProps {
   onNavigate: (page: string) => void;
@@ -91,6 +92,8 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({ onNavigate }
 
   return (
     <div className="space-y-8 animate-fadeIn">
+      {/* Coverage: present but measured over less than the whole period. */}
+      <CoverageNote items={collectCoverage(data)} />
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>

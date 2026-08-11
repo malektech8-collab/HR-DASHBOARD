@@ -39,6 +39,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { NotProvided, collectSuppressions } from '../components/ui/NotProvided';
+import { CoverageNote, collectCoverage } from '../components/ui/CoverageNote';
 
 interface CommandCenterProps {
   onNavigate: (page: string) => void;
@@ -168,6 +169,8 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onNavigate }) => {
 
   return (
     <div className="space-y-8 pb-16">
+      {/* Coverage: present but measured over less than the whole period. */}
+      <CoverageNote items={collectCoverage()} />
       {/* 1. Header Row */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-card/40 backdrop-blur-md border border-border p-6 rounded-2xl">
         <div>

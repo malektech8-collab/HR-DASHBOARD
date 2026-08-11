@@ -44,6 +44,7 @@ import yaml
 from fastapi import Depends
 
 from app.config import settings
+from app.schemas.kpi import CoverageItem, SuppressionItem
 from app.db.duckdb_client import get_db_connection
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -80,6 +81,17 @@ DOMAIN_LABELS_AR = {
     "compliance": "الالتزام", "hr_requests": "طلبات الموارد البشرية",
     "employee_relations": "علاقات الموظفين", "recruitment": "التوظيف",
     "talent": "المواهب",
+}
+
+# Where each date-grained domain's coverage comes from. The mart name appears
+# as a literal so the registry-coverage test can see that the API reads it -
+# that test is what forces this new surface into metric_provenance.yml instead
+# of letting it bypass provenance.
+COVERAGE_QUERIES = {
+    "attendance": (
+        "SELECT declared_start, declared_end, covered_days, expected_days "
+        "FROM mart_attendance_coverage"
+    ),
 }
 
 _registry_cache = None
@@ -133,6 +145,59 @@ class Suppression:
         }
 
 
+class Coverage:
+    """How much of the reporting period one domain's upload covers."""
+
+    __slots__ = ("domain", "declared_start", "declared_end",
+                 "covered_days", "expected_days")
+
+    def __init__(self, domain, declared_start, declared_end,
+                 covered_days, expected_days):
+        self.domain = domain
+        self.declared_start = declared_start
+        self.declared_end = declared_end
+        self.covered_days = int(covered_days or 0)
+        self.expected_days = int(expected_days or 0)
+
+    @property
+    def is_partial(self):
+        """The noise rule: a note only where there is something to say.
+
+        Full coverage says nothing worth reading, and a note on every card
+        trains people to stop reading notes - which would cost most on the one
+        case that needs an explanation, the unmeasurable em dash.
+        """
+        return self.expected_days > 0 and self.covered_days < self.expected_days
+
+    def _window(self, connector):
+        if not (self.declared_start and self.declared_end):
+            return ""
+        return " ({} {} {})".format(
+            self.declared_start, connector, self.declared_end)
+
+    def as_dict(self):
+        pct = (100.0 * self.covered_days / self.expected_days
+               if self.expected_days else 0.0)
+        # Western digits inside the Arabic text, matching every other bilingual
+        # message in the product. One convention, settled here.
+        return {
+            "domain": self.domain,
+            "domain_label_en": DOMAIN_LABELS_EN.get(self.domain, self.domain),
+            "domain_label_ar": DOMAIN_LABELS_AR.get(self.domain, self.domain),
+            "declared_start": str(self.declared_start) if self.declared_start else None,
+            "declared_end": str(self.declared_end) if self.declared_end else None,
+            "covered_days": self.covered_days,
+            "expected_days": self.expected_days,
+            "coverage_pct": round(pct, 1),
+            "message_en": "Covers {} of {} working days{}.".format(
+                self.covered_days, self.expected_days, self._window("to")),
+            "message_ar": "\u064a\u063a\u0637\u064a {} \u0645\u0646 {} "
+                          "\u064a\u0648\u0645 \u0639\u0645\u0644{}.".format(
+                              self.covered_days, self.expected_days,
+                              self._window("إلى")),
+        }
+
+
 class Provenance:
     """Per-request suppression decisions, plus the record of what was withheld.
 
@@ -147,12 +212,15 @@ class Provenance:
     make it real.
     """
 
-    def __init__(self, provided: Set[str], registry: Dict, data_mode: str = "demo"):
+    def __init__(self, provided: Set[str], registry: Dict, data_mode: str = "demo",
+                 coverage: Optional[Dict[str, "Coverage"]] = None):
         self.provided = set(provided)
         self.registry = registry or {}
         self.marts = self.registry.get("marts") or {}
         self.data_mode = data_mode
+        self._coverage = coverage or {}
         self._suppressed: Dict[str, Suppression] = {}
+        self._noted: Dict[str, Coverage] = {}
 
     # -- queries ----------------------------------------------------------
 
@@ -245,14 +313,60 @@ class Provenance:
             return None
         return built
 
+    # -- coverage: present, but measured over less than the whole period ----
+
+    def mart_domains(self, mart) -> List[str]:
+        """Every domain a mart depends on, whichever mode it declares."""
+        spec = self.entry(mart)
+        if spec is None:
+            return []
+        if spec.get("mode") == "column":
+            found = set()
+            for entry in (spec.get("columns") or {}).values():
+                found.update(_entry_domains(entry)[0])
+            return sorted(found)
+        return sorted(_entry_domains(spec.get("domains"))[0])
+
+    def coverage(self, domain) -> Optional["Coverage"]:
+        """The declared window and day counts for a domain, or None."""
+        return self._coverage.get(domain)
+
+    def note_coverage(self, mart) -> List["Coverage"]:
+        """Record a note for every partially-covered domain this mart reads.
+
+        Gated on the domain being PROVIDED: with the domain absent, the
+        `suppressed` block already explains the emptiness, and a coverage note
+        beside it would be a second explanation of the same thing.
+        """
+        noted = []
+        for domain in self.mart_domains(mart):
+            if domain not in self.provided:
+                continue
+            found = self._coverage.get(domain)
+            if found is not None and found.is_partial:
+                self._noted.setdefault(domain, found)
+                noted.append(found)
+        return noted
+
+    def coverage_block(self) -> List[CoverageItem]:
+        return [CoverageItem(**c.as_dict()) for c in sorted(
+            self._noted.values(), key=lambda c: c.domain)]
+
+    @property
+    def any_coverage_note(self) -> bool:
+        return bool(self._noted)
+
     # -- the sibling block -------------------------------------------------
 
     def _record(self, suppression):
         self._suppressed.setdefault(
             "{}::{}".format(suppression.mart, suppression.key), suppression)
 
-    def block(self) -> List[Dict]:
-        return [s.as_dict() for s in sorted(
+    def block(self) -> List[SuppressionItem]:
+        # Built as models, not dicts: assigning dicts to a typed field works
+        # but makes Pydantic warn, and a warning nobody reads is how the next
+        # shape mismatch gets through.
+        return [SuppressionItem(**s.as_dict()) for s in sorted(
             self._suppressed.values(), key=lambda s: (s.mart, s.key))]
 
     @property
@@ -280,6 +394,24 @@ def provided_domains(conn) -> Set[str]:
             registry.get("uncontracted") or {})
 
 
+def domain_coverage(conn) -> Dict[str, Coverage]:
+    """Read each date-grained domain's coverage from its mart.
+
+    A missing mart means the warehouse predates the coverage surface, which is
+    not an error: no coverage read means no note, and every figure is served
+    exactly as it was before.
+    """
+    found = {}
+    for domain, query in COVERAGE_QUERIES.items():
+        try:
+            row = conn.execute(query).fetchone()
+        except Exception:
+            continue
+        if row:
+            found[domain] = Coverage(domain, row[0], row[1], row[2], row[3])
+    return found
+
+
 def get_provenance(
     conn: duckdb.DuckDBPyConnection = Depends(get_db_connection),
 ) -> Provenance:
@@ -287,6 +419,7 @@ def get_provenance(
         provided=provided_domains(conn),
         registry=load_registry(),
         data_mode=str(settings.DATA_MODE or "demo").strip().lower(),
+        coverage=domain_coverage(conn),
     )
 
 
@@ -314,9 +447,13 @@ def suppressible(response_model, *marts):
                 return func(**kwargs)
             if any(not prov.payload(mart) for mart in marts):
                 return response_model(suppressed=prov.block())
+            for mart in marts:
+                prov.note_coverage(mart)
             result = func(**kwargs)
             if hasattr(result, "suppressed") and not result.suppressed:
                 result.suppressed = prov.block()
+            if hasattr(result, "coverage_notes") and not result.coverage_notes:
+                result.coverage_notes = prov.coverage_block()
             return result
         wrapper.__suppressible_marts__ = marts
         return wrapper

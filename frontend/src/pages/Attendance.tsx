@@ -25,6 +25,7 @@ import { ExceptionTable } from '../components/tables/ExceptionTable';
 import { Sparkles, ShieldAlert, Clock } from 'lucide-react';
 import { formatCurrency, formatPercent } from '../lib/formatters';
 import { NotProvided, collectSuppressions } from '../components/ui/NotProvided';
+import { CoverageNote, collectCoverage } from '../components/ui/CoverageNote';
 
 export const Attendance: React.FC = () => {
   const [summary, setSummary] = useState<AttendanceSummaryData | null>(null);
@@ -470,8 +471,15 @@ export const Attendance: React.FC = () => {
   const otCostKpi = getKpi("overtime_cost");
   const excCountKpi = getKpi("attendance_exception_count");
 
+  // The attendance cards can be unmeasurable; the coverage note is the
+  // reason, so it travels with the em dash rather than only the banner.
+  const coverageItems = collectCoverage(departments, projects, summary, trends);
+  const unmeasurableReason = coverageItems[0]?.message_en;
+
   return (
     <div className="space-y-6">
+      {/* Coverage: present but measured over less than the whole period. */}
+      <CoverageNote items={coverageItems} />
       {/* Title Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/80 pb-5">
         <div>
@@ -498,30 +506,35 @@ export const Attendance: React.FC = () => {
           value={compKpi.value}
           unit={compKpi.unit}
           status={compKpi.status}
+          unmeasurableReason={unmeasurableReason}
         />
         <KpiCard
           label={absKpi.label}
           value={absKpi.value}
           unit={absKpi.unit}
           status={absKpi.status}
+          unmeasurableReason={unmeasurableReason}
         />
         <KpiCard
           label={lateKpi.label}
           value={lateKpi.value}
           unit={lateKpi.unit}
           status={lateKpi.status}
+          unmeasurableReason={unmeasurableReason}
         />
         <KpiCard
           label={excusedKpi.label}
           value={excusedKpi.value}
           unit={excusedKpi.unit}
           status={excusedKpi.status}
+          unmeasurableReason={unmeasurableReason}
         />
         <KpiCard
           label={netKpi.label}
           value={netKpi.value}
           unit={netKpi.unit}
           status={netKpi.status}
+          unmeasurableReason={unmeasurableReason}
         />
       </div>
 
@@ -532,30 +545,35 @@ export const Attendance: React.FC = () => {
           value={earlyKpi.value}
           unit={earlyKpi.unit}
           status={earlyKpi.status}
+          unmeasurableReason={unmeasurableReason}
         />
         <KpiCard
           label={punchKpi.label}
           value={punchKpi.value}
           unit={punchKpi.unit}
           status={punchKpi.status}
+          unmeasurableReason={unmeasurableReason}
         />
         <KpiCard
           label={otHoursKpi.label}
           value={otHoursKpi.value}
           unit={otHoursKpi.unit}
           status={otHoursKpi.status}
+          unmeasurableReason={unmeasurableReason}
         />
         <KpiCard
           label={otCostKpi.label}
           value={otCostKpi.value}
           unit={otCostKpi.unit}
           status={otCostKpi.status}
+          unmeasurableReason={unmeasurableReason}
         />
         <KpiCard
           label={excCountKpi.label}
           value={excCountKpi.value}
           unit={excCountKpi.unit}
           status={excCountKpi.status}
+          unmeasurableReason={unmeasurableReason}
         />
       </div>
 

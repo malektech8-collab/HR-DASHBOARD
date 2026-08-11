@@ -16,6 +16,11 @@ router = APIRouter()
 
 @router.get("/summary", response_model=WorkforceSummaryResponse)
 def get_workforce_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), report_month: str = Depends(get_report_month), prov: Provenance = Depends(get_provenance)):
+    # Column mode: @suppressible does not run here, so the coverage of
+    # every domain this mart reads is noted explicitly. The KPI strip is
+    # the most-read surface and the one carrying the em dash, so it is
+    # the last place a coverage note should be missing.
+    prov.note_coverage("mart_workforce_kpis")
     try:
 
         res = conn.execute("SELECT * FROM mart_workforce_kpis").fetchone()
@@ -118,7 +123,8 @@ def get_workforce_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_conne
     return WorkforceSummaryResponse(
         report_month=report_month,
         kpis=kpis,
-        suppressed=prov.block()
+        suppressed=prov.block(),
+        coverage_notes=prov.coverage_block()
     )
 
 @router.get("/trends", response_model=WorkforceTrendsResponse)

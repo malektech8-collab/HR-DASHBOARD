@@ -32,6 +32,7 @@ import { KpiCard } from '../components/cards/KpiCard';
 import { ExceptionTable } from '../components/tables/ExceptionTable';
 import { Star, AlertTriangle } from 'lucide-react';
 import { NotProvided, collectSuppressions } from '../components/ui/NotProvided';
+import { CoverageNote, collectCoverage } from '../components/ui/CoverageNote';
 
 const CATEGORY_COLORS: Record<string, string> = {
   'Outstanding': '#10b981',
@@ -335,6 +336,8 @@ export const Talent: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Coverage: present but measured over less than the whole period. */}
+      <CoverageNote items={collectCoverage(byDepartment, byProject, competencyGaps, distribution, goals, learning, readiness, riskData, succession, summary, trends)} />
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>

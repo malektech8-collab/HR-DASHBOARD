@@ -15,6 +15,12 @@ interface KpiCardProps {
   trendValue?: number;
   trendDirection?: 'up' | 'down' | 'flat';
   status: 'healthy' | 'warning' | 'critical' | 'neutral';
+  /**
+   * Why the value is an em dash. "No days reported yet" is the answer to the
+   * question the dash raises, and without it the card is indistinguishable
+   * from a bug.
+   */
+  unmeasurableReason?: string;
 }
 
 export const KpiCard: React.FC<KpiCardProps> = ({
@@ -23,7 +29,8 @@ export const KpiCard: React.FC<KpiCardProps> = ({
   unit,
   trendValue,
   trendDirection,
-  status
+  status,
+  unmeasurableReason
 }) => {
   // Format the primary display value depending on the unit type
   let displayValue = '';
@@ -80,6 +87,11 @@ export const KpiCard: React.FC<KpiCardProps> = ({
         <span className="text-2xl font-bold tracking-tight text-foreground">{displayValue}</span>
         <span className="text-xs text-muted-foreground">{unit.toLowerCase() !== 'sar' && unit.toLowerCase() !== '%' ? unit : ''}</span>
       </div>
+
+      {/* An em dash without a reason is indistinguishable from a bug. */}
+      {(value === null || value === undefined) && unmeasurableReason && (
+        <p className="mt-1 text-xs text-muted-foreground">{unmeasurableReason}</p>
+      )}
 
       {/* Footer Trend Indicator Row */}
       <div className="mt-3 pt-2 border-t border-border/50 flex items-center justify-between text-xs">

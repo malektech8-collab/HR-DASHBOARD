@@ -23,6 +23,7 @@ import { ExceptionTable } from '../components/tables/ExceptionTable';
 import { Sparkles, ShieldAlert, TrendingUp, TrendingDown } from 'lucide-react';
 import { formatCurrency, formatPercent, formatNumber } from '../lib/formatters';
 import { NotProvided, collectSuppressions } from '../components/ui/NotProvided';
+import { CoverageNote, collectCoverage } from '../components/ui/CoverageNote';
 
 export const Payroll: React.FC = () => {
   const [summary, setSummary] = useState<PayrollSummaryData | null>(null);
@@ -415,6 +416,8 @@ export const Payroll: React.FC = () => {
 
   return (
     <div className="space-y-8 animate-fadeIn text-foreground">
+      {/* Coverage: present but measured over less than the whole period. */}
+      <CoverageNote items={collectCoverage(components, departments, projects, summary, trends, variance)} />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

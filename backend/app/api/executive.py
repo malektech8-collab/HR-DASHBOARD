@@ -11,6 +11,11 @@ router = APIRouter()
 
 @router.get("/summary", response_model=ExecutiveSummaryResponse)
 def get_executive_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
+    # Column mode: @suppressible does not run here, so the coverage of
+    # every domain this mart reads is noted explicitly. The KPI strip is
+    # the most-read surface and the one carrying the em dash, so it is
+    # the last place a coverage note should be missing.
+    prov.note_coverage("mart_exec_kpis")
     try:
 
         # Query mart_exec_kpis
@@ -137,5 +142,6 @@ def get_executive_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_conne
         last_refresh_at=last_refresh_str,
         kpis=kpis,
         charts=charts,
-        suppressed=prov.block()
+        suppressed=prov.block(),
+        coverage_notes=prov.coverage_block()
     )

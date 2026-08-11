@@ -26,6 +26,11 @@ router = APIRouter()
 
 @router.get("/summary", response_model=PayrollSummaryResponse)
 def get_payroll_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), report_month: str = Depends(get_report_month), prov: Provenance = Depends(get_provenance)):
+    # Column mode: @suppressible does not run here, so the coverage of
+    # every domain this mart reads is noted explicitly. The KPI strip is
+    # the most-read surface and the one carrying the em dash, so it is
+    # the last place a coverage note should be missing.
+    prov.note_coverage("mart_payroll_kpis")
     try:
 
         res = conn.execute("SELECT * FROM mart_payroll_kpis").fetchone()
@@ -150,7 +155,8 @@ def get_payroll_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connect
         report_month=report_month,
         kpis=kpis,
         reconciliation=reconciliation,
-        suppressed=prov.block()
+        suppressed=prov.block(),
+        coverage_notes=prov.coverage_block()
     )
 
 @router.get("/trends", response_model=PayrollTrendsResponse)
@@ -249,6 +255,11 @@ def get_payroll_components(conn: duckdb.DuckDBPyConnection = Depends(get_db_conn
 
 @router.get("/variance", response_model=PayrollVarianceResponse)
 def get_payroll_variance(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), prov: Provenance = Depends(get_provenance)):
+    # Column mode: @suppressible does not run here, so the coverage of
+    # every domain this mart reads is noted explicitly. The KPI strip is
+    # the most-read surface and the one carrying the em dash, so it is
+    # the last place a coverage note should be missing.
+    prov.note_coverage("mart_payroll_variance_components")
     try:
 
         # Two marts, suppressed independently.
@@ -291,7 +302,8 @@ def get_payroll_variance(conn: duckdb.DuckDBPyConnection = Depends(get_db_connec
             change_pct=row_dict["change_pct"]
         ))
 
-    return PayrollVarianceResponse(components=components, employees=employees, suppressed=prov.block())
+    return PayrollVarianceResponse(components=components, employees=employees, suppressed=prov.block(),
+        coverage_notes=prov.coverage_block())
 
 @router.get("/exceptions", response_model=PayrollExceptionsResponse)
 @suppressible(PayrollExceptionsResponse, "mart_payroll_exceptions")
