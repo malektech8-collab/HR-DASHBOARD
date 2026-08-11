@@ -22,7 +22,12 @@ export interface SuppressionItem {
 export interface KPIItem {
   key: string;
   label: string;
-  value: number;
+  /**
+   * Category F: null when the metric is genuinely UNMEASURABLE — the domain
+   * was provided, but not for the days it would need. Distinct from a
+   * suppressed card, which is absent from `kpis` and named in `suppressed`.
+   */
+  value: number | null;
   unit: string;
   trend_value?: number;
   trend_direction?: 'up' | 'down' | 'flat';
@@ -35,8 +40,8 @@ export interface ExecutiveSummaryData {
   kpis: KPIItem[] | null;
   charts: {
     months: string[];
-    headcount_trend: number[];
-    payroll_trend: number[];
+    headcount_trend: (number | null)[];
+    payroll_trend: (number | null)[];
   };
   suppressed?: SuppressionItem[];
 }
@@ -79,7 +84,8 @@ export interface WorkforceSummaryData {
 
 export interface WorkforceTrendsData {
   months: string[] | null;
-  headcount_trend: number[] | null;
+  /** Ruling 2: a point before the declared history depth is null, not derived. */
+  headcount_trend: (number | null)[] | null;
   suppressed?: SuppressionItem[];
 }
 
@@ -230,8 +236,8 @@ export interface AttendanceTrendsData {
 export interface AttendanceByProjectItem {
   project: string;
   headcount: number;
-  attendance_compliance_pct: number;
-  absence_days: number;
+  attendance_compliance_pct: number | null;
+  absence_days: number | null;
   late_minutes: number;
   missing_punches: number;
   overtime_hours: number;
@@ -246,8 +252,8 @@ export interface AttendanceByProjectData {
 export interface AttendanceByDepartmentItem {
   department: string;
   headcount: number;
-  attendance_compliance_pct: number;
-  absence_days: number;
+  attendance_compliance_pct: number | null;
+  absence_days: number | null;
   late_minutes: number;
   net_late_minutes: number;
   missing_punches: number;

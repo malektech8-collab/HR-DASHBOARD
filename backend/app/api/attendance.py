@@ -24,6 +24,11 @@ from app.api._provenance import Provenance, get_provenance, suppressible
 router = APIRouter()
 
 
+def _pct_or_none(value):
+    """Category F: a breakdown row's compliance can be NULL too."""
+    return None if value is None else round(value * 100, 2)
+
+
 @router.get("/summary", response_model=AttendanceSummaryResponse)
 def get_attendance_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), report_month: str = Depends(get_report_month), prov: Provenance = Depends(get_provenance)):
     try:
@@ -38,22 +43,28 @@ def get_attendance_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_conn
 
 
     # Determine status and trends
+    # Category F: NULL when no day in the period was reported on. Every
+    # expression below has to tolerate it - a metric that cannot be measured
+    # must not be turned into a number on the way out.
     compliance_pct = row_dict["attendance_compliance_pct"]
+
+    def _pct(value):
+        return None if value is None else round(value * 100, 2)
     
     kpis = prov.kpis("mart_attendance_kpis", [
         ("attendance_compliance_pct", lambda: KPIItem(
                 key="attendance_compliance_pct",
                 label="Attendance Compliance %",
-                value=round(compliance_pct * 100, 2),
+                value=_pct(compliance_pct),
                 unit="%",
-                status="healthy" if compliance_pct >= 0.95 else ("warning" if compliance_pct >= 0.90 else "critical")
+                status="neutral" if compliance_pct is None else ("healthy" if compliance_pct >= 0.95 else ("warning" if compliance_pct >= 0.90 else "critical"))
             )),
         ("absence_days", lambda: KPIItem(
                 key="absence_days",
                 label="Absence Days",
                 value=row_dict["absence_days"],
                 unit="days",
-                status="warning" if row_dict["absence_days"] > 5 else "healthy"
+                status="neutral" if row_dict["absence_days"] is None else ("warning" if row_dict["absence_days"] > 5 else "healthy")
             )),
         ("late_minutes", lambda: KPIItem(
                 key="late_minutes",
@@ -135,7 +146,7 @@ def get_attendance_trends(conn: duckdb.DuckDBPyConnection = Depends(get_db_conne
         row_dict = dict(zip(cols, row))
         trends.append(AttendanceTrendItem(
             month=row_dict["month"],
-            attendance_compliance_pct=round(row_dict["attendance_compliance_pct"] * 100, 2),
+            attendance_compliance_pct=_pct_or_none(row_dict["attendance_compliance_pct"]),
             absence_days=row_dict["absence_days"],
             late_minutes=row_dict["late_minutes"],
             net_late_minutes=row_dict["net_late_minutes"],
@@ -162,7 +173,7 @@ def get_attendance_by_project(conn: duckdb.DuckDBPyConnection = Depends(get_db_c
         projects.append(AttendanceByProjectItem(
             project=row_dict["project"],
             headcount=row_dict["headcount"],
-            attendance_compliance_pct=round(row_dict["attendance_compliance_pct"] * 100, 2),
+            attendance_compliance_pct=_pct_or_none(row_dict["attendance_compliance_pct"]),
             absence_days=row_dict["absence_days"],
             late_minutes=row_dict["late_minutes"],
             missing_punches=row_dict["missing_punches"],
@@ -189,7 +200,7 @@ def get_attendance_by_department(conn: duckdb.DuckDBPyConnection = Depends(get_d
         departments.append(AttendanceByDepartmentItem(
             department=row_dict["department"],
             headcount=row_dict["headcount"],
-            attendance_compliance_pct=round(row_dict["attendance_compliance_pct"] * 100, 2),
+            attendance_compliance_pct=_pct_or_none(row_dict["attendance_compliance_pct"]),
             absence_days=row_dict["absence_days"],
             late_minutes=row_dict["late_minutes"],
             net_late_minutes=row_dict["net_late_minutes"],

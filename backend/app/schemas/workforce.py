@@ -11,7 +11,9 @@ class WorkforceSummaryResponse(BaseModel):
 
 class WorkforceTrendsResponse(BaseModel):
     months: Optional[List[str]] = None
-    headcount_trend: Optional[List[int]] = None
+    # Ruling 2: a point before the declared history depth is null, so the chart
+    # shows a gap rather than a derived-but-understated headcount.
+    headcount_trend: Optional[List[Optional[int]]] = None
     # Withheld figures, named. Empty when nothing was suppressed.
     suppressed: List[SuppressionItem] = Field(default_factory=list)
 

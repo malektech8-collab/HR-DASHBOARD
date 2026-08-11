@@ -1,11 +1,22 @@
 {{ config(materialized='view') }}
 
 SELECT 
+        -- Category F. The denominator is MEASURED days, not every working day
+        -- in the period: COUNT(absence_days) skips the NULLs that
+        -- base_expected_attendance puts on days outside declared coverage.
+        -- Dividing by COUNT(*) would let unreported days inflate compliance,
+        -- so the figure would look best exactly when the data is thinnest.
+        --
+        -- No measured days at all is NULL, not 1.0. "100% compliant" over
+        -- nothing is the same fabricated-favourable value in a different place.
         CASE 
-            WHEN COUNT(*) = 0 THEN 1.0
-            ELSE 1.0 - (COUNT(CASE WHEN calculated_net_late_minutes > 0 OR missing_punch_count > 0 OR absence_days > 0 THEN 1 END) / CAST(COUNT(*) AS DOUBLE))
+            WHEN COUNT(absence_days) = 0 THEN NULL
+            ELSE 1.0 - (COUNT(CASE WHEN calculated_net_late_minutes > 0 OR missing_punch_count > 0 OR absence_days > 0 THEN 1 END) / CAST(COUNT(absence_days) AS DOUBLE))
         END AS attendance_compliance_pct,
-        COALESCE(SUM(absence_days), 0.0) AS absence_days,
+        -- NO COALESCE. SUM already skips the unreported days; wrapping it in
+        -- COALESCE(..., 0.0) would replace a fabricated 513 with a fabricated
+        -- 0 on a month nobody reported, which is the harder lie to spot.
+        SUM(absence_days) AS absence_days,
         COALESCE(SUM(calculated_late_minutes), 0) AS late_minutes,
         COALESCE(SUM(excused_late_minutes), 0) AS excused_late_minutes,
         COALESCE(SUM(calculated_net_late_minutes), 0) AS net_late_minutes,

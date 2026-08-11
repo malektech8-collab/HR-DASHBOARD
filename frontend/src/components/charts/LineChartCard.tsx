@@ -4,7 +4,12 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 export interface LineChartCardProps {
   title: string;
   xAxisData: string[];
-  seriesData: number[];
+  /**
+   * Category F: a null point is a month the client has not reported on.
+   * ECharts renders it as a GAP in the line, which is the correct picture —
+   * a line that stops, never one that dives to zero.
+   */
+  seriesData: (number | null)[];
   seriesName: string;
   color?: string; // Default: 'var(--primary)'
   valueFormatter?: (val: number) => string;

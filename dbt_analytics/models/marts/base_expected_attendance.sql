@@ -45,10 +45,33 @@ WITH calendar_dates AS (
         att.missing_punch_count,
         att.overtime_hours,
         att.overtime_approved,
-        CASE 
+        -- Category F. Inside declared coverage a missing row IS an absence,
+        -- and that inference is the whole point of the model. Outside it, a
+        -- missing row means the client has not sent us that day.
+        --
+        -- NULL, not 1.0 (a fabricated absence, and in KSA absence records feed
+        -- Article 80 dismissal grounds and payroll deduction) and not 0.0
+        -- either: 0.0 asserts the employee was PRESENT, it is silent where a
+        -- fabricated absence at least raises an exception, and it pushes
+        -- attendance_compliance_pct toward 100% exactly when the data is
+        -- thinnest. NULL says "not measured", and SUM/COUNT/AVG then skip it
+        -- without a single special case.
+        CASE
+            WHEN ed.calendar_date < DATE '{{ var('attendance_coverage_start') }}'
+              OR ed.calendar_date > DATE '{{ var('attendance_coverage_end') }}'
+                THEN NULL
             WHEN att.employee_id IS NULL THEN 1.0
             ELSE COALESCE(att.absence_days, 0.0)
-        END AS absence_days
+        END AS absence_days,
+        -- The row stays either way, so the gap is COUNTABLE. Narrowing the
+        -- calendar instead would show a shorter month with no indication that
+        -- anything was missing.
+        CASE
+            WHEN ed.calendar_date BETWEEN DATE '{{ var('attendance_coverage_start') }}'
+                                      AND DATE '{{ var('attendance_coverage_end') }}'
+                THEN 'covered'
+            ELSE 'not_reported'
+        END AS coverage_status
     FROM employee_dates ed
     LEFT JOIN {{ ref('base_attendance_current') }} att 
       ON ed.employee_id = att.employee_id 

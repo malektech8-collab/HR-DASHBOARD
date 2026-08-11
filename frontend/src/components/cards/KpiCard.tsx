@@ -4,7 +4,13 @@ import { formatNumber, formatCurrency, formatPercent } from '../../lib/formatter
 
 interface KpiCardProps {
   label: string;
-  value: number;
+  /**
+   * Category F: null when the metric is UNMEASURABLE — the domain was
+   * provided, but not for the days it needs. The card stays, showing an em
+   * dash, because the label is still true and the reader should see that the
+   * measure exists and has no answer yet. A zero here would be a measurement.
+   */
+  value: number | null;
   unit: string;
   trendValue?: number;
   trendDirection?: 'up' | 'down' | 'flat';
@@ -21,7 +27,9 @@ export const KpiCard: React.FC<KpiCardProps> = ({
 }) => {
   // Format the primary display value depending on the unit type
   let displayValue = '';
-  if (unit === 'SAR') {
+  if (value === null || value === undefined) {
+    displayValue = '—';
+  } else if (unit === 'SAR') {
     displayValue = formatCurrency(value);
   } else if (unit === '%') {
     displayValue = formatPercent(value);
