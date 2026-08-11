@@ -165,6 +165,17 @@ The 72-model sweep is the bulk of the diff and the least interesting part of it;
 >
 > Recorded here rather than in a commit message because a commit message is
 > not where a future contributor looks before adding a field.
+>
+> **Condition on the deferral, ruled 2026-08-11 at merge.** Deferring to three
+> holds ONLY because `test_no_response_model_has_a_field_shadowed_by_a_later_definition`
+> closes the failure mode that two parallel lists already produced: `coverage`
+> collided with `SuccessionCoverageResponse.coverage`, Python silently took the
+> later definition, and the whole suite stayed green. That guard is what makes
+> a second parallel list survivable.
+>
+> **If that guard is ever weakened or removed, the trigger moves to TWO** — the
+> envelope becomes owed immediately, because without the guard the next
+> collision is silent again.
 3. **Arabic numerals in the message.** The example above uses Arabic-Indic digits (٦, ٢٧). The rest of the product renders Western digits in Arabic text.
    > **SETTLED at execution:** Western digits inside Arabic text, everywhere. Matches every bilingual message step 2b and Category F already ship, and a test asserts no Arabic-Indic digit appears in a coverage message.
 
