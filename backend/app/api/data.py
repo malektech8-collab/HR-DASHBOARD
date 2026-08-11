@@ -237,27 +237,82 @@ def get_templates(
         })
     return templates
 
-@router.post("/upload")
-def upload_data_file(file: UploadFile = File(...)):
-    """
-    Upload a CSV or Parquet data file directly to the /app/data/silver/ directory.
-    """
-    filename = file.filename
-    if not filename:
-        raise HTTPException(status_code=400, detail="Invalid filename")
-        
-    # Standard file type validation (.csv or .parquet)
-    ext = os.path.splitext(filename)[1].lower()
-    if ext not in [".csv", ".parquet"]:
+# P0-2 step 1. Neither of these may be decided by the uploaded file.
+#
+# FORMAT. `.parquet` is refused. Not "never" - NOT YET, and the precondition is
+# named: parquet becomes acceptable once validate_csv's rule engine runs
+# against a polars FRAME, with the CSV reader as one adapter and a parquet
+# reader as another. One rule implementation, two readers. Accepting parquet
+# before that means a SECOND implementation of the contract rules, which is
+# exactly what produced the 17-table typing divergence between this path and
+# scripts/ingest_raw.py. Until then the branch it replaces was a
+# shutil.copyfileobj straight into silver: any file named *.parquet became a
+# domain's table, with no read at all.
+#
+# TABLE. The target domain is an explicit parameter checked against
+# data/contracts/. It used to be os.path.splitext(filename)[0], so
+# `payroll.csv` renamed `employees.csv` silently replaced the employee master,
+# and `employees (3).csv` created a table called `employees (3)`.
+ACCEPTED_UPLOAD_EXTENSIONS = {".csv"}
+
+PARQUET_REFUSAL = (
+    "Parquet uploads are not accepted yet. Contract validation reads CSV rows "
+    "and reports the row and column of each violation; accepting parquet "
+    "requires the same rules running against a dataframe, which is planned but "
+    "not built. Please upload the CSV export instead."
+)
+
+
+def _validated_table(table: Optional[str]) -> str:
+    """The target domain, from the request - never from the filename."""
+    cs = _canonical_schema()
+    known = cs.available_tables()
+    if not table:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Forbidden file type. Only .csv and .parquet files are allowed."
+            detail="A target table is required. It is no longer inferred from "
+                   "the filename. Choose one of: {}.".format(", ".join(known)),
         )
-        
-    # Prevent directory traversal
+    if table not in known:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unknown table '{}': no contract at "
+                   "data/contracts/{}_schema.yml. Choose one of: {}.".format(
+                       table, table, ", ".join(known)),
+        )
+    return table
+
+
+def _validated_extension(filename: Optional[str]) -> str:
+    if not filename:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+    ext = os.path.splitext(os.path.basename(filename))[1].lower()
+    if ext == ".parquet":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=PARQUET_REFUSAL)
+    if ext not in ACCEPTED_UPLOAD_EXTENSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Forbidden file type '{}'. Only {} is accepted.".format(
+                ext, ", ".join(sorted(ACCEPTED_UPLOAD_EXTENSIONS))),
+        )
+    return ext
+
+
+@router.post("/upload")
+def upload_data_file(
+    file: UploadFile = File(...),
+    table: Optional[str] = Query(None, description="Target contracted domain"),
+):
+    """
+    Upload a CSV data file directly to the /app/data/silver/ directory.
+    """
+    filename = file.filename
+    _validated_extension(filename)
+    table_name = _validated_table(table)
+    ext = ".csv"
+
     safe_filename = os.path.basename(filename)
-    table_name = os.path.splitext(safe_filename)[0].replace("_sample", "")
-    
     dest_dir = get_silver_dir()
     os.makedirs(dest_dir, exist_ok=True)
     
@@ -277,12 +332,9 @@ def upload_data_file(file: UploadFile = File(...)):
                 os.remove(temp_csv_path)
             
             dest_path = dest_parquet_path
-        else:
-            # Write parquet directly
-            dest_path = os.path.join(dest_dir, f"{table_name}.parquet")
-            with open(dest_path, "wb") as buffer:
-                shutil.copyfileobj(file.file, buffer)
-                
+        else:  # pragma: no cover - _validated_extension permits only .csv
+            raise HTTPException(status_code=400, detail=PARQUET_REFUSAL)
+
         # Generate .uploaded companion marker file
         marker_path = f"{dest_path}.uploaded"
         with open(marker_path, "w") as f:

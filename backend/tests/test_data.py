@@ -89,45 +89,40 @@ def test_templates_endpoints():
     assert client.get("/api/data/templates?name=not_a_domain").status_code == 404
     assert _yaml is not None
 
-def test_upload_endpoints_validation():
-    # 1. Forbidden file extension
-    files = {"file": ("test.txt", b"some plain text data", "text/plain")}
-    response = client.post("/api/data/upload", files=files)
-    assert response.status_code == 400
-    assert "Only .csv and .parquet files are allowed" in response.json()["detail"]
+def test_upload_refuses_what_the_filename_used_to_decide():
+    """P0-2 step 1. The uploaded file decides neither the format nor the table.
 
-    # 2. Path traversal attack protection
-    files = {"file": ("../../test.csv", b"employee_id,employee_name\nEMP999,Hacker", "text/csv")}
-    response = client.post("/api/data/upload", files=files)
-    assert response.status_code == 200
-    data = response.json()
-    assert data["filename"] == "test.parquet"
-    assert ".." not in data["destination_path"]
+    Before this, `table_name = os.path.splitext(filename)[0]`, so payroll.csv
+    renamed employees.csv replaced the employee master, and any file ending
+    .parquet was copied byte-for-byte into data/silver.
+    """
+    csv_bytes = b"employee_id,employee_name" + bytes([10]) + b"EMP999,Someone"
 
-def test_valid_csv_compilation():
-    # Upload a valid CSV and verify Polars compiles it to Parquet
-    csv_content = (
-        "employee_id,employee_name,nationality,is_saudi,joining_date,basic_salary,housing_allowance,transport_allowance\n"
-        "EMP001,Ahmad,Saudi,True,2024-01-15,12000,3000,1000\n"
-    )
-    files = {"file": ("test_employees.csv", csv_content.encode("utf-8"), "text/csv")}
-    response = client.post("/api/data/upload", files=files)
-    assert response.status_code == 200
-    data = response.json()
-    assert data["filename"] == "test_employees.parquet"
-    
-    # Check that Parquet file and companion marker .uploaded file were created
-    silver_dir = get_silver_dir()
-    pq_file = os.path.join(silver_dir, "test_employees.parquet")
-    marker_file = os.path.join(silver_dir, "test_employees.parquet.uploaded")
-    
-    assert os.path.exists(pq_file)
-    assert os.path.exists(marker_file)
-    
-    # Verify .uploaded marker contents
-    with open(marker_file, "r") as f:
-        content = f.read()
-        assert "Uploaded: test_employees.csv" in content
+    # 1. a table is required - it is no longer inferred from the filename
+    r = client.post("/api/data/upload",
+                    files={"file": ("employees.csv", csv_bytes, "text/csv")})
+    assert r.status_code == 400
+    assert "no longer inferred from the filename" in r.json()["detail"]
+
+    # 2. the table must be contracted
+    r = client.post("/api/data/upload?table=not_a_domain",
+                    files={"file": ("employees.csv", csv_bytes, "text/csv")})
+    assert r.status_code == 400
+    assert "no contract" in r.json()["detail"]
+
+    # 3. parquet is refused - NOT YET, with the precondition in the message
+    r = client.post("/api/data/upload?table=employees",
+                    files={"file": ("employees.parquet", b"PAR1", "application/octet-stream")})
+    assert r.status_code == 400
+    detail = r.json()["detail"]
+    assert "not accepted yet" in detail and "dataframe" in detail
+
+    # 4. anything else is still refused
+    r = client.post("/api/data/upload?table=employees",
+                    files={"file": ("test.txt", b"plain", "text/plain")})
+    assert r.status_code == 400
+    assert "Forbidden file type" in r.json()["detail"]
+
 
 def test_refresh_trigger():
     # Trigger pipeline refresh via subprocess
