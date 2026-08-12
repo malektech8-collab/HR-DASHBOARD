@@ -15,16 +15,20 @@ import {
   Download,
   UploadCloud,
   RefreshCw,
-  FileText,
   Terminal,
   CheckCircle2,
   XCircle,
   AlertCircle
 } from 'lucide-react';
-import { useTemplatesQuery, useUploadMutation, useRefreshMutation } from '../hooks/useDataManagement';
+import { useTemplatesQuery, useRefreshMutation } from '../hooks/useDataManagement';
 import { getTemplateDownloadUrl } from '../lib/api';
 
-export const DataQuality: React.FC = () => {
+interface DataQualityProps {
+  /** Uploading moved to Data Onboarding; the page links there. */
+  onNavigate?: (page: string) => void;
+}
+
+export const DataQuality: React.FC<DataQualityProps> = ({ onNavigate }) => {
   const [summary, setSummary] = useState<DataQualitySummaryData | null>(null);
   const [exceptions, setExceptions] = useState<DQExceptionItem[] | null>([]);
   const [loading, setLoading] = useState(true);
@@ -34,13 +38,9 @@ export const DataQuality: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'audit' | 'management'>('audit');
   
   // Data management states
-  const [selectedTarget, setSelectedTarget] = useState('employees');
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [dragActive, setDragActive] = useState(false);
 
   // TanStack Query hooks
   const { data: templates, isLoading: templatesLoading } = useTemplatesQuery();
-  const uploadMutation = useUploadMutation();
   const refreshMutation = useRefreshMutation();
 
   const loadData = async () => {
@@ -106,51 +106,6 @@ export const DataQuality: React.FC = () => {
     { label: 'Duplicate Employee ID', value: summary.duplicate_employee_count, icon: Copy, isCritical: true },
     { label: 'Invalid Payroll Record', value: summary.invalid_payroll_count, icon: Wallet, isCritical: true },
   ];
-
-  // Drag-and-drop file upload handlers
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0];
-      setSelectedFile(file);
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
-    }
-  };
-
-  const handleUploadSubmit = () => {
-    if (!selectedFile) return;
-    
-    // Rename/route file correctly to match the selected target name (e.g. employees.csv or employees.parquet)
-    const ext = selectedFile.name.split('.').pop() || '';
-    const renamedFile = new File(
-      [selectedFile], 
-      `${selectedTarget}.${ext}`, 
-      { type: selectedFile.type }
-    );
-
-    uploadMutation.mutate(renamedFile, {
-      onSuccess: () => {
-        setSelectedFile(null);
-      }
-    });
-  };
 
   const handleRefreshTrigger = () => {
     refreshMutation.mutate(undefined, {
@@ -308,108 +263,27 @@ export const DataQuality: React.FC = () => {
               )}
             </div>
 
-            {/* Local Upload File Routing Section */}
-            <div className="bg-card border border-border rounded-xl p-6 space-y-6">
+            {/* Upload moved to Data Onboarding (upload UI cycle).
+                What used to be here wrote a renamed file straight into
+                data/silver with no validation, no preview and no coverage
+                declaration - the P0-2 defect. Pointing at the real flow rather
+                than keeping a second one. */}
+            <div className="bg-card border border-border rounded-xl p-6 space-y-4">
               <div>
                 <h3 className="text-lg font-bold flex items-center gap-2">
-                  <UploadCloud className="w-5 h-5 text-primary" /> Local Data Upload Routing
+                  <UploadCloud className="w-5 h-5 text-primary" /> Uploading data
                 </h3>
-                <p className="text-xs text-muted-foreground mt-1">Upload `.csv` or `.parquet` files. CSV files will be compiled on disk to Parquet and routed directly to the Silver layer.</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Uploads now go through <span className="font-semibold text-foreground">Data Onboarding</span>,
+                  where the file is checked against its contract and previewed before anything is committed.
+                </p>
               </div>
-
-              {/* Target Selector */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase text-muted-foreground">Select Target Table</label>
-                <div className="flex flex-wrap gap-2">
-                  {["employees", "payroll", "attendance", "compliance", "employee_relations"].map((t) => (
-                    <button
-                      key={t}
-                      onClick={() => setSelectedTarget(t)}
-                      className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition ${
-                        selectedTarget === t
-                          ? "bg-primary text-primary-foreground border-primary"
-                          : "bg-muted text-muted-foreground border-border hover:text-foreground"
-                      }`}
-                    >
-                      {t.replace("_", " ")}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Dropzone area */}
-              <div
-                onDragEnter={handleDrag}
-                onDragOver={handleDrag}
-                onDragLeave={handleDrag}
-                onDrop={handleDrop}
-                className={`border-2 border-dashed rounded-xl p-8 text-center flex flex-col items-center justify-center gap-3 transition ${
-                  dragActive ? "border-primary bg-primary/5" : "border-border hover:bg-muted/30"
-                }`}
+              <button
+                onClick={() => onNavigate?.('onboarding')}
+                className="px-4 py-2 bg-primary text-primary-foreground text-xs font-semibold rounded-lg hover:opacity-90"
               >
-                <input
-                  type="file"
-                  id="file-upload-input"
-                  className="hidden"
-                  accept=".csv,.parquet"
-                  onChange={handleFileChange}
-                />
-                <UploadCloud className="w-10 h-10 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-semibold">Drag & drop your file here, or <label htmlFor="file-upload-input" className="text-primary hover:underline cursor-pointer">browse</label></p>
-                  <p className="text-[10px] text-muted-foreground mt-1">Supports only CSV and Parquet formats (.csv, .parquet)</p>
-                </div>
-              </div>
-
-              {/* Selected File Details */}
-              {selectedFile && (
-                <div className="bg-muted/40 border border-border p-4 rounded-lg flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <FileText className="w-8 h-8 text-primary" />
-                    <div>
-                      <p className="text-xs font-bold truncate max-w-[200px] md:max-w-md">{selectedFile.name}</p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">{(selectedFile.size / 1024).toFixed(1)} KB | Target: <span className="font-semibold text-primary capitalize">{selectedTarget.replace("_", " ")}</span></p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setSelectedFile(null)}
-                      className="px-3 py-1.5 border border-border text-xs font-semibold rounded-lg hover:bg-muted"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleUploadSubmit}
-                      disabled={uploadMutation.isPending}
-                      className="px-3 py-1.5 bg-primary text-primary-foreground text-xs font-semibold rounded-lg hover:opacity-90 disabled:opacity-50 flex items-center gap-1.5"
-                    >
-                      {uploadMutation.isPending && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
-                      Upload & Route
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Upload Status Alerts */}
-              {uploadMutation.isSuccess && (
-                <div className="bg-healthy/10 border border-healthy/30 text-healthy px-4 py-3 rounded-lg flex items-center gap-3 text-xs">
-                  <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-                  <div>
-                    <span className="font-bold">Upload Succeeded: </span>
-                    File compiled and safely written to silver storage mapping. Companion `.uploaded` marker generated.
-                  </div>
-                </div>
-              )}
-
-              {uploadMutation.isError && (
-                <div className="bg-critical/10 border border-critical/30 text-critical px-4 py-3 rounded-lg flex items-center gap-3 text-xs">
-                  <XCircle className="w-4 h-4 flex-shrink-0" />
-                  <div>
-                    <span className="font-bold">Upload Failed: </span>
-                    {uploadMutation.error.message || "Disk compilation or validation check failed."}
-                  </div>
-                </div>
-              )}
+                Go to Data Onboarding
+              </button>
             </div>
           </div>
 

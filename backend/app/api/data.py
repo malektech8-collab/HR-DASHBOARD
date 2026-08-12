@@ -11,6 +11,11 @@ from fastapi import (APIRouter, Body, Depends, File, HTTPException, Query,
 from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
 
+import duckdb
+
+from app.config import settings
+from app.db.duckdb_client import get_db_connection
+
 # P0-2 step 1c. Upload and refresh MUTATE client data and were reachable
 # unauthenticated, while /api/governance/* has required a token since it was
 # written. This makes the mutating data routes consistent with that; it does
@@ -315,6 +320,117 @@ def get_raw_dir() -> str:
                                          "../../../data/raw"))
     os.makedirs(local, exist_ok=True)
     return local
+
+
+class DomainStatus(BaseModel):
+    """One row of the onboarding checklist."""
+    domain: str
+    label_en: str
+    label_ar: str
+    kind: str                       # contracted | uncontracted
+    contracted: bool
+    declared: bool
+    provided: bool
+    row_count: int
+    coverage_start: Optional[str] = None
+    coverage_end: Optional[str] = None
+    covered_days: Optional[int] = None
+    expected_days: Optional[int] = None
+    history_since: Optional[str] = None
+    # `available` is FALSE for the uncontracted domains: they cannot be
+    # onboarded at all, which is different from merely not being uploaded yet.
+    # A client shown "missing" for a domain they cannot provide will keep
+    # trying.
+    available: bool = True
+    unavailable_reason: Optional[str] = None
+
+
+class OnboardingStatusResponse(BaseModel):
+    data_mode: str
+    report_month: Optional[str] = None
+    domains: List[DomainStatus]
+
+
+@router.get("/onboarding-status", response_model=OnboardingStatusResponse)
+def get_onboarding_status(
+    # current_user FIRST: FastAPI resolves dependencies in signature order, and
+    # authentication should be decided before the database is opened. With the
+    # other order, a missing warehouse turns an unauthenticated request into a
+    # 500 instead of a 401.
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    conn: duckdb.DuckDBPyConnection = Depends(get_db_connection),
+):
+    """Which domains are declared, which are populated, what is still missing.
+
+    A read of `domain_provenance`, which build_warehouse already writes. No new
+    computation - the facts existed and had nowhere to be seen.
+    """
+    cs = _canonical_schema()
+    contracted = set(cs.available_tables())
+
+    rows = {}
+    try:
+        for record in conn.execute(
+            "SELECT domain, kind, declared, row_count, provided, "
+            "coverage_start, coverage_end, history_since FROM domain_provenance"
+        ).fetchall():
+            rows[record[0]] = record
+    except Exception:
+        # An older warehouse, or one whose build aborted. Report nothing rather
+        # than inventing a state - the same default-deny step 2b applies.
+        rows = {}
+
+    coverage = {}
+    try:
+        record = conn.execute(
+            "SELECT covered_days, expected_days FROM mart_attendance_coverage"
+        ).fetchone()
+        if record:
+            coverage["attendance"] = record
+    except Exception:
+        pass
+
+    report_month = None
+    try:
+        record = conn.execute(
+            "SELECT report_month FROM base_command_center_report_context").fetchone()
+        report_month = record[0] if record else None
+    except Exception:
+        pass
+
+    domains = []
+    for domain in sorted(set(rows) | contracted):
+        record = rows.get(domain)
+        is_contracted = domain in contracted
+        spec = cs.describe(domain, "en") if is_contracted else None
+        spec_ar = cs.describe(domain, "ar") if is_contracted else None
+        days = coverage.get(domain)
+        domains.append(DomainStatus(
+            domain=domain,
+            label_en=spec["label"] if spec else domain.replace("_", " ").title(),
+            label_ar=spec_ar["label"] if spec_ar else domain,
+            kind=(record[1] if record else ("contracted" if is_contracted
+                                            else "uncontracted")),
+            contracted=is_contracted,
+            declared=bool(record[2]) if record else False,
+            provided=bool(record[4]) if record else False,
+            row_count=int(record[3]) if record else 0,
+            coverage_start=str(record[5]) if record and record[5] else None,
+            coverage_end=str(record[6]) if record and record[6] else None,
+            covered_days=days[0] if days else None,
+            expected_days=days[1] if days else None,
+            history_since=str(record[7]) if record and record[7] else None,
+            available=is_contracted,
+            unavailable_reason=None if is_contracted else (
+                "No contract yet, so this domain cannot be uploaded. It is "
+                "served from sample data in demo and never in real mode."),
+        ))
+
+    return OnboardingStatusResponse(
+        data_mode=str(settings.DATA_MODE or "demo").strip().lower(),
+        report_month=report_month,
+        domains=domains,
+    )
 
 
 @router.post("/uploads", response_model=StagedUpload)

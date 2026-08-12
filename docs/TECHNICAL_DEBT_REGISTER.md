@@ -82,11 +82,12 @@ Risk while open is low — collection is scoped by `pytest.ini` and the Gate 2 s
 
 ### TD-005 — `uploadFile()` in `api.ts` targets a removed endpoint
 
-- **Status**: OPEN — recorded 2026-08-12
+- **Status**: **CLOSED** — 2026-08-12, upload UI cycle
 - **Category**: Frontend
 - **Description**: `frontend/src/lib/api.ts` still POSTs to `/api/data/upload`, which P0-2 replaced with the staged flow (`/api/data/uploads`, `…/{id}`, `…/{id}/commit`).
 - **Impact**: None today — no page calls it, which is why P0-2 could redesign the endpoint freely. But it was previously dead and is now dead **and wrong**, so the first contributor to wire an upload UI from it would build against an endpoint that no longer exists.
 - **Remediation**: rewrite alongside the upload UI (P0-2 sequencing step 5). The client needs three calls, not one: stage, preview, commit — and the preview is the step that makes the flow worth having.
+- **Resolution**: replaced by `lib/uploads.ts` (`stageUpload` / `previewUpload` / `commitUpload` / `discardUpload`). Two structural tests hold it closed: no `uploadFile` symbol and no `/api/data/upload` literal anywhere in `frontend/src`. **A correction to the original entry**: it was not in fact unreachable — `useDataManagement.useUploadMutation` wired it into the Data Quality page's upload widget, which renamed the file client-side to force the target table and told the user the CSV would be "routed directly to the Silver layer". That widget is now a link to Data Onboarding.
 
 ### TD-006 — Synthetic JWT layer and plaintext password comparison
 
@@ -96,6 +97,23 @@ Risk while open is low — collection is scoped by `pytest.ini` and the Gate 2 s
 - **Impact**: P0-2 put `Depends(get_current_user)` on six data-mutating routes, so this layer is now the only thing standing between an anonymous request and a client's data. It was not load-bearing before; it is now.
 - **Deliberately out of scope of P0-2**: bundling a review of the auth implementation into a data-validation cycle would have made both harder to review, and the dependency is correct regardless of what sits behind it.
 - **Remediation**: real password hashing, a real user store, a reviewed token implementation, and a decision on whether commit requires a specific role (`RoleChecker` already exists and is used by `/api/governance/*`).
+
+### TD-007 — RTL / full Arabic localisation
+
+- **Status**: OPEN — recorded 2026-08-12, scheduled immediately after the upload UI
+- **Category**: Frontend / i18n
+- **Description**: Arabic is currently schema-derived only: column labels (`name_ar`), domain labels, and validator messages (`message_ar`). The chrome — navigation, headings, buttons, the onboarding step copy — is English, and the layout is LTR throughout.
+- **Why now**: the onboarding screen is where an Arabic-first HR user meets the product, and the violation list is the densest Arabic anywhere in it. Mixed Arabic/English in an LTR table renders legibly and not well: column alignment and punctuation both suffer. Keeping the worst of it in a downloadable CSV rather than on screen was a deliberate mitigation, not a fix.
+- **Remediation**: a locale switch, `dir="rtl"` on the document, mirrored layout, and translated chrome. Deliberately scheduled *after* this cycle so it is evaluated against real screens rather than designed in the abstract.
+
+### TD-008 — The template is 23 bare headers, not a template
+
+- **Status**: OPEN — recorded 2026-08-12
+- **Category**: Onboarding
+- **Description**: `GET /api/data/templates?name=` serves a header-only CSV generated from the contract. `PRODUCT-ARCHITECTURE.md` §4 specifies something quite different: *"a formatted Excel file per domain: correct headers, an instructions sheet in Arabic and English, dropdown validation on enum columns, and 2–3 example rows."*
+- **Impact**: this is the first artefact a non-technical HR user touches, and 23 bare column names in a CSV is not guidance. The upload UI makes the gap sharper rather than smaller — the flow now says "download the template, fill it, upload it", and the template does not carry enough to fill it correctly. Dropdown validation on enum columns would prevent the `allowed-values` rejections the UI now has to explain after the fact.
+- **Deliberately not folded into the upload UI cycle**: it is a generator (openpyxl or similar), a bilingual instructions sheet, and per-column dropdowns driven by `allowed_values` — a body of work in its own right, and one that touches the contract loader rather than the UI.
+- **Remediation**: its own cycle. The contract already carries everything needed (`name_en`, `name_ar`, `description_*`, `example`, `allowed_values`), which is the point of §4's "one definition generates all of".
 
 ## Exclusions
 

@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { getJson, login } from '../lib/http';
+
 export interface GovernanceStatusData {
   current_gate: string;
   current_status: string;
@@ -17,30 +19,14 @@ export interface GovernanceStatusData {
   milestone_3k_status: string;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-
-async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<any> {
-  const token = localStorage.getItem('auth_token');
-  const headers = new Headers(options.headers || {});
-  if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
-  }
-
-  const response = await fetch(url, { ...options, headers });
-  if (!response.ok) {
-    if (response.status === 401) {
-      localStorage.removeItem('auth_token');
-    }
-    const text = await response.text();
-    throw new Error(`Request failed with status ${response.status}: ${text}`);
-  }
-  return response.json();
-}
+// One HTTP client for the whole app: lib/http.ts. This file used to own
+// the only fetchWithAuth in the frontend while api.ts had none, which is
+// why P0-2's authenticated routes were unreachable from any page.
 
 export function useGovernanceStatus() {
   return useQuery<GovernanceStatusData>({
     queryKey: ['governanceStatus'],
-    queryFn: () => fetchWithAuth(`${API_BASE_URL}/api/governance/status`),
+    queryFn: () => getJson<GovernanceStatusData>('/api/governance/status'),
     retry: false,
   });
 }
@@ -49,25 +35,7 @@ export function useLoginMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ username, password }: Record<string, string>) => {
-      const params = new URLSearchParams();
-      params.append('username', username);
-      params.append('password', password);
-
-      const res = await fetch(`${API_BASE_URL}/api/governance/token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: params,
-      });
-
-      if (!res.ok) {
-        throw new Error('Authentication failed. Please verify credentials.');
-      }
-
-      const data = await res.json();
-      localStorage.setItem('auth_token', data.access_token);
-      return data;
+      await login(username, password);
     },
     onSuccess: () => {
       // Invalidate status query to fetch newly authorized state

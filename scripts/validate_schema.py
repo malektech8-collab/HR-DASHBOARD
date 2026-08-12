@@ -207,10 +207,10 @@ def validate_csv(csv_path, table, contracts_dir="data/contracts", today=None):
     if missing:
         v.append(Violation(
             "required-columns", table, None, SEVERITY_REJECT,
-            "[{}] {}: missing required column(s) {}. Rule: required-columns. "
-            "Expected columns: {}.".format(table, csv_path, missing, contract_names),
-            "[{}] {}: أعمدة مطلوبة مفقودة {}. القاعدة: الأعمدة المطلوبة.".format(
-                table, csv_path, missing),
+            "[{}] missing required column(s) {}. Rule: required-columns. "
+            "Expected columns: {}.".format(table, missing, contract_names),
+            "[{}] أعمدة مطلوبة مفقودة {}. القاعدة: الأعمدة المطلوبة.".format(
+                table, missing),
         ))
 
     # --- Rule 2: no unexpected columns (structural) -----------------------
@@ -218,11 +218,11 @@ def validate_csv(csv_path, table, contracts_dir="data/contracts", today=None):
     if unexpected:
         v.append(Violation(
             "no-unexpected-columns", table, None, SEVERITY_REJECT,
-            "[{}] {}: unexpected column(s) {} not in contract. "
+            "[{}] unexpected column(s) {} not in contract. "
             "Rule: no-unexpected-columns. Allowed columns: {}.".format(
-                table, csv_path, unexpected, contract_names),
-            "[{}] {}: أعمدة غير متوقعة {} ليست في العقد. "
-            "القاعدة: لا أعمدة غير متوقعة.".format(table, csv_path, unexpected),
+                table, unexpected, contract_names),
+            "[{}] أعمدة غير متوقعة {} ليست في العقد. "
+            "القاعدة: لا أعمدة غير متوقعة.".format(table, unexpected),
         ))
 
     # A structurally wrong file makes per-cell checks meaningless: the columns
@@ -246,9 +246,8 @@ def validate_csv(csv_path, table, contracts_dir="data/contracts", today=None):
                 rows = _rows_for(df.select(bad_mask.alias("m"))["m"].to_list())
                 v.append(Violation(
                     "type-conformance", table, name, SEVERITY_REJECT,
-                    "[{}] {}: column '{}' has {} value(s) that do not parse "
-                    "as {} (e.g. {!r}). Rule: type-conformance.".format(
-                        table, csv_path, name, bad, ctype, sample_bad),
+                    "{}: {} value(s) do not parse as {} (e.g. {!r}). "
+                    "Rule: type-conformance.".format(en, bad, ctype, sample_bad),
                     "الصف {}، {}: القيمة {!r} لا تطابق النوع {}.".format(
                         rows[0] if rows else "?", ar, sample_bad, ctype),
                     row=rows[0] if rows else None, value=sample_bad,
@@ -356,9 +355,13 @@ def validate_csv(csv_path, table, contracts_dir="data/contracts", today=None):
             if invalid:
                 v.append(Violation(
                     "allowed-values", table, name, sev,
-                    "[{}] {}: column '{}' has value(s) {} outside "
-                    "allowed_values {}. Rule: allowed-values.".format(
-                        table, csv_path, name, invalid, allowed),
+                    # No csv_path and no raw column name: this message is
+                    # client-facing now that the upload UI renders it and puts
+                    # it in a downloadable report. It used to embed the SERVER'S
+                    # ABSOLUTE PATH to the staged file, which is both a leak of
+                    # our filesystem layout and meaningless to the reader.
+                    "{}: value(s) {} are not allowed. Allowed values: {}. "
+                    "Rule: allowed-values.".format(en, invalid, allowed),
                     "{}: قيم غير مسموح بها {}. القيم المسموحة: {}.".format(
                         ar, invalid, allowed),
                     value=invalid[0] if invalid else None,
@@ -378,11 +381,10 @@ def validate_csv(csv_path, table, contracts_dir="data/contracts", today=None):
         if cond_col not in actual_set:
             v.append(Violation(
                 "required-when-condition-missing", table, name, SEVERITY_REJECT,
-                "[{}] {}: column '{}' is conditionally required on '{}', which "
-                "is not present in the file. Rule: required-when.".format(
-                    table, csv_path, name, cond_col),
-                "[{}] {}: العمود '{}' مطلوب شرطياً بناءً على '{}' غير الموجود "
-                "في الملف.".format(table, csv_path, name, cond_col),
+                "{}: conditionally required on '{}', which is not present in "
+                "the file. Rule: required-when.".format(en, cond_col),
+                "{}: مطلوب شرطياً بناءً على '{}' غير الموجود في الملف.".format(
+                    ar, cond_col),
             ))
             continue
         cond_en, cond_ar = _labels(by_name[cond_col])

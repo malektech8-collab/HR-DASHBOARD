@@ -15,6 +15,7 @@ const Compliance = lazy(() => import('./pages/Compliance').then(m => ({ default:
 const EmployeeRelations = lazy(() => import('./pages/EmployeeRelations').then(m => ({ default: m.EmployeeRelations })));
 const Recruitment = lazy(() => import('./pages/Recruitment').then(m => ({ default: m.Recruitment })));
 const Talent = lazy(() => import('./pages/Talent').then(m => ({ default: m.Talent })));
+const DataOnboarding = lazy(() => import('./pages/DataOnboarding').then(m => ({ default: m.DataOnboarding })));
 
 function App() {
   const [currentPage, setCurrentPage] = useState('command-center');
@@ -61,7 +62,9 @@ function App() {
       case 'talent':
         return <Talent />;
       case 'data-quality':
-        return <DataQuality />;
+        return <DataQuality onNavigate={setCurrentPage} />;
+      case 'onboarding':
+        return <DataOnboarding />;
       default:
         return <CommandCenter onNavigate={setCurrentPage} />;
     }
