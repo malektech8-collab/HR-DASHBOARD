@@ -7,6 +7,7 @@
  */
 import type {
   DomainStatus,
+  MappingSummary,
   OnboardingStatus,
   UploadPreview,
   Violation,
@@ -32,6 +33,27 @@ export function violationsInOneColumn(count: number, column = 'joining_date'): V
     aViolation({ row: i + 2, column }));
 }
 
+/** A profile that did its job: nothing outstanding. */
+export function aMapping(over: Partial<MappingSummary> = {}): MappingSummary {
+  return {
+    applied: true,
+    profile_version: 1,
+    renamed: { 'الرقم الوظيفي': 'employee_id' },
+    ignored: [],
+    unmapped: [],
+    derived: [],
+    unmapped_values: {},
+    reject_enum_options: {
+      status: ['Active', 'Inactive', 'Terminated', 'On Leave'],
+    },
+    reject_enum_consequences: {
+      status: 'Status decides who is counted as employed.',
+    },
+    header_changed: false,
+    ...over,
+  };
+}
+
 export function aPreview(over: Partial<UploadPreview> = {}): UploadPreview {
   return {
     upload: {
@@ -54,6 +76,7 @@ export function aPreview(over: Partial<UploadPreview> = {}): UploadPreview {
     suggested_coverage_end: null,
     coverage_required: false,
     history_required: false,
+    mapping: null,
     ...over,
   };
 }
