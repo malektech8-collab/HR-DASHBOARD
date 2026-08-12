@@ -1,4 +1,5 @@
 import csv
+import datetime
 import io
 import os
 import sys
@@ -295,6 +296,11 @@ class MappingOut(BaseModel):
     # options listed, never as a bare rejection.
     unmapped_values: Dict[str, List[str]] = {}
     reject_enum_options: Dict[str, List[str]] = {}
+    # What a value mapping into each gated column DECIDES, in the client's
+    # terms. An affirmation is worth nothing if it does not say what is being
+    # affirmed, so the consequence travels with the options rather than living
+    # in UI copy that can drift from the contract.
+    reject_enum_consequences: Dict[str, str] = {}
     header_changed: bool = False
 
 
@@ -559,6 +565,10 @@ def preview_upload(upload_id: str,
             unmapped_values={k: sorted(v)
                              for k, v in mapping_report.unmapped_values.items()},
             reject_enum_options=mapping_module.reject_enum_columns(table),
+            reject_enum_consequences={
+                col: mapping_module.consequence(table, col)
+                for col in mapping_module.reject_enum_columns(table)
+                if mapping_module.consequence(table, col)},
             header_changed=(
                 bool(profile.get("source_fingerprint"))
                 and profile.get("source_fingerprint") != fingerprint),
@@ -593,6 +603,209 @@ def preview_upload(upload_id: str,
         history_required=table in onboarding.HISTORY_DECLARING,
         mapping=mapping_out,
     )
+
+
+# --------------------------------------------------------------------------
+# mapping - the screen's two routes
+# --------------------------------------------------------------------------
+
+# Five is enough to settle a header and few enough that the response stays a
+# glance rather than a data dump.
+MAX_SAMPLES = 5
+
+
+class MappingCandidate(BaseModel):
+    canonical: str
+    matched_by: str
+    confidence: Optional[float] = None
+
+
+class CanonicalColumn(BaseModel):
+    name: str
+    label_en: str
+    label_ar: str
+    required: bool
+    allowed_values: Optional[List[str]] = None
+
+
+class SourceColumn(BaseModel):
+    header: str
+    # THE CLIENT'S OWN VALUES. Read from the staged file at request time and
+    # returned for display only. They are never written to the profile, the
+    # manifest or a log: a profile accumulates as training substrate and
+    # outlives the upload, which is the whole reason for the PII rule in
+    # scripts/mapping.py. Showing someone their own file in their own session
+    # is a different act from keeping it.
+    samples: List[str] = []
+    non_empty: int = 0
+    candidates: List[MappingCandidate] = []
+    current: Optional[str] = None
+    decision: str = "undecided"
+
+
+class MappingWorkspace(BaseModel):
+    """Everything the mapping screen needs, in one request."""
+    upload_id: str
+    table: str
+    row_count: int
+    source_columns: List[SourceColumn]
+    canonical_columns: List[CanonicalColumn]
+    reject_enum_options: Dict[str, List[str]] = {}
+    reject_enum_consequences: Dict[str, str] = {}
+    derivation_rules: List[str] = []
+    profile_version: Optional[int] = None
+
+
+class MappingDecisionIn(BaseModel):
+    header: str
+    decision: str = "undecided"
+    chosen: Optional[str] = None
+    reason: Optional[str] = None
+
+
+class SaveMappingRequest(BaseModel):
+    upload_id: str
+    decisions: List[MappingDecisionIn] = []
+    values: Dict[str, Dict[str, str]] = {}
+    derive: Dict[str, Dict[str, str]] = {}
+    # column -> {client value: canonical value}, restated by the human as the
+    # affirmation. `confirmed_by` is taken from the session, never from the
+    # body - a signature the caller supplies for itself is not one.
+    confirmations: Dict[str, Dict[str, str]] = {}
+
+
+class SavedMapping(BaseModel):
+    table: str
+    version: int
+    created_by: str
+    created_at: str
+    mapped: int
+    ignored: int
+    undecided: int
+
+
+def _derivation_rules():
+    scripts_dir = get_scripts_dir()
+    if scripts_dir not in sys.path:
+        sys.path.insert(0, scripts_dir)
+    import derivations
+    return sorted(derivations.REGISTRY)
+
+
+@router.get("/uploads/{upload_id}/columns", response_model=MappingWorkspace)
+def mapping_workspace(upload_id: str,
+                      current_user: Dict[str, Any] = Depends(get_current_user)):
+    """The client's own columns, with sample values, ranked candidates and the
+    canonical targets to choose from.
+
+    A separate route rather than a wider preview response, deliberately: this
+    is the one endpoint whose PURPOSE is to return client data, and it should
+    be reviewable as such instead of hidden inside a response everything calls.
+    """
+    staging, _vs, _onb = _scripts()
+    mapping_module = _mapping()
+    cs = _canonical_schema()
+    try:
+        manifest = staging.load(upload_id)
+    except Exception:
+        raise HTTPException(status_code=404, detail="No such upload.")
+    table = manifest["table"]
+    frame = pl.read_csv(staging.data_path(upload_id), null_values=[""])
+
+    profile = mapping_module.load_profile(table) or {}
+    mapped = {mapping_module.normalise(k): v
+              for k, v in (profile.get("columns") or {}).items()}
+    ignored = {mapping_module.normalise(
+        e["header"] if isinstance(e, dict) else e)
+        for e in (profile.get("ignored") or [])}
+    ranked = mapping_module.suggest(table, list(frame.columns))
+
+    source_columns = []
+    for header in frame.columns:
+        values = [str(v) for v in frame[header].to_list() if v not in (None, "")]
+        key = mapping_module.normalise(header)
+        current = mapped.get(key)
+        source_columns.append(SourceColumn(
+            header=header,
+            samples=sorted(set(values))[:MAX_SAMPLES],
+            non_empty=len(values),
+            candidates=[MappingCandidate(**c) for c in ranked.get(header, [])],
+            current=current,
+            decision=("mapped" if current else
+                      ("ignored" if key in ignored else "undecided")),
+        ))
+
+    return MappingWorkspace(
+        upload_id=upload_id,
+        table=table,
+        row_count=frame.height,
+        source_columns=source_columns,
+        canonical_columns=[
+            CanonicalColumn(
+                name=c["name"],
+                label_en=c.get("name_en") or c["name"],
+                label_ar=c.get("name_ar") or c["name"],
+                required=bool(c.get("required")),
+                allowed_values=c.get("allowed_values"))
+            for c in cs.columns(table)],
+        reject_enum_options=mapping_module.reject_enum_columns(table),
+        reject_enum_consequences={
+            col: mapping_module.consequence(table, col)
+            for col in mapping_module.reject_enum_columns(table)
+            if mapping_module.consequence(table, col)},
+        derivation_rules=_derivation_rules(),
+        profile_version=profile.get("version"),
+    )
+
+
+@router.post("/mapping/{table}", response_model=SavedMapping)
+def save_mapping(table: str, body: SaveMappingRequest = Body(...),
+                 current_user: Dict[str, Any] = Depends(get_current_user)):
+    """Append a profile version from the screen's decisions.
+
+    The version is built by `mapping.build_version`, which computes evidence,
+    matched_by, confidence and the rejected candidates from the staged frame.
+    Nothing about provenance comes from the request body, because a caller that
+    can assert its own provenance is not recording any.
+    """
+    table_name = _validated_table(table)
+    staging, _vs, _onb = _scripts()
+    mapping_module = _mapping()
+    try:
+        manifest = staging.load(body.upload_id)
+    except Exception:
+        raise HTTPException(status_code=404, detail="No such upload.")
+    if manifest["table"] != table_name:
+        raise HTTPException(
+            status_code=400,
+            detail="That upload is a {} file, not {}.".format(
+                manifest["table"], table_name))
+
+    frame = pl.read_csv(staging.data_path(body.upload_id), null_values=[""])
+    who = current_user.get("email") or current_user.get("username") or ""
+    stamp = datetime.datetime.now().isoformat(timespec="seconds")
+    confirmations = {
+        column: {"confirmed_by": who, "confirmed_at": stamp,
+                 "pairs": dict(pairs)}
+        for column, pairs in (body.confirmations or {}).items()}
+
+    version = mapping_module.build_version(
+        table_name, frame,
+        {d.header: {"decision": d.decision, "chosen": d.chosen,
+                    "reason": d.reason} for d in body.decisions},
+        created_by=who,
+        values=body.values, derive=body.derive, confirmations=confirmations)
+    try:
+        saved = mapping_module.save_version(table_name, version)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    undecided = sum(1 for e in saved["evidence"] if e["decision"] == "undecided")
+    return SavedMapping(
+        table=table_name, version=saved["version"],
+        created_by=saved["created_by"], created_at=saved["created_at"],
+        mapped=len(saved.get("columns") or {}),
+        ignored=len(saved.get("ignored") or []), undecided=undecided)
 
 
 @router.delete("/uploads/{upload_id}")
