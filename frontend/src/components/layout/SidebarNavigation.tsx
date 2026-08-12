@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  UploadCloud,
   LayoutDashboard,
   Users,
   CreditCard,
@@ -36,6 +37,7 @@ export const SidebarNavigation: React.FC<SidebarProps> = ({ currentPage, onPageC
     { id: 'recruitment', label: 'Recruitment & Hiring', icon: UserPlus },
     { id: 'talent', label: 'Talent & Succession', icon: Star },
     { id: 'data-quality', label: 'Data Quality', icon: AlertTriangle },
+    { id: 'onboarding', label: 'Data Onboarding', icon: UploadCloud },
   ];
 
   return (

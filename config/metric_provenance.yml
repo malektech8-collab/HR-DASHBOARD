@@ -240,6 +240,10 @@ marts:
     mode: payload
     domains: []   # period metadata only - no client measures, so never suppressed
 
+  domain_provenance:
+    mode: payload
+    domains: []   # the onboarding checklist itself - it REPORTS provenance rather than carrying a client measure, so suppressing it would hide the screen that explains the suppression
+
   mart_attendance_coverage:
     mode: payload
     domains: [attendance]

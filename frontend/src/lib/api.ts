@@ -51,420 +51,342 @@ import type {
   QaIndexResponse
 } from './types';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// Every call goes through lib/http.ts, which attaches the auth token. Before
+// that existed this file had 77 fetch sites and none of them sent one, so the
+// six routes P0-2 protected were unreachable from the frontend.
+import { API_BASE_URL, getJson, postJson } from './http';
 
-async function handleResponse<T>(response: Response): Promise<T> {
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(text || `API error: ${response.status} ${response.statusText}`);
-  }
-  return response.json() as Promise<T>;
-}
+export { API_BASE_URL };
 
 export async function fetchRefreshStatus(): Promise<RefreshStatus> {
-  const res = await fetch(`${API_BASE_URL}/api/meta/refresh-status`);
-  return handleResponse<RefreshStatus>(res);
+  return getJson<RefreshStatus>('/api/meta/refresh-status');
 }
 
 export async function fetchExecutiveSummary(): Promise<ExecutiveSummaryData> {
-  const res = await fetch(`${API_BASE_URL}/api/executive/summary`);
-  return handleResponse<ExecutiveSummaryData>(res);
+  return getJson<ExecutiveSummaryData>('/api/executive/summary');
 }
 
 export async function fetchDataQualitySummary(): Promise<DataQualitySummaryData> {
-  const res = await fetch(`${API_BASE_URL}/api/data-quality/summary`);
-  return handleResponse<DataQualitySummaryData>(res);
+  return getJson<DataQualitySummaryData>('/api/data-quality/summary');
 }
 
 export async function fetchDataQualityExceptions(): Promise<DQExceptionsData> {
-  const res = await fetch(`${API_BASE_URL}/api/data-quality/exceptions`);
-  return handleResponse<DQExceptionsData>(res);
+  return getJson<DQExceptionsData>('/api/data-quality/exceptions');
 }
 
 // Workforce API endpoints
 export async function fetchWorkforceSummary(): Promise<WorkforceSummaryData> {
-  const res = await fetch(`${API_BASE_URL}/api/workforce/summary`);
-  return handleResponse<WorkforceSummaryData>(res);
+  return getJson<WorkforceSummaryData>('/api/workforce/summary');
 }
 
 export async function fetchWorkforceTrends(): Promise<WorkforceTrendsData> {
-  const res = await fetch(`${API_BASE_URL}/api/workforce/trends`);
-  return handleResponse<WorkforceTrendsData>(res);
+  return getJson<WorkforceTrendsData>('/api/workforce/trends');
 }
 
 export async function fetchWorkforceDistribution(): Promise<WorkforceDistributionData> {
-  const res = await fetch(`${API_BASE_URL}/api/workforce/distribution`);
-  return handleResponse<WorkforceDistributionData>(res);
+  return getJson<WorkforceDistributionData>('/api/workforce/distribution');
 }
 
 export async function fetchWorkforceContractExpiry(): Promise<ExpiryAgingData> {
-  const res = await fetch(`${API_BASE_URL}/api/workforce/contract-expiry`);
-  return handleResponse<ExpiryAgingData>(res);
+  return getJson<ExpiryAgingData>('/api/workforce/contract-expiry');
 }
 
 export async function fetchWorkforceIqamaExpiry(): Promise<ExpiryAgingData> {
-  const res = await fetch(`${API_BASE_URL}/api/workforce/iqama-expiry`);
-  return handleResponse<ExpiryAgingData>(res);
+  return getJson<ExpiryAgingData>('/api/workforce/iqama-expiry');
 }
 
 export async function fetchWorkforceExceptions(): Promise<DQExceptionsData> {
-  const res = await fetch(`${API_BASE_URL}/api/workforce/exceptions`);
-  return handleResponse<DQExceptionsData>(res);
+  return getJson<DQExceptionsData>('/api/workforce/exceptions');
 }
 
 // Payroll API endpoints
 export async function fetchPayrollSummary(): Promise<PayrollSummaryData> {
-  const res = await fetch(`${API_BASE_URL}/api/payroll/summary`);
-  return handleResponse<PayrollSummaryData>(res);
+  return getJson<PayrollSummaryData>('/api/payroll/summary');
 }
 
 export async function fetchPayrollTrends(): Promise<PayrollTrendsData> {
-  const res = await fetch(`${API_BASE_URL}/api/payroll/trends`);
-  return handleResponse<PayrollTrendsData>(res);
+  return getJson<PayrollTrendsData>('/api/payroll/trends');
 }
 
 export async function fetchPayrollByProject(): Promise<PayrollByProjectData> {
-  const res = await fetch(`${API_BASE_URL}/api/payroll/by-project`);
-  return handleResponse<PayrollByProjectData>(res);
+  return getJson<PayrollByProjectData>('/api/payroll/by-project');
 }
 
 export async function fetchPayrollByDepartment(): Promise<PayrollByDepartmentData> {
-  const res = await fetch(`${API_BASE_URL}/api/payroll/by-department`);
-  return handleResponse<PayrollByDepartmentData>(res);
+  return getJson<PayrollByDepartmentData>('/api/payroll/by-department');
 }
 
 export async function fetchPayrollComponents(): Promise<PayrollComponentsData> {
-  const res = await fetch(`${API_BASE_URL}/api/payroll/components`);
-  return handleResponse<PayrollComponentsData>(res);
+  return getJson<PayrollComponentsData>('/api/payroll/components');
 }
 
 export async function fetchPayrollVariance(): Promise<PayrollVarianceData> {
-  const res = await fetch(`${API_BASE_URL}/api/payroll/variance`);
-  return handleResponse<PayrollVarianceData>(res);
+  return getJson<PayrollVarianceData>('/api/payroll/variance');
 }
 
 export async function fetchPayrollExceptions(): Promise<PayrollExceptionsData> {
-  const res = await fetch(`${API_BASE_URL}/api/payroll/exceptions`);
-  return handleResponse<PayrollExceptionsData>(res);
+  return getJson<PayrollExceptionsData>('/api/payroll/exceptions');
 }
 
 // Attendance API endpoints
 export async function fetchAttendanceSummary(): Promise<AttendanceSummaryData> {
-  const res = await fetch(`${API_BASE_URL}/api/attendance/summary`);
-  return handleResponse<AttendanceSummaryData>(res);
+  return getJson<AttendanceSummaryData>('/api/attendance/summary');
 }
 
 export async function fetchAttendanceTrends(): Promise<AttendanceTrendsData> {
-  const res = await fetch(`${API_BASE_URL}/api/attendance/trends`);
-  return handleResponse<AttendanceTrendsData>(res);
+  return getJson<AttendanceTrendsData>('/api/attendance/trends');
 }
 
 export async function fetchAttendanceByProject(): Promise<AttendanceByProjectData> {
-  const res = await fetch(`${API_BASE_URL}/api/attendance/by-project`);
-  return handleResponse<AttendanceByProjectData>(res);
+  return getJson<AttendanceByProjectData>('/api/attendance/by-project');
 }
 
 export async function fetchAttendanceByDepartment(): Promise<AttendanceByDepartmentData> {
-  const res = await fetch(`${API_BASE_URL}/api/attendance/by-department`);
-  return handleResponse<AttendanceByDepartmentData>(res);
+  return getJson<AttendanceByDepartmentData>('/api/attendance/by-department');
 }
 
 export async function fetchAttendanceLateArrival(): Promise<AttendanceLateArrivalData> {
-  const res = await fetch(`${API_BASE_URL}/api/attendance/late-arrival`);
-  return handleResponse<AttendanceLateArrivalData>(res);
+  return getJson<AttendanceLateArrivalData>('/api/attendance/late-arrival');
 }
 
 export async function fetchAttendanceOvertime(): Promise<AttendanceOvertimeData> {
-  const res = await fetch(`${API_BASE_URL}/api/attendance/overtime`);
-  return handleResponse<AttendanceOvertimeData>(res);
+  return getJson<AttendanceOvertimeData>('/api/attendance/overtime');
 }
 
 export async function fetchAttendanceMissingPunches(): Promise<AttendanceMissingPunchesData> {
-  const res = await fetch(`${API_BASE_URL}/api/attendance/missing-punches`);
-  return handleResponse<AttendanceMissingPunchesData>(res);
+  return getJson<AttendanceMissingPunchesData>('/api/attendance/missing-punches');
 }
 
 export async function fetchAttendanceExceptions(): Promise<AttendanceExceptionsData> {
-  const res = await fetch(`${API_BASE_URL}/api/attendance/exceptions`);
-  return handleResponse<AttendanceExceptionsData>(res);
+  return getJson<AttendanceExceptionsData>('/api/attendance/exceptions');
 }
 
 // Compliance API endpoints
 export async function fetchComplianceSummary(): Promise<ComplianceSummaryData> {
-  const res = await fetch(`${API_BASE_URL}/api/compliance/summary`);
-  return handleResponse<ComplianceSummaryData>(res);
+  return getJson<ComplianceSummaryData>('/api/compliance/summary');
 }
 
 export async function fetchSaudizationSummary(): Promise<SaudizationSummaryData> {
-  const res = await fetch(`${API_BASE_URL}/api/compliance/saudization`);
-  return handleResponse<SaudizationSummaryData>(res);
+  return getJson<SaudizationSummaryData>('/api/compliance/saudization');
 }
 
 export async function fetchSaudizationByProject(): Promise<SaudizationByProjectData> {
-  const res = await fetch(`${API_BASE_URL}/api/compliance/saudization-by-project`);
-  return handleResponse<SaudizationByProjectData>(res);
+  return getJson<SaudizationByProjectData>('/api/compliance/saudization-by-project');
 }
 
 export async function fetchSaudizationByDepartment(): Promise<SaudizationByDepartmentData> {
-  const res = await fetch(`${API_BASE_URL}/api/compliance/saudization-by-department`);
-  return handleResponse<SaudizationByDepartmentData>(res);
+  return getJson<SaudizationByDepartmentData>('/api/compliance/saudization-by-department');
 }
 
 export async function fetchDocumentExpiry(): Promise<DocumentExpiryData> {
-  const res = await fetch(`${API_BASE_URL}/api/compliance/document-expiry`);
-  return handleResponse<DocumentExpiryData>(res);
+  return getJson<DocumentExpiryData>('/api/compliance/document-expiry');
 }
 
 export async function fetchGosiStatus(): Promise<GosiStatusData> {
-  const res = await fetch(`${API_BASE_URL}/api/compliance/gosi`);
-  return handleResponse<GosiStatusData>(res);
+  return getJson<GosiStatusData>('/api/compliance/gosi');
 }
 
 export async function fetchWpsStatus(): Promise<WpsStatusData> {
-  const res = await fetch(`${API_BASE_URL}/api/compliance/wps`);
-  return handleResponse<WpsStatusData>(res);
+  return getJson<WpsStatusData>('/api/compliance/wps');
 }
 
 export async function fetchComplianceExceptions(): Promise<ComplianceExceptionsData> {
-  const res = await fetch(`${API_BASE_URL}/api/compliance/exceptions`);
-  return handleResponse<ComplianceExceptionsData>(res);
+  return getJson<ComplianceExceptionsData>('/api/compliance/exceptions');
 }
 
 // Employee Relations API endpoints
 export async function fetchErSummary(): Promise<ErSummaryData> {
-  const res = await fetch(`${API_BASE_URL}/api/er/summary`);
-  return handleResponse<ErSummaryData>(res);
+  return getJson<ErSummaryData>('/api/er/summary');
 }
 
 export async function fetchErTrends(): Promise<ErTrendsData> {
-  const res = await fetch(`${API_BASE_URL}/api/er/trends`);
-  return handleResponse<ErTrendsData>(res);
+  return getJson<ErTrendsData>('/api/er/trends');
 }
 
 export async function fetchErByProject(): Promise<ErCasesByProjectData> {
-  const res = await fetch(`${API_BASE_URL}/api/er/by-project`);
-  return handleResponse<ErCasesByProjectData>(res);
+  return getJson<ErCasesByProjectData>('/api/er/by-project');
 }
 
 export async function fetchErByDepartment(): Promise<ErCasesByDepartmentData> {
-  const res = await fetch(`${API_BASE_URL}/api/er/by-department`);
-  return handleResponse<ErCasesByDepartmentData>(res);
+  return getJson<ErCasesByDepartmentData>('/api/er/by-department');
 }
 
 export async function fetchErCaseTypes(): Promise<ErCaseTypeData> {
-  const res = await fetch(`${API_BASE_URL}/api/er/case-types`);
-  return handleResponse<ErCaseTypeData>(res);
+  return getJson<ErCaseTypeData>('/api/er/case-types');
 }
 
 export async function fetchErStatus(): Promise<ErCaseStatusData> {
-  const res = await fetch(`${API_BASE_URL}/api/er/status`);
-  return handleResponse<ErCaseStatusData>(res);
+  return getJson<ErCaseStatusData>('/api/er/status');
 }
 
 export async function fetchErSla(): Promise<ErSlaPerformanceData> {
-  const res = await fetch(`${API_BASE_URL}/api/er/sla`);
-  return handleResponse<ErSlaPerformanceData>(res);
+  return getJson<ErSlaPerformanceData>('/api/er/sla');
 }
 
 export async function fetchErAging(): Promise<ErAgingBucketData> {
-  const res = await fetch(`${API_BASE_URL}/api/er/aging`);
-  return handleResponse<ErAgingBucketData>(res);
+  return getJson<ErAgingBucketData>('/api/er/aging');
 }
 
 export async function fetchErExceptions(): Promise<ErExceptionsData> {
-  const res = await fetch(`${API_BASE_URL}/api/er/exceptions`);
-  return handleResponse<ErExceptionsData>(res);
+  return getJson<ErExceptionsData>('/api/er/exceptions');
 }
 
 // Recruitment API endpoints
 export async function fetchRecruitmentSummary(): Promise<RecruitmentSummaryData> {
-  const res = await fetch(`${API_BASE_URL}/api/recruitment/summary`);
-  return handleResponse<RecruitmentSummaryData>(res);
+  return getJson<RecruitmentSummaryData>('/api/recruitment/summary');
 }
 
 export async function fetchRecruitmentPipeline(): Promise<RecruitmentPipelineData> {
-  const res = await fetch(`${API_BASE_URL}/api/recruitment/pipeline`);
-  return handleResponse<RecruitmentPipelineData>(res);
+  return getJson<RecruitmentPipelineData>('/api/recruitment/pipeline');
 }
 
 export async function fetchRecruitmentTrends(): Promise<RecruitmentTrendsData> {
-  const res = await fetch(`${API_BASE_URL}/api/recruitment/trends`);
-  return handleResponse<RecruitmentTrendsData>(res);
+  return getJson<RecruitmentTrendsData>('/api/recruitment/trends');
 }
 
 export async function fetchRecruitmentByProject(): Promise<RecruitmentByProjectData> {
-  const res = await fetch(`${API_BASE_URL}/api/recruitment/by-project`);
-  return handleResponse<RecruitmentByProjectData>(res);
+  return getJson<RecruitmentByProjectData>('/api/recruitment/by-project');
 }
 
 export async function fetchRecruitmentByDepartment(): Promise<RecruitmentByDepartmentData> {
-  const res = await fetch(`${API_BASE_URL}/api/recruitment/by-department`);
-  return handleResponse<RecruitmentByDepartmentData>(res);
+  return getJson<RecruitmentByDepartmentData>('/api/recruitment/by-department');
 }
 
 export async function fetchTimeToFill(): Promise<TimeToFillData> {
-  const res = await fetch(`${API_BASE_URL}/api/recruitment/time-to-fill`);
-  return handleResponse<TimeToFillData>(res);
+  return getJson<TimeToFillData>('/api/recruitment/time-to-fill');
 }
 
 export async function fetchSourceEffectiveness(): Promise<SourceEffectivenessData> {
-  const res = await fetch(`${API_BASE_URL}/api/recruitment/source-effectiveness`);
-  return handleResponse<SourceEffectivenessData>(res);
+  return getJson<SourceEffectivenessData>('/api/recruitment/source-effectiveness');
 }
 
 export async function fetchOfferAcceptance(): Promise<OfferAcceptanceData> {
-  const res = await fetch(`${API_BASE_URL}/api/recruitment/offers`);
-  return handleResponse<OfferAcceptanceData>(res);
+  return getJson<OfferAcceptanceData>('/api/recruitment/offers');
 }
 
 export async function fetchOnboardingStatus(): Promise<OnboardingStatusData> {
-  const res = await fetch(`${API_BASE_URL}/api/recruitment/onboarding`);
-  return handleResponse<OnboardingStatusData>(res);
+  return getJson<OnboardingStatusData>('/api/recruitment/onboarding');
 }
 
 export async function fetchWorkforcePlanVsActual(): Promise<WorkforcePlanVsActualData> {
-  const res = await fetch(`${API_BASE_URL}/api/recruitment/workforce-plan`);
-  return handleResponse<WorkforcePlanVsActualData>(res);
+  return getJson<WorkforcePlanVsActualData>('/api/recruitment/workforce-plan');
 }
 
 export async function fetchRecruitmentExceptions(): Promise<RecruitmentExceptionsData> {
-  const res = await fetch(`${API_BASE_URL}/api/recruitment/exceptions`);
-  return handleResponse<RecruitmentExceptionsData>(res);
+  return getJson<RecruitmentExceptionsData>('/api/recruitment/exceptions');
 }
 
 // Talent, Performance, Learning & Succession API endpoints
 export async function fetchTalentSummary(): Promise<TalentSummaryData> {
-  const res = await fetch(`${API_BASE_URL}/api/talent/summary`);
-  return handleResponse<TalentSummaryData>(res);
+  return getJson<TalentSummaryData>('/api/talent/summary');
 }
 
 export async function fetchPerformanceDistribution(): Promise<PerformanceDistributionData> {
-  const res = await fetch(`${API_BASE_URL}/api/talent/performance-distribution`);
-  return handleResponse<PerformanceDistributionData>(res);
+  return getJson<PerformanceDistributionData>('/api/talent/performance-distribution');
 }
 
 export async function fetchPerformanceTrends(): Promise<PerformanceTrendsData> {
-  const res = await fetch(`${API_BASE_URL}/api/talent/trends`);
-  return handleResponse<PerformanceTrendsData>(res);
+  return getJson<PerformanceTrendsData>('/api/talent/trends');
 }
 
 export async function fetchPerformanceByProject(): Promise<PerformanceByProjectData> {
-  const res = await fetch(`${API_BASE_URL}/api/talent/by-project`);
-  return handleResponse<PerformanceByProjectData>(res);
+  return getJson<PerformanceByProjectData>('/api/talent/by-project');
 }
 
 export async function fetchPerformanceByDepartment(): Promise<PerformanceByDepartmentData> {
-  const res = await fetch(`${API_BASE_URL}/api/talent/by-department`);
-  return handleResponse<PerformanceByDepartmentData>(res);
+  return getJson<PerformanceByDepartmentData>('/api/talent/by-department');
 }
 
 export async function fetchGoalCompletion(): Promise<GoalCompletionData> {
-  const res = await fetch(`${API_BASE_URL}/api/talent/goals`);
-  return handleResponse<GoalCompletionData>(res);
+  return getJson<GoalCompletionData>('/api/talent/goals');
 }
 
 export async function fetchCompetencyGaps(): Promise<CompetencyGapData> {
-  const res = await fetch(`${API_BASE_URL}/api/talent/competency-gaps`);
-  return handleResponse<CompetencyGapData>(res);
+  return getJson<CompetencyGapData>('/api/talent/competency-gaps');
 }
 
 export async function fetchLearningCompletion(): Promise<LearningCompletionData> {
-  const res = await fetch(`${API_BASE_URL}/api/talent/learning`);
-  return handleResponse<LearningCompletionData>(res);
+  return getJson<LearningCompletionData>('/api/talent/learning');
 }
 
 export async function fetchLearningByProject(): Promise<LearningByProjectData> {
-  const res = await fetch(`${API_BASE_URL}/api/talent/learning-by-project`);
-  return handleResponse<LearningByProjectData>(res);
+  return getJson<LearningByProjectData>('/api/talent/learning-by-project');
 }
 
 export async function fetchSuccessionCoverage(): Promise<SuccessionCoverageData> {
-  const res = await fetch(`${API_BASE_URL}/api/talent/succession`);
-  return handleResponse<SuccessionCoverageData>(res);
+  return getJson<SuccessionCoverageData>('/api/talent/succession');
 }
 
 export async function fetchSuccessorReadiness(): Promise<SuccessorReadinessData> {
-  const res = await fetch(`${API_BASE_URL}/api/talent/succession-readiness`);
-  return handleResponse<SuccessorReadinessData>(res);
+  return getJson<SuccessorReadinessData>('/api/talent/succession-readiness');
 }
 
 export async function fetchTalentRisk(): Promise<TalentRiskData> {
-  const res = await fetch(`${API_BASE_URL}/api/talent/risk`);
-  return handleResponse<TalentRiskData>(res);
+  return getJson<TalentRiskData>('/api/talent/risk');
 }
 
 export async function fetchTalentExceptions(): Promise<TalentExceptionsData> {
-  const res = await fetch(`${API_BASE_URL}/api/talent/exceptions`);
-  return handleResponse<TalentExceptionsData>(res);
+  return getJson<TalentExceptionsData>('/api/talent/exceptions');
 }
 
 // Command Center API endpoints
 export async function fetchCommandCenterOverview(): Promise<CommandCenterOverviewData> {
-  const res = await fetch(`${API_BASE_URL}/api/command-center/overview`);
-  return handleResponse<CommandCenterOverviewData>(res);
+  return getJson<CommandCenterOverviewData>('/api/command-center/overview');
 }
 
 export async function fetchCommandCenterModuleHealth(): Promise<ModuleHealthResponse> {
-  const res = await fetch(`${API_BASE_URL}/api/command-center/module-health`);
-  return handleResponse<ModuleHealthResponse>(res);
+  return getJson<ModuleHealthResponse>('/api/command-center/module-health');
 }
 
 export async function fetchCommandCenterPriorityAlerts(): Promise<PriorityAlertResponse> {
-  const res = await fetch(`${API_BASE_URL}/api/command-center/priority-alerts`);
-  return handleResponse<PriorityAlertResponse>(res);
+  return getJson<PriorityAlertResponse>('/api/command-center/priority-alerts');
 }
 
 export async function fetchCommandCenterExceptions(): Promise<ExceptionSummaryResponse> {
-  const res = await fetch(`${API_BASE_URL}/api/command-center/exceptions`);
-  return handleResponse<ExceptionSummaryResponse>(res);
+  return getJson<ExceptionSummaryResponse>('/api/command-center/exceptions');
 }
 
 export async function fetchCommandCenterDataFreshness(): Promise<FreshnessResponse> {
-  const res = await fetch(`${API_BASE_URL}/api/command-center/data-freshness`);
-  return handleResponse<FreshnessResponse>(res);
+  return getJson<FreshnessResponse>('/api/command-center/data-freshness');
 }
 
 export async function fetchCommandCenterFilterOptions(): Promise<FilterOptionsResponse> {
-  const res = await fetch(`${API_BASE_URL}/api/command-center/filter-options`);
-  return handleResponse<FilterOptionsResponse>(res);
+  return getJson<FilterOptionsResponse>('/api/command-center/filter-options');
 }
 
 export async function fetchCommandCenterNavigationStatus(): Promise<NavigationStatusResponse> {
-  const res = await fetch(`${API_BASE_URL}/api/command-center/navigation-status`);
-  return handleResponse<NavigationStatusResponse>(res);
+  return getJson<NavigationStatusResponse>('/api/command-center/navigation-status');
 }
 
 export async function fetchCommandCenterQaIndex(): Promise<QaIndexResponse> {
-  const res = await fetch(`${API_BASE_URL}/api/command-center/qa-index`);
-  return handleResponse<QaIndexResponse>(res);
+  return getJson<QaIndexResponse>('/api/command-center/qa-index');
 }
 
 // Data Management API endpoints
 export interface TemplateInfo {
   name: string;
   filename: string;
+  /** Bilingual, from the contract - the endpoint has returned it since 1b-ii;
+   *  the type simply never declared it. */
+  label: string;
   description: string;
+  available: boolean;
 }
 
 export async function fetchTemplates(): Promise<TemplateInfo[]> {
-  const res = await fetch(`${API_BASE_URL}/api/data/templates`);
-  return handleResponse<TemplateInfo[]>(res);
+  return getJson<TemplateInfo[]>('/api/data/templates');
 }
 
 export function getTemplateDownloadUrl(name: string): string {
   return `${API_BASE_URL}/api/data/templates?name=${encodeURIComponent(name)}`;
 }
 
-export async function uploadFile(file: File): Promise<any> {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  const res = await fetch(`${API_BASE_URL}/api/data/upload`, {
-    method: "POST",
-    body: formData,
-  });
-  return handleResponse<any>(res);
-}
+// uploadFile() WAS HERE and is deleted (TD-005). It POSTed to
+// /api/data/upload, which P0-2 replaced with the staged flow: a single call
+// that wrote straight to data/silver became stage -> preview -> commit. It was
+// already dead - no page called it - and after P0-2 it was dead AND wrong, so
+// the first contributor to wire an upload UI from it would have built against
+// an endpoint that no longer exists. See lib/uploads.ts.
 
 export interface RefreshReport {
   status: string;
@@ -475,8 +397,5 @@ export interface RefreshReport {
 }
 
 export async function triggerRefresh(): Promise<RefreshReport> {
-  const res = await fetch(`${API_BASE_URL}/api/data/refresh`, {
-    method: "POST",
-  });
-  return handleResponse<RefreshReport>(res);
+  return postJson<RefreshReport>('/api/data/refresh');
 }

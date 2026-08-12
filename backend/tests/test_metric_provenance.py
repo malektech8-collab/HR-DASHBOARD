@@ -23,7 +23,11 @@ DICTIONARY_PATH = os.path.join(_ROOT, "config", "metrics_dictionary.yml")
 WAREHOUSE = os.path.join(_ROOT, "warehouse", "hr_analytics.duckdb")
 NEWLINE = chr(10)
 
-API_REF = re.compile(r"FROM\s+(mart_[a-z0-9_]+|base_[a-z0-9_]+)")
+# WIDENED for the onboarding-status endpoint: the rule is "an API-served
+# object must be mapped", and the mart_/base_ prefixes were a naming assumption,
+# not the policy. domain_provenance is a pipeline table the API now reads, so
+# the coverage test must see it.
+API_REF = re.compile(r"FROM\s+(mart_[a-z0-9_]+|base_[a-z0-9_]+|domain_provenance)")
 API_DIRS = [
     os.path.join(_ROOT, "backend", "app", "api"),
     os.path.join(_ROOT, "backend", "app", "api", "endpoints"),
@@ -267,6 +271,10 @@ def test_source_free_entries_are_pinned(registry):
         "mart_command_center_overview.last_data_refresh",
         "mart_command_center_overview.latest_source_business_date",
         "base_command_center_report_context (payload)",
+        # The onboarding checklist REPORTS provenance rather than carrying a
+        # client measure. Suppressing it when a domain is absent would hide the
+        # screen that exists to explain the absence.
+        "domain_provenance (payload)",
     }, ("the set of source-free entries changed: {}. Each bypasses "
         "suppression, so additions need review.".format(sorted(empties)))
 
