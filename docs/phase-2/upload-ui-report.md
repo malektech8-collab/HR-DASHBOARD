@@ -106,7 +106,7 @@ A structural test bans `fetch(` outside `lib/http.ts`. It is a **Python** test s
 - **renamed the file client-side** to `{target}.{ext}` — a workaround for the filename-derived table that P0-2 removed
 - told the user the CSV would be *"routed directly to the Silver layer"*, which was the defect
 
-So P0-2 did not merely remove a dead endpoint; it broke a live widget, and the breakage was invisible because the frontend has no CI test job. The widget is now a link to Data Onboarding. TD-005's entry carries the correction.
+So P0-2 did not merely remove a dead endpoint; it broke a live widget, and the breakage was invisible because **nothing tested that widget** — not because the frontend has no CI test job. It has one (§2's correction), collecting 1 file and 3 tests, none of them this. The widget is now a link to Data Onboarding. TD-005's entry carries the correction.
 
 **A server path was leaking into client-facing errors.** Five violation messages embedded `csv_path`. Before the UI those only reached an operator's console; now they render in a browser and go into a downloadable report — and after P0-2 the path is `data/staging/<uuid>/data.csv`, which leaks our filesystem layout and tells the reader nothing about their own file. Found by reading the rig's output rather than by a test:
 
