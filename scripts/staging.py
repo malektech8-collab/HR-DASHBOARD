@@ -37,6 +37,10 @@ STAGING_DIR = os.path.join("data", "staging")
 CONTAINER_STAGING_DIR = "/app/data/staging"
 
 DATA_FILENAME = "data.csv"
+# The canonical form, produced by applying a mapping profile. The
+# original is never modified, so a re-map costs no re-upload and the
+# client can always be shown their own headers.
+MAPPED_FILENAME = "mapped.csv"
 MANIFEST_FILENAME = "manifest.json"
 
 
@@ -105,6 +109,10 @@ def data_path(upload_id):
     if not os.path.exists(path):
         raise StagingError("staged upload '{}' has no data file".format(upload_id))
     return path
+
+
+def mapped_path(upload_id):
+    return os.path.join(_upload_dir(upload_id), MAPPED_FILENAME)
 
 
 def mark_committed(upload_id):

@@ -269,8 +269,33 @@ class ViolationOut(BaseModel):
     rule: str
     row: Optional[int] = None
     column: Optional[str] = None
+    # The client's OWN header, when a mapping profile renamed it. Without this
+    # a violation names a canonical column they never wrote, at a row of a file
+    # they never made - and the error report they open beside their spreadsheet
+    # becomes unreadable. The validator stays canonical-only; the translation
+    # happens here, at the edge.
+    source_column: Optional[str] = None
     message_en: str
     message_ar: str
+
+
+class MappingOut(BaseModel):
+    """What the profile did, and what still needs a human."""
+    applied: bool
+    profile_version: Optional[int] = None
+    renamed: Dict[str, str] = {}
+    ignored: List[str] = []
+    # Source headers with no decision. These BLOCK: a column is mapped,
+    # explicitly ignored with a reason, or it stops the upload. Default-dropping
+    # would let a renamed export silently lose a column.
+    unmapped: List[str] = []
+    derived: List[str] = []
+    # canonical column -> values with no mapping, for columns where an
+    # unmapped value BLOCKS. Surfaced as a mapping TASK with the canonical
+    # options listed, never as a bare rejection.
+    unmapped_values: Dict[str, List[str]] = {}
+    reject_enum_options: Dict[str, List[str]] = {}
+    header_changed: bool = False
 
 
 class UploadPreview(BaseModel):
@@ -289,6 +314,7 @@ class UploadPreview(BaseModel):
     suggested_coverage_end: Optional[str] = None
     coverage_required: bool = False
     history_required: bool = False
+    mapping: Optional[MappingOut] = None
 
 
 class CommitDeclaration(BaseModel):
@@ -307,8 +333,17 @@ def _scripts():
     return staging, validate_schema, onboarding
 
 
-def _violation_out(v):
+def _mapping():
+    scripts_dir = get_scripts_dir()
+    if scripts_dir not in sys.path:
+        sys.path.insert(0, scripts_dir)
+    import mapping
+    return mapping
+
+
+def _violation_out(v, back_map=None):
     return ViolationOut(rule=v.rule, row=v.row, column=v.column,
+                        source_column=(back_map or {}).get(v.column),
                         message_en=v.message_en, message_ar=v.message_ar)
 
 
@@ -488,7 +523,48 @@ def preview_upload(upload_id: str,
         raise HTTPException(status_code=400,
                             detail="Unreadable CSV: {}".format(exc))
 
-    result = validate_schema.validate_csv(path, table)
+    # A mapping profile, if one exists, is applied BEFORE validation, so the
+    # validator only ever sees canonical columns. The mapped file is written
+    # beside the original - which is never modified, so a client can always be
+    # shown their own headers and a re-map costs no re-upload.
+    mapping_module = _mapping()
+    mapping_out = MappingOut(applied=False)
+    back_map = {}
+    validated_path = path
+    try:
+        profile = mapping_module.load_profile(table)
+    except Exception as exc:
+        raise HTTPException(status_code=400,
+                            detail="Mapping profile is invalid: {}".format(exc))
+
+    if profile:
+        try:
+            mapped, mapping_report = mapping_module.apply_profile(
+                frame, table, profile)
+        except Exception as exc:
+            raise HTTPException(
+                status_code=400,
+                detail="Mapping could not be applied: {}".format(exc))
+        validated_path = staging.mapped_path(upload_id)
+        mapped.write_csv(validated_path)
+        back_map = mapping_report.back_map
+        fingerprint = mapping_module.header_fingerprint(frame.columns)
+        mapping_out = MappingOut(
+            applied=True,
+            profile_version=profile.get("version"),
+            renamed=mapping_report.renamed,
+            ignored=mapping_report.ignored,
+            unmapped=mapping_report.unmapped,
+            derived=mapping_report.derived,
+            unmapped_values={k: sorted(v)
+                             for k, v in mapping_report.unmapped_values.items()},
+            reject_enum_options=mapping_module.reject_enum_columns(table),
+            header_changed=(
+                bool(profile.get("source_fingerprint"))
+                and profile.get("source_fingerprint") != fingerprint),
+        )
+
+    result = validate_schema.validate_csv(validated_path, table)
 
     suggested_start = suggested_end = None
     coverage_required = table in onboarding.DATE_GRAINED
@@ -505,13 +581,17 @@ def preview_upload(upload_id: str,
         columns_present=present,
         columns_missing=[c for c in contracted if c not in present],
         columns_unexpected=[c for c in present if c not in contracted],
-        rejects=[_violation_out(v) for v in result.rejects],
-        exceptions=[_violation_out(v) for v in result.exceptions],
-        can_commit=not result.rejects,
+        rejects=[_violation_out(v, back_map) for v in result.rejects],
+        exceptions=[_violation_out(v, back_map) for v in result.exceptions],
+        # Unmapped headers and unmapped REJECT values block just as a
+        # contract violation does - the file cannot be committed as it is.
+        can_commit=(not result.rejects and not mapping_out.unmapped
+                    and not mapping_out.unmapped_values),
         suggested_coverage_start=suggested_start,
         suggested_coverage_end=suggested_end,
         coverage_required=coverage_required,
         history_required=table in onboarding.HISTORY_DECLARING,
+        mapping=mapping_out,
     )
 
 
@@ -604,6 +684,20 @@ def commit_upload(
             shutil.move(previous_registry, registry_path)
         elif not registry_existed and os.path.exists(registry_path):
             os.remove(registry_path)
+
+    # The MAPPED file is what lands in data/raw, because data/raw is canonical
+    # and scripts/ingest_raw.py revalidates it unchanged. That is what keeps
+    # P0-2's single ingest path intact: nothing downstream knows profiles exist.
+    mapping_module = _mapping()
+    if mapping_module.load_profile(table):
+        mapped = staging.mapped_path(upload_id)
+        if not os.path.exists(mapped):
+            raise HTTPException(
+                status_code=400,
+                detail="This upload has a mapping profile but has not been "
+                       "previewed. Preview it first - the preview is where the "
+                       "mapping is applied and checked.")
+        staged_path = mapped
 
     try:
         shutil.copy2(staged_path, raw_path)
