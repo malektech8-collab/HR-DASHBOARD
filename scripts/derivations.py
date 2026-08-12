@@ -21,7 +21,6 @@ Two hard constraints, both deliberate:
 
 Nothing in this module runs during demo-mode ingestion.
 """
-import unicodedata
 
 
 class DerivationError(ValueError):
@@ -57,31 +56,9 @@ _NON_SAUDI_ALIASES = {
     "فلبيني", "بنغلاديشي", "لبناني", "مغربي", "تونسي",
 }
 
-# Tashkeel (U+064B-U+0652), Quranic honorifics (U+0610-U+061A) and the
-# superscript alef (U+0670). Deliberately NOT U+0621-U+064A, which are the
-# Arabic letters themselves.
-_ARABIC_DIACRITICS = dict.fromkeys(
-    list(range(0x064B, 0x0653)) + list(range(0x0610, 0x061B)) + [0x0670]
-)
-
-
-def _normalise(value):
-    """Casefold, strip, collapse whitespace, and normalise Arabic forms.
-
-    Handles the inconsistent spacing and alef/ya variants that appear in real
-    Arabic exports.
-    """
-    if value is None:
-        return ""
-    s = unicodedata.normalize("NFKC", str(value)).strip()
-    s = " ".join(s.split())
-    s = s.translate(_ARABIC_DIACRITICS)
-    s = s.replace("ـ", "")                       # tatweel
-    for a in "آأإٱ":              # alef variants -> bare alef
-        s = s.replace(a, "ا")
-    s = s.replace("ى", "ي")                 # alef maqsura -> ya
-    s = s.replace("ة", "ه")                 # ta marbuta -> ha
-    return s.casefold()
+# Normalisation moved to scripts/text.py so header and value matching can share
+# it. Re-exported here because this module's callers already import it.
+from text import _normalise, normalise  # noqa: E402,F401
 
 
 def _normalised_set(values):
