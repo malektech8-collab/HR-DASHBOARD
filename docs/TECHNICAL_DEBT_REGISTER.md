@@ -115,6 +115,20 @@ Risk while open is low — collection is scoped by `pytest.ini` and the Gate 2 s
 - **Deliberately not folded into the upload UI cycle**: it is a generator (openpyxl or similar), a bilingual instructions sheet, and per-column dropdowns driven by `allowed_values` — a body of work in its own right, and one that touches the contract loader rather than the UI.
 - **Remediation**: its own cycle. The contract already carries everything needed (`name_en`, `name_ar`, `description_*`, `example`, `allowed_values`), which is the point of §4's "one definition generates all of".
 
+### TD-009 — Generated TypeScript types from the OpenAPI schema
+
+- **Status**: OPEN — recorded 2026-08-12
+- **Category**: Frontend / backend contract
+- **Description**: The frontend's request and response types are hand-written in `lib/api.ts`, `lib/uploads.ts` and `lib/types.ts`, mirroring the Pydantic models by convention. Nothing enforces that they still match.
+- **What `test_path_contract.py` DOES catch** (added in the same cycle as this entry): a frontend path literal with no corresponding backend route — the P0-2 failure, where `/api/data/upload` was deleted and `uploadFile()`'s literal survived.
+- **What it does NOT catch, stated explicitly so it is not rediscovered as an incident**:
+  - a **renamed response field** — the backend renaming `can_commit` to `commit_allowed` leaves the path valid and every test green, and the commit button silently reads `undefined`, which is falsy, so it disables forever
+  - a **changed type** — `covered_days` going from `int` to `str`
+  - **changed semantics** — a payload returning `[]` where it used to return `null`, which is the exact distinction three cycles of suppression work were spent establishing, and which no path check can see
+  - a **new required request field** — commit gaining a mandatory parameter the client does not send
+- **Impact**: the two halves agree by convention and review. Convention has failed here before: `TemplateInfo` was missing `label` and `available` for two cycles because the endpoint returned fields the interface never declared, and it surfaced only when a new page tried to read one.
+- **Remediation**: generate types from `app.openapi()` (`openapi-typescript` or similar) into a checked-in file, and fail CI when the generated output differs from the committed one — the same shape as the path contract, one level deeper. Worth doing before the client-facing surface grows further.
+
 ## Exclusions
 
 None of these legacy build warnings affect the functionality of the new `GovernanceWidget` or `/api/governance/status` API endpoint, both of which are fully compliant and bug-free.
