@@ -123,6 +123,17 @@ def a_profile():
         "derive": {"is_saudi": {"rule": "nationality_is_saudi",
                                 "from": "الجنسيه"}},
         "values": {"status": {"نشط": "Active", "موقوف": "Inactive"}},
+        # Cycle B: a value mapping into a REJECT enum needs an affirmation
+        # keyed by the PAIR. This fixture was written before that rule and is
+        # exactly the shape it catches - a mapping that rewrites a client's
+        # words with nobody's name on it.
+        "confirmations": {
+            "status": {
+                "confirmed_by": "operator@synthetic.local",
+                "confirmed_at": "2026-08-12T09:00:00",
+                "pairs": {"نشط": "Active", "موقوف": "Inactive"},
+            },
+        },
     }
 
 
@@ -351,9 +362,17 @@ def test_header_matching_absorbs_the_same_variation():
 # versioning and the changed-export signal
 # --------------------------------------------------------------------------
 
+def _saveable():
+    """a_profile() plus the evidence cycle B requires at the write."""
+    version = a_profile()
+    version["evidence"] = mapping.build_evidence(
+        "employees", a_client_export(), version)
+    return version
+
+
 def test_versions_are_appended_never_mutated(profile_file):
-    first = mapping.save_version("employees", a_profile(), path=str(profile_file))
-    second = mapping.save_version("employees", a_profile(), path=str(profile_file))
+    first = mapping.save_version("employees", _saveable(), path=str(profile_file))
+    second = mapping.save_version("employees", _saveable(), path=str(profile_file))
     assert (first["version"], second["version"]) == (1, 2)
     spec = yaml.safe_load(profile_file.read_text(encoding="utf-8"))
     assert len(spec["versions"]) == 2, (
@@ -381,7 +400,10 @@ def test_rejected_candidates_survive_a_round_trip(profile_file):
     """"system proposed manager_id, human chose owner_id" is the scarcest
     training signal there is, and it exists only if it is written down at the
     moment the human decides."""
-    version = a_profile()
+    # A one-column version, so the evidence below covers everything it
+    # references - cycle B refuses a version whose evidence has holes.
+    version = {"created_by": "operator@synthetic.local",
+               "columns": {"المسؤول": "manager_id"}}
     version["evidence"] = [{
         "source_header": "المسؤول",
         "normalised": normalise("المسؤول"),

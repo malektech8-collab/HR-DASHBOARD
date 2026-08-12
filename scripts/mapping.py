@@ -59,6 +59,43 @@ _EXPRESSION_SHAPED = re.compile(
 # high-cardinality column sneaking through the enum branch.
 MAX_VOCABULARY_SAMPLES = 25
 
+NEWLINE = chr(10)
+
+# What a value mapping into a REJECT enum DECIDES, in the client's terms.
+#
+# Carried here rather than in the UI copy because the consequence is a property
+# of the contract, not of a screen: the CLI has to state it too, and so does the
+# error raised when an affirmation is missing. A tick that says "confirm this
+# mapping" asks nobody anything. A tick that says what the mapping decides is
+# the only part of this mechanism that does any work.
+VALUE_MAPPING_CONSEQUENCE = {
+    "employees.status": (
+        "Status decides who is counted as employed: headcount, Saudization "
+        "and payroll exposure all read it.",
+        "الحالة تحدد من يُحتسب موظفاً: عدد الموظفين والسعودة والتكلفة "
+        "الشهرية جميعها تعتمد عليها."),
+    "employees.end_of_service_type": (
+        "End-of-service type decides whether a leaver is owed money. "
+        "Article 80 is dismissal for cause and carries NO end-of-service "
+        "award; Resignation and Articles 74/75/77/81 do.",
+        "نوع نهاية الخدمة يحدد ما إذا كان للموظف المنتهية خدمته مستحقات. "
+        "المادة 80 هي الفصل لسبب مشروع ولا تستوجب مكافأة نهاية خدمة، بخلاف "
+        "الاستقالة والمواد 74 و75 و77 و81."),
+    "employee_relations.case_type": (
+        "Case type decides which cases appear as labour cases, and those are "
+        "the ones reported as legal exposure.",
+        "نوع القضية يحدد أي القضايا تظهر كقضايا عمالية، وهي التي يتم "
+        "الإبلاغ عنها كتعرض قانوني."),
+}
+
+
+def consequence(table, column, locale="en"):
+    """What mapping a value into this column decides, or None."""
+    pair = VALUE_MAPPING_CONSEQUENCE.get("{}.{}".format(table, column))
+    if not pair:
+        return None
+    return pair[1] if str(locale).lower().startswith("ar") else pair[0]
+
 
 class MappingError(ValueError):
     """The profile is missing, malformed, or asks for something not allowed."""
@@ -111,6 +148,9 @@ def load_profile(table, path=None, contracted=None):
         raise MappingError("{}: no versions recorded.".format(path))
     latest = max(versions, key=lambda v: int(v.get("version", 0)))
     _validate_targets(table, latest, contracted=contracted)
+    # Also checked here, not only at the write: a profile that reached the disk
+    # some other way must not be APPLIED unaffirmed.
+    assert_value_mappings_confirmed(table, latest)
     return latest
 
 
@@ -138,6 +178,85 @@ def _validate_targets(table, version, contracted=None):
         # rule is reviewed code rather than config
         _der.resolve(rule["rule"] if isinstance(rule, dict) else rule)
     return True
+
+
+# --------------------------------------------------------------------------
+# suggesting - rungs 1-5 of the ladder (cycle B, settled in cycle A's plan)
+# --------------------------------------------------------------------------
+
+ALIAS_PATH = os.path.join("config", "mapping_aliases.yml")
+
+# rung -> (matched_by, confidence). Rungs 1-3 are derived from the contract
+# itself and are pre-selected by the UI; rung 4 is a curated guess and is
+# suggested only. A wrong HEADER mapping usually fails validation loudly, which
+# is why pre-selection is acceptable here and is NOT acceptable for a value
+# mapping into a REJECT enum - that one is silent, and needs a tick.
+LADDER = [
+    ("canonical", 1.0),
+    ("label_exact", 0.95),
+    ("label_normalised", 0.85),
+    ("alias", 0.7),
+]
+
+_alias_cache = {}
+
+
+def load_aliases(path=None):
+    path = path or ALIAS_PATH
+    if path in _alias_cache:
+        return _alias_cache[path]
+    data = {}
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as handle:
+            data = yaml.safe_load(handle) or {}
+    _alias_cache[path] = data
+    return data
+
+
+def suggest(table, headers, alias_path=None):
+    """Ranked canonical candidates for each source header.
+
+    Returns {header: [{"canonical", "matched_by", "confidence"}, ...]}, best
+    first, empty list when nothing matched. Every rung records HOW it matched,
+    because that is what makes the accumulated profiles trainable later - a
+    mapping with no provenance teaches nothing.
+    """
+    columns = _cs.columns(table)
+    by_key = {c["name"]: c["name"] for c in columns}
+    by_label = {}
+    by_label_normalised = {}
+    for column in columns:
+        for label in (column.get("name_ar"), column.get("name_en")):
+            if not label:
+                continue
+            by_label.setdefault(label, column["name"])
+            by_label_normalised.setdefault(normalise(label), column["name"])
+
+    aliases = {}
+    for canonical, spellings in (load_aliases(alias_path).get(table) or {}).items():
+        for spelling in spellings or []:
+            aliases.setdefault(normalise(spelling), canonical)
+
+    out = {}
+    for header in headers:
+        key = normalise(header)
+        rungs = [
+            by_key.get(str(header).strip()),
+            by_label.get(str(header).strip()),
+            by_label_normalised.get(key),
+            aliases.get(key),
+        ]
+        seen = set()
+        candidates = []
+        for (matched_by, confidence), canonical in zip(LADDER, rungs):
+            if not canonical or canonical in seen:
+                continue
+            seen.add(canonical)
+            candidates.append({"canonical": canonical,
+                               "matched_by": matched_by,
+                               "confidence": confidence})
+        out[header] = candidates
+    return out
 
 
 def header_fingerprint(headers):
@@ -355,6 +474,169 @@ def reject_enum_columns(table):
 # writing a profile
 # --------------------------------------------------------------------------
 
+def assert_attributed(version):
+    """Every version names who made it. Enforced at the write.
+
+    A mapping is an assertion about what a client's data means, and it survives
+    every upload after the one it was written for. Cycle A recorded `created_by`
+    when it was supplied and accepted a version without it, so the decision that
+    turns a client's word into a canonical one could be anonymous. This is a
+    record, not an authentication - a console caller can still write anything -
+    but an unsigned assertion is not reviewable at all.
+    """
+    who = str(version.get("created_by") or "").strip()
+    if not who:
+        raise MappingError(
+            "refusing to save a mapping version with no 'created_by'. A value "
+            "mapping decides what a client's data means and outlives the "
+            "upload it was written for; an anonymous one cannot be reviewed."
+            + NEWLINE +
+            "لا يمكن حفظ إصدار ربط بدون 'created_by'. ربط القيم يحدد معنى "
+            "بيانات العميل ويبقى بعد الرفع الذي كُتب من أجله.")
+    return who
+
+
+def assert_value_mappings_confirmed(table, version):
+    """A value mapping into a REJECT enum needs a human affirmation.
+
+    KEYED BY THE PAIR, NOT THE COLUMN. Confirming `status` today must not
+    silently bless a pair added next month - that is the whole failure this
+    prevents, and a column-level flag would wave it through.
+
+    Called from BOTH save_version and load_profile. Save-side alone would leave
+    the hand-written YAML path open, and hand-written YAML is exactly the path
+    that produced the gap.
+
+    Deliberately limited to the REJECT enums (three today). The EXCEPTION-enum
+    columns are not gated: asking for fourteen affirmations would make the tick
+    a formality, which is worse than not having one. Their mis-mapping remains
+    an operator assertion the system accepts - see docs/phase-2/mapping-ui-plan
+    §1.4, which is the honest residual, not an oversight.
+    """
+    gated = reject_enum_columns(table)
+    confirmations = version.get("confirmations") or {}
+    problems = []
+    for canonical, pairs in (version.get("values") or {}).items():
+        if canonical not in gated:
+            continue
+        record = confirmations.get(canonical) or {}
+        who = str(record.get("confirmed_by") or "").strip()
+        affirmed = record.get("pairs") or {}
+        missing = {k: v for k, v in (pairs or {}).items() if affirmed.get(k) != v}
+        if not who:
+            problems.append((canonical, sorted((pairs or {}).items()),
+                             "no confirmed_by"))
+        elif missing:
+            problems.append((canonical, sorted(missing.items()),
+                             "not affirmed"))
+    if not problems:
+        return True
+
+    lines = []
+    for canonical, pairs, why in problems:
+        shown = ", ".join("{!r} -> {!r}".format(k, v) for k, v in pairs)
+        lines.append("  {} ({}): {}".format(canonical, why, shown))
+        note = consequence(table, canonical)
+        if note:
+            lines.append("    {}".format(note))
+    raise MappingError(
+        "refusing this mapping: the value mapping(s) below rewrite a client's "
+        "own words into canonical ones, and nobody has affirmed them."
+        + NEWLINE + NEWLINE.join(lines) + NEWLINE +
+        "Record the affirmation under confirmations.<column> with "
+        "confirmed_by and the SAME pairs. Adding or changing a pair needs its "
+        "own affirmation - a tick inherited from last month is not one."
+        + NEWLINE +
+        "تعذّر قبول الربط: القيم أدناه تعيد كتابة كلمات العميل إلى قيم "
+        "معيارية دون تأكيد من مسؤول.")
+
+
+def build_version(table, frame, decisions, created_by, values=None,
+                  derive=None, confirmations=None, alias_path=None):
+    """THE constructor for a profile version. Evidence by construction.
+
+    Cycle A left evidence to discipline: `build_evidence()` then
+    `save_version()`, and a hand-written YAML that skipped both loaded
+    perfectly and captured nothing. Since the screen IS the data collection,
+    that could not stay a matter of remembering - so this is the only sanctioned
+    way to make a version, and `save_version` refuses one without the evidence
+    it produces.
+
+    `decisions` is {source header: {"decision": mapped|ignored|undecided,
+    "chosen": canonical, "reason": why it was ignored}}. Everything else -
+    matched_by, confidence, the candidates the human REJECTED, the fingerprint -
+    is computed here rather than supplied, because a caller that has to
+    remember to attach provenance is the failure this replaces.
+    """
+    headers = list(frame.columns)
+    ranked = suggest(table, headers, alias_path=alias_path)
+
+    columns, ignored, seed = {}, [], []
+    for header in headers:
+        decision = dict(decisions.get(header) or {})
+        kind = decision.get("decision") or (
+            "mapped" if decision.get("chosen") else "undecided")
+        chosen = decision.get("chosen")
+        candidates = ranked.get(header) or []
+
+        matched_by, confidence = "human", None
+        for candidate in candidates:
+            if candidate["canonical"] == chosen:
+                matched_by = candidate["matched_by"]
+                confidence = candidate["confidence"]
+                break
+        # Everything the ladder offered and the human did not take. This is the
+        # scarcest signal in the whole system and the only part that cannot be
+        # reconstructed later: it says a candidate was PLAUSIBLE and WRONG.
+        rejected = [c for c in candidates if c["canonical"] != chosen]
+
+        if kind == "mapped" and chosen:
+            columns[header] = chosen
+        elif kind == "ignored":
+            ignored.append({"header": header,
+                            "reason": decision.get("reason")
+                            or "No canonical home; ignored by the operator."})
+        seed.append({"source_header": header, "matched_by": matched_by,
+                     "confidence": confidence, "rejected": rejected})
+
+    version = {
+        "created_by": created_by,
+        "columns": columns,
+        "ignored": ignored,
+        "values": dict(values or {}),
+        "derive": dict(derive or {}),
+        "confirmations": dict(confirmations or {}),
+        "source_fingerprint": header_fingerprint(headers),
+        "evidence": seed,
+    }
+    version["evidence"] = build_evidence(table, frame, version)
+    return version
+
+
+def assert_evidence_is_complete(version):
+    """Every header the version acts on must carry evidence.
+
+    Not a formality: without it a profile records WHAT was decided and nothing
+    about how, and the accumulated profiles - the training substrate this whole
+    format exists for - become a list of answers with the questions thrown away.
+    """
+    covered = {e.get("source_header") for e in (version.get("evidence") or [])}
+    referenced = set(version.get("columns") or {})
+    referenced |= {entry["header"] if isinstance(entry, dict) else entry
+                   for entry in (version.get("ignored") or [])}
+    missing = sorted(referenced - covered)
+    if missing:
+        raise MappingError(
+            "refusing to save a mapping version with no evidence for {}. "
+            "Build the version with mapping.build_version(), or the CLI at "
+            "scripts/mapping_cli.py - both capture evidence by construction. "
+            "A profile that records what was decided but not how teaches "
+            "nothing later.".format(missing)
+            + NEWLINE +
+            "لا يمكن حفظ إصدار ربط بدون سجل للأعمدة: {}.".format(missing))
+    return True
+
+
 def save_version(table, version, path=None, contracted=None):
     """Append a version. Never mutate one.
 
@@ -371,13 +653,18 @@ def save_version(table, version, path=None, contracted=None):
             spec = yaml.safe_load(handle) or spec
     _reject_expressions(version, "new version")
     _validate_targets(table, version, contracted=contracted)
+    assert_attributed(version)
+    assert_value_mappings_confirmed(table, version)
+    # PII is checked BEFORE completeness on purpose: "you tried to store a
+    # client's names" must not be masked by "your evidence is incomplete".
+    assert_no_pii(table, version)
+    assert_evidence_is_complete(version)
 
     existing = spec.get("versions") or []
     version = dict(version)
     version["version"] = max([int(v.get("version", 0)) for v in existing] or [0]) + 1
     version.setdefault("created_at",
                        datetime.datetime.now().isoformat(timespec="seconds"))
-    assert_no_pii(table, version)
     existing.append(version)
     spec["versions"] = existing
     spec["table"] = table
