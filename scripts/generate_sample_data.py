@@ -4,27 +4,11 @@ import random
 from datetime import datetime, timedelta
 
 def create_sample_data():
-    import builtins
-    original_open = builtins.open
-    class DummyFile:
-        def write(self, *args, **kwargs): pass
-        def writelines(self, *args, **kwargs): pass
-        def __enter__(self): return self
-        def __exit__(self, *args): pass
-        
-    def custom_open(file, mode="r", *args, **kwargs):
-        if isinstance(file, str) and file.startswith("data/sample/") and file.endswith("_sample.csv"):
-            filename = os.path.basename(file)
-            table_name = filename.replace("_sample.csv", "")
-            marker1 = f"data/silver/{table_name}.parquet.uploaded"
-            marker2 = f"/app/data/silver/{table_name}.parquet.uploaded"
-            if original_open(marker1, "r") if os.path.exists(marker1) else (original_open(marker2, "r") if os.path.exists(marker2) else False):
-                print(f"Skipping sample file write for '{table_name}' (manual upload detected).")
-                return DummyFile()
-        return original_open(file, mode, *args, **kwargs)
-        
-    builtins.open = custom_open
-
+    # The `.uploaded` freeze marker is GONE (P0-2). This function used to
+    # monkeypatch builtins.open so a sample file would not be rewritten when a
+    # manual upload had landed in data/silver. Nothing uploads into silver any
+    # more, and refresh_all no longer calls this at all in real mode, so the
+    # only thing the patch could still do is surprise someone.
     os.makedirs("data/sample", exist_ok=True)
     
     # 1. Employees data
@@ -530,7 +514,6 @@ def create_sample_data():
         writer.writerows(career_paths)
 
     print("Successfully generated sample files in data/sample/.")
-    builtins.open = original_open
 
 if __name__ == "__main__":
     create_sample_data()

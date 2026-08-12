@@ -247,18 +247,17 @@ def check_rows_within_declared_coverage(table, csv_path, coverage=None,
 def ingest(data_mode=None):
     if data_mode is None:
         data_mode = os.getenv("DATA_MODE", "demo")
+    # The `.uploaded` freeze marker is GONE (P0-2). It existed so a manual
+    # upload into data/silver would not be clobbered by sample regeneration.
+    # Nothing uploads into silver any more - a committed upload lands in
+    # data/raw and is ingested here like any other real-mode file - and real
+    # mode never loads sample at all, so there is nothing left to protect.
+    #
+    # It is also the one mechanism in this codebase with a known incident: a
+    # stale marker froze employees ingest and zeroed four Attendance widgets
+    # while every check reported green. That is why declared-ness is read from
+    # a registry rather than inferred from what happens to be on disk.
     original_exists = os.path.exists
-    def custom_exists(path):
-        if isinstance(path, str) and path.startswith("data/sample/") and path.endswith("_sample.csv"):
-            filename = os.path.basename(path)
-            table_name = filename.replace("_sample.csv", "")
-            marker1 = f"data/silver/{table_name}.parquet.uploaded"
-            marker2 = f"/app/data/silver/{table_name}.parquet.uploaded"
-            if original_exists(marker1) or original_exists(marker2):
-                print(f"Skipping ingestion for table '{table_name}' due to manual upload (.uploaded marker).")
-                return False
-        return original_exists(path)
-    os.path.exists = custom_exists
 
     os.makedirs("data/bronze", exist_ok=True)
     os.makedirs("data/silver", exist_ok=True)
