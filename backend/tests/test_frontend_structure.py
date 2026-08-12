@@ -8,9 +8,13 @@ needs.
 NOT because CI lacks a frontend runner. It has one - Gate 2 runs
 `npx vitest run src/` - and an earlier version of this docstring claimed
 otherwise, which was wrong and is corrected here so nobody cites it as grounds
-to skip writing component tests. What vitest currently collects is 1 file and
-3 tests, all of GovernanceWidget: the harness exists and is nearly empty, which
-is why P0-2 broke the Data Quality upload widget invisibly.
+to skip writing component tests.
+
+When that correction was written vitest collected 1 file and 3 tests, which is
+why P0-2 broke the Data Quality upload widget invisibly. The frontend-test
+cycle took it to 5 files and 58, and added the one check that would actually
+have caught that defect: test_path_contract.py. Component tests would not have
+- they mock the boundary the defect lived on.
 
 What they hold:
 
@@ -96,14 +100,27 @@ def test_reject_and_exception_render_in_separate_regions():
     assert "do not block the upload" in panels
 
 
-def test_the_commit_button_is_gated_on_can_commit_and_the_declaration():
+def test_the_commit_button_delegates_to_the_extracted_gate():
+    """This test used to assert the inline expression:
+
+        disabled={!preview.can_commit || !declarationReady || busy !== null}
+
+    and it broke the moment that logic was extracted to lib/uploadFlow.ts -
+    a live example of the risk named in the plan, a source scan asserting an
+    IMPLEMENTATION rather than a behaviour.
+
+    What it holds now is the only part a source scan is the right tool for:
+    that the page has not grown a second copy of the rule. The behaviour is a
+    truth table in lib/uploadFlow.test.ts, where it belongs.
+    """
     page = open(os.path.join(SRC, "pages", "DataOnboarding.tsx"),
                 encoding="utf-8").read()
-    assert "disabled={!preview.can_commit || !declarationReady" in page
-    # the label carries the consequence when only exceptions remain
-    assert "will be recorded" in page
-    # and the declaration needs an active confirmation, not just a pre-filled field
-    assert "&& confirmed);" in page
+    assert "commitGate(" in page, "the page must use the extracted rule"
+    assert "disabled={!gate.enabled}" in page
+    assert "{gate.label}" in page
+    # no second implementation
+    assert "can_commit &&" not in page
+    assert "declarationReady" not in page
 
 
 def test_the_error_report_carries_the_true_total_and_a_truncation_line():

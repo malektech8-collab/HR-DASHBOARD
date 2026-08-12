@@ -5,6 +5,7 @@ import { OnboardingStatusTable } from '../components/widgets/OnboardingStatusTab
 import { ViolationPanels } from '../components/widgets/ViolationPanels';
 import { fetchTemplates, getTemplateDownloadUrl } from '../lib/api';
 import { ApiError, getToken, login } from '../lib/http';
+import { commitGate } from '../lib/uploadFlow';
 import {
   commitUpload,
   discardUpload,
@@ -36,7 +37,7 @@ import type { TemplateInfo } from '../lib/api';
 
 type Step = 'pick' | 'upload' | 'review' | 'done';
 
-const ScopedLogin: React.FC<{ onDone: () => void }> = ({ onDone }) => {
+export const ScopedLogin: React.FC<{ onDone: () => void }> = ({ onDone }) => {
   const [username, setUsername] = useState('admin@synthetic.local');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -173,14 +174,10 @@ export const DataOnboarding: React.FC = () => {
     await refreshStatus();
   });
 
-  // The declaration must be actively confirmed, not merely pre-filled. A
-  // suggestion a human confirms is a declaration; a pre-filled field they never
-  // look at is inference wearing a costume (Category F, ruling 3).
-  const declarationReady = !preview
-    || ((!preview.coverage_required
-         || Boolean(declaration.coverage_start && declaration.coverage_end))
-        && (!preview.history_required || Boolean(declaration.history_since))
-        && confirmed);
+  // Both rules live in lib/uploadFlow.ts and are tested as a truth table.
+  // They either block a valid commit or admit bad data, so they are not
+  // something to verify by driving this DOM.
+  const gate = commitGate(preview, { declaration, confirmed }, busy !== null);
 
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -362,26 +359,16 @@ export const DataOnboarding: React.FC = () => {
               <div className="border-t border-border pt-4 space-y-2">
                 <button
                   onClick={onCommit}
-                  disabled={!preview.can_commit || !declarationReady || busy !== null}
+                  disabled={!gate.enabled}
                   data-testid="commit-button"
                   className="px-4 py-2 bg-primary text-primary-foreground text-xs font-semibold rounded-lg disabled:opacity-50 flex items-center gap-1.5"
                 >
                   {busy === 'committing' && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
-                  {preview.exceptions.length > 0
-                    ? `Commit — ${preview.exceptions.length} data-quality ${
-                        preview.exceptions.length === 1 ? 'exception' : 'exceptions'
-                      } will be recorded`
-                    : 'Commit'}
+                  {gate.label}
                 </button>
-                {!preview.can_commit && (
-                  <p className="text-xs text-critical">
-                    {preview.rejects.length} {preview.rejects.length === 1 ? 'error' : 'errors'} must
-                    be fixed before this can be committed.
-                  </p>
-                )}
-                {preview.can_commit && !declarationReady && (
-                  <p className="text-xs text-muted-foreground">
-                    Confirm the period above to continue.
+                {gate.blockedBecause && (
+                  <p className={`text-xs ${preview.can_commit ? 'text-muted-foreground' : 'text-critical'}`}>
+                    {gate.blockedBecause}
                   </p>
                 )}
                 {busy === 'committing' && (
