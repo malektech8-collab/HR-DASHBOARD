@@ -23,6 +23,12 @@ export interface Violation {
   rule: string;
   row: number | null;
   column: string | null;
+  /**
+   * The client's OWN header, when a mapping profile renamed it. Render this,
+   * not `column`: a violation naming a canonical column they never wrote, at a
+   * row of a file they never made, is unusable beside their spreadsheet.
+   */
+  source_column: string | null;
   message_en: string;
   message_ar: string;
 }
@@ -138,16 +144,18 @@ function csvCell(value: unknown): string {
 }
 
 export function buildErrorReport(preview: UploadPreview): string {
+  // `your_column` first: the client scans by their own header, not ours.
   const header = [
-    'severity', 'row', 'column', 'rule', 'message_en', 'message_ar',
+    'severity', 'row', 'your_column', 'canonical_column', 'rule',
+    'message_en', 'message_ar',
   ];
   const lines = [header.join(',')];
 
   const push = (severity: string, violations: Violation[]) => {
     for (const v of violations) {
       lines.push([
-        severity, v.row ?? '', v.column ?? '', v.rule,
-        v.message_en, v.message_ar,
+        severity, v.row ?? '', v.source_column ?? v.column ?? '',
+        v.column ?? '', v.rule, v.message_en, v.message_ar,
       ].map(csvCell).join(','));
     }
   };
@@ -184,7 +192,8 @@ export interface ColumnGroup {
 export function groupByColumn(violations: Violation[]): ColumnGroup[] {
   const groups = new Map<string, ColumnGroup>();
   for (const v of violations) {
-    const key = v.column ?? '(row)';
+    // Group by the client's own header where we know it.
+    const key = v.source_column ?? v.column ?? '(row)';
     const existing = groups.get(key);
     if (existing) {
       existing.count += 1;

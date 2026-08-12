@@ -18,6 +18,7 @@ export function aViolation(over: Partial<Violation> = {}): Violation {
     rule: 'date-range',
     row: 47,
     column: 'joining_date',
+    source_column: null,
     message_en: "Row 47, Joining Date: date '0025-01-26' is outside the plausible range.",
     message_ar: "الصف 47، تاريخ الانضمام: التاريخ '0025-01-26' خارج النطاق المعقول.",
     ...over,
