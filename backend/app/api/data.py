@@ -637,6 +637,12 @@ class SourceColumn(BaseModel):
     # scripts/mapping.py. Showing someone their own file in their own session
     # is a different act from keeping it.
     samples: List[str] = []
+    # Every distinct value, but ONLY where a candidate target declares
+    # allowed_values. The client has to map their vocabulary onto ours, and
+    # five samples cannot show them a word that appears on row 900. This is the
+    # same predicate the PII rule uses: a vocabulary's values are vocabulary,
+    # not people. Still display-only - nothing here is persisted either.
+    distinct_values: List[str] = []
     non_empty: int = 0
     candidates: List[MappingCandidate] = []
     current: Optional[str] = None
@@ -725,9 +731,18 @@ def mapping_workspace(upload_id: str,
         values = [str(v) for v in frame[header].to_list() if v not in (None, "")]
         key = mapping_module.normalise(header)
         current = mapped.get(key)
+        targets = [c["canonical"] for c in ranked.get(header, [])]
+        if current:
+            targets.append(current)
+        vocabulary = any(mapping_module.is_vocabulary_column(table, t)
+                         for t in targets)
+        distinct = sorted(set(values))
         source_columns.append(SourceColumn(
             header=header,
-            samples=sorted(set(values))[:MAX_SAMPLES],
+            samples=distinct[:MAX_SAMPLES],
+            distinct_values=(
+                distinct[:mapping_module.MAX_VOCABULARY_SAMPLES]
+                if vocabulary else []),
             non_empty=len(values),
             candidates=[MappingCandidate(**c) for c in ranked.get(header, [])],
             current=current,

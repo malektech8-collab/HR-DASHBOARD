@@ -32,6 +32,13 @@ export interface SourceColumn {
   header: string;
   /** DISPLAY ONLY. Never persisted, never returned to the server. */
   samples: string[];
+  /**
+   * Every distinct value, present only when a candidate target declares
+   * `allowed_values`. Five samples cannot show the client a word that first
+   * appears on row 900, and mapping their vocabulary onto ours needs the whole
+   * set. Display only, like `samples`.
+   */
+  distinct_values: string[];
   non_empty: number;
   candidates: MappingCandidate[];
   current: string | null;
@@ -110,6 +117,20 @@ export function orderForReview(columns: SourceColumn[]): SourceColumn[] {
   const rank = (c: SourceColumn) =>
     (c.decision === 'undecided' && !preselect(c) ? 0 : c.decision === 'undecided' ? 1 : 2);
   return [...columns].sort((a, b) => rank(a) - rank(b));
+}
+
+/**
+ * The client's words in a gated column that are not already canonical.
+ *
+ * These are the ones that BLOCK, and the ones the affirmation is about. A
+ * value that already equals a canonical option needs no mapping and no tick -
+ * asking about it would be the fastest way to make the tick meaningless.
+ */
+export function valuesNeedingMapping(
+  column: SourceColumn, allowedValues: string[],
+): string[] {
+  const allowed = new Set(allowedValues);
+  return column.distinct_values.filter((v) => !allowed.has(v));
 }
 
 export interface MappingProgress {

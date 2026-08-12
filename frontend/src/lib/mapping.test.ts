@@ -12,6 +12,7 @@ import {
   preselect,
   progressOf,
   unaffirmedPairs,
+  valuesNeedingMapping,
 } from './mapping';
 import type { SourceColumn } from './mapping';
 
@@ -19,6 +20,7 @@ function aColumn(over: Partial<SourceColumn> = {}): SourceColumn {
   return {
     header: 'الجنسيه',
     samples: ['سعودي', 'مصري'],
+    distinct_values: [],
     non_empty: 3,
     candidates: [{
       canonical: 'nationality', matched_by: 'label_normalised', confidence: 0.85,
@@ -124,5 +126,27 @@ describe('unaffirmedPairs', () => {
     // The eleven EXCEPTION enums take no affirmation, by decision.
     expect(unaffirmedPairs({ contract_type: { 'محدد': 'Limited' } }, {}, gated))
       .toEqual({});
+  });
+});
+
+describe('valuesNeedingMapping', () => {
+  const OPTIONS = ['Active', 'Inactive', 'Terminated', 'On Leave'];
+
+  it('asks only about words that are not already canonical', () => {
+    // A value that already says "Active" needs no mapping and no tick. Asking
+    // about it is the fastest way to make the tick meaningless.
+    const column = aColumn({ distinct_values: ['نشط', 'Active', 'موقوف'] });
+    expect(valuesNeedingMapping(column, OPTIONS)).toEqual(['نشط', 'موقوف']);
+  });
+
+  it('is empty for a column that is already canonical throughout', () => {
+    const column = aColumn({ distinct_values: ['Active', 'On Leave'] });
+    expect(valuesNeedingMapping(column, OPTIONS)).toEqual([]);
+  });
+
+  it('is empty when the target is not a vocabulary column', () => {
+    // distinct_values is populated only for vocabulary targets, so a name
+    // column asks nothing - and its values were never sent in the first place.
+    expect(valuesNeedingMapping(aColumn(), OPTIONS)).toEqual([]);
   });
 });

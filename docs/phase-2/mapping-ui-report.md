@@ -215,13 +215,41 @@ def test_build_version_records_what_the_human_did_NOT_take():
 | Check | Result |
 |---|---|
 | Demo byte-identity | `19 / 446175.0 / 50.0 / 667 / 15` — **identical**; dbt 158/158, 11/11, reconciliation PASSED |
-| pytest | **293 passed** (251 + 42 new) |
-| vitest | **91 passed** (62 + 29 new) |
-| `tsc --noEmit` | 0 errors |
+| pytest | **294 passed** (251 + 43 new) |
+| vitest | **94 passed** (62 + 32 new) |
+| `tsc -b` (the real one — see below) | 0 errors |
+| `npm run build` | passes |
 | flake8 (CI blocking selection) | 0 |
 | flake8 (full, changed files) | no new findings — `data.py` reports the same 10 pre-existing as `main` |
 
 Demo byte-identity is structural, not lucky: mapping is upload-time only, the demo pipeline never stages an upload, and `test_nothing_downstream_knows_profiles_exist` holds the line. It was run anyway, per guardrail.
+
+### 4.1 CORRECTION — `tsc --noEmit` was checking nothing
+
+The Docker gate failed this PR on `src/components/widgets/MappingScreen.tsx(106,18): error TS6133: 'setValues' is declared but its value is never read.` Gate 1 had passed, and so had my own `npx tsc --noEmit`.
+
+**Both were vacuous.** `frontend/tsconfig.json` is a solution file — `"files": []` plus two project references — so bare `tsc --noEmit` resolves **zero input files** and exits 0 whatever the code says. Measured directly:
+
+```
+$ npx tsc --noEmit --listFilesOnly | wc -l
+0
+```
+
+`noUnusedLocals` and `"include": ["src"]` live in `tsconfig.app.json`, which only `tsc -b` reads. So the only real typecheck in CI has been `tsc -b` inside `npm run build` in **Gate 3**, three gates and ninety seconds later than it should fire.
+
+This invalidates the "tsc --noEmit: 0 errors" line in **every prior cycle report of mine that carried it**, including [`mapping-profiles-report.md`](mapping-profiles-report.md) §7 and [`upload-ui-report.md`](upload-ui-report.md). Those cycles were green on the Docker gate, so the code was in fact typechecked — but not by the check I cited, and I should not have cited it.
+
+**Gate 1 now runs `npx tsc -b`.** The error surfaces in 30 seconds instead of 100, and the comment in the workflow records why.
+
+### 4.2 What the unused variable actually was
+
+Not a stray. `setValues` had no caller because **the value-mapping UI did not exist**: the screen rendered an affirmation for a `values` map nothing could populate, so a client could never map `معلق` to anything and the affirmation block was unreachable. Deleting the variable would have compiled and shipped a screen missing half its purpose.
+
+Fixed properly:
+
+- the workspace route returns `distinct_values` — **every** distinct value, but only where a candidate target declares `allowed_values`. Five samples cannot show a client a word that first appears on row 900, and the same predicate that governs the PII rule at the write governs what is returned here. A name column gets `distinct_values: []` and keeps its five recognition samples. Pinned by test.
+- the screen renders a row per value that is not already canonical, each with the canonical options. Choosing a meaning **clears any existing affirmation for that column** — a changed pair is a new assertion, which is the same rule the backend enforces at save and at load.
+- the save button blocks while any gated value has no meaning, so the screen cannot produce a profile the preview would immediately reject.
 
 **One test was loosened and the loosening was paid for.** `test_nothing_downstream_reads_staging` scans `scripts/` for the string `data/staging`, and `mapping_cli.py` names it in its usage text because staging is where an operator's file actually is. Rather than change the docstring to dodge a text scan, the exemption is explicit and a companion test asserts no pipeline step imports the CLI — the only condition under which the exemption is safe. The exemption is to the letter of the scan; the rule it protects is untouched.
 
@@ -230,12 +258,13 @@ Demo byte-identity is structural, not lucky: mapping is upload-time only, the de
 ## 5. Open
 
 1. **§1.4 stands in full.** Eleven EXCEPTION enums, plausible mis-mapped headers, and attribution-as-record are all still open, by decision.
-2. **The screen has no component test.** `MappingPanel` has eight; `MappingScreen` has none — its rules were extracted into `lib/mapping.ts` and tested as pure functions (pre-selection, ordering, progress, unaffirmed pairs), and the routes it calls are tested through the API. What is untested is the wiring between them. That is the thinnest part of this cycle.
-3. **`derive` is not editable from the screen.** The save request carries `derive: {}`; only the CLI can set one. One rule exists (`nationality_is_saudi`), so this is small — but a client whose export lacks `is_saudi` still needs an operator.
-4. **The alias table does not grow.** It needs mappings from more than one client; single-tenant accumulation would relearn one client's habits and call it knowledge.
-5. **TD-007 (RTL)** is now sharper: the mapping screen is the densest Arabic surface in the product and its chrome is English.
-6. **TD-009** is sharper too: `lib/mapping.ts` is another hand-written mirror of Pydantic models with nothing enforcing the match.
-7. **`mart_wps_status`** still missing; `GET /api/compliance/wps` still 500s.
+2. **The value-mapping step has no component test.** Its rule (`valuesNeedingMapping`) is tested as a pure function and the screen wiring is not — the same gap as item 3 below, and the one that let the missing UI reach CI.
+3. **The screen has no component test.** `MappingPanel` has eight; `MappingScreen` has none — its rules were extracted into `lib/mapping.ts` and tested as pure functions (pre-selection, ordering, progress, unaffirmed pairs), and the routes it calls are tested through the API. What is untested is the wiring between them. That is the thinnest part of this cycle.
+4. **`derive` is not editable from the screen.** The save request carries `derive: {}`; only the CLI can set one. One rule exists (`nationality_is_saudi`), so this is small — but a client whose export lacks `is_saudi` still needs an operator.
+5. **The alias table does not grow.** It needs mappings from more than one client; single-tenant accumulation would relearn one client's habits and call it knowledge.
+6. **TD-007 (RTL)** is now sharper: the mapping screen is the densest Arabic surface in the product and its chrome is English.
+7. **TD-009** is sharper too: `lib/mapping.ts` is another hand-written mirror of Pydantic models with nothing enforcing the match.
+8. **`mart_wps_status`** still missing; `GET /api/compliance/wps` still 500s.
 
 ---
 

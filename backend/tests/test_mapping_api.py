@@ -146,6 +146,29 @@ def test_the_samples_route_is_the_only_one_that_returns_client_values():
     """
     source = io.open(os.path.join(_ROOT, "backend", "app", "api", "data.py"),
                      encoding="utf-8").read()
-    assert "samples=sorted(set(values))[:MAX_SAMPLES]" in source
+    workspace = source.split("def mapping_workspace")[1].split("def save_mapping")[0]
+    assert "samples=distinct[:MAX_SAMPLES]" in workspace
     body = source.split("def save_mapping")[1]
     assert "samples" not in body, "a save must never carry values back"
+    assert "distinct_values" not in body, "nor the vocabulary set"
+
+
+def test_distinct_values_are_scoped_by_the_same_PII_predicate(staged_arabic):
+    """The client must map their whole vocabulary, not five samples of it.
+
+    A status column's words are the thing being mapped, so all of them are
+    returned - five samples cannot show a word that first appears on row 900.
+    A name column gets none, by the same predicate the PII rule uses at the
+    write: a vocabulary's values are vocabulary, a person's are not. Both are
+    display-only; neither is persisted.
+    """
+    body = api.get("/api/data/uploads/{}/columns".format(staged_arabic),
+                   headers=_auth()).json()
+    by_header = {c["header"]: c for c in body["source_columns"]}
+
+    status = by_header[label_ar("employees", "status")]
+    assert set(status["distinct_values"]) == {"نشط", "موقوف"}
+
+    name = by_header[label_ar("employees", "employee_name") + " "]
+    assert name["distinct_values"] == [], "a person's values are not a vocabulary"
+    assert name["samples"], "five for recognition is still allowed"

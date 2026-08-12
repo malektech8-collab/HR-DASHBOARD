@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, Check, RefreshCw, X } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Check, RefreshCw, X } from 'lucide-react';
 
 import {
   fetchWorkspace,
@@ -8,6 +8,7 @@ import {
   progressOf,
   saveMapping,
   unaffirmedPairs,
+  valuesNeedingMapping,
 } from '../../lib/mapping';
 import type { MappingWorkspace, SourceColumn } from '../../lib/mapping';
 
@@ -131,7 +132,17 @@ export const MappingScreen: React.FC<{
     [workspace, chosen, ignored]);
   const gated = Object.keys(workspace?.reject_enum_options ?? {});
   const outstanding = unaffirmedPairs(values, confirmations, gated);
-  const blocked = progress.needAttention > 0 || Object.keys(outstanding).length > 0;
+  // A gated column whose client words still have no meaning blocks too: saving
+  // now would produce a profile the preview immediately rejects.
+  const unmeant = (workspace?.source_columns ?? []).some((column) => {
+    const canonical = ignored[column.header] ? null : chosen[column.header];
+    if (!canonical || !gated.includes(canonical)) return false;
+    const options = workspace?.reject_enum_options[canonical] ?? [];
+    return valuesNeedingMapping(column, options)
+      .some((v) => !values[canonical]?.[v]);
+  });
+  const blocked = progress.needAttention > 0 || unmeant
+    || Object.keys(outstanding).length > 0;
 
   if (error) {
     return <p className="text-xs text-critical">{error}</p>;
@@ -205,6 +216,53 @@ export const MappingScreen: React.FC<{
         </table>
       </div>
 
+      {/* Their vocabulary onto ours. Only for the gated columns, and only for
+          words that are not already canonical - asking about a value that
+          already says "Active" is the fastest way to make the tick
+          meaningless. */}
+      {workspace.source_columns.map((column) => {
+        const canonical = ignored[column.header] ? null : chosen[column.header];
+        if (!canonical || !gated.includes(canonical)) return null;
+        const options = workspace.reject_enum_options[canonical] ?? [];
+        const outstandingValues = valuesNeedingMapping(column, options);
+        if (outstandingValues.length === 0) return null;
+        return (
+          <div key={`values-${column.header}`}
+               className="border-t border-border pt-3 space-y-2"
+               data-testid={`values-${canonical}`}>
+            <p className="text-xs font-semibold">
+              {outstandingValues.length} value
+              {outstandingValues.length === 1 ? '' : 's'} in{' '}
+              <span className="font-mono">{column.header}</span> need a meaning
+            </p>
+            {outstandingValues.map((value) => (
+              <div key={value} className="flex items-center gap-2 text-xs">
+                <span className="font-mono w-32 truncate">{value}</span>
+                <ArrowRight className="w-3 h-3 text-muted-foreground shrink-0" />
+                <select
+                  value={values[canonical]?.[value] ?? ''}
+                  data-testid={`value-${value}`}
+                  onChange={(e) => {
+                    const next = { ...(values[canonical] ?? {}) };
+                    if (e.target.value) next[value] = e.target.value;
+                    else delete next[value];
+                    setValues({ ...values, [canonical]: next });
+                    // A changed pair is a new assertion. Dropping the tick is
+                    // the same rule the backend enforces at save and at load:
+                    // an affirmation is keyed to the pair, never the column.
+                    setConfirmations({ ...confirmations, [canonical]: {} });
+                  }}
+                  className="text-xs bg-transparent border border-border rounded px-2 py-1"
+                >
+                  <option value="">— choose —</option>
+                  {options.map((o) => <option key={o} value={o}>{o}</option>)}
+                </select>
+              </div>
+            ))}
+          </div>
+        );
+      })}
+
       {gated.map((column) => {
         const pairs = values[column] ?? {};
         const entries = Object.entries(pairs);
@@ -262,7 +320,12 @@ export const MappingScreen: React.FC<{
             need a decision.
           </p>
         )}
-        {Object.keys(outstanding).length > 0 && (
+        {unmeant && (
+          <p className="text-xs text-critical">
+            Some values still need a meaning.
+          </p>
+        )}
+        {!unmeant && Object.keys(outstanding).length > 0 && (
           <p className="text-xs text-critical">
             Confirm the value meanings above before saving.
           </p>
