@@ -204,7 +204,15 @@ An export with ~37 headers against a 23-column contract means roughly 14 columns
 
 Cycle A is the one that unblocks real data. Cycle B is the one that makes it a product.
 
-### What cycle B should be built on, sketched now because it shapes A's format
+### What cycle B should be built on — SETTLED INPUT (cycle A executed, `phase-2/mapping-profiles`)
+
+> **Status: settled, not a sketch.** Per the cycle-A ruling, the ladder below and the
+> `matched_by` / `confidence` capture are fixed inputs to cycle B — B starts from them
+> rather than re-deciding them. Cycle A built the format that carries them: `evidence`
+> holds `decision`, `matched_by`, `confidence` and `rejected` per source header, and
+> round-trips through save/load with `rejected` intact (tested). Nothing in cycle A
+> *populates* `matched_by` beyond the hand-written profile — the screen is what fills it,
+> which is the point: **the manual UI is the data collection.**
 
 **The strongest lever already exists: the contract carries `name_en` AND `name_ar`.** A client whose headers are the canonical Arabic labels should match automatically, and even approximate Arabic headers will match after the normalisation in §3. The suggestion engine ladder:
 
@@ -217,6 +225,8 @@ Cycle A is the one that unblocks real data. Cycle B is the one that makes it a p
 Every rung records `matched_by` and `confidence` into `evidence`, which is exactly the labelled data §4's AI mapper needs. **The manual UI is the data collection.**
 
 Screen design principles worth fixing now: unmapped columns first (never a 37-row list where the 3 that need attention are in the middle); sample values shown beside each source column, because a header alone often will not settle it; and progress stated as *"14 of 37 mapped, 3 need attention"* rather than a percentage.
+
+**One boundary the PII rule draws across that second principle:** showing the client their own values on screen, in their own session, is fine — it is their file. *Persisting* those values into the profile is not, for any column that is not a vocabulary column. So cycle B reads sample values from the staged upload at display time and never writes them into `evidence`; `mapping.assert_no_pii` enforces that at the save regardless of what the screen does. This is the same distinction that made `PRODUCT-ARCHITECTURE` §4 wrong (see the cycle-A report §2) — worth stating here so B does not walk back into it.
 
 ---
 

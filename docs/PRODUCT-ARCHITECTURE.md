@@ -99,6 +99,18 @@ A **mapping profile** records how a client's raw columns map to canonical keys, 
 
 **These accumulated mapping profiles are the training ground for the AI column mapper in §5.** Build the manual version first; the automated version becomes far more tractable once real mappings exist to learn from and test against.
 
+> **CORRECTION — sample values (2026-08-12, mapping-profiles cycle A).**
+>
+> An earlier version of this section instructed the profile to record **"verbatim source headers, sample values, derivations…"** without qualification. **That is wrong, and it is the one instruction in §4 that must not be followed as written.**
+>
+> Sample values from an HR export are client PII — names, national IDs, salaries — and a mapping profile is by design an artefact that *accumulates*, is *reused*, and is eventually *fed to a model*. Recording values wholesale would put personal data into the longest-lived object in the system, in direct tension with `PRIVACY_AND_MASKING_POLICY.md` and the PDPL posture.
+>
+> **The rule, as implemented:** verbatim values are recorded **only** for a source column whose canonical target declares `allowed_values`. Everything else records a redacted shape — `dtype`, cardinality, length range, format pattern.
+>
+> This is not a reduction in training signal, which is why it is a correction rather than a compromise. For a **vocabulary** column the values *are* the signal (`نشط`, `A`, `Active` → `Active`) and they are vocabulary, not people. For a **name or salary** column the header is the signal, and the values add nothing a model can use that the shape does not already carry.
+>
+> Enforced by `mapping.assert_no_pii`, which refuses the write, and by test — not by this paragraph.
+
 ### Known real-world data issues the pipeline must handle explicitly
 
 Encountered in actual exports — these are validation cases, not edge cases:
