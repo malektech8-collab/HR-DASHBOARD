@@ -327,6 +327,14 @@ def test_staging_is_gitignored():
                for line in ignore.splitlines()), "client data must not be committable"
 
 
+# scripts/mapping_cli.py names data/staging in its usage text, because staging
+# is where an operator's file actually is. It is an operator TOOL, invoked by
+# hand and never imported by the pipeline - which the next test asserts rather
+# than assumes. The guarantee here is "no pipeline step picks up a staged
+# file", so the exemption is to the letter of the scan and not to the rule.
+STAGING_AWARE = {"staging.py", "mapping_cli.py"}
+
+
 def test_nothing_downstream_reads_staging():
     """Staging is inert by construction, not by convention."""
     offenders = []
@@ -338,10 +346,29 @@ def test_nothing_downstream_reads_staging():
                 if not name.endswith((".py", ".sql", ".yml")):
                     continue
                 path = os.path.join(dirpath, name)
-                if name == "staging.py":
+                if name in STAGING_AWARE:
                     continue
                 if "data/staging" in open(path, encoding="utf-8").read():
                     offenders.append(os.path.relpath(path, _ROOT))
+    assert not offenders, offenders
+
+
+def test_the_pipeline_never_imports_the_operator_cli():
+    """The exemption above is only safe while this holds.
+
+    mapping_cli.py may read a staged file because a human asked it to. If a
+    pipeline step ever imported it, staging would stop being inert and the
+    scan's exemption would be hiding that.
+    """
+    offenders = []
+    for name in ("refresh_all.py", "ingest_raw.py", "build_warehouse.py",
+                 "validate_data.py"):
+        path = os.path.join(_ROOT, "scripts", name)
+        if not os.path.exists(path):
+            continue
+        text = open(path, encoding="utf-8").read()
+        if "mapping_cli" in text:
+            offenders.append(name)
     assert not offenders, offenders
 
 
