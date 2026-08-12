@@ -71,6 +71,32 @@ Risk while open is low — collection is scoped by `pytest.ini` and the Gate 2 s
 - **Remediation**: Remove unused imports and local variable declarations, and clean up debug console logs.
 - **Resolution Notes**: Unused variables and console.debug logging statements in `CommandCenter.tsx` were successfully refactored and cleaned up. Build remains fully stable and clean.
 
+### TD-004 — Commit rollback does not restore `data/silver`
+
+- **Status**: OPEN — recorded 2026-08-12, ruled record-only
+- **Category**: Upload / ingest (P0-2)
+- **Description**: `POST /api/data/uploads/{id}/commit` restores `data/raw/{table}.csv` and `data/onboarding/declared_domains.yml` when the pipeline fails, but not `data/silver`. Ingest has usually already written silver by the time a later stage (the declared-domain guard, the history-depth guard, dbt) fails, so a rolled-back commit leaves silver holding the rejected upload's rows.
+- **Why it is currently survivable**: `build_warehouse` aborts before writing `domain_provenance`, and in real mode `_provenance.provided_domains()` then returns the empty set, so step 2b's default-deny suppresses **every** figure rather than serving data from a rolled-back commit. Verified end to end during P0-2 (`docs/phase-2/p0-2-upload-validation-report.md` §5).
+- **Why it is still debt**: that is defence-in-depth working as intended, and **it should not be load-bearing**. Two independent mechanisms currently have to hold for a failed commit to be safe. Anything that makes `domain_provenance` survive a failed build — a partial write, a retry, a future incremental warehouse — removes the backstop silently.
+- **Remediation**: make silver part of the rollback set, or make the pipeline write silver to a scratch location and promote it only on success. The second is the honest fix and is close to what staging already does one layer up.
+
+### TD-005 — `uploadFile()` in `api.ts` targets a removed endpoint
+
+- **Status**: OPEN — recorded 2026-08-12
+- **Category**: Frontend
+- **Description**: `frontend/src/lib/api.ts` still POSTs to `/api/data/upload`, which P0-2 replaced with the staged flow (`/api/data/uploads`, `…/{id}`, `…/{id}/commit`).
+- **Impact**: None today — no page calls it, which is why P0-2 could redesign the endpoint freely. But it was previously dead and is now dead **and wrong**, so the first contributor to wire an upload UI from it would build against an endpoint that no longer exists.
+- **Remediation**: rewrite alongside the upload UI (P0-2 sequencing step 5). The client needs three calls, not one: stage, preview, commit — and the preview is the step that makes the flow worth having.
+
+### TD-006 — Synthetic JWT layer and plaintext password comparison
+
+- **Status**: OPEN — recorded 2026-08-12, **Phase 3 hardening**
+- **Category**: Security
+- **Description**: `app/core/security.py` holds `MOCK_USER_DB`, a dict literal of three users whose passwords are stored and compared in plaintext (the field is named `hashed_password` but is not hashed). `create_access_token` / `decode_access_token` are a synthetic JWT implementation that no cycle has reviewed.
+- **Impact**: P0-2 put `Depends(get_current_user)` on six data-mutating routes, so this layer is now the only thing standing between an anonymous request and a client's data. It was not load-bearing before; it is now.
+- **Deliberately out of scope of P0-2**: bundling a review of the auth implementation into a data-validation cycle would have made both harder to review, and the dependency is correct regardless of what sits behind it.
+- **Remediation**: real password hashing, a real user store, a reviewed token implementation, and a decision on whether commit requires a specific role (`RoleChecker` already exists and is used by `/api/governance/*`).
+
 ## Exclusions
 
 None of these legacy build warnings affect the functionality of the new `GovernanceWidget` or `/api/governance/status` API endpoint, both of which are fully compliant and bug-free.
