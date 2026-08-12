@@ -1,10 +1,16 @@
 """Structural guards on the frontend source.
 
 These are Python tests scanning TypeScript, which is unusual and deliberate:
-CI runs `pytest backend/tests` and a frontend typecheck, and nothing else. A
-vitest suite would not run, and **a guard that does not run in CI is
-decoration**. Adding a frontend test job is worth doing on its own merits and
-is not this cycle's business, so the guards live where they will fire.
+a source-wide scan sees every file at once, including files no component test
+would import, which is what a "there is exactly one X in the codebase" rule
+needs.
+
+NOT because CI lacks a frontend runner. It has one - Gate 2 runs
+`npx vitest run src/` - and an earlier version of this docstring claimed
+otherwise, which was wrong and is corrected here so nobody cites it as grounds
+to skip writing component tests. What vitest currently collects is 1 file and
+3 tests, all of GovernanceWidget: the harness exists and is nearly empty, which
+is why P0-2 broke the Data Quality upload widget invisibly.
 
 What they hold:
 

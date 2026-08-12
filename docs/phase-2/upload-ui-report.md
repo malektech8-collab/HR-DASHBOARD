@@ -84,7 +84,15 @@ Suggested from the file, required at commit, and the UI additionally demands an 
 
 `api.ts` had **77 fetch sites and not one Authorization header**, while `hooks/useGovernance.ts` held a complete auth client. `fetchWithAuth` moved to `lib/http.ts`; both callers route through it; 75 GET sites were rewritten mechanically and the two POSTs by hand.
 
-A structural test bans `fetch(` outside `lib/http.ts`. It is a **Python** test scanning TypeScript, deliberately: CI runs `pytest backend/tests` and a typecheck, and nothing else — a vitest suite would not run, and **a guard that does not run in CI is decoration**. It also strips comments first, because the equivalent guard in P0-2 failed on its own prose.
+A structural test bans `fetch(` outside `lib/http.ts`. It is a **Python** test scanning TypeScript, which is defensible as a source-wide AST-style scan: it sees every file at once, including files no component test would import. It also strips comments first, because the equivalent guard in P0-2 failed on its own prose.
+
+> **Correction — the justification I originally gave for this was factually wrong.**
+>
+> I wrote: *"CI runs `pytest backend/tests` and a typecheck, and nothing else — a vitest suite would not run, and a guard that does not run in CI is decoration."*
+>
+> **CI does run vitest.** `.github/workflows/ci-cd-pipeline.yml` line 82, in Gate 2: `npx vitest run src/`. I did not check the workflow before asserting what it ran.
+>
+> The scan stays, on the merits above rather than on that claim. But the wrong justification had to go, because someone could later cite "CI doesn't run frontend tests" as grounds not to write any.
 
 `ApiError` carries the status, so a page branches on `isUnauthorized` rather than string-matching a message.
 
@@ -172,7 +180,9 @@ One backend fix from the rig: `get_onboarding_status` resolved `conn` before `cu
 
 1. **TD-007 — RTL/i18n**, scheduled next per ruling. The violation list is the densest Arabic in the product and mixed Arabic/English in an LTR table is legible but not good.
 2. **TD-008 — the template is 23 bare headers**, not the formatted bilingual Excel `PRODUCT-ARCHITECTURE` §4 specifies. The UI makes the gap sharper: the flow says "download the template, fill it", and the template does not carry enough to fill it correctly. Dropdown validation on enum columns would have prevented the `Actif` rejection in §1.
-3. **No frontend test job in CI.** The structural guards run in pytest, which is why they run at all. That is a workaround; the P0-2 widget breakage would have been caught by a real frontend test suite. Worth its own small cycle.
+3. **Frontend test coverage is one component.** CI runs `npx vitest run src/` in Gate 2 — and it collects **1 test file, 3 tests**, all of `GovernanceWidget`. That is the gap the `uploadFile()` correction exposed, stated precisely: *vitest runs, but nothing covered the Data Quality upload widget, so a live feature broke invisibly in P0-2 and stayed broken until this cycle read the imports.*
+
+   It is not that the harness is missing; it is that almost nothing is in it. The pages have no tests at all, and the new onboarding flow — a step machine with a disabled-commit rule and a declaration gate — is exactly the shape that component tests are good at and a source scan is not. Worth its own cycle, and worth doing before the RTL work (TD-007) rather than after, since RTL touches every page.
 4. **Commit is synchronous** (900s timeout) with a progress message but no per-stage detail.
 5. **Mapping profiles** (§4) — a client whose export has their own column names still cannot onboard; the UI surfaces "unexpected columns" but cannot reconcile them.
 
