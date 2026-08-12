@@ -5,6 +5,7 @@ data/gold/*
 # Deployment state and in-flight uploads: client data, never repo content.
 data/onboarding/*
 data/staging/*
+data/mapping/*
 warehouse/*.duckdb
 warehouse/*.wal
 .env
