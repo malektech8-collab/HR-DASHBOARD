@@ -58,6 +58,37 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
 
+        # EXPLICIT, and it is the strict option on purpose.
+        #
+        # pydantic-settings defaults to "forbid" already; stating it makes the
+        # choice deliberate rather than inherited, because the alternative was
+        # considered and rejected.
+        #
+        # The alternative was "ignore", the one-character fix for a real
+        # defect: .env.example shipped VITE_API_URL, so copying it to .env -
+        # the documented first step - made this class raise at import and the
+        # backend could not start.
+        #
+        # "forbid" was kept because it catches a variable that does not belong
+        # in this file AT ALL, which is exactly the defect that occurred. The
+        # right fix was to move the frontend variable to frontend/.env.example,
+        # where Vite actually reads it; it was never read here, so its only
+        # effect was the crash.
+        #
+        # MEASURED LIMITATION, so nobody relies on this for more than it does:
+        # "forbid" does NOT catch a typo that PREFIXES an existing field name.
+        # pydantic-settings matches those against the field and discards the
+        # remainder silently, so both of these are ACCEPTED and ignored:
+        #
+        #     DATA_MODEE=real      -> DATA_MODE keeps its default, no error
+        #     JWT_SECRETT=abc      -> JWT_SECRET stays unset, no error
+        #
+        # whereas VITE_API_URL and TOTALLY_UNRELATED are refused. So this
+        # setting protects against misplaced variables, not against misspelled
+        # ones. Real mode's own fail-closed checks are what catch the second
+        # kind: an unset JWT_SECRET refuses to start (app/core/security.py).
+        extra = "forbid"
+
 
 settings = Settings()
 
