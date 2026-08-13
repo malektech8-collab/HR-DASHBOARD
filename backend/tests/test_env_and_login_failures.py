@@ -22,6 +22,20 @@ from app.core import security, users  # noqa: E402
 from app.core.security import Role  # noqa: E402
 
 NL = chr(10)
+
+# Any key whose NAME suggests it carries a credential. Widened after the
+# incident: the original pattern omitted CREDENTIAL, and a pattern that has to
+# be right the first time is a pattern that will be wrong eventually.
+SECRETISH_PATTERN = (
+    r"^(?P<name>[A-Z0-9_]*"
+    r"(SECRET|PASSWORD|PASSWD|TOKEN|KEY|CREDENTIAL|API_KEY|PRIVATE)"
+    r"[A-Z0-9_]*)=(?P<value>.*)$")
+
+# The exact value that was committed to .env.example:46 in bbe126e and reached
+# main. It is BURNED - recorded here so the guard below can prove it would
+# catch this specific string, and so nobody ever reintroduces it believing it
+# is a harmless placeholder.
+BURNED_SECRET = "DKILo9YWGHA4WyJZ627-CGuzZfmQz5fGwqfTeJzN5SFT1RFMRC64vzK0u5nHFILA"
 ENV_EXAMPLE = os.path.join(_ROOT, ".env.example")
 FRONTEND_ENV_EXAMPLE = os.path.join(_ROOT, "frontend", ".env.example")
 
@@ -231,8 +245,7 @@ def test_the_env_example_carries_no_secret_VALUES():
     """
     import re
 
-    secretish = re.compile(
-        r"^(?P<name>[A-Z0-9_]*(SECRET|PASSWORD|TOKEN|KEY)[A-Z0-9_]*)=(?P<value>.*)$")
+    secretish = re.compile(SECRETISH_PATTERN)
     offenders = []
     with open(ENV_EXAMPLE, encoding="utf-8") as handle:
         for number, line in enumerate(handle, start=1):
@@ -294,3 +307,61 @@ def test_the_path_check_would_catch_the_defect_it_was_written_for(tmp_path):
     resolved = os.path.realpath(os.path.join(repo, match.group("value")))
     assert not resolved.startswith(repo + os.sep), (
         "the historical value must be recognised as escaping the repo")
+
+
+def test_the_secret_guard_catches_the_BURNED_value_restored(tmp_path):
+    """SP-001 for the secret guard: watch it FAIL on the real incident.
+
+    Restores the exact value that reached main into a THROWAWAY copy of
+    .env.example, runs the same rule the guard runs, and asserts it is caught.
+    The repository's own file is never touched.
+
+    Without this, `test_the_env_example_carries_no_secret_VALUES` passing means
+    only that it ran - not that it can see anything.
+    """
+    import re
+    import shutil
+
+    throwaway = tmp_path / ".env.example"
+    shutil.copy2(ENV_EXAMPLE, str(throwaway))
+    restored = throwaway.read_text(encoding="utf-8").replace(
+        "JWT_SECRET=", "JWT_SECRET=" + BURNED_SECRET, 1)
+    throwaway.write_text(restored, encoding="utf-8")
+
+    secretish = re.compile(SECRETISH_PATTERN)
+    offenders = [
+        match.group("name")
+        for match in (secretish.match(line.strip())
+                      for line in throwaway.read_text(encoding="utf-8").splitlines())
+        if match and match.group("value").strip()
+    ]
+    assert "JWT_SECRET" in offenders, (
+        "the guard must catch the exact value that reached main")
+
+    # ...and the repository's own file is still clean, having never been edited.
+    with open(ENV_EXAMPLE, encoding="utf-8") as handle:
+        assert BURNED_SECRET not in handle.read()
+
+
+@pytest.mark.parametrize("line,caught", [
+    ("JWT_SECRET=abc123", True),
+    ("AWS_SECRET_ACCESS_KEY=abc123", True),
+    ("SOME_API_TOKEN=abc123", True),
+    ("DB_PASSWORD=abc123", True),
+    ("CLIENT_CREDENTIAL=abc123", True),
+    ("PRIVATE_KEY=abc123", True),
+    ("JWT_SECRET=", False),          # naming it is the point of the file
+    ("DATA_MODE=demo", False),       # not a credential
+    ("# JWT_SECRET=abc123", False),  # commented out
+])
+def test_the_secret_guard_pattern_on_known_inputs(line, caught):
+    """The pattern itself, on inputs chosen to separate naming from populating.
+
+    CREDENTIAL was missing from the first version of this pattern. It is here
+    because the incident showed that the set has to be wider than the one
+    variable that happened to go wrong.
+    """
+    import re
+
+    match = re.match(SECRETISH_PATTERN, line.strip())
+    assert bool(match and match.group("value").strip()) is caught
