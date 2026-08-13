@@ -211,3 +211,86 @@ def test_the_data_routes_already_answered_this_way(
                              headers={"Authorization": "Bearer anything"})
     assert response.status_code == 503
     assert "JWT_SECRET" in response.json()["detail"]
+
+
+# --------------------------------------------------------------------------
+# GAP-002's targeted check, plus the defect that found it
+# --------------------------------------------------------------------------
+
+def test_the_env_example_carries_no_secret_VALUES():
+    """A committed example must name secrets, never populate them.
+
+    THE DEFECT THIS EXISTS FOR. Commit bbe126e put a real 64-character
+    JWT_SECRET into .env.example and it reached main. Anyone copying the
+    example to .env - the documented first step - would then have been running
+    on a signing key published in the repository, which is precisely the
+    condition PR #32 was written to eliminate. It came back through the front
+    door, in the file that tells people how to set the thing up.
+
+    Names are fine and are the point of the file. Values are not.
+    """
+    import re
+
+    secretish = re.compile(
+        r"^(?P<name>[A-Z0-9_]*(SECRET|PASSWORD|TOKEN|KEY)[A-Z0-9_]*)=(?P<value>.*)$")
+    offenders = []
+    with open(ENV_EXAMPLE, encoding="utf-8") as handle:
+        for number, line in enumerate(handle, start=1):
+            match = secretish.match(line.strip())
+            if match and match.group("value").strip():
+                offenders.append("{}:{}".format(number, match.group("name")))
+    assert not offenders, (
+        "these carry a VALUE in a committed file: " + ", ".join(offenders))
+
+
+def test_path_valued_settings_in_the_example_resolve_inside_the_repo():
+    """GAP-002's targeted check, chosen over doubling the CI suite.
+
+    DATABASE_PATH=../warehouse/hr_analytics.duckdb was a VALID variable with a
+    WRONG value: correct only when the process starts in backend/, and from the
+    repo root - where the pipeline and uvicorn both run - it resolved OUTSIDE
+    the repository and every endpoint returned 500.
+
+    Neither of the other two checks in this file would have caught it. It is a
+    declared field, and constructing Settings from it succeeds. Only actually
+    resolving the path finds it.
+
+    A full CI suite run under the example .env would also have found it, at the
+    cost of doubling the slowest gate. This costs nothing.
+    """
+    import re
+
+    path_like = re.compile(r"^(?P<name>[A-Z0-9_]*(PATH|DIR)[A-Z0-9_]*)=(?P<value>.+)$")
+    repo = os.path.realpath(_ROOT)
+    offenders = []
+    with open(ENV_EXAMPLE, encoding="utf-8") as handle:
+        for number, line in enumerate(handle, start=1):
+            match = path_like.match(line.strip())
+            if not match:
+                continue
+            value = match.group("value").strip()
+            if not value:
+                continue
+            # Resolve the way the process will: relative to the repo root,
+            # which is where the pipeline and the server are started.
+            resolved = os.path.realpath(os.path.join(repo, value))
+            if not (resolved == repo or resolved.startswith(repo + os.sep)):
+                offenders.append("{}:{}={} -> {}".format(
+                    number, match.group("name"), value, resolved))
+    assert not offenders, (
+        "these resolve OUTSIDE the repository when the process starts at the "
+        "repo root:\n  " + "\n  ".join(offenders))
+
+
+def test_the_path_check_would_catch_the_defect_it_was_written_for(tmp_path):
+    """SP-001: watch it fail. Without this, the check above passing proves
+    only that it ran, not that it looks."""
+    import re
+
+    path_like = re.compile(r"^(?P<name>[A-Z0-9_]*(PATH|DIR)[A-Z0-9_]*)=(?P<value>.+)$")
+    repo = os.path.realpath(_ROOT)
+    bad = "DATABASE_PATH=../warehouse/hr_analytics.duckdb"
+    match = path_like.match(bad)
+    resolved = os.path.realpath(os.path.join(repo, match.group("value")))
+    assert not resolved.startswith(repo + os.sep), (
+        "the historical value must be recognised as escaping the repo")
