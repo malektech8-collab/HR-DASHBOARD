@@ -22,7 +22,7 @@ If either line appears **uncommented**, comment it out:
 
 | Line | Why it breaks |
 |---|---|
-| `VITE_API_URL=...` | A frontend variable in the shared `.env`. The backend refused to start: `ValidationError: 1 validation error for Settings / vite_api_url  Extra inputs are not permitted`. Now tolerated, but a stale `.env` on an older build still fails. |
+| `VITE_API_URL=...` | A frontend variable in a file only the backend reads. It **still fails**, by design — `Settings` declares `extra = "forbid"`, so the backend will not start: `ValidationError: 1 validation error for Settings / vite_api_url  Extra inputs are not permitted`. **Delete the line from `.env`.** Vite never read it there; if you need to override the API URL, it belongs in `frontend/.env` (see `frontend/.env.example`). |
 | `DATABASE_PATH=../warehouse/hr_analytics.duckdb` | Relative, and correct only from `backend\`. Run from the repo root — as the pipeline and uvicorn both are — it resolves **outside the repo**, and every endpoint fails with `duckdb.IOException: Cannot open file "...\repos\hr-dashboard\..\warehouse\hr_analytics.duckdb"`. Leave it unset; `config.py` computes the right absolute path itself. |
 
 ---

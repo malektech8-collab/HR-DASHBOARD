@@ -57,20 +57,6 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = ".env"
-        # One .env drives the pipeline, the backend AND the frontend - which is
-        # the documented arrangement (.env.example ships VITE_API_URL, and
-        # scripts/build_warehouse.py loads the same file). pydantic-settings
-        # defaults to extra="forbid", so a frontend variable in that shared file
-        # made `Settings()` raise at IMPORT and the backend could not start:
-        #
-        #   ValidationError: 1 validation error for Settings
-        #   vite_api_url  Extra inputs are not permitted
-        #
-        # An operator following the documented first step - copy .env.example to
-        # .env - hit it immediately, before any real data was involved. Ignore
-        # what is not ours rather than refuse to start because someone else's
-        # variable is present in a file we share by design.
-        extra = "ignore"
 
         # EXPLICIT, and it is the strict option on purpose.
         #
