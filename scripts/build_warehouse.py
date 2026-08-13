@@ -434,72 +434,19 @@ def build_warehouse():
     INSERT INTO command_center_overview_data VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     """, (cc_active_headcount, cc_payroll_cost, cc_attendance_compliance_pct, cc_saudization_pct, cc_open_er_cases, cc_open_requisitions, cc_review_completion_pct, cc_total_active_exceptions, cc_modules_healthy, cc_last_data_refresh, cc_latest_source_business_date, cc_data_quality_score))
 
+    # Reconciliation. Extracted to scripts/reconciliation.py in 2026-08.
+    #
+    # The eleven checks that used to live here compared the overview table
+    # against the marts it had just been POPULATED FROM, fifteen lines above,
+    # in this same connection. Eight of them could not fail. They now recompute
+    # independently from the base models, and every one of them is tamper-
+    # tested in backend/tests/test_reconciliation.py - the check is watched
+    # failing before it is trusted to pass.
+    import reconciliation
     print("Running Command Center integration reconciliation checks...")
-    
-    # 1. Active Headcount
-    kpi_hc = conn.execute("SELECT active_headcount FROM mart_command_center_overview").fetchone()[0]
-    ref_hc = conn.execute("SELECT active_headcount FROM mart_workforce_kpis").fetchone()[0]
-    if kpi_hc != ref_hc:
-        raise ValueError(f"Command Center Active Headcount ({kpi_hc}) != Workforce Active Headcount ({ref_hc})")
-
-    # 2. Payroll Cost
-    kpi_pay = conn.execute("SELECT payroll_cost FROM mart_command_center_overview").fetchone()[0]
-    ref_pay = conn.execute("SELECT total_payroll_cost FROM mart_payroll_kpis").fetchone()[0]
-    if abs(kpi_pay - ref_pay) > 0.01:
-        raise ValueError(f"Command Center Payroll Cost ({kpi_pay}) != Payroll Cost ({ref_pay})")
-
-    # 3. Attendance Compliance
-    kpi_att = conn.execute("SELECT attendance_compliance_pct FROM mart_command_center_overview").fetchone()[0]
-    ref_att = conn.execute("SELECT attendance_compliance_pct FROM mart_attendance_kpis").fetchone()[0]
-    if abs(kpi_att - ref_att) > 0.001:
-        raise ValueError(f"Command Center Attendance Compliance ({kpi_att}) != Attendance Compliance ({ref_att})")
-
-    # 4. Saudization %
-    kpi_saudi = conn.execute("SELECT saudization_pct FROM mart_command_center_overview").fetchone()[0]
-    ref_saudi = conn.execute("SELECT saudization_pct FROM mart_compliance_kpis").fetchone()[0]
-    if abs(kpi_saudi - ref_saudi) > 0.001:
-        raise ValueError(f"Command Center Saudization ({kpi_saudi}) != Compliance Saudization ({ref_saudi})")
-
-    # 5. Open ER Cases
-    kpi_er = conn.execute("SELECT open_er_cases FROM mart_command_center_overview").fetchone()[0]
-    ref_er = conn.execute("SELECT total_open_er_cases FROM mart_er_kpis").fetchone()[0]
-    if kpi_er != ref_er:
-        raise ValueError(f"Command Center Open ER Cases ({kpi_er}) != ER Open Cases ({ref_er})")
-
-    # 6. Open Requisitions
-    kpi_req = conn.execute("SELECT open_requisitions FROM mart_command_center_overview").fetchone()[0]
-    ref_req = conn.execute("SELECT open_requisitions FROM mart_recruitment_kpis").fetchone()[0]
-    if kpi_req != ref_req:
-        raise ValueError(f"Command Center Open Requisitions ({kpi_req}) != Recruitment Open Requisitions ({ref_req})")
-
-    # 7. Review Completion %
-    kpi_talent = conn.execute("SELECT review_completion_pct FROM mart_command_center_overview").fetchone()[0]
-    ref_talent = conn.execute("SELECT review_completion_pct FROM mart_talent_kpis").fetchone()[0]
-    if abs(kpi_talent - ref_talent) > 0.001:
-        raise ValueError(f"Command Center Review Completion ({kpi_talent}) != Talent Review Completion ({ref_talent})")
-
-    # 8. Total Active Exceptions
-    kpi_exc = conn.execute("SELECT total_active_exceptions FROM mart_command_center_overview").fetchone()[0]
-    actual_exc = conn.execute("SELECT COUNT(*) FROM base_command_center_exception_sources").fetchone()[0]
-    if kpi_exc != actual_exc:
-        raise ValueError(f"Command Center Total Active Exceptions ({kpi_exc}) != actual combined exceptions ({actual_exc})")
-
-    # 9. Modules registry count = 9
-    reg_count = conn.execute("SELECT COUNT(*) FROM base_command_center_module_registry").fetchone()[0]
-    if reg_count != 9:
-        raise ValueError(f"Command Center Module registry count ({reg_count}) != 9")
-
-    # 10. Data freshness rows = 9
-    fresh_count = conn.execute("SELECT COUNT(*) FROM mart_command_center_data_freshness").fetchone()[0]
-    if fresh_count != 9:
-        raise ValueError(f"Command Center Freshness rows count ({fresh_count}) != 9")
-
-    # 11. Navigation status rows = 9
-    nav_count = conn.execute("SELECT COUNT(*) FROM mart_command_center_navigation_status").fetchone()[0]
-    if nav_count != 9:
-        raise ValueError(f"Command Center Navigation status rows count ({nav_count}) != 9")
-
-    print("Command Center integration reconciliation checks PASSED.")
+    performed = reconciliation.run(conn)
+    print("Command Center integration reconciliation checks PASSED "
+          "({} independent checks).".format(performed))
     
     conn.close()
     print("DuckDB database warehouse creation complete.")

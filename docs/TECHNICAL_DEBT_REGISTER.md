@@ -129,6 +129,55 @@ Risk while open is low — collection is scoped by `pytest.ini` and the Gate 2 s
 - **Impact**: the two halves agree by convention and review. Convention has failed here before: `TemplateInfo` was missing `label` and `available` for two cycles because the endpoint returned fields the interface never declared, and it surfaced only when a new page tried to read one.
 - **Remediation**: generate types from `app.openapi()` (`openapi-typescript` or similar) into a checked-in file, and fail CI when the generated output differs from the committed one — the same shape as the path contract, one level deeper. Worth doing before the client-facing surface grows further.
 
+## Standing practices
+
+These are not debt items. They are rules adopted after a defect class appeared
+more than once, recorded here because the register is where someone looks
+before trusting a check.
+
+### SP-001 — A verification line earns its place only once someone has confirmed it can fail
+
+- **Adopted**: 2026-08-13, after the second instance in two cycles.
+- **Rule**: before a check, gate or figure is quoted as evidence, someone must
+  have watched it FAIL. Tamper the input, see it go red, restore. A check that
+  has only ever passed is indistinguishable from a check that cannot fail.
+- **Scope**: CI steps, reconciliation checks, pinned figures in cycle reports,
+  and any assertion offered at review as proof that something works.
+
+#### The two instances
+
+| | What was quoted | What it actually did |
+|---|---|---|
+| **1** | `npx tsc --noEmit` — "0 errors", every cycle | Typechecked **zero files**. `frontend/tsconfig.json` is a solution file with `"files": []` and only project references, so bare `tsc` resolved no inputs and exited 0 on any error. `npx tsc --noEmit --listFilesOnly \| wc -l` returned `0`. Found only when the Docker gate, which runs `tsc -b`, failed on an unused variable. |
+| **2** | `Command Center integration reconciliation checks PASSED` | Eight of eleven checks compared `command_center_overview_data` against the marts it had been **populated from fifteen lines earlier in the same connection**. Tampering `mart_workforce_kpis` with `+ 1` left the pipeline green. |
+
+Both were offered as evidence for many cycles and **accepted at review each
+time**. Nobody asked what they covered, on either side of the review. That is
+what makes this a class rather than two mistakes: a check nobody has
+interrogated is not evidence, it is a habit that looks like one.
+
+#### What the rule costs, and why it is worth it
+
+One command, once, per check. `--listFilesOnly` would have answered the first
+in seconds at any point in six cycles. A `+ 1` in a model would have answered
+the second.
+
+#### Where it is enforced
+
+- `backend/tests/test_reconciliation.py` — every reconciliation check has a
+  paired test that tampers its input and asserts it raises. Two structural
+  tests additionally forbid a check from reading the artefact it validates.
+- `backend/tests/test_demo_gate.py` — the five demo figures and the dbt counts
+  are asserted rather than eyeballed; `HR_WAREHOUSE_PATH` exists so the gate
+  itself can be pointed at a doctored warehouse and watched failing.
+- CI Gate 1 runs `npx tsc -b`, which reads the project references.
+
+#### Known gaps in the practice
+
+Not every check in the repo has been tamper-proven — only those written or
+touched since adoption. Applying it retroactively to the rest of the suite is
+open work, not a completed sweep, and should not be implied otherwise.
+
 ## Exclusions
 
 None of these legacy build warnings affect the functionality of the new `GovernanceWidget` or `/api/governance/status` API endpoint, both of which are fully compliant and bug-free.
