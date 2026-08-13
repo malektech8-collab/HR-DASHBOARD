@@ -239,6 +239,8 @@ $ npx tsc --noEmit --listFilesOnly | wc -l
 
 This invalidates the "tsc --noEmit: 0 errors" line in **every prior cycle report of mine that carried it**, including [`mapping-profiles-report.md`](mapping-profiles-report.md) §7 and [`upload-ui-report.md`](upload-ui-report.md). Those cycles were green on the Docker gate, so the code was in fact typechecked — but not by the check I cited, and I should not have cited it.
 
+**And it was not only a reporting error.** The claim was put forward as evidence cycle after cycle and **accepted at review each time**. Nobody asked what `tsc --noEmit` actually covered, including me — the line looked like verification, so it passed for verification on both sides of the review. A check nobody has interrogated is not evidence; it is a habit. The lesson is not "cite `tsc -b` instead", it is that a verification line earns its place only once someone has confirmed it can fail. `--listFilesOnly` would have answered it in one command at any point in the last six cycles.
+
 **Gate 1 now runs `npx tsc -b`.** The error surfaces in 30 seconds instead of 100, and the comment in the workflow records why.
 
 ### 4.2 What the unused variable actually was
