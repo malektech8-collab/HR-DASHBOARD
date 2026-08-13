@@ -1,0 +1,300 @@
+# Alias table - rung 4 of the header suggestion ladder.
+#
+# Real Arabic HR exports do not use the contract's own labels. These are the
+# spellings seen in practice, mapped to the canonical column they mean.
+# Matching happens AFTER normalisation (scripts/text.py), so alef/ya/ta-marbuta
+# variants, tatweel, diacritics and stray whitespace need no entry here.
+#
+# This file is repo content, reviewed like code - not operator-supplied data -
+# which is why it is not subject to the no-expression guard that profiles are.
+#
+# It is seeded by hand and will be wrong somewhere. That is why rung 4 is
+# SUGGESTED rather than pre-selected, and why a rejected alias is recorded in
+# the profile evidence: the table gets better from what a human rejects, which
+# is the only signal that says an alias was plausible AND wrong.
+#
+# It deliberately does NOT auto-grow from accumulated profiles. That needs
+# mappings from more than one client; single-tenant accumulation would relearn
+# one client's habits and call it knowledge.
+#
+# NOTE the deliberate collisions: "الحالة" is status on employees, request_status
+# on hr_requests and case_status on employee_relations; "المشروع" is project on
+# three tables. Aliases are scoped per table for exactly that reason.
+attendance:
+  absence_days:
+  - أيام الغياب
+  - الغياب
+  - Absent
+  actual_check_in:
+  - وقت الحضور
+  - الدخول
+  - Check In
+  - In
+  actual_check_out:
+  - وقت الانصراف
+  - الخروج
+  - Check Out
+  - Out
+  attendance_date:
+  - التاريخ
+  - تاريخ الحضور
+  - Date
+  employee_id:
+  - الرقم الوظيفي
+  - رقم الموظف
+  - Emp No
+  late_minutes:
+  - دقائق التأخير
+  - التأخير
+  - Late
+  missing_punch_count:
+  - بصمة ناقصة
+  - Missing Punch
+  overtime_hours:
+  - ساعات إضافية
+  - الإضافي
+  - OT Hours
+  project:
+  - المشروع
+  - الموقع
+  - Project
+  - Site
+  shift_name:
+  - الوردية
+  - المناوبة
+  - Shift
+compliance:
+  employee_id:
+  - الرقم الوظيفي
+  - رقم الموظف
+  gosi_salary:
+  - راتب التأمينات
+  - أجر التأمينات
+  - GOSI Salary
+  gosi_status:
+  - التأمينات
+  - حالة التأمينات
+  - GOSI
+  health_insurance_status:
+  - التأمين الصحي
+  - الضمان الصحي
+  - CCHI
+  iqama_expiry:
+  - انتهاء الإقامة
+  - تاريخ انتهاء الاقامة
+  - Iqama Expiry
+  mudad_status:
+  - مدد
+  - حالة مدد
+  - Mudad
+  occupation_code:
+  - رمز المهنة
+  - كود المهنة
+  - Occupation Code
+  period:
+  - الشهر
+  - الفترة
+  - Month
+  qiwa_status:
+  - قوى
+  - حالة قوى
+  - Qiwa
+  work_permit_expiry:
+  - انتهاء رخصة العمل
+  - رخصة العمل
+  - Work Permit Expiry
+employee_relations:
+  case_id:
+  - رقم القضية
+  - معرف القضية
+  - Case No
+  case_number:
+  - رقم القضية العمالية
+  - الرقم المرجعي
+  - Reference
+  case_status:
+  - حالة القضية
+  - الحالة
+  - Case Status
+  case_type:
+  - نوع القضية
+  - نوع الحالة
+  - Case Type
+  employee_id:
+  - الرقم الوظيفي
+  - رقم الموظف
+  owner_id:
+  - المسؤول
+  - المكلف
+  - Owner
+  priority:
+  - الأولوية
+  - الأهمية
+  - Priority
+employees:
+  basic_salary:
+  - الراتب الأساسي
+  - الراتب
+  - Basic
+  - Basic Salary
+  contract_end_date:
+  - نهاية العقد
+  - تاريخ انتهاء العقد
+  - Contract End
+  contract_type:
+  - نوع العقد
+  - Contract Type
+  cost_center:
+  - مركز التكلفة
+  - Cost Centre
+  - CC
+  department:
+  - القسم
+  - الإدارة
+  - Dept
+  - Department
+  employee_id:
+  - الرقم الوظيفي
+  - رقم الموظف
+  - الرقم
+  - Emp No
+  - Employee No
+  - Staff ID
+  employee_name:
+  - الاسم
+  - اسم الموظف
+  - الاسم الكامل
+  - Name
+  - Full Name
+  employment_type:
+  - نوع التوظيف
+  - طبيعة العمل
+  - Employment Type
+  end_of_service_type:
+  - سبب ترك العمل
+  - نوع نهاية الخدمة
+  - Leaving Reason
+  grade:
+  - الدرجة
+  - المستوى
+  - Grade
+  - Level
+  housing_allowance:
+  - بدل السكن
+  - السكن
+  - Housing
+  job_title:
+  - المسمى الوظيفي
+  - الوظيفة
+  - المهنة
+  - Position
+  - Title
+  joining_date:
+  - تاريخ التعيين
+  - تاريخ المباشرة
+  - تاريخ الالتحاق
+  - Hire Date
+  - Join Date
+  - DOJ
+  manager_id:
+  - الرئيس المباشر
+  - رقم المدير
+  - Manager
+  - Line Manager
+  nationality:
+  - الجنسية
+  - جنسية الموظف
+  - Nationality
+  project:
+  - المشروع
+  - الموقع
+  - Project
+  - Site
+  status:
+  - الحالة
+  - حالة الموظف
+  - Status
+  - Emp Status
+  termination_date:
+  - تاريخ ترك العمل
+  - تاريخ الاستقالة
+  - Exit Date
+  - Last Working Day
+  transport_allowance:
+  - بدل النقل
+  - المواصلات
+  - Transport
+hr_requests:
+  employee_id:
+  - الرقم الوظيفي
+  - رقم الموظف
+  owner:
+  - المسؤول
+  - المكلف
+  - Owner
+  - Assignee
+  request_id:
+  - رقم الطلب
+  - معرف الطلب
+  - Request No
+  - Ticket
+  request_status:
+  - حالة الطلب
+  - الحالة
+  - Status
+  request_type:
+  - نوع الطلب
+  - الطلب
+  - Request Type
+payroll:
+  basic_salary:
+  - الراتب الأساسي
+  - الأساسي
+  - Basic
+  cost_center:
+  - مركز التكلفة
+  - Cost Centre
+  deductions:
+  - الخصومات
+  - الاستقطاعات
+  - Deductions
+  employee_id:
+  - الرقم الوظيفي
+  - رقم الموظف
+  - Emp No
+  - Staff ID
+  gross_pay:
+  - إجمالي الراتب
+  - الإجمالي
+  - Gross
+  housing_allowance:
+  - بدل السكن
+  - السكن
+  - Housing
+  net_pay:
+  - صافي الراتب
+  - الصافي
+  - Net
+  - Net Pay
+  other_allowances:
+  - بدلات أخرى
+  - بدلات إضافية
+  - Other Allowances
+  overtime_amount:
+  - بدل الساعات الإضافية
+  - قيمة الإضافي
+  - OT Amount
+  payroll_period:
+  - الشهر
+  - فترة الرواتب
+  - الفترة
+  - Month
+  - Period
+  payroll_status:
+  - حالة الصرف
+  - حالة الراتب
+  - Payment Status
+  transport_allowance:
+  - بدل النقل
+  - المواصلات
+  - Transport
