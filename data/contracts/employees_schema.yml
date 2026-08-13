@@ -297,14 +297,21 @@ columns:
   name_ar: نوع نهاية الخدمة
   type: VARCHAR
   required: false
-  description_en: 'Reason employment ended. Required when status is Terminated;
-    leave empty for active employees.'
+  description_en: 'Reason employment ended. Required when status is Terminated; leave empty
+    for active employees. `Unspecified` means the SOURCE DID NOT RECORD the legal grounds.
+    It is not a category of termination and must not be treated as one - no award, notice
+    period or entitlement can be derived from it. FOR A FUTURE MART AUTHOR: `Unspecified`
+    is an ABSENCE, not an eighth category. Grouping it beside Article 80 in a breakdown is
+    the same defect as COALESCE(project, ''Unassigned'') - it renders a gap as a slice. Report
+    the seven real reasons as categories and `Unspecified` as a coverage note: "N of M leavers
+    have no recorded grounds".'
   required_when:
     column: status
     equals: Terminated
-  description_ar: >-
-    سبب انتهاء الخدمة. يعبأ فقط للموظفين المنتهية خدمتهم، ويترك فارغاً للموظفين
-    على رأس العمل.
+  description_ar: 'سبب انتهاء الخدمة. يعبأ فقط للموظفين المنتهية خدمتهم، ويترك فارغاً للموظفين
+    على رأس العمل. القيمة `Unspecified` تعني أن النظام المصدر لم يسجّل السبب النظامي، وهي
+    ليست نوعاً من أنواع إنهاء الخدمة ولا يجوز التعامل معها كذلك: لا يمكن اشتقاق أي مكافأة
+    أو إشعار أو استحقاق منها.'
   example: Resignation
   allowed_values:
   - Resignation
@@ -314,6 +321,7 @@ columns:
   - Article 80
   - Article 81
   - Probation
+  - Unspecified
   value_labels:
     Resignation:
       en: Resignation
@@ -333,9 +341,16 @@ columns:
     Article 81:
       en: Article 81
       ar: ترك العمل مع الاحتفاظ بالحقوق — المادة ٨١
-    # Article 53 confirmed by the practitioner (2026-08-10): establishes the
-    # 90-day probation period, extendable to 180 by written agreement, during
-    # which either party may terminate.
     Probation:
       en: Probation - Article 53
       ar: إنهاء خلال فترة التجربة — المادة ٥٣
+    Unspecified:
+      en: Unspecified - grounds not recorded
+      ar: غير محدد — لم يُسجَّل السبب النظامي
+  flag_values:
+    Unspecified:
+      severity: exception
+      reason_en: The legal grounds for this termination were not recorded in your source system.
+        No end-of-service entitlement can be derived from it.
+      reason_ar: لم يُسجَّل السبب النظامي لإنهاء هذه الخدمة في نظامك المصدر، ولا يمكن اشتقاق
+        أي مستحقات نهاية خدمة منه.
