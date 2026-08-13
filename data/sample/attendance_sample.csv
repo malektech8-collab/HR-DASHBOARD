@@ -1,4 +1,4 @@
-attendance_date,employee_id,shift_name,scheduled_start,scheduled_end,actual_check_in,actual_check_out,late_minutes,excused_late_minutes,net_late_minutes,absence_days,overtime_hours,overtime_approved,missing_punch_count,project
+attendance_date,employee_id,shift_name,scheduled_start,scheduled_end,actual_check_in,actual_check_out,late_minutes,excused_late_minutes,net_late_minutes,absence_days,overtime_hours,overtime_approved,missing_punch_count,location
 2026-06-01,EMP001,Day Shift,2026-06-01 08:00:00,2026-06-01 17:00:00,2026-06-01 07:55:00,2026-06-01 17:05:00,0,0,0,0,0,False,0,PROJ-ALPHA
 2026-06-01,EMP002,Day Shift,2026-06-01 08:00:00,2026-06-01 17:00:00,2026-06-01 07:55:00,2026-06-01 17:05:00,0,0,0,0,0,False,0,PROJ-ALPHA
 2026-06-01,EMP003,Day Shift,2026-06-01 08:00:00,2026-06-01 17:00:00,2026-06-01 07:55:00,2026-06-01 17:05:00,0,0,0,0,0,False,0,PROJ-ALPHA
