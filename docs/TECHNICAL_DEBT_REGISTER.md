@@ -315,6 +315,108 @@ general class named here.
   proof per SP-001. Until then this gap is why "CI is green" says nothing about
   whether a new contributor can start the stack.
 
+### INC-001 — A committed secret, reintroduced by the cycle that removed committed secrets
+
+- **Status**: CONTAINED 2026-08-13. Value permanently burned. Guarded by test.
+- **Category**: Security / process
+- **Severity of what happened**: a working 64-character `JWT_SECRET` reached
+  `main` inside `.env.example` — **the exact file the first-real-load runbook
+  instructs the operator to copy.**
+
+#### What happened
+
+| | |
+|---|---|
+| `ca1194a` (PR #32) | Removed the committed signing constant, added `JWT_SECRET=` to `.env.example` **empty**, with instructions to generate one per deployment. Correct. |
+| `bbe126e` (PR #33) | *"fix(env): a shared .env must not stop the backend from starting"* — filled that line in with a real value. |
+| merged | PR #33, and it sat on `main` until found. |
+
+Anyone following the documented first step — `Copy-Item .env.example .env` —
+would then have signed tokens with a key published in the repository. That is
+**precisely the condition PR #32 was written to eliminate**, reintroduced
+through the front door, in the file that teaches people how to set the thing
+up. Two cycles apart, by the same author.
+
+#### WHY it happened — the part worth keeping
+
+The commit that did it was solving a real problem: the backend would not start
+from a copied `.env`. Under that pressure, **a startup problem was solved by
+filling in a value rather than by documenting how to generate one.** A
+populated field makes the error go away immediately; an empty field plus
+instructions requires the person to do something. The first is faster and
+looks finished.
+
+That is the whole mechanism, and it generalises past secrets: *making an error
+stop is not the same as making the thing correct*, and the difference is
+invisible in a green test run. Nothing in the pipeline distinguishes
+`JWT_SECRET=<64 chars>` from `JWT_SECRET=` — both parse, both start, both pass
+every gate this project has.
+
+#### How it was found — and this belongs to GAP-002
+
+Not by a gate. **By reading `.env.example` line by line while implementing
+GAP-002's targeted path-resolution check.** No test, no lint, no reviewer, no
+CI step saw it; the file is gitignored in its `.env` form, so
+[GAP-002](#gap-002--a-defect-in-envexample-is-invisible-to-ci-by-construction)
+applies exactly — CI verifies a configuration nobody uses, and the artefact
+humans copy was unverified.
+
+The argument for building that check is therefore stronger than the argument
+made when it was proposed: it did not merely catch the defect it was scoped
+for, it caused a second and worse one to be found. That is worth stating
+because the proposal was nearly declined as disproportionate.
+
+#### The value is BURNED
+
+`DKILo9YWGHA4WyJZ627-CGuzZfmQz5fGwqfTeJzN5SFT1RFMRC64vzK0u5nHFILA` must never
+be used as a signing key anywhere, in any environment, ever. It is recorded in
+`backend/tests/test_env_and_login_failures.py` as `BURNED_SECRET` so the guard
+can prove it catches this exact string, and so nobody reintroduces it believing
+it is a harmless placeholder.
+
+It was **not** a live production credential — it was absent from the operator's
+own `.env` — so no deployment is known to have used it. "Not known to have been
+used" is not "was not used", which is why it is burned rather than assessed.
+
+#### Guarded now
+
+`.env.example` may **name** a credential and must never **populate** one.
+Enforced over `SECRET | PASSWORD | PASSWD | TOKEN | KEY | CREDENTIAL |
+API_KEY | PRIVATE`. Per SP-001 the guard is watched failing: a test restores
+the burned value into a throwaway copy and asserts it is caught, so the guard
+passing means it looks rather than merely runs.
+
+`CREDENTIAL` was absent from the first version of that pattern. A pattern that
+has to be right the first time will be wrong eventually, which is the same
+lesson in miniature.
+
+#### DECISION — the git history is NOT rewritten
+
+Recorded as a decision with its reasoning, so it reads as a choice rather than
+an omission.
+
+**The repository is public.** The value is therefore already in clones, in
+forks, in GitHub's cached views of the old commit, and potentially in any
+scraper that indexes public repositories. Given that:
+
+1. **A rewrite removes it incompletely.** It cannot reach a fork or a clone,
+   and GitHub retains unreferenced objects that stay reachable by SHA.
+2. **A rewrite breaks every existing clone**, forcing a re-clone on anyone who
+   has one, for no security gain.
+3. **A rewrite manufactures false confidence.** The most likely outcome is
+   someone later concluding the value was never exposed because the history
+   looks clean — which would make un-burning it thinkable. The visible history
+   is what keeps "burned" credible.
+
+**Blank + burn + test is the honest posture.** The value is removed going
+forward, marked never-usable, and guarded against return. The history records
+that it happened, which is accurate and is the point.
+
+This reasoning holds *because* the repo is public. For a private repository
+with a genuinely limited blast radius, a rewrite plus rotation would be the
+better trade, and this entry should not be cited as a general rule against
+rewriting history.
+
 ## Standing practices
 
 These are not debt items. They are rules adopted after a defect class appeared
