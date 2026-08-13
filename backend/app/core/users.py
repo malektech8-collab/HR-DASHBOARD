@@ -152,9 +152,18 @@ def get(email: str) -> Optional[Dict[str, Any]]:
 
 
 def listing() -> List[Dict[str, Any]]:
+    """Every account. Tolerant of a store that has no schema yet.
+
+    `list-users` is the first command an operator runs to check the state of a
+    fresh deployment, and before this it raised a raw
+    `sqlite3.OperationalError: no such table: users` - a stack trace as the
+    answer to "is this set up?". `count()` already handled it; this did not.
+    """
     with _connect() as conn:
-        rows = conn.execute(
-            "SELECT * FROM users ORDER BY email").fetchall()
+        try:
+            rows = conn.execute("SELECT * FROM users ORDER BY email").fetchall()
+        except sqlite3.OperationalError:
+            return []
     return [_row_to_user(r) for r in rows]
 
 
