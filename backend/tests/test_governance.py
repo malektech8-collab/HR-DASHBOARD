@@ -12,13 +12,13 @@ from app.main import app
 
 client = TestClient(app)
 
-from app.core.security import MOCK_USER_DB
+from app.core import users
 
 def test_governance_status_endpoint():
     # Authenticate as SYSTEM_ADMIN to access governance status
     login_response = client.post(
         "/api/governance/token",
-        data={"username": "admin@synthetic.local", "password": MOCK_USER_DB["admin@synthetic.local"]["hashed_password"]}
+        data={"username": "admin@synthetic.local", "password": users.demo_credentials()[1]}
     )
     assert login_response.status_code == 200
     token = login_response.json()["access_token"]
