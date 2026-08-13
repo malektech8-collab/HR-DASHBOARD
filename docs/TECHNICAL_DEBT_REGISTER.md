@@ -158,6 +158,77 @@ Risk while open is low — collection is scoped by `pytest.ini` and the Gate 2 s
   equivalent on a fixture designed to separate them, or a decision that the
   two-place edit is permanent and this item is documentation rather than debt.
 
+### GAP-001 — Every gate in this project is numeric. None can see wrong TEXT.
+
+- **Status**: OPEN, named rather than solved (2026-08-13)
+- **Category**: Verification coverage
+
+#### The evidence
+
+492 of 667 client-facing exception messages rendered a DuckDB relation name
+into the sentence a client reads:
+
+```
+Hold "hr_analytics"."main"."stg_payroll" and verify termination status
+Active employee has no "hr_analytics"."main"."stg_attendance" record
+    for expected workday on 2026-06-25
+```
+
+They passed **every gate this project has**, for the life of the project:
+
+| Gate | Why it was blind |
+|---|---|
+| Demo byte-identity (`19 / 446175.0 / 50.0 / 667 / 15`) | 667 was 667 before and after. Only the text was wrong. |
+| Reconciliation (12 independent checks) | Compares numbers. No check reads a string. |
+| dbt 161/161, 11/11 | Models built and tests passed; the SQL was valid. |
+| pytest / vitest / `tsc -b` | Nothing asserts the content of a generated message. |
+| Contract validation | Governs the client's INPUT, not our OUTPUT. |
+
+The pipeline was, in the terms of every check it has, completely healthy.
+
+#### What the new test does and does not cover
+
+`backend/tests/test_no_jinja_in_sql_strings.py` covers the **class**: a dbt
+`ref()` rendering inside a SQL string literal. It does not cover the
+**category**: client-facing text being wrong. A typo, a placeholder left in, a
+mis-merged sentence, an Arabic string that says something different from its
+English pair — all still pass everything.
+
+#### What would catch the category
+
+Three candidates, with an honest read on each:
+
+1. **A snapshot/approval test over generated client-facing text.** Extract the
+   distinct `description` / `recommended_action` / label values the pipeline
+   produces on demo data and check them into an approved file; any change is a
+   reviewable diff. *Would have caught this on the commit that introduced it.*
+   Cost: one fixture, and a diff to approve whenever a message legitimately
+   changes. **This is the one worth building.**
+2. **A lint on generated strings** — no `"`, no `{{`, no relation-shaped
+   substrings, no `None`/`nan`/`null` in client-facing text. Cheaper and
+   narrower; catches machine noise, not wrong English.
+3. **Bilingual pair checking** — assert every `_en` has a non-empty `_ar` and
+   that neither contains the other's script. Catches a real class this project
+   is exposed to and is unrelated to (1).
+
+#### Is it worth building?
+
+**(1) and (2): yes, and they are small.** The exposure is not hypothetical —
+this is a bilingual product whose differentiator is telling a client precisely
+what is wrong with their data. The text IS the product surface, and it has
+been unguarded while five numeric gates were built around it.
+
+**(3): yes, but after TD-007 (RTL)**, which will move the Arabic surface
+anyway.
+
+**Not** a general "assert every string" sweep — that produces a test that
+fails on every legitimate copy change and is deleted within two cycles.
+
+- **Closure criterion**: (1) implemented, with its own tamper-proof per
+  SP-001 — a deliberately corrupted message must turn it red.
+- **Until then**: this gap is why "all gates green" on a text change means
+  less than it appears to. Say so when reporting one.
+
 ## Standing practices
 
 These are not debt items. They are rules adopted after a defect class appeared
@@ -252,6 +323,27 @@ messages**, which is where it had always been.
 its cause and fix it, or record it as open debt with its blast radius unknown.
 "Sidesteps that entirely" is a description of the workaround, not of the
 defect.
+
+**And the part that matters most: this was APPROVED AT REVIEW.** The cycle-5a
+report did not hide the defect or describe it vaguely. It quoted the corrupted
+string in full — `'"hr_analytics"."main"."stg_attendance"'` — named the two
+affected domains, and explained the workaround. It was read and accepted.
+
+So the failure was **not in the reporting**. Both sides read an accurate
+description of a live data corruption and accepted "fixes" as a synonym for
+"stops reading". The word did the work: "fixes the second latent bug for free"
+reads like closure, and nobody — author or reviewer — asked the one question
+that would have separated them: *is the value still wrong in the database?*
+
+This is why the rule is written as a rule and not as a lesson about diligence.
+A process that depends on someone noticing an ambiguous verb in an otherwise
+correct report will fail again. What is needed is the habit of asking, of any
+claimed fix, **what changed in the data** — and if the answer is "nothing, we
+stopped looking at it", that is a workaround with open debt behind it.
+
+**Applies equally to a finding raised and deferred.** A defect the architect
+rules out of scope is fine; a defect that quietly stops being mentioned because
+a consumer moved is not.
 
 #### Known gaps in the practice
 
