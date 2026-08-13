@@ -62,12 +62,33 @@ def create_sample_data():
     with open("data/sample/employees_sample.csv", "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow([
-            "employee_id", "employee_name", "nationality", "is_saudi", "company", "department", "project", 
+            "employee_id", "employee_name", "nationality", "is_saudi", "company", "department", "location", 
             "job_title", "job_family", "grade", "manager_id", "cost_center", "employment_type", 
             "contract_type", "joining_date", "termination_date", "contract_end_date", "status", 
             "basic_salary", "housing_allowance", "transport_allowance"
         ])
         writer.writerows(employees)
+
+    # 1b. Locations - the reference dimension.
+    #
+    # IDENTITY MAPPING, ON PURPOSE. Each demo site maps to a project of the
+    # same name, so every GROUP BY key downstream is byte-identical to what it
+    # was before the project column moved out of the employee row. The cost is
+    # stated rather than hidden: the demo therefore does NOT exercise a real
+    # many-sites-to-one-project rollup. A dedicated fixture covers that
+    # instead (backend/tests/test_org_dimensions.py), because giving the demo
+    # a real hierarchy would change every by-project figure and forfeit the
+    # byte-identity gate that has caught regressions for six cycles running.
+    locations = [
+        ["PROJ-ALPHA", "PROJ-ALPHA", "Central", "Phase 1"],
+        ["PROJ-BETA", "PROJ-BETA", "Central", "Phase 1"],
+        ["PROJ-GAMMA", "PROJ-GAMMA", "Eastern", "Phase 1"],
+    ]
+    with open("data/sample/locations_sample.csv", "w", newline="",
+              encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["location", "project", "region", "phase"])
+        writer.writerows(locations)
 
     # 2. Payroll data (Selected Month: 2026-06)
     # We will generate payroll records for 2026-06.
@@ -91,7 +112,13 @@ def create_sample_data():
         ["2026-06", "EMP008", "-5000", "-1250", "1000", "0", "0", "100", "-5250", "-5350", "PROJ-ALPHA", "CC-OPS", "Paid"],
         ["2026-06", "EMP009", "9000", "2250", "1000", "0", "300", "100", "12550", "12450", "PROJ-ALPHA", "CC-FIN", "Paid"],
         ["2026-06", "EMP010", "25000", "6250", "2000", "2000", "0", "1000", "35250", "34250", "PROJ-GAMMA", "CC-ENG", "Paid"],
-        ["2026-06", "EMP011", "25000", "6250", "2000", "0", "0", "500", "33250", "32750", "CC-HR", "CC-HR", "Paid"],
+        # EMP011's site column held "CC-HR" - a COST CENTRE, not a site, and it
+        # contradicted the same employee's PROJ-ALPHA in the employees fixture.
+        # Nothing noticed for the life of the project: the old schema treated
+        # whatever string sat in that column AS the project, so mart_payroll_by_
+        # project reported a project called CC-HR that never existed. The
+        # locations join is what surfaced it. Corrected to the employee's site.
+        ["2026-06", "EMP011", "25000", "6250", "2000", "0", "0", "500", "33250", "32750", "PROJ-ALPHA", "CC-HR", "Paid"],
         ["2026-06", "EMP012", "35000", "8750", "2500", "0", "0", "1000", "46250", "45250", "PROJ-BETA", "CC-ENG", "Paid"],
         ["2026-06", "EMP013", "22000", "5500", "2000", "0", "0", "800", "29500", "28700", "PROJ-ALPHA", "CC-MKT", "Paid"],
         ["2026-06", "EMP014", "32000", "8000", "2500", "0", "0", "1200", "42500", "41300", "PROJ-GAMMA", "CC-OPS", "Paid"],
@@ -131,7 +158,7 @@ def create_sample_data():
         writer.writerow([
             "payroll_period", "employee_id", "basic_salary", "housing_allowance", "transport_allowance", 
             "other_allowances", "overtime_amount", "deductions", "gross_pay", "net_pay", 
-            "project", "cost_center", "payroll_status"
+            "location", "cost_center", "payroll_status"
         ])
         writer.writerows(payroll_records)
 
@@ -210,7 +237,7 @@ def create_sample_data():
             "attendance_date", "employee_id", "shift_name", "scheduled_start", "scheduled_end", 
             "actual_check_in", "actual_check_out", "late_minutes", "excused_late_minutes", 
             "net_late_minutes", "absence_days", "overtime_hours", "overtime_approved", 
-            "missing_punch_count", "project"
+            "missing_punch_count", "location"
         ])
         writer.writerows(attendance)
 
@@ -230,7 +257,7 @@ def create_sample_data():
         writer = csv.writer(f)
         writer.writerow([
             "request_id", "employee_id", "request_type", "request_status", "created_at", "closed_at", 
-            "owner", "sla_hours", "actual_hours", "sla_breached", "project"
+            "owner", "sla_hours", "actual_hours", "sla_breached", "location"
         ])
         writer.writerows(hr_requests)
 
@@ -295,7 +322,7 @@ def create_sample_data():
 
     with open("data/sample/recruitment_requisitions_sample.csv", "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(["requisition_id", "job_title", "department", "project", "cost_center", "owner_id", "approval_date", "target_hire_date", "closed_date", "status"])
+        writer.writerow(["requisition_id", "job_title", "department", "location", "cost_center", "owner_id", "approval_date", "target_hire_date", "closed_date", "status"])
         writer.writerows(requisitions)
 
     candidates = [
@@ -362,7 +389,7 @@ def create_sample_data():
 
     with open("data/sample/workforce_plan_sample.csv", "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(["period", "project", "department", "planned_headcount"])
+        writer.writerow(["period", "location", "department", "planned_headcount"])
         writer.writerows(workforce_plan)
 
     vacancy_requests = [
@@ -374,7 +401,7 @@ def create_sample_data():
 
     with open("data/sample/vacancy_requests_sample.csv", "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(["request_id", "department", "project", "job_title", "quantity", "status", "approved_date"])
+        writer.writerow(["request_id", "department", "location", "job_title", "quantity", "status", "approved_date"])
         writer.writerows(vacancy_requests)
 
     # 1. Performance Reviews

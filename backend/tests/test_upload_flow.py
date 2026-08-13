@@ -26,7 +26,7 @@ from app.main import app  # noqa: E402
 client = TestClient(app)
 
 EMPLOYEES_CSV = (
-    "employee_id,employee_name,nationality,is_saudi,company,department,project,"
+    "employee_id,employee_name,nationality,is_saudi,company,department,location,"
     "job_title,job_family,grade,manager_id,cost_center,employment_type,"
     "contract_type,joining_date,termination_date,contract_end_date,status,"
     "basic_salary,housing_allowance,transport_allowance,work_unit,"
@@ -235,7 +235,10 @@ def test_ingest_still_types_every_table_it_did_before():
     source = open(os.path.join(_ROOT, "scripts", "ingest_raw.py"),
                   encoding="utf-8").read()
     typed = re.findall(r'if os\.path\.exists\(files\["(\w+)"\]\):', source)
-    assert len(typed) == 21, sorted(typed)
+    # 22 since 2026-08: `locations` is the first REFERENCE dimension, and
+    # the first contracted table with no employee_id. It is typed by the
+    # same one path as the other 21 - which is the property this pins.
+    assert len(typed) == 22, sorted(typed)
     assert "hr_requests" in typed, (
         "hr_requests is contracted and was one of the 17 the upload path "
         "never typed")

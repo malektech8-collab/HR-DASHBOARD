@@ -106,14 +106,20 @@ columns:
   description_en: Gross pay minus deductions. The amount actually transferred.
   description_ar: إجمالي الراتب ناقص الاستقطاعات. المبلغ المحول فعلياً.
   example: '10650'
-- name: project
-  name_en: Project
-  name_ar: المشروع
+- name: location
+  name_en: Location
+  name_ar: الموقع
   type: VARCHAR
   required: true
-  description_en: Project or site the employee is assigned to.
-  description_ar: المشروع أو الموقع المكلّف به الموظف.
-  example: Project Alpha
+  description_en: 'The site, office or yard this row belongs to. Must match a `location` in
+    your locations file - that file is what says which project each site belongs to. Renamed
+    from `project` in 2026-08: this column always held the physical site (the employees contract
+    said so in its own work_unit description), while nothing recorded the project above it.
+    A project is no longer an attribute of a row.'
+  description_ar: 'الموقع أو المكتب الذي ينتمي إليه هذا الصف. يجب أن يطابق موقعاً في ملف المواقع،
+    وهو الملف الذي يحدد المشروع التابع له كل موقع. أُعيدت تسميته من `project` في ٢٠٢٦-٠٨:
+    كان هذا العمود يحمل دائماً الموقع الفعلي، ولم يكن هناك ما يسجّل المشروع الأعلى منه.'
+  example: RUH-TOWER-P1
 - name: cost_center
   name_en: Cost Center
   name_ar: مركز التكلفة

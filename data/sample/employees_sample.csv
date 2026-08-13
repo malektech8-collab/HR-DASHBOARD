@@ -1,4 +1,4 @@
-employee_id,employee_name,nationality,is_saudi,company,department,project,job_title,job_family,grade,manager_id,cost_center,employment_type,contract_type,joining_date,termination_date,contract_end_date,status,basic_salary,housing_allowance,transport_allowance
+employee_id,employee_name,nationality,is_saudi,company,department,location,job_title,job_family,grade,manager_id,cost_center,employment_type,contract_type,joining_date,termination_date,contract_end_date,status,basic_salary,housing_allowance,transport_allowance
 EMP001,Ahmad Al-Sudairy,Saudi,True,Company A,HR,PROJ-ALPHA,HR Specialist,HR,G3,EMP011,CC-HR,Full-time,Unlimited,2024-01-15,,,Active,12000,3000,1000
 EMP002,John Doe,British,False,Company A,Engineering,PROJ-BETA,Software Engineer,IT,G4,EMP012,CC-ENG,Full-time,Limited,2024-03-01,,2026-03-01,Active,15000,3750,1000
 EMP003,Fahad Al-Otaibi,Saudi,True,Company A,Finance,PROJ-ALPHA,Financial Analyst,Finance,G3,,CC-FIN,Full-time,Unlimited,2024-05-10,,,Active,11000,2750,1000

@@ -129,6 +129,7 @@ def build_warehouse():
     # 1. Create source tables from Parquet files
     parquet_files = {
         "employees": f"{data_prefix}data/silver/employees.parquet",
+        "locations": f"{data_prefix}data/silver/locations.parquet",
         "payroll": f"{data_prefix}data/silver/payroll.parquet",
         "attendance": f"{data_prefix}data/silver/attendance.parquet",
         "hr_requests": f"{data_prefix}data/silver/hr_requests.parquet",

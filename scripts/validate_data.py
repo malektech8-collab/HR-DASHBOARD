@@ -19,6 +19,18 @@ GOLD_SCHEMA = {
 }
 
 
+# GRAIN NOTE, for whoever generalises this into a loop over contracted tables.
+#
+# Every check below is written against a NAMED table - employees, payroll,
+# attendance, hr_requests - and each assumes an employee_id. That is why adding
+# `locations`, the first contracted table with no employee column, needed no
+# change here: a reference dimension is simply never walked.
+#
+# The moment this becomes `for table in contracted_tables()`, that stops being
+# true and `locations` (and any future reference dimension) starts being fed to
+# checks that assume a per-employee grain. The guard machinery in
+# scripts/onboarding.py IS grain-agnostic and was verified as such; this module
+# is not, and only escapes the question by not asking it.
 def validate():
     os.makedirs("data/gold", exist_ok=True)
     print("Starting data validation...")
@@ -71,7 +83,7 @@ def validate():
                 "Merge or delete duplicate employee record in ERP"
             )
 
-        # Check Active employees checks (manager, project, salary)
+        # Check Active employees checks (manager, location, salary)
         active_emps = df_emp.filter(pl.col("status") == "Active")
         
         # Missing Manager
@@ -86,16 +98,25 @@ def validate():
                 "Assign supervisor/manager in employee profile"
             )
 
-        # Missing Project
-        missing_proj = active_emps.filter(pl.col("project").is_null() | (pl.col("project") == ""))
-        for r in missing_proj.iter_rows(named=True):
+        # Missing Location.
+        #
+        # Was "Missing Project" until 2026-08. The column was renamed, not
+        # repurposed: it always held the physical site. An employee with no
+        # site cannot be placed anywhere, which is the same defect under its
+        # right name. A site that IS supplied but is absent from the client's
+        # locations file is a DIFFERENT problem and is reported separately by
+        # mart_unmatched_locations - one is a hole in the employee record, the
+        # other is a hole in the reference file.
+        missing_loc = active_emps.filter(
+            pl.col("location").is_null() | (pl.col("location") == ""))
+        for r in missing_loc.iter_rows(named=True):
             add_issue(
                 r["employee_id"],
                 r["employee_name"],
-                "Missing Project",
-                "Active employee has no project code assigned.",
+                "Missing Location",
+                "Active employee has no location assigned.",
                 "Warning",
-                "Assign cost project code in master profile"
+                "Assign a location in the master profile"
             )
 
         # Missing Nationality

@@ -1,4 +1,4 @@
-requisition_id,job_title,department,project,cost_center,owner_id,approval_date,target_hire_date,closed_date,status
+requisition_id,job_title,department,location,cost_center,owner_id,approval_date,target_hire_date,closed_date,status
 REQ001,Software Engineer,Engineering,PROJ-BETA,CC-ENG,EMP011,2026-06-01,2026-06-25,2026-06-20,Closed
 REQ002,HR Specialist,HR,PROJ-ALPHA,CC-HR,EMP011,2026-06-02,2026-07-15,,Open
 REQ002,HR Specialist duplicate log,HR,PROJ-ALPHA,CC-HR,EMP011,2026-06-02,2026-07-15,,Open

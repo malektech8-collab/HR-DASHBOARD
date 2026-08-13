@@ -1,0 +1,84 @@
+version: 1
+table: locations
+label_en: Locations
+label_ar: المواقع
+description_en: >-
+  Reference dimension. One row per site the organisation operates, and the
+  project each site belongs to. This is the ONLY place the project grouping is
+  recorded - employees, payroll, attendance and HR requests each carry a
+  `location`, and every project-level figure is produced by joining through
+  this file. A deployment that provides no locations file gets no project-level
+  analytics, which is correct: without this file nobody has said what the
+  projects are, and inventing them would be a fabrication.
+description_ar: >-
+  بُعد مرجعي. صف واحد لكل موقع تعمل به المنشأة، والمشروع التابع له كل موقع.
+  هذا هو المكان الوحيد الذي يُسجَّل فيه تجميع المشاريع - الموظفون والرواتب
+  والحضور وطلبات الموارد البشرية يحمل كل منها عمود `location`، وكل رقم على
+  مستوى المشروع يُنتج بالربط عبر هذا الملف. المنشأة التي لا تقدّم ملف المواقع
+  لا تحصل على تحليلات على مستوى المشروع، وهذا هو الصحيح.
+instructions_en: >-
+  IMPORTANT - this file records the CURRENT assignment of each site, and it has
+  no history. If a site moves to a different project, re-uploading this file
+  re-groups EVERY period, including months already reported. A figure you
+  published last month can change. If you need a site's history preserved,
+  tell us before you re-assign it - effective-dated locations are not yet
+  supported and there is no way to recover the previous grouping afterwards.
+instructions_ar: >-
+  هام - يسجّل هذا الملف الإسناد الحالي لكل موقع، وليس له سجل تاريخي. إذا انتقل
+  موقع إلى مشروع آخر، فإن إعادة رفع هذا الملف تعيد تجميع جميع الفترات، بما في
+  ذلك الأشهر التي صدرت تقاريرها. قد يتغير رقم نشرته الشهر الماضي. إذا كنت
+  بحاجة إلى الحفاظ على سجل الموقع، أبلغنا قبل إعادة الإسناد - المواقع المؤرخة
+  غير مدعومة بعد ولا توجد طريقة لاستعادة التجميع السابق بعد ذلك.
+columns:
+  - name: location
+    name_en: Location
+    name_ar: الموقع
+    type: VARCHAR
+    required: true
+    unique: true
+    primary_key: true
+    description_en: >-
+      The atomic organisational unit - the site, office or yard a person is
+      deployed to. Every organisation has at least one, including one that has
+      no project concept at all. This must match the `location` value used on
+      your employees, payroll, attendance and HR request files exactly.
+    description_ar: >-
+      الوحدة التنظيمية الأساسية - الموقع أو المكتب الذي يُنتدب إليه الموظف. كل
+      منشأة لديها موقع واحد على الأقل، حتى تلك التي لا يوجد لديها مفهوم
+      المشاريع. يجب أن تطابق هذه القيمة عمود `location` في ملفات الموظفين
+      والرواتب والحضور والطلبات تماماً.
+    example: RUH-TOWER-P1
+  - name: project
+    name_en: Project
+    name_ar: المشروع
+    type: VARCHAR
+    required: false
+    description_en: >-
+      The grouping above the site. Several sites may belong to one project.
+      LEAVE EMPTY if your organisation has no project concept - project-level
+      analytics will then be shown as not provided rather than invented.
+    description_ar: >-
+      التجميع الأعلى من الموقع. قد تنتمي عدة مواقع إلى مشروع واحد. اتركه فارغاً
+      إذا لم يكن لدى منشأتك مفهوم المشاريع - عندئذ ستظهر التحليلات على مستوى
+      المشروع كغير مقدَّمة بدلاً من أن تُختلق.
+    example: Riyadh Tower
+  - name: region
+    name_en: Region
+    name_ar: المنطقة
+    type: VARCHAR
+    required: false
+    description_en: Optional geography the site sits in.
+    description_ar: المنطقة الجغرافية التي يقع بها الموقع، اختياري.
+    example: Central
+  - name: phase
+    name_en: Phase
+    name_ar: المرحلة
+    type: VARCHAR
+    required: false
+    description_en: >-
+      Optional delivery phase within the project. Recorded for reporting only;
+      nothing is currently grouped by it.
+    description_ar: >-
+      مرحلة التنفيذ داخل المشروع، اختياري. تُسجَّل لأغراض التقارير فقط ولا يتم
+      التجميع بها حالياً.
+    example: Phase 1

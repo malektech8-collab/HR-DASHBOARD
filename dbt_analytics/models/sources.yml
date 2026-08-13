@@ -5,6 +5,7 @@ sources:
     schema: main
     tables:
       - name: employees
+      - name: locations
       - name: payroll
       - name: attendance
       - name: hr_requests

@@ -17,9 +17,14 @@
 # mappings from more than one client; single-tenant accumulation would relearn
 # one client's habits and call it knowledge.
 #
-# NOTE the deliberate collisions: "الحالة" is status on employees, request_status
-# on hr_requests and case_status on employee_relations; "المشروع" is project on
-# three tables. Aliases are scoped per table for exactly that reason.
+# NOTE the deliberate collisions, and one that is now load-bearing: "الحالة" is
+# status on employees, request_status on hr_requests and case_status on
+# employee_relations. "المشروع" maps to `location` on the fact tables and to
+# `project` ONLY on `locations` - because on a fact row that column always held
+# the site, and the project a site belongs to now lives in the reference file.
+# A client whose employee export is headed "project" is exactly the migration
+# case: map it to `location` and supply a locations file.
+# Aliases are scoped per table for exactly these reasons.
 attendance:
   absence_days:
   - أيام الغياب
@@ -47,6 +52,11 @@ attendance:
   - دقائق التأخير
   - التأخير
   - Late
+  location:
+  - المشروع
+  - الموقع
+  - Project
+  - Site
   missing_punch_count:
   - بصمة ناقصة
   - Missing Punch
@@ -54,11 +64,6 @@ attendance:
   - ساعات إضافية
   - الإضافي
   - OT Hours
-  project:
-  - المشروع
-  - الموقع
-  - Project
-  - Site
   shift_name:
   - الوردية
   - المناوبة
@@ -196,6 +201,11 @@ employees:
   - Hire Date
   - Join Date
   - DOJ
+  location:
+  - المشروع
+  - الموقع
+  - Project
+  - Site
   manager_id:
   - الرئيس المباشر
   - رقم المدير
@@ -205,11 +215,6 @@ employees:
   - الجنسية
   - جنسية الموظف
   - Nationality
-  project:
-  - المشروع
-  - الموقع
-  - Project
-  - Site
   status:
   - الحالة
   - حالة الموظف
@@ -246,6 +251,27 @@ hr_requests:
   - نوع الطلب
   - الطلب
   - Request Type
+locations:
+  location:
+  - الموقع
+  - موقع العمل
+  - رمز الموقع
+  - Site
+  - Site Code
+  - Location Code
+  phase:
+  - المرحلة
+  - مرحلة المشروع
+  - Phase
+  project:
+  - المشروع
+  - اسم المشروع
+  - Project
+  - Project Name
+  region:
+  - المنطقة
+  - الإقليم
+  - Region
 payroll:
   basic_salary:
   - الراتب الأساسي

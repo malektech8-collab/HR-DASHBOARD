@@ -161,9 +161,21 @@ def _validate_targets(table, version, contracted=None):
     known = {c["name"] for c in _cs.columns(table)}
     unknown = sorted(set((version.get("columns") or {}).values()) - known)
     if unknown:
+        hint = ""
+        if "project" in unknown:
+            # A profile written before 2026-08 maps to `project`, which no
+            # longer exists on a fact table. Failing loudly is right; failing
+            # loudly WITHOUT saying where it went would send an operator
+            # hunting through a schema.
+            hint = (" NOTE: `project` was renamed to `location` in 2026-08. "
+                    "The column always held the physical site. The project a "
+                    "site belongs to now lives in the separate `locations` "
+                    "file, so map this column to `location` and upload a "
+                    "locations file to get project-level figures back.")
         raise MappingError(
             "profile for '{}' maps to unknown canonical column(s) {}. "
-            "Contract columns are {}.".format(table, unknown, sorted(known)))
+            "Contract columns are {}.{}".format(
+                table, unknown, sorted(known), hint))
     for target in (version.get("derive") or {}):
         if target not in known:
             raise MappingError(

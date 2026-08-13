@@ -245,6 +245,17 @@ export const DataOnboarding: React.FC = () => {
                 </button>
               ))}
             </div>
+            {/* A limitation the client can be harmed by not knowing has to be
+                read BEFORE the upload, beside the template they are about to
+                fill in - not discovered afterwards in a board pack. */}
+            {table && templates.find((t) => t.name === table)?.instructions && (
+              <p
+                className="text-xs text-warning border border-warning/30 bg-warning/5 rounded-lg p-3"
+                data-testid="template-instructions"
+              >
+                {templates.find((t) => t.name === table)?.instructions}
+              </p>
+            )}
             {table && (
               <a
                 href={getTemplateDownloadUrl(table)}
