@@ -33,6 +33,17 @@ class Settings(BaseSettings):
     # instead. See scripts/report_period.py.
     DEFAULT_REPORT_MONTH: str = "2026-06"
 
+    # The JWT signing key for THIS deployment. No default, deliberately.
+    #
+    # This replaced a committed module constant that was identical in every
+    # deployment of the product, so a forged SYSTEM_ADMIN token needed only
+    # repository access - not server access - and worked at every customer
+    # install. Real mode now refuses to start without a per-deployment value;
+    # demo generates a random one per process. See app/core/security.py.
+    #
+    # Generate:  python -c "import secrets; print(secrets.token_urlsafe(64))"
+    JWT_SECRET: str | None = None
+
     # S3 / Cloud Storage configurations
     AWS_ACCESS_KEY_ID: str | None = None
     AWS_SECRET_ACCESS_KEY: str | None = None

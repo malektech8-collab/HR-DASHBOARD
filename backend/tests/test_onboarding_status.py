@@ -19,12 +19,14 @@ client = TestClient(app)
 
 
 def auth():
-    from app.core.security import MOCK_USER_DB
+    from app.core import users
 
-    email = next(iter(MOCK_USER_DB))
+    # Tests used to read users.demo_credentials()[1] to learn the
+    # password - an idiom that only worked because it was plaintext.
+    users.seed_demo_users()
+    email, password = users.demo_credentials()
     token = client.post("/api/governance/token",
-                        data={"username": email,
-                              "password": MOCK_USER_DB[email]["hashed_password"]}
+                        data={"username": email, "password": password}
                         ).json()["access_token"]
     return {"Authorization": "Bearer {}".format(token)}
 

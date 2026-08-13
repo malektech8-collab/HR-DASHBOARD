@@ -37,11 +37,11 @@ api = TestClient(app)
 
 
 def _auth():
-    from app.core.security import MOCK_USER_DB
-    email = next(iter(MOCK_USER_DB))
+    from app.core import users
+    email = users.demo_credentials()[0]
     token = api.post("/api/governance/token",
                      data={"username": email,
-                           "password": MOCK_USER_DB[email]["hashed_password"]}
+                           "password": users.demo_credentials()[1]}
                      ).json()["access_token"]
     return {"Authorization": "Bearer {}".format(token)}
 

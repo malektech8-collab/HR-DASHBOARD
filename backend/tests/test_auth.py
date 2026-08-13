@@ -9,18 +9,22 @@ sys.path.append(
 )
 
 from app.main import app
-from app.core.security import MOCK_USER_DB
+from app.core import users
+from app.core.security import Role
 
 client = TestClient(app)
 
 def test_login_success():
+    """Every demo account can log in, and gets a bearer token.
+
+    Was: iterate MOCK_USER_DB and read each password out of the "database".
+    That only worked because the passwords were plaintext.
     """
-    Test successful login for all mock users and check token structure.
-    """
-    for email, user_data in MOCK_USER_DB.items():
+    users.seed_demo_users()
+    for email, password, _role in users.DEMO_USERS:
         response = client.post(
             "/api/governance/token",
-            data={"username": email, "password": user_data["hashed_password"]}
+            data={"username": email, "password": password}
         )
         assert response.status_code == 200
         data = response.json()
@@ -47,10 +51,12 @@ def test_governance_access_granted():
     """
     Test that SYSTEM_ADMIN and EXECUTIVE mock users can successfully access governance status.
     """
+    users.seed_demo_users()
     # 1. Test SYSTEM_ADMIN
     admin_login = client.post(
         "/api/governance/token",
-        data={"username": "admin@synthetic.local", "password": MOCK_USER_DB["admin@synthetic.local"]["hashed_password"]}
+        data={"username": "admin@synthetic.local",
+              "password": users.demo_credentials(Role.SYSTEM_ADMIN)[1]}
     )
     admin_token = admin_login.json()["access_token"]
 
@@ -64,7 +70,8 @@ def test_governance_access_granted():
     # 2. Test EXECUTIVE
     exec_login = client.post(
         "/api/governance/token",
-        data={"username": "exec@synthetic.local", "password": MOCK_USER_DB["exec@synthetic.local"]["hashed_password"]}
+        data={"username": "exec@synthetic.local",
+              "password": users.demo_credentials(Role.EXECUTIVE)[1]}
     )
     exec_token = exec_login.json()["access_token"]
 
@@ -78,9 +85,11 @@ def test_governance_access_forbidden():
     """
     Test that HR_ANALYST user receives a 403 Forbidden error.
     """
+    users.seed_demo_users()
     hr_login = client.post(
         "/api/governance/token",
-        data={"username": "hr@synthetic.local", "password": MOCK_USER_DB["hr@synthetic.local"]["hashed_password"]}
+        data={"username": "hr@synthetic.local",
+              "password": users.demo_credentials(Role.HR_ANALYST)[1]}
     )
     hr_token = hr_login.json()["access_token"]
 

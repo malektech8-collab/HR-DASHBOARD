@@ -1,5 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { AppLayout } from './components/layout/AppLayout';
+import { LoginGate } from './components/auth/LoginGate';
 import { CommandCenter } from './pages/CommandCenter'; // Statically imported for immediate landing load
 import { PageSkeleton } from './components/ui/PageSkeleton';
 import { fetchRefreshStatus } from './lib/api';
@@ -72,17 +73,19 @@ function App() {
 
 
   return (
-    <AppLayout
-      currentPage={currentPage}
-      onPageChange={setCurrentPage}
-      reportMonth="2026-06"
-      lastRefreshAt={metadata?.last_refresh_at || 'Unknown'}
-      refreshStatus={syncStatus}
-    >
-      <Suspense fallback={<PageSkeleton />}>
-        {renderPage()}
-      </Suspense>
-    </AppLayout>
+    <LoginGate>
+      <AppLayout
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+        reportMonth="2026-06"
+        lastRefreshAt={metadata?.last_refresh_at || 'Unknown'}
+        refreshStatus={syncStatus}
+      >
+        <Suspense fallback={<PageSkeleton />}>
+          {renderPage()}
+        </Suspense>
+      </AppLayout>
+    </LoginGate>
   );
 }
 
