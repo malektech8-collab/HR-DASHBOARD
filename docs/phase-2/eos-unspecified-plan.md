@@ -28,7 +28,7 @@ leaver-related columns:      ['termination_date']
 This is not an argument against the ruling — the value must be accepted or the client's file is rejected outright. It changes two things:
 
 1. **§3 has no mart to update.** The honest answer to "what groups by `end_of_service_type`" is *nothing does*, and a plan claiming otherwise would be inventing work.
-2. **It sharpens a debt already on the register.** Article 80 exposure is a stated Phase 2 selling point, `end_of_service_type` is the column that would carry it, and nothing computes anything from it. Adding `Unspecified` makes that gap *bigger and better documented*: the first real client will supply ~504 leavers' reasons into a column no figure derives from. Worth naming in the report, not fixing here.
+2. **It sharpens a debt already on the register.** Article 80 exposure is a stated Phase 2 selling point, `end_of_service_type` is the column that would carry it, and nothing computes anything from it. Adding `Unspecified` makes that gap *bigger and better documented*: the first real client will supply several hundred leavers' reasons into a column no figure derives from. Worth naming in the report, not fixing here.
 
 ---
 
@@ -117,7 +117,7 @@ Properties that matter, each following an existing precedent in this repo:
 
 - **Declarative only.** A mapping of value → severity + bilingual reason. No expression, ever — same rule as `required_when`, and for the same reason: a contract is operator-supplied data.
 - **Per row.** Unlike Rule 4's file-level message, this emits one violation per offending row with the Excel row number, so the client gets *which* leavers, which is the product's stated differentiator.
-- **Capped** at `MAX_RENDERED_VIOLATIONS` with the existing "and N more" tail. On 504 leavers this matters: a client with 187 unspecified rows must not receive 187 messages, and the error report already carries the true total.
+- **Capped** at `MAX_RENDERED_VIOLATIONS` with the existing "and N more" tail. On an export with several hundred leavers this matters: a client with more flagged rows than the cap must not receive one message per row, and the error report already carries the true total.
 - **Generic.** Nothing about this is EOSB-specific. `flag_values` will be wanted the next time a canonical vocabulary has a legal-but-incomplete member.
 
 ### 2.5 The honest limitation
@@ -142,7 +142,7 @@ Stated as a table so the claim is checkable rather than asserted:
 
 **What this means for the cycle:** there is no mart to teach about `Unspecified`, no KPI to exclude it from, and no chart that would silently absorb it into a slice. That is a smaller change than the ruling anticipated and I would rather say so than manufacture work.
 
-**What it means for later, and it should be recorded rather than fixed here:** when a leaver-reason mart *is* built, `Unspecified` must not be a category alongside the articles. It is an absence, and the established treatment for an absence in this codebase is **withheld, not bucketed** — the same rule that made `COALESCE(project, 'Unassigned')` wrong. A future `mart_leavers_by_reason` should report Article 74/75/77/80/81, Resignation and Probation as categories, and `Unspecified` as a **coverage note**: *"187 of 504 leavers have no recorded grounds"*. Grouping it as an eighth slice would put an absence on a pie chart, which is the defect this project keeps paying for.
+**What it means for later, and it should be recorded rather than fixed here:** when a leaver-reason mart *is* built, `Unspecified` must not be a category alongside the articles. It is an absence, and the established treatment for an absence in this codebase is **withheld, not bucketed** — the same rule that made `COALESCE(project, 'Unassigned')` wrong. A future `mart_leavers_by_reason` should report Article 74/75/77/80/81, Resignation and Probation as categories, and `Unspecified` as a **coverage note**: *"N of M leavers have no recorded grounds"*. Grouping it as an eighth slice would put an absence on a pie chart, which is the defect this project keeps paying for.
 
 ---
 

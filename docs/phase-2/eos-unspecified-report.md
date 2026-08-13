@@ -142,4 +142,36 @@ The repository's `.env` is now configured for the first real load — `DATA_MODE
 
 ---
 
+## 9. CORRECTION — the "no client figures" claim was wrong
+
+**The original wording, recorded per the established treatment:**
+
+> *"No client figures appear anywhere in this repo. The sizing context informed the cap decision and stays out of the record."*
+
+**That was not accurate.** [`eos-unspecified-plan.md`](eos-unspecified-plan.md) carried the client's real leaver count in three places — once in §0, once as the sizing argument for the cap, and once inside an illustrative coverage-note sentence. All three are now generalised to "several hundred" and `N of M`. The meaning is unchanged; the figure is gone.
+
+The figure is deliberately **not reproduced here.** The established treatment records the *original wording of the claim* so the correction is checkable — it does not require quoting the client data the correction exists to remove, and doing so would undo the fix in the act of documenting it.
+
+**Severity is low** and worth saying so plainly: a headcount, not a person, a salary or an identifier. No PDPL concern. The history is **not** rewritten — disproportionate for a count, and the no-rewrite reasoning in INC-001 was explicitly scoped to genuine secrets.
+
+### Why the self-check reported clean
+
+This is the part worth keeping. The grep ran against the figures supplied **in the execute ruling** — `42`, `505`, `331`, `Jisr`. It found none of them and reported clean. But the leaver count came from the **plan-time** context, a turn earlier, and I had written it into the plan document myself. It was never in the search.
+
+> **A grep for the figures you were GIVEN does not cover the figures you WROTE.**
+
+The same shape as SP-001's third instance: the check ran, it was watched, and it was scoped to the wrong input. Checking *"did I paste the numbers from this message"* is not checking *"does this repository contain client figures"*, and the first reads exactly like the second when you are the one who wrote the search.
+
+### Should the secret guard extend to client figures in `docs/`?
+
+**Recommendation: no — recommend, do not build.**
+
+The `.env.example` guard works because its target is structural: a key whose *name* says credential, carrying any value at all. There is no equivalent structure here. A leaver count is a bare integer, and `docs/` legitimately contains hundreds of those — `dbt 161/161`, `450 passed`, `667 exceptions`, `19 / 446175.0`, row numbers, line numbers, article numbers. A guard would have to distinguish *our* numbers from *theirs* with nothing in the text to tell them apart, and the false-positive rate on a bare integer would be so high that the check gets suppressed or deleted within two cycles — the failure mode GAP-001 already names for noisy checks.
+
+A narrower variant is defensible and still not worth building now: pin the *specific* figures from each real export in a per-engagement denylist. That works, and it means maintaining a list of the client's numbers **inside the repository**, which is worse than the problem.
+
+**What actually helps** is cheaper and is a practice, not a tool: when a cycle receives real-data context, the figures go in the *ruling* and the *plan quotes none of them*. Had the plan said "several hundred leavers" from the start there would have been nothing to grep for. That is a habit, and habits are what SP-001 exists to make checkable — so the honest position is that this one is **unguarded**, and stating that is better than a check nobody trusts.
+
+---
+
 **Not merged. Awaiting review.**
