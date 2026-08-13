@@ -6,6 +6,8 @@ data/gold/*
 data/onboarding/*
 data/staging/*
 data/mapping/*
+# Accounts for THIS deployment. argon2 hashes, but still credentials.
+data/auth/*
 warehouse/*.duckdb
 warehouse/*.wal
 .env
