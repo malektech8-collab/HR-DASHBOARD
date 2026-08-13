@@ -231,6 +231,89 @@ fails on every legitimate copy change and is deleted within two cycles.
   SP-001 — a deliberately corrupted message must turn it red.
 - **Until then**: this gap is why "all gates green" on a text change means
   less than it appears to. Say so when reporting one.
+### GAP-002 — A defect in `.env.example` is invisible to CI by construction
+
+- **Status**: OPEN, named rather than solved (2026-08-13)
+- **Category**: Verification coverage
+- **Sibling of**: GAP-001 above — *"every gate in this project is numeric; none
+  can see wrong TEXT"*. Same shape as this one: a whole class of defect that no
+  gate is positioned to see, named rather than solved. GAP-001 is about what a
+  gate cannot read; this is about what a gate never runs against.
+
+#### The evidence
+
+`.env.example` shipped two lines that broke the documented setup path:
+
+| Line | Effect |
+|---|---|
+| `VITE_API_URL=...` | `Settings()` raised at import — the backend could not start at all |
+| `DATABASE_PATH=../warehouse/hr_analytics.duckdb` | relative, correct only from `backend/`; from the repo root it resolves **outside the repo** and every endpoint 500s |
+
+Measured on a developer machine that had followed the documented step
+(`Copy-Item .env.example .env`):
+
+```
+pytest backend/tests   ->  397 passed, 7 errors     (with the .env in place)
+pytest backend/tests   ->  404 passed               (DATABASE_PATH corrected)
+```
+
+**CI was green throughout, for both defects, for as long as they existed.**
+
+#### Why CI cannot see it
+
+`.env` is gitignored — correctly, it holds `JWT_SECRET`. So CI never has one,
+and every setting falls back to the code default, which is right. **CI tests a
+configuration no developer and no deployment actually uses.**
+
+The consequence is not that CI was wrong; it is that the artefact CI verifies
+and the artefact humans follow are different artefacts, and only one of them is
+tested. Every developer following the documented setup ran a subtly broken
+suite and had no way to know it was the setup rather than their change.
+
+#### What would catch the class
+
+A CI step that copies the **committed** `.env.example` to a throwaway `.env`
+and runs against it:
+
+```yaml
+- name: The documented setup path
+  run: |
+    cp .env.example .env
+    python -c "import sys; sys.path.insert(0,'backend'); from app.config import Settings; Settings()"
+    pytest backend/tests -q
+    rm .env
+```
+
+That is roughly ten lines and one extra suite run.
+
+#### Is it worth building?
+
+**Partly, and the cheap half is worth more than the expensive half.**
+
+- **Worth it: the import check.** `cp .env.example .env` then constructing
+  `Settings` is seconds, and it is the exact failure that stopped the backend
+  starting. A test now does this in-process
+  (`test_copying_the_committed_env_example_lets_the_backend_start`), which
+  covers it without a CI change — so this half is **already done**.
+- **Worth it: the declared-variable check.** Asserting every variable in
+  `.env.example` is a field on `Settings` catches the next `VITE_API_URL`
+  before it is committed. Also already done, in the same file.
+- **Marginal: a second full suite run under the example `.env`.** It doubles
+  the slowest gate to catch a narrower class — a *valid* variable with a
+  *wrong value*, which is what `DATABASE_PATH` was. The two checks above would
+  not have caught that one.
+- **Not worth it: testing the operator's actual `.env`.** It is per-machine and
+  secret. Out of scope by construction.
+
+**Recommendation:** keep the two in-process checks that exist, and add the
+`DATABASE_PATH`-shaped case to them — assert that every path-valued setting in
+`.env.example` resolves inside the repository — rather than doubling the CI
+suite. That closes the measured instance at proportionate cost and leaves the
+general class named here.
+
+- **Closure criterion**: the path-resolution assertion added, with a tamper
+  proof per SP-001. Until then this gap is why "CI is green" says nothing about
+  whether a new contributor can start the stack.
 
 ## Standing practices
 
@@ -347,6 +430,50 @@ stopped looking at it", that is a workaround with open debt behind it.
 **Applies equally to a finding raised and deferred.** A defect the architect
 rules out of scope is fine; a defect that quietly stops being mentioned because
 a consumer moved is not.
+#### An instance where the practice WORKED — caught before review, 2026-08-13
+
+The three instances above are all cases where a claim survived review. This one
+did not, and the register should show the difference.
+
+**The claim.** Justifying `extra = "forbid"` on the `Settings` model, I wrote —
+into a code comment *and* a test — that it protects against a typo like
+`DATA_MODEE=real`, on the reasoning that a deployment silently serving demo
+data while believing it is real would be the worst outcome.
+
+**The measurement.** Before pushing, per SP-001(i), I ran the check I had
+asserted:
+
+```
+DATA_MODEE=real    -> ACCEPTED, silently ignored
+JWT_SECRETT=abc    -> ACCEPTED, silently ignored
+VITE_API_URL=...   -> REFUSED
+TOTALLY_UNRELATED  -> REFUSED
+```
+
+**The fact.** pydantic-settings matches an environment name that *prefixes* a
+declared field against that field and discards the remainder. So:
+
+> **`forbid` guards against MISPLACED variables, not MISSPELLED ones.**
+
+A variable belonging to another component is refused — which is exactly the
+defect it was being kept for. A trailing-character typo on a real field name is
+accepted and dropped in silence, under `forbid` and `ignore` alike.
+
+**What was done.** The comment was rewritten to state the measured behaviour and
+name the limitation; the test asserting the false claim was replaced with a
+parametrised test that pins the limitation, so nobody later relies on this for
+typo protection. What does catch the misspelled case is real mode's own
+fail-closed check — an unset `JWT_SECRET` refuses to start — by a different
+mechanism, with a different message.
+
+**Why it is recorded as a success rather than a near-miss.** The first two
+instances cost a cycle each to find, because nobody asked what the check
+covered. This one cost one command, because someone did. That is the entire
+value of the rule, and the register should carry an example of it paying rather
+than only examples of its absence.
+
+**And the residue that makes it honest:** the false claim was written down
+first. The practice is what caught it; it is not what stopped it being written.
 
 #### Known gaps in the practice
 
