@@ -177,6 +177,12 @@ def describe(table, locale=DEFAULT_LOCALE, directory=None):
         "version": spec.get("version"),
         "label": _localised(spec, "label", locale, table),
         "description": _localised(spec, "description", locale, ""),
+        # Optional per-table instructions, shown beside the template download.
+        # A limitation a client can be harmed by has to reach the client: the
+        # locations contract uses this to say that re-assigning a site
+        # re-groups months already reported, because that is something they
+        # must be TOLD, not something they discover in a board pack.
+        "instructions": _localised(spec, "instructions", locale, "") or None,
         "locale": locale if locale in LOCALES else DEFAULT_LOCALE,
         "columns": out_cols,
     }

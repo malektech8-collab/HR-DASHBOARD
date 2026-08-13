@@ -190,6 +190,9 @@ def get_templates(
             "filename": f"{table}_template.csv",
             "label": spec["label"],
             "description": spec["description"],
+            # Null for most domains. Where present it is a warning the client
+            # has to read BEFORE they upload, not a footnote.
+            "instructions": spec.get("instructions"),
             "available": True,
         })
     return templates

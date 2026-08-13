@@ -60,6 +60,12 @@ domains:
     compliance: [compliance]
     hr_requests: [hr_requests]
     employee_relations: [employee_relations]
+    # A REFERENCE DIMENSION, not a fact domain. It carries no measures of its
+    # own; it is what turns a row's site into a project. Listed here because a
+    # by-project figure DEPENDS on it: without this file nobody has said what
+    # the projects are, and the four by-project marts must be withheld rather
+    # than grouped by a site pretending to be a project.
+    locations: [locations]
   uncontracted:
     recruitment:
       - recruitment_requisitions
@@ -258,7 +264,7 @@ marts:
 
   mart_attendance_by_project:
     mode: payload
-    domains: [attendance, employees, payroll]
+    domains: [attendance, employees, locations, payroll]
     # same fabricator as by_department
 
   mart_attendance_exceptions:
@@ -291,7 +297,7 @@ marts:
 
   mart_command_center_filter_options:
     mode: payload
-    domains: [attendance, compliance, employees, payroll]
+    domains: [attendance, compliance, employees, locations, payroll]
     # filter dropdown values; suppressing them would break navigation rather than protect a number
 
   mart_command_center_module_health:
@@ -358,7 +364,7 @@ marts:
 
   mart_er_cases_by_project:
     mode: payload
-    domains: [employee_relations, employees, hr_requests]
+    domains: [employee_relations, employees, hr_requests, locations]
 
   mart_er_exceptions:
     mode: payload
@@ -382,7 +388,7 @@ marts:
 
   mart_learning_by_project:
     mode: payload
-    domains: [employees, talent]
+    domains: [employees, locations, talent]
 
   mart_learning_completion:
     mode: payload
@@ -402,7 +408,7 @@ marts:
 
   mart_payroll_by_project:
     mode: payload
-    domains: [employees, payroll]
+    domains: [employees, locations, payroll]
 
   mart_payroll_components:
     mode: payload
@@ -435,7 +441,7 @@ marts:
 
   mart_performance_by_project:
     mode: payload
-    domains: [employees, talent]
+    domains: [employees, locations, talent]
 
   mart_performance_distribution:
     mode: payload
@@ -447,7 +453,7 @@ marts:
 
   mart_recruitment_by_project:
     mode: payload
-    domains: [recruitment]
+    domains: [locations, recruitment]
 
   mart_recruitment_exceptions:
     mode: payload
@@ -475,7 +481,7 @@ marts:
 
   mart_saudization_by_project:
     mode: payload
-    domains: [employees]
+    domains: [employees, locations]
 
   mart_saudization_summary:
     mode: payload

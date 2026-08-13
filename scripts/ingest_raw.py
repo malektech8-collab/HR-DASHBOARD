@@ -267,6 +267,7 @@ def ingest(data_mode=None):
     # Define paths
     files = {
         "employees": "data/sample/employees_sample.csv",
+        "locations": "data/sample/locations_sample.csv",
         "payroll": "data/sample/payroll_sample.csv",
         "attendance": "data/sample/attendance_sample.csv",
         "hr_requests": "data/sample/hr_requests_sample.csv",
@@ -439,6 +440,20 @@ def ingest(data_mode=None):
         ])
         df.write_parquet("data/silver/employees.parquet")
         print("Ingested employees to bronze/silver.")
+
+    # 1b. Locations - the reference dimension.
+    #
+    # All VARCHAR, no casts, no derivations. It is a lookup table: the project
+    # grouping lives here and nowhere else, so every project-level figure is
+    # produced by joining through it rather than by reading a column off an
+    # employee row that only ever meant "site".
+    if os.path.exists(files["locations"]):
+        df_raw = pl.read_csv(files["locations"])
+        df_raw.write_parquet("data/bronze/locations.parquet")
+
+        df = pl.read_csv(files["locations"], null_values=[""])
+        df.write_parquet("data/silver/locations.parquet")
+        print("Ingested locations to bronze/silver.")
 
     # 2. Payroll
     if os.path.exists(files["payroll"]):
