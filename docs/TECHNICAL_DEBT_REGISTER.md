@@ -129,20 +129,71 @@ Risk while open is low — collection is scoped by `pytest.ini` and the Gate 2 s
 - **Impact**: the two halves agree by convention and review. Convention has failed here before: `TemplateInfo` was missing `label` and `available` for two cycles because the endpoint returned fields the interface never declared, and it surfaced only when a new page tried to read one.
 - **Remediation**: generate types from `app.openapi()` (`openapi-typescript` or similar) into a checked-in file, and fail CI when the generated output differs from the committed one — the same shape as the path contract, one level deeper. Worth doing before the client-facing surface grows further.
 
+### TD-010 — Business rules restated in the reconciliation checks
+
+- **Status**: OPEN (accepted cost, recorded 2026-08-13)
+- **Category**: Analytics / verification
+- **Description**: The reconciliation checks recompute their figures
+  independently, which is what makes them checks rather than tautologies. Two
+  of them therefore restate a business rule that also lives in a dbt model. A
+  change to either rule must be made in **both** places or the check will fire
+  on a correct pipeline.
+
+| Rule | Model | Check |
+|---|---|---|
+| Category F attendance denominator — measured days only, `COUNT(absence_days)` not `COUNT(*)`, NULL when no day was measured | `dbt_analytics/models/marts/mart_attendance_kpis.sql` | `scripts/reconciliation.py`, `attendance_compliance_pct` |
+| Saudization nationality exclusion — employees with no nationality excluded from **both** sides of the ratio, not counted as non-Saudi | `dbt_analytics/models/marts/mart_compliance_kpis.sql` | `scripts/reconciliation.py`, `saudization_pct` |
+
+- **Impact**: a rule change edited in one place produces a red pipeline with a
+  confusing message — the check reports a disagreement that is real but whose
+  cause is the check itself being stale.
+- **Why it is accepted**: an independent recomputation has to be independently
+  written. Sharing a macro between the model and the check would restore the
+  tautology in a more sophisticated form: both sides would move together, which
+  is exactly the defect SP-001 exists to prevent.
+- **Mitigation today**: the duplication is named in both files and here. Both
+  restatements carry a comment saying the other half exists and why.
+- **Closure criterion**: not "remove the duplication" — that would undo the
+  fix. Either a test that asserts the two SQL fragments are semantically
+  equivalent on a fixture designed to separate them, or a decision that the
+  two-place edit is permanent and this item is documentation rather than debt.
+
 ## Standing practices
 
 These are not debt items. They are rules adopted after a defect class appeared
 more than once, recorded here because the register is where someone looks
 before trusting a check.
 
-### SP-001 — A verification line earns its place only once someone has confirmed it can fail
+### SP-001 — A verification line earns its place once someone has confirmed BOTH halves
 
-- **Adopted**: 2026-08-13, after the second instance in two cycles.
+- **Adopted**: 2026-08-13. **Amended the same day**, after the first half alone
+  proved insufficient — see the worked example below.
 - **Rule**: before a check, gate or figure is quoted as evidence, someone must
-  have watched it FAIL. Tamper the input, see it go red, restore. A check that
-  has only ever passed is indistinguishable from a check that cannot fail.
+  have confirmed that:
+  1. **it can fail** — tamper the input, watch it go red, restore; and
+  2. **it asserts the thing that matters** — the tamper must be the defect you
+     actually care about, not merely *a* defect it happens to notice.
 - **Scope**: CI steps, reconciliation checks, pinned figures in cycle reports,
   and any assertion offered at review as proof that something works.
+
+#### Why half the rule is not most of the rule
+
+The first half is falsifiability. The second is relevance. **A check can be
+perfectly falsifiable and still vacuous**, and one that is will survive review
+indefinitely because it passes the obvious question.
+
+**Worked example — reconciliation checks 9–11.** They asserted
+`COUNT(*) = 9` on the Command Center module registry. Delete a row and they go
+red, so they satisfy (i), and on that basis they were classified as *real* in
+the org-dimensions report while the other eight were called tautologies.
+
+They failed (ii) completely. Three of those nine rows carried
+`module_key = '"hr_analytics"."main"."stg_payroll"'` and a matching broken
+`route_path`, for the life of the project. All nine rows were present. They
+were just wrong, and a row count cannot see the difference.
+
+The checks now assert the nine module **keys** and that each route is `/` plus
+its key. That is (ii): the tamper is the defect that actually occurred.
 
 #### The two instances
 
@@ -150,6 +201,7 @@ before trusting a check.
 |---|---|---|
 | **1** | `npx tsc --noEmit` — "0 errors", every cycle | Typechecked **zero files**. `frontend/tsconfig.json` is a solution file with `"files": []` and only project references, so bare `tsc` resolved no inputs and exited 0 on any error. `npx tsc --noEmit --listFilesOnly \| wc -l` returned `0`. Found only when the Docker gate, which runs `tsc -b`, failed on an unused variable. |
 | **2** | `Command Center integration reconciliation checks PASSED` | Eight of eleven checks compared `command_center_overview_data` against the marts it had been **populated from fifteen lines earlier in the same connection**. Tampering `mart_workforce_kpis` with `+ 1` left the pipeline green. |
+| **3** | the remaining three checks, described as *real* | Falsifiable (delete a row, they go red) and vacuous: `COUNT(*) = 9` while three of the nine rows were corrupt. This is the instance that produced half (ii) of the rule. |
 
 Both were offered as evidence for many cycles and **accepted at review each
 time**. Nobody asked what they covered, on either side of the review. That is
@@ -171,6 +223,35 @@ the second.
   are asserted rather than eyeballed; `HR_WAREHOUSE_PATH` exists so the gate
   itself can be pointed at a doctored warehouse and watched failing.
 - CI Gate 1 runs `npx tsc -b`, which reads the project references.
+
+#### A related failure mode: routing around a defect instead of tracing it
+
+SP-001 is about checks. This is about findings, and it produced the same
+outcome — something known to be wrong, left in place.
+
+In cycle 5a the corrupted keys were **seen, described, and worked around**.
+From `docs/phase-0/phase-0-5a-resolver-report.md`:
+
+> "(Note: pre-cycle, `attendance` and `compliance` also had a `module_key`
+> mismatch — they queried `'attendance'`/`'compliance'` but the freshness mart
+> stores relation-expanded keys like `'"hr_analytics"."main"."stg_attendance"'`;
+> reading `base_command_center_report_context` sidesteps that entirely.)"
+
+and, in the same report:
+
+> "which also fixes the second latent bug (the attendance/compliance
+> `module_key` mismatch) **for free by not using `module_key` at all**"
+
+The word "fixes" is doing work it had not earned. Nothing was fixed: one
+consumer stopped reading a corrupt value. The corruption stayed in the data,
+spread to a second set of models, and was found again two phases later — by
+which point it had also reached **492 of 667 client-facing exception
+messages**, which is where it had always been.
+
+**The rule**: a defect that is routed around is not closed. Either trace it to
+its cause and fix it, or record it as open debt with its blast radius unknown.
+"Sidesteps that entirely" is a description of the workaround, not of the
+defect.
 
 #### Known gaps in the practice
 
