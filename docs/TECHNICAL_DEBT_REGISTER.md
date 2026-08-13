@@ -91,12 +91,15 @@ Risk while open is low — collection is scoped by `pytest.ini` and the Gate 2 s
 
 ### TD-006 — Synthetic JWT layer and plaintext password comparison
 
-- **Status**: OPEN — recorded 2026-08-12, **Phase 3 hardening**
+- **Status**: **CLOSED** — 2026-08-13, phase-3/auth cycle
 - **Category**: Security
 - **Description**: `app/core/security.py` holds `MOCK_USER_DB`, a dict literal of three users whose passwords are stored and compared in plaintext (the field is named `hashed_password` but is not hashed). `create_access_token` / `decode_access_token` are a synthetic JWT implementation that no cycle has reviewed.
 - **Impact**: P0-2 put `Depends(get_current_user)` on six data-mutating routes, so this layer is now the only thing standing between an anonymous request and a client's data. It was not load-bearing before; it is now.
 - **Deliberately out of scope of P0-2**: bundling a review of the auth implementation into a data-validation cycle would have made both harder to review, and the dependency is correct regardless of what sits behind it.
 - **Remediation**: real password hashing, a real user store, a reviewed token implementation, and a decision on whether commit requires a specific role (`RoleChecker` already exists and is used by `/api/governance/*`).
+- **Resolution**: argon2id, a SQLite store at `data/auth/auth.db`, per-deployment `JWT_SECRET` with real mode failing closed, `iss`/`aud`/`jti`, logout, lockout, and first-run bootstrap with no credential ever at rest. See [docs/phase-3/auth-report.md](phase-3/auth-report.md).
+- **A CORRECTION TO THIS ENTRY, and the larger half of the fix.** The description above said this layer "is now the only thing between an anonymous request and a client's data". That was true of the six routes P0-2 protected and false of the product: 83 routes existed and `get_current_user` appeared in ONE file, so `/api/workforce/exceptions` returned `employee_name` to an anonymous caller. Strengthening the credential layer would not have moved that by one byte. Route coverage was folded into the same cycle for that reason — closing it without would have shipped a report that was true and misleading at once.
+- **Carried forward**: the role POLICY is not decided (mechanism only). See the endpoint list in the report §6, whose sharpest entry is `/api/data/uploads/{id}/columns`.
 
 ### TD-007 — RTL / full Arabic localisation
 
