@@ -31,9 +31,15 @@ jobs:
         working-directory: frontend
         run: npm run lint
 
+      # `tsc --noEmit` typechecked NOTHING: tsconfig.json is a solution file
+      # with "files": [] and only project references, so bare tsc resolved zero
+      # input files and exited 0 on any error. `tsc -b` builds the referenced
+      # projects, which is where "include": ["src"] and noUnusedLocals live -
+      # and is what the Docker gate has been running all along, three gates
+      # later and with a far slower turnaround.
       - name: Run Frontend Type Check (tsc)
         working-directory: frontend
-        run: npx tsc --noEmit
+        run: npx tsc -b
 
       # --- Backend Checks ---
       - name: Set up Python

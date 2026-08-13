@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { aPreview, aViolation } from '../test/builders';
+import { aMapping, aPreview, aViolation } from '../test/builders';
 import { commitGate, isDeclarationReady } from './uploadFlow';
 import type { CommitDeclaration, UploadPreview } from './uploads';
 
@@ -132,5 +132,105 @@ describe('commitGate — REJECT blocks, EXCEPTION permits and is announced', () 
 
   it('no preview cannot be committed', () => {
     expect(commitGate(null, ready, false).enabled).toBe(false);
+  });
+});
+
+
+/**
+ * THE DEFECT THIS SECTION EXISTS FOR, precisely.
+ *
+ *   Cycle A widened `can_commit` to also block on unmapped headers and
+ *   unmapped REJECT-enum values. `commitGate` was not told, and still read the
+ *   reason off `preview.rejects.length`. With a clean file and an incomplete
+ *   profile that produced:
+ *
+ *       "0 errors must be fixed before this can be committed."
+ *
+ *   It failed closed, so nothing wrong was committed. It was simply a dead
+ *   end: the count was zero, the cause was elsewhere, and `MappingOut` — which
+ *   named the cause exactly — was returned by the preview and read by nothing.
+ *
+ * So the gate now derives the reason instead of assuming it, and returns it as
+ * a value the page can branch on rather than a sentence it can only print.
+ */
+describe('commitGate — why it is blocked', () => {
+  const ready = { declaration: {}, confirmed: false };
+
+  it('never says "0 errors" when the blocker is the mapping', () => {
+    const preview = aPreview({
+      can_commit: false,
+      mapping: aMapping({ unmapped: ['ملاحظات'] }),
+    });
+    const gate = commitGate(preview, ready, false);
+
+    expect(gate.blockedBecause).not.toContain('0 errors');
+    expect(gate.blockKind).toBe('unmapped-columns');
+    expect(gate.blockCount).toBe(1);
+  });
+
+  it('names unmapped values, and counts them across columns', () => {
+    const preview = aPreview({
+      can_commit: false,
+      mapping: aMapping({
+        unmapped_values: { status: ['معلق', 'منتهي'], end_of_service_type: ['فصل'] },
+      }),
+    });
+    const gate = commitGate(preview, ready, false);
+
+    expect(gate.blockKind).toBe('unmapped-values');
+    expect(gate.blockCount).toBe(3);
+  });
+
+  it('puts rejects ahead of the mapping when both apply', () => {
+    // Fixing the file is the more actionable step. A client sent to the
+    // mapping screen who then still cannot commit has been sent twice.
+    const preview = aPreview({
+      can_commit: false,
+      rejects: [aViolation()],
+      mapping: aMapping({ unmapped: ['ملاحظات'] }),
+    });
+
+    expect(commitGate(preview, ready, false).blockKind).toBe('rejects');
+  });
+
+  it('stays vague rather than confident about a cause it did not check', () => {
+    // A future server-side blocker this client does not model must not be
+    // reported as something it is not.
+    const preview = aPreview({ can_commit: false, mapping: aMapping() });
+    const gate = commitGate(preview, ready, false);
+
+    expect(gate.enabled).toBe(false);
+    expect(gate.blockedBecause).not.toContain('0');
+  });
+
+  it('falls through to the declaration once the mapping is complete', () => {
+    const preview = aPreview({
+      can_commit: true,
+      coverage_required: true,
+      mapping: aMapping(),
+    });
+
+    expect(commitGate(preview, ready, false).blockKind).toBe('declaration');
+  });
+
+  it('enables with no blockKind when everything is satisfied', () => {
+    const gate = commitGate(aPreview({ mapping: aMapping() }), ready, false);
+
+    expect(gate.enabled).toBe(true);
+    expect(gate.blockKind).toBeNull();
+  });
+
+  it('reports busy separately, with nothing to say', () => {
+    const gate = commitGate(aPreview({ mapping: aMapping() }), ready, true);
+
+    expect(gate.blockKind).toBe('busy');
+    expect(gate.blockedBecause).toBeNull();
+  });
+
+  it('handles a preview with no mapping at all', () => {
+    // A client whose export is already canonical has `mapping: null`.
+    const gate = commitGate(aPreview({ mapping: null }), ready, false);
+
+    expect(gate.enabled).toBe(true);
   });
 });

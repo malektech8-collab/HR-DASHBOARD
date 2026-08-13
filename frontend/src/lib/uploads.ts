@@ -33,6 +33,29 @@ export interface Violation {
   message_ar: string;
 }
 
+/**
+ * What the profile did to this upload, and what still needs a human.
+ *
+ * Returned by the preview since cycle A and read by nothing until now, which
+ * is how the commit button came to say "0 errors must be fixed" when the real
+ * blocker was an incomplete profile.
+ */
+export interface MappingSummary {
+  applied: boolean;
+  profile_version: number | null;
+  renamed: Record<string, string>;
+  ignored: string[];
+  /** Source headers with no decision. These BLOCK. */
+  unmapped: string[];
+  derived: string[];
+  /** canonical column -> client values with no mapping, where that BLOCKS. */
+  unmapped_values: Record<string, string[]>;
+  reject_enum_options: Record<string, string[]>;
+  /** What a value mapping into that column decides. Shown beside the choice. */
+  reject_enum_consequences: Record<string, string>;
+  header_changed: boolean;
+}
+
 export interface UploadPreview {
   upload: StagedUpload;
   row_count: number;
@@ -49,6 +72,7 @@ export interface UploadPreview {
   suggested_coverage_end: string | null;
   coverage_required: boolean;
   history_required: boolean;
+  mapping: MappingSummary | null;
 }
 
 export interface CommitDeclaration {

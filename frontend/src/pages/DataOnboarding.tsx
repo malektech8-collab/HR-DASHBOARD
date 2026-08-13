@@ -6,6 +6,8 @@ import { ViolationPanels } from '../components/widgets/ViolationPanels';
 import { fetchTemplates, getTemplateDownloadUrl } from '../lib/api';
 import { ApiError, getToken, login } from '../lib/http';
 import { commitGate } from '../lib/uploadFlow';
+import { MappingPanel } from '../components/widgets/MappingPanel';
+import { MappingScreen } from '../components/widgets/MappingScreen';
 import {
   commitUpload,
   discardUpload,
@@ -35,7 +37,10 @@ import type { TemplateInfo } from '../lib/api';
  * side effect of an upload screen.
  */
 
-type Step = 'pick' | 'upload' | 'review' | 'done';
+// `map` sits between upload and review because that is where it happens:
+// the preview is what discovers the profile is incomplete, and the review
+// step is where the client is sent back from.
+type Step = 'pick' | 'upload' | 'map' | 'review' | 'done';
 
 export const ScopedLogin: React.FC<{ onDone: () => void }> = ({ onDone }) => {
   const [username, setUsername] = useState('admin@synthetic.local');
@@ -110,6 +115,7 @@ export const DataOnboarding: React.FC = () => {
   const [preview, setPreview] = useState<UploadPreview | null>(null);
   const [declaration, setDeclaration] = useState<CommitDeclaration>({});
   const [confirmed, setConfirmed] = useState(false);
+  const [focusHeader, setFocusHeader] = useState<string | undefined>();
   const [report, setReport] = useState<RefreshReport | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -274,6 +280,31 @@ export const DataOnboarding: React.FC = () => {
             </section>
           )}
 
+          {/* 2b. map — only when the profile is incomplete. A client whose
+                 export already matches never sees this. */}
+          {preview && step === 'map' && (
+            <MappingScreen
+              uploadId={preview.upload.upload_id}
+              focusHeader={focusHeader}
+              onCancel={() => { setFocusHeader(undefined); setStep('review'); }}
+              onSaved={async () => {
+                // Re-preview rather than patching state: the mapping is applied
+                // server-side, and the client should never hold its own idea of
+                // what a profile did.
+                setFocusHeader(undefined);
+                setBusy('previewing');
+                try {
+                  setPreview(await previewUpload(preview.upload.upload_id));
+                  setStep('review');
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : String(err));
+                } finally {
+                  setBusy(null);
+                }
+              }}
+            />
+          )}
+
           {/* 3. review — validation results and preview are one screen,
                  because they are one request */}
           {preview && step === 'review' && (
@@ -298,6 +329,11 @@ export const DataOnboarding: React.FC = () => {
                 <div><dt className="text-muted-foreground">Unexpected</dt>
                   <dd className="font-bold">{preview.columns_unexpected.length}</dd></div>
               </dl>
+
+              <MappingPanel
+                mapping={preview.mapping}
+                onFix={(header) => { setFocusHeader(header); setStep('map'); }}
+              />
 
               <ViolationPanels preview={preview} />
 
@@ -367,8 +403,18 @@ export const DataOnboarding: React.FC = () => {
                   {gate.label}
                 </button>
                 {gate.blockedBecause && (
-                  <p className={`text-xs ${preview.can_commit ? 'text-muted-foreground' : 'text-critical'}`}>
+                  <p className={`text-xs ${gate.blockKind === 'declaration' ? 'text-muted-foreground' : 'text-critical'}`}>
                     {gate.blockedBecause}
+                    {(gate.blockKind === 'unmapped-columns'
+                      || gate.blockKind === 'unmapped-values') && (
+                      <button
+                        onClick={() => setStep('map')}
+                        className="ml-1 underline font-semibold"
+                        data-testid="goto-mapping"
+                      >
+                        Fix the mapping
+                      </button>
+                    )}
                   </p>
                 )}
                 {busy === 'committing' && (
