@@ -370,6 +370,13 @@ export interface TemplateInfo {
    *  the type simply never declared it. */
   label: string;
   description: string;
+  /**
+   * Per-domain warning, null for most. Where present it is something the
+   * client can be HARMED by not knowing before they upload - `locations` uses
+   * it to say that re-assigning a site re-groups months already reported.
+   * Render it prominently, not as a footnote.
+   */
+  instructions: string | null;
   available: boolean;
 }
 
