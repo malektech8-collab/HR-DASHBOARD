@@ -85,14 +85,20 @@ columns:
   description_en: Organisational department.
   description_ar: الإدارة التنظيمية.
   example: Finance
-- name: project
-  name_en: Project
-  name_ar: المشروع
+- name: location
+  name_en: Location
+  name_ar: الموقع
   type: VARCHAR
   required: true
-  description_en: Project or site the employee is assigned to.
-  description_ar: المشروع أو الموقع المكلّف به الموظف.
-  example: Project Alpha
+  description_en: 'The site, office or yard this row belongs to. Must match a `location` in
+    your locations file - that file is what says which project each site belongs to. Renamed
+    from `project` in 2026-08: this column always held the physical site (the employees contract
+    said so in its own work_unit description), while nothing recorded the project above it.
+    A project is no longer an attribute of a row.'
+  description_ar: 'الموقع أو المكتب الذي ينتمي إليه هذا الصف. يجب أن يطابق موقعاً في ملف المواقع،
+    وهو الملف الذي يحدد المشروع التابع له كل موقع. أُعيدت تسميته من `project` في ٢٠٢٦-٠٨:
+    كان هذا العمود يحمل دائماً الموقع الفعلي، ولم يكن هناك ما يسجّل المشروع الأعلى منه.'
+  example: RUH-TOWER-P1
 - name: job_title
   name_en: Job Title
   name_ar: المسمى الوظيفي
@@ -270,15 +276,21 @@ columns:
   name_ar: وحدة عمل
   type: VARCHAR
   required: false
-  description_en: 'Work unit within a department. The organisational hierarchy is
-    Location -> Department -> Work Unit: the location (the `project` column) is the
-    physical site and contains multiple departments, and each department contains
-    one or more work units. Optional - leave empty where a department is not
-    subdivided.'
-  description_ar: >-
-    وحدة العمل داخل القسم. التسلسل التنظيمي هو الموقع ثم القسم ثم وحدة العمل:
-    الموقع (عمود المشروع) هو الموقع الفعلي ويضم عدة أقسام، وكل قسم يضم وحدة عمل
-    أو أكثر. اختياري - يترك فارغاً إذا لم يكن القسم مقسماً إلى وحدات.
+  description_en: 'Work unit within a department, e.g. Payables under Finance. Optional -
+    leave empty where a department is not subdivided. Recorded for completeness; nothing is
+    currently grouped by it. CORRECTION (2026-08, org-dimensions cycle): this description
+    previously read "Work unit within a department. The organisational hierarchy is Location
+    -> Department -> Work Unit: the location (the `project` column) is the physical site and
+    contains multiple departments, and each department contains one or more work units." That
+    nesting is WRONG. Department is ORTHOGONAL to location and project - the demo data alone
+    shows Engineering, HR and Operations each spanning two projects, and cross-cutting functions
+    (Safety, Fleet, QA) span every site by design. Read as nested, Engineering at one site
+    and Engineering at another would be different departments.'
+  description_ar: 'وحدة العمل داخل القسم، مثل الحسابات الدائنة ضمن المالية. اختياري - يترك
+    فارغاً إذا لم يكن القسم مقسماً إلى وحدات. يُسجَّل للاكتمال ولا يتم التجميع به حالياً.
+    تصحيح (٢٠٢٦-٠٨): كان هذا الوصف يذكر أن التسلسل التنظيمي هو الموقع ثم القسم ثم وحدة العمل
+    وأن الموقع يضم عدة أقسام. هذا غير صحيح: القسم مستقل عن الموقع والمشروع، والأقسام المشتركة
+    مثل السلامة والجودة تمتد عبر جميع المواقع بحكم تصميمها.'
   example: Payables
 - name: end_of_service_type
   name_en: End of Service Type
