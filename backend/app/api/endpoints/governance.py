@@ -7,7 +7,8 @@ from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 from app.core import bootstrap as bootstrap_tokens
 from app.core import users
-from app.core.security import Role, create_access_token, revoke
+from app.core.security import (Role, SecretNotConfigured,
+                               create_access_token, revoke)
 from app.api.dependencies.auth import RoleChecker, get_current_user
 
 router = APIRouter()
@@ -45,8 +46,20 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()) -> Dict[str, Any]:
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    return {"access_token": create_access_token(data={"sub": user["email"]}),
-            "token_type": "bearer"}
+    try:
+        token = create_access_token(data={"sub": user["email"]})
+    except SecretNotConfigured as exc:
+        # A CORRECT credential against a misconfigured deployment. This used to
+        # be an uncaught raise, so the operator got a bare 500 - at the one
+        # moment they most needed to be told which variable is missing. The
+        # data routes already answered 503 with this message; login did not,
+        # which meant the most informative message in the system was the one
+        # place it could not be seen.
+        #
+        # It failed closed either way. It now fails helpfully.
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc))
+    return {"access_token": token, "token_type": "bearer"}
 
 
 class BootstrapRequest(BaseModel):
