@@ -49,7 +49,7 @@
     FROM {{ ref('base_er_case_population') }} WHERE case_id IN (SELECT case_id FROM {{ ref('base_er_case_population') }} GROUP BY 1 HAVING COUNT(*) > 1)
     UNION ALL
     -- 13. SLA status missing
-    SELECT case_id, employee_name, 'Missing SLA Status' AS issue_type, 'SLA {{ ref('stg_compliance') }} clock cannot evaluate status', 'Warning' AS severity, 'Provide created_date and target_due_date' AS recommended_action, er_case_record_id
+    SELECT case_id, employee_name, 'Missing SLA Status' AS issue_type, 'SLA compliance clock cannot evaluate status', 'Warning' AS severity, 'Provide created_date and target_due_date' AS recommended_action, er_case_record_id
     FROM {{ ref('base_er_case_population') }} WHERE sla_status = 'Not Eligible'
     UNION ALL
     -- 14. Escalated case missing escalation reason

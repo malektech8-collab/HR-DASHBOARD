@@ -88,6 +88,11 @@ VALUE_CHECKS = [
         "label": "Attendance Compliance",
         "served":
             "SELECT attendance_compliance_pct FROM mart_command_center_overview",
+        # DUPLICATION, ACCEPTED AND RECORDED AS TD-010. This rule also lives
+        # in mart_attendance_kpis.sql. A change must be made in BOTH places.
+        # Sharing a macro would restore the tautology in a subtler form: both
+        # sides would move together, which is the defect SP-001 prevents.
+        #
         # Category F: the denominator is MEASURED days. COUNT(absence_days)
         # skips the NULLs base_expected_attendance puts on days outside
         # declared coverage, and no measured days at all is NULL, not 1.0.
@@ -109,6 +114,9 @@ VALUE_CHECKS = [
         "name": "saudization_pct",
         "label": "Saudization",
         "served": "SELECT saudization_pct FROM mart_command_center_overview",
+        # DUPLICATION, ACCEPTED AND RECORDED AS TD-010. Also in
+        # mart_compliance_kpis.sql; a change must be made in both places.
+        #
         # Employees with no nationality are excluded from BOTH sides of the
         # ratio rather than counted as non-Saudi - a missing nationality is
         # unknown, not foreign, and Nitaqat banding turns on this figure.

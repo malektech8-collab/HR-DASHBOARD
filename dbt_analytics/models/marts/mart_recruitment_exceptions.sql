@@ -28,8 +28,8 @@
     SELECT requisition_id AS record_id_str, 'Overdue Requisition' AS issue_type, 'Open requisition has breached its effective target date: ' || CAST(effective_target_hire_date AS VARCHAR), 'Critical' AS severity, 'Expedite sourcing and pipeline conversions' AS recommended_action
     FROM {{ ref('base_recruitment_requisitions_current') }} WHERE status IN ('Open', 'Approved', 'In Progress', 'On Hold') AND '{{ var('report_anchor_date') }}' > effective_target_hire_date
     UNION ALL
-    -- 8. Requisition approved but no {{ ref('stg_candidates') }}
-    SELECT requisition_id AS record_id_str, 'Empty Candidate Pipeline' AS issue_type, 'Requisition is open but has 0 {{ ref('stg_candidates') }} linked', 'Warning' AS severity, 'Source and link {{ ref('stg_candidates') }} to requisition' AS recommended_action
+    -- 8. Requisition approved but no candidates
+    SELECT requisition_id AS record_id_str, 'Empty Candidate Pipeline' AS issue_type, 'Requisition is open but has 0 candidates linked', 'Warning' AS severity, 'Source and link candidates to requisition' AS recommended_action
     FROM {{ ref('base_recruitment_requisitions_current') }} WHERE status IN ('Open', 'Approved', 'In Progress', 'On Hold') AND requisition_id NOT IN (SELECT DISTINCT requisition_id FROM {{ ref('base_candidate_pipeline_current') }})
     UNION ALL
     -- 9. Candidate missing pipeline stage
@@ -52,8 +52,8 @@
     SELECT offer_id AS record_id_str, 'Offer Missing Salary' AS issue_type, 'Offer extended has no base salary details', 'Critical' AS severity, 'Enter base salary details' AS recommended_action
     FROM {{ ref('base_offer_source_records') }} WHERE salary IS NULL OR salary <= 0
     UNION ALL
-    -- 14. Offer accepted but {{ ref('stg_onboarding') }} not started
-    SELECT o.offer_id AS record_id_str, 'Onboarding Not Triggered' AS issue_type, 'Offer status is Accepted but {{ ref('stg_onboarding') }} is not logged', 'Critical' AS severity, 'Create {{ ref('stg_onboarding') }} record' AS recommended_action
+    -- 14. Offer accepted but onboarding not started
+    SELECT o.offer_id AS record_id_str, 'Onboarding Not Triggered' AS issue_type, 'Offer status is Accepted but onboarding is not logged', 'Critical' AS severity, 'Create onboarding record' AS recommended_action
     FROM {{ ref('base_offer_source_records') }} o WHERE o.offer_status = 'Accepted' AND o.candidate_id NOT IN (SELECT DISTINCT candidate_id FROM {{ ref('base_onboarding_source_records') }})
     UNION ALL
     -- 15. Onboarding linked to unknown employee

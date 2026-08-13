@@ -62,11 +62,11 @@ WITH anchor AS (
     JOIN {{ ref('stg_compliance') }} c ON e.employee_id = c.employee_id, anchor
     WHERE e.is_saudi = FALSE AND c.iqama_expiry BETWEEN anchor_date AND anchor_date + INTERVAL 30 DAY
     UNION ALL
-    -- 8. Inactive employee appearing in {{ ref('stg_payroll') }}
+    -- 8. Inactive employee appearing in payroll
     SELECT 
         e.employee_id, e.employee_name, 'Inactive Employee Payroll' AS issue_type,
-        'Employee status is ' || e.status || ' but appeared in active {{ ref('stg_payroll') }} run' AS description, 'Critical' AS severity,
-        'Hold {{ ref('stg_payroll') }} run and check termination status/period logic' AS recommended_action
+        'Employee status is ' || e.status || ' but appeared in active payroll run' AS description, 'Critical' AS severity,
+        'Hold payroll run and check termination status/period logic' AS recommended_action
     FROM {{ ref('stg_payroll') }} p
     JOIN {{ ref('stg_employees') }} e ON p.employee_id = e.employee_id
     WHERE e.status IN ('Inactive', 'Terminated') AND p.payroll_period = '{{ var('report_month') }}'
@@ -91,7 +91,7 @@ WITH anchor AS (
     SELECT 
         e.employee_id, e.employee_name, 'Missing Iqama Expiry Date' AS issue_type,
         'Active non-Saudi employee has no Iqama expiry date set' AS description, 'Warning' AS severity,
-        'Update {{ ref('stg_compliance') }} records with Iqama expiry date' AS recommended_action
+        'Update compliance records with Iqama expiry date' AS recommended_action
     FROM {{ ref('base_active_workforce') }} e
     LEFT JOIN {{ ref('stg_compliance') }} c ON e.employee_id = c.employee_id
     WHERE e.is_saudi = FALSE AND c.iqama_expiry IS NULL

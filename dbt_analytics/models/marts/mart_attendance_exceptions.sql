@@ -115,25 +115,25 @@
 
     UNION ALL
 
-    -- 9. Overtime hours without {{ ref('stg_payroll') }} overtime amount
+    -- 9. Overtime hours without payroll overtime amount
     SELECT 
         employee_id,
         employee_name,
         'Overtime Amount Missing' AS issue_type,
-        'Employee has approved overtime hours (' || attendance_ot_hours || ') but {{ ref('stg_payroll') }} overtime amount is zero' AS description,
+        'Employee has approved overtime hours (' || attendance_ot_hours || ') but payroll overtime amount is zero' AS description,
         'Critical' AS severity,
-        'Process overtime payment in monthly {{ ref('stg_payroll') }}' AS recommended_action
+        'Process overtime payment in monthly payroll' AS recommended_action
     FROM {{ ref('base_attendance_payroll_overtime') }}
     WHERE attendance_ot_hours > 0 AND payroll_ot_cost = 0
 
     UNION ALL
 
-    -- 10. Payroll overtime amount without {{ ref('stg_attendance') }} overtime hours
+    -- 10. Payroll overtime amount without attendance overtime hours
     SELECT 
         employee_id,
         employee_name,
         'Overtime Hours Missing' AS issue_type,
-        'Employee has {{ ref('stg_payroll') }} overtime payment (' || payroll_ot_cost || ' SAR) but approved overtime hours are zero' AS description,
+        'Employee has payroll overtime payment (' || payroll_ot_cost || ' SAR) but approved overtime hours are zero' AS description,
         'Critical' AS severity,
         'Investigate overtime validation or manual entry error' AS recommended_action
     FROM {{ ref('base_attendance_payroll_overtime') }}
@@ -148,7 +148,7 @@
         'Attendance for Inactive Employee' AS issue_type,
         'Attendance record exists on ' || strftime(attendance_date, '%Y-%m-%d') || ' but employee is inactive' AS description,
         'Critical' AS severity,
-        'Verify employee work status and {{ ref('stg_attendance') }} logs' AS recommended_action
+        'Verify employee work status and attendance logs' AS recommended_action
     FROM {{ ref('base_attendance_current') }}
     WHERE emp_status = 'Inactive'
 
@@ -176,16 +176,16 @@
         'Critical' AS severity,
         'Register employee in master file or verify employee ID' AS recommended_action
     FROM {{ ref('base_attendance_current') }}
-    WHERE record_classification = 'Unknown employee {{ ref('stg_attendance') }}'
+    WHERE record_classification = 'Unknown employee attendance'
 
     UNION ALL
 
-    -- 14. Active employee missing {{ ref('stg_attendance') }} record for expected workday
+    -- 14. Active employee missing attendance record for expected workday
     SELECT 
         employee_id,
         employee_name,
         'Missing Workday Attendance' AS issue_type,
-        'Active employee has no {{ ref('stg_attendance') }} record for expected workday on ' || strftime(calendar_date, '%Y-%m-%d') AS description,
+        'Active employee has no attendance record for expected workday on ' || strftime(calendar_date, '%Y-%m-%d') AS description,
         'Warning' AS severity,
         'Confirm if employee was absent, on leave, or missed punch' AS recommended_action
     FROM {{ ref('base_expected_attendance') }}

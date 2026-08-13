@@ -25,11 +25,11 @@ SELECT
         ) AS calculated_net_late_minutes,
         -- Classification of record
         CASE 
-            WHEN e.employee_id IS NULL THEN 'Unknown employee {{ ref('stg_attendance') }}'
-            WHEN e.status = 'Active' THEN 'Active employee {{ ref('stg_attendance') }}'
-            WHEN e.status = 'Inactive' THEN 'Inactive employee {{ ref('stg_attendance') }}'
-            WHEN e.status = 'Terminated' THEN 'Terminated employee {{ ref('stg_attendance') }}'
-            ELSE 'Other employee {{ ref('stg_attendance') }}'
+            WHEN e.employee_id IS NULL THEN 'Unknown employee attendance'
+            WHEN e.status = 'Active' THEN 'Active employee attendance'
+            WHEN e.status = 'Inactive' THEN 'Inactive employee attendance'
+            WHEN e.status = 'Terminated' THEN 'Terminated employee attendance'
+            ELSE 'Other employee attendance'
         END AS record_classification
     FROM {{ ref('stg_attendance') }} a
     LEFT JOIN {{ ref('base_employees_deduplicated') }} e ON a.employee_id = e.employee_id
