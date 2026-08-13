@@ -21,7 +21,7 @@
     -- 3. Active employee missing WPS record (conditional on WPS source availability)
     SELECT employee_id, employee_name, 'Missing WPS Record' AS issue_type, 
            'Active employee has no record in WPS (Mudad) portal' AS description, 
-           'Critical' AS severity, 'Add employee to WPS {{ ref('stg_payroll') }} files' AS recommended_action 
+           'Critical' AS severity, 'Add employee to WPS payroll files' AS recommended_action 
     FROM {{ ref('base_compliance_current') }} 
     WHERE mudad_status IS NULL AND {{ var('has_wps_source_sql') }}
     
@@ -30,13 +30,13 @@
     -- 4. Employee appearing in WPS but inactive in workforce (only when WPS status exists)
     SELECT employee_id, employee_name, 'WPS Record for Inactive Employee' AS issue_type, 
            'Employee is appearing in government WPS file with status ' || mudad_status || ' but is inactive/terminated (' || COALESCE(employee_status, 'Unknown') || ')' AS description, 
-           'Critical' AS severity, 'Stop WPS {{ ref('stg_payroll') }} entry and verify status' AS recommended_action 
+           'Critical' AS severity, 'Stop WPS payroll entry and verify status' AS recommended_action 
     FROM {{ ref('base_government_platform_records') }} 
     WHERE record_classification != 'Active Employee' AND mudad_status IS NOT NULL
     
     UNION ALL
     
-    -- 5. Missing project for {{ ref('stg_compliance') }} population
+    -- 5. Missing project for compliance population
     SELECT employee_id, employee_name, 'Missing Project assignment' AS issue_type, 
            'Active employee is missing project code assignment' AS description, 
            'Warning' AS severity, 'Update project mapping in master file' AS recommended_action 
@@ -45,7 +45,7 @@
     
     UNION ALL
     
-    -- 6. Missing department for {{ ref('stg_compliance') }} population
+    -- 6. Missing department for compliance population
     SELECT employee_id, employee_name, 'Missing Department assignment' AS issue_type, 
            'Active employee is missing department mapping' AS description, 
            'Warning' AS severity, 'Update department mapping in master file' AS recommended_action 
@@ -54,7 +54,7 @@
     
     UNION ALL
     
-    -- 7. Missing cost center for {{ ref('stg_compliance') }} population
+    -- 7. Missing cost center for compliance population
     SELECT employee_id, employee_name, 'Missing Cost Center assignment' AS issue_type, 
            'Active employee is missing cost center assignment' AS description, 
            'Warning' AS severity, 'Update cost center in master file' AS recommended_action 
@@ -84,7 +84,7 @@
     -- 10. GOSI Salary Mismatch (excluding nulls)
     SELECT employee_id, employee_name, 'GOSI Salary Mismatch' AS issue_type, 
            'Registered GOSI salary (' || gosi_salary || ') differs from basic salary (' || payroll_basic_salary || ')' AS description, 
-           'Critical' AS severity, 'Update GOSI salary records to match {{ ref('stg_payroll') }} basic' AS recommended_action 
+           'Critical' AS severity, 'Update GOSI salary records to match payroll basic' AS recommended_action 
     FROM {{ ref('base_compliance_current') }} 
     WHERE gosi_salary IS NOT NULL AND payroll_basic_salary IS NOT NULL AND gosi_salary != payroll_basic_salary
     
@@ -92,8 +92,8 @@
     
     -- 11. Missing Salary Values in Compliance/Payroll
     SELECT employee_id, employee_name, 'Missing Salary Info' AS issue_type, 
-           'Active employee has null salary values in GOSI or {{ ref('stg_payroll') }} base' AS description, 
-           'Warning' AS severity, 'Update salary values in GOSI/{{ ref('stg_payroll') }} database' AS recommended_action 
+           'Active employee has null salary values in GOSI or payroll base' AS description, 
+           'Warning' AS severity, 'Update salary values in GOSI/payroll database' AS recommended_action 
     FROM {{ ref('base_compliance_current') }} 
     WHERE gosi_salary IS NULL OR payroll_basic_salary IS NULL
     
@@ -129,7 +129,7 @@
     -- 15. Non-Saudi employee missing Iqama expiry date
     SELECT employee_id, employee_name, 'Missing Iqama Expiry Date' AS issue_type, 
            'Non-Saudi employee is missing an Iqama expiry date' AS description, 
-           'Warning' AS severity, 'Update {{ ref('stg_compliance') }} records with Iqama expiry date' AS recommended_action 
+           'Warning' AS severity, 'Update compliance records with Iqama expiry date' AS recommended_action 
     FROM {{ ref('base_document_expiry') }} 
     WHERE iqama_bucket = 'missing_date'
     
@@ -156,7 +156,7 @@
     -- 18. Non-Saudi employee missing work permit expiry date
     SELECT employee_id, employee_name, 'Missing Work Permit Expiry Date' AS issue_type, 
            'Non-Saudi employee is missing a Work Permit expiry date' AS description, 
-           'Warning' AS severity, 'Update {{ ref('stg_compliance') }} records with Work Permit expiry date' AS recommended_action 
+           'Warning' AS severity, 'Update compliance records with Work Permit expiry date' AS recommended_action 
     FROM {{ ref('base_document_expiry') }} 
     WHERE work_permit_bucket = 'missing_date'
     
