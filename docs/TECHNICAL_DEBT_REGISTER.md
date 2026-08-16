@@ -583,6 +583,105 @@ Not every check in the repo has been tamper-proven — only those written or
 touched since adoption. Applying it retroactively to the rest of the suite is
 open work, not a completed sweep, and should not be implied otherwise.
 
+### SP-002 — A correction records the WORDING of a claim, not the DATA it was about
+
+- **Adopted**: 2026-08-13, caught in a first draft before review.
+- **Rule**: this project corrects a wrong statement **in place, with the
+  original wording recorded beside it**, so the correction is checkable rather
+  than a silently different file. That convention says to preserve *what was
+  claimed*. It does **not** say to reproduce *what the claim was about* — and
+  where the correction exists to remove something, quoting it back undoes the
+  fix in the act of documenting it.
+
+#### The instance
+
+A cycle report stated *"No client figures appear anywhere in this repo."* It
+was wrong: the plan document carried a client's leaver count in three places.
+The fix generalised all three to a magnitude.
+
+The first draft of the correction then quoted the offending sentence in full,
+figure included — reproducing the exact count the correction had just removed,
+in the document that records the removal. Caught before review. It would have
+left the repository in the state it started in, with an extra paragraph
+explaining why it should not be.
+
+The rule was then broken a second time, in the first draft of THIS ENTRY, which
+quoted that sentence to illustrate the mistake. Also caught, and worth
+recording: the pull toward quoting the example is strong precisely when the
+subject is what makes the example vivid. That is the moment the rule is for.
+
+#### The rule, stated generally because it will recur
+
+> Record the **claim**: *"the report said no client figures appear anywhere in
+> this repo"*.
+> Describe the **subject**: *"the plan carried the client's leaver count in
+> three places — §0, the cap sizing, and an illustrative coverage note"*.
+> **Never reproduce the subject** when removing it was the point.
+
+The test of a good correction is whether a reader can tell **what was wrong**
+and **verify it is now right**. Neither needs the offending value. It applies
+to any correction whose subject is a secret, a client figure, personal data, or
+a credential — the classes where the correction and the disclosure would
+otherwise be the same act.
+
+Where the subject is harmless — a wrong table name, a mis-stated status code,
+a bad path — quoting it in full is still correct and remains the norm. The
+distinction is not "corrections are now vaguer"; it is that the subject's own
+sensitivity decides whether it may be repeated.
+
+### SP-003 — Real-data context stays in the ruling; the repo carries magnitudes
+
+- **Adopted**: 2026-08-13, after a client's leaver count reached a plan
+  document.
+- **Rule**: when a cycle is given real-data context for sizing — counts,
+  distributions, vocabulary frequencies — those figures inform the decision and
+  **stay in the instruction**. Plans and reports state the **magnitude**:
+  *"several hundred leavers"*, *"a small minority carry no article"*,
+  *"N of M"*. Vocabulary values are the exception and may be quoted verbatim,
+  because a status word is the client's terminology and not their people.
+- **Why the habit rather than the sanitising**: had the plan said "several
+  hundred" when it was written, there would have been nothing to find later.
+  Removing a figure afterwards leaves it in the git history; not writing it
+  never does.
+
+#### This is UNGUARDED, by design
+
+Stated plainly so nobody assumes a check exists:
+
+**A guard on bare integers would be deleted.** `docs/` legitimately contains
+hundreds of numbers — `161/161`, `450 passed`, `667`, `446175.0`, row numbers,
+line numbers, Labor Law article numbers. Nothing in the text distinguishes a
+figure of ours from a figure of theirs. The false-positive rate would get the
+check suppressed or removed within two cycles, which is exactly the failure
+mode [GAP-001](#gap-001--every-gate-in-this-project-is-numeric-none-can-see-wrong-text)
+names for noisy checks.
+
+**A per-engagement denylist would work and is worse.** Pinning each real
+export's actual figures so they can be detected means **storing the client's
+numbers in the repository in order to find the client's numbers in the
+repository** — a control that creates the exposure it exists to prevent, in a
+file that is easier to find than the prose it is guarding.
+
+So the honest position is: this rests on a habit, the habit is written down
+here, and **there is no automated backstop**. Per SP-001 an unenforced rule is
+not evidence of anything, and the register should say so rather than let a
+reader infer coverage that does not exist.
+
+#### The failure it was adopted from
+
+The self-check that reported clean grepped the figures supplied **in that
+cycle's ruling** and found none. The figure that was actually present came from
+the **previous** turn's context and had been written into the plan by the same
+author. It was never in the search.
+
+> **A grep for the figures you were GIVEN does not cover the figures you
+> WROTE.**
+
+Same shape as SP-001's third instance: the check ran, it was watched, and it
+was scoped to the wrong input. *"Did I paste the numbers from this message"*
+reads exactly like *"does this repository contain client figures"* when you are
+the one who wrote the search.
+
 ## Exclusions
 
 None of these legacy build warnings affect the functionality of the new `GovernanceWidget` or `/api/governance/status` API endpoint, both of which are fully compliant and bug-free.

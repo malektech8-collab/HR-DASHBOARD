@@ -77,10 +77,19 @@ VALUE_MAPPING_CONSEQUENCE = {
     "employees.end_of_service_type": (
         "End-of-service type decides whether a leaver is owed money. "
         "Article 80 is dismissal for cause and carries NO end-of-service "
-        "award; Resignation and Articles 74/75/77/81 do.",
+        "award; Resignation and Articles 74/75/77/81 do. "
+        "MAPPING TO `Unspecified` IS A DIFFERENT ASSERTION from the others: "
+        "the article-bearing values assert WHICH entitlement applies, while "
+        "`Unspecified` asserts that the source did not record the grounds and "
+        "therefore NO entitlement can be derived. Choose it when the grounds "
+        "are genuinely absent - never as a default for a value you have not "
+        "looked up, because it withholds a figure the client may be owed.",
         "نوع نهاية الخدمة يحدد ما إذا كان للموظف المنتهية خدمته مستحقات. "
         "المادة 80 هي الفصل لسبب مشروع ولا تستوجب مكافأة نهاية خدمة، بخلاف "
-        "الاستقالة والمواد 74 و75 و77 و81."),
+        "الاستقالة والمواد 74 و75 و77 و81. أما الربط بقيمة `Unspecified` فهو "
+        "إقرار مختلف: بأن النظام المصدر لم يسجّل السبب النظامي وأنه لا يمكن "
+        "اشتقاق أي استحقاق منه. تُختار عند غياب السبب فعلياً، لا كقيمة "
+        "افتراضية."),
     "employee_relations.case_type": (
         "Case type decides which cases appear as labour cases, and those are "
         "the ones reported as legal exposure.",

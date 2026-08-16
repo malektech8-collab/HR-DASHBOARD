@@ -200,6 +200,28 @@ def test_the_consequence_text_names_what_is_at_stake():
     assert mapping.consequence("employees", "employment_type") is None
 
 
+def test_the_consequence_text_covers_the_Unspecified_case():
+    """`Unspecified` is a DIFFERENT assertion from the article-bearing values.
+
+    The article values assert WHICH entitlement applies. `Unspecified` asserts
+    that the source did not record the grounds, so NONE can be derived. An
+    operator ticking the affirmation box needs to be told which of those two
+    things they are doing - the original text enumerated only outcomes that
+    all carry an entitlement decision, so it was incomplete the moment
+    `Unspecified` was added to the enum.
+
+    Pinned in BOTH locales, because the affirmation is shown in whichever the
+    operator is working in.
+    """
+    for locale in ("en", "ar"):
+        text = mapping.consequence("employees", "end_of_service_type", locale)
+        assert "Unspecified" in text, locale
+    english = mapping.consequence("employees", "end_of_service_type")
+    assert "NO entitlement can be derived" in english
+    assert "never as a default" in english, (
+        "the text must warn against using it for a value not looked up")
+
+
 # --------------------------------------------------------------------------
 # the suggestion ladder
 # --------------------------------------------------------------------------

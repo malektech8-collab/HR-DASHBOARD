@@ -367,6 +367,72 @@ def validate_csv(csv_path, table, contracts_dir="data/contracts", today=None):
                     value=invalid[0] if invalid else None,
                 ))
 
+        # --- Rule 9: flag_values (declarable severity, PER ROW) -----------
+        # A value that is LEGAL but INCOMPLETE. `allowed_values` cannot express
+        # this - it flags what is outside the list, and these are inside it.
+        #
+        # end_of_service_type: Unspecified is the first: employment ended and
+        # the source did not record the legal grounds. Refusing the file would
+        # be wrong (the grounds do not exist to supply, and the client's only
+        # route in would be to invent an article), but accepting it silently
+        # would be worse - once the value is in allowed_values the validator
+        # says nothing, and hundreds of leavers with an unknown end-of-service
+        # basis commit without a word.
+        #
+        # EXCEPTION, not REJECT, per the split at the top of this module: the
+        # file is well-formed and specific rows carry a gap the business
+        # already has.
+        #
+        # PER ROW, unlike Rule 4's file-level message, because the product's
+        # differentiator is telling a client WHICH records are affected. Capped
+        # like every other row-level rule: a client with a few hundred flagged
+        # rows must get a usable message, not one per row.
+        #
+        # A LIMITATION WORTH KNOWING, and it is not a defect: this fires on the
+        # CANONICAL value, after any mapping profile has been applied. So it
+        # reports a MAPPING DECISION, not a discovery. When an operator maps a
+        # client's phrase to `Unspecified`, this is the system repeating that
+        # decision back with its consequence attached - it is not the system
+        # having found something in the data on its own. Read the count as
+        # "the operator classified N rows this way", never as "N rows were
+        # detected as incomplete".
+        flags = spec.get("flag_values") or {}
+        if flags:
+            column_values = df.select(pl.col(name)).to_series().to_list()
+            for flagged, rule in flags.items():
+                sev = (SEVERITY_REJECT
+                       if str(rule.get("severity", "")).lower() == "reject"
+                       else SEVERITY_EXCEPTION)
+                hits = [i for i, val in enumerate(column_values)
+                        if val is not None and str(val) == str(flagged)]
+                if not hits:
+                    continue
+                # The value's own bilingual label, from this same contract -
+                # no import, so the validator keeps reading only what it was
+                # handed.
+                labels = (spec.get("value_labels") or {}).get(flagged) or {}
+                label_en = labels.get("en", flagged)
+                label_ar = labels.get("ar", flagged)
+                for i in hits[:MAX_RENDERED_VIOLATIONS]:
+                    r = i + 2      # header is row 1
+                    v.append(Violation(
+                        "flagged-value", table, name, sev,
+                        "Row {}, {}: {}. {}".format(
+                            r, en, label_en, rule.get("reason_en", "")),
+                        "الصف {}، {}: {}. {}".format(
+                            r, ar, label_ar, rule.get("reason_ar", "")),
+                        row=r, value=flagged,
+                    ))
+                if len(hits) > MAX_RENDERED_VIOLATIONS:
+                    v.append(Violation(
+                        "flagged-value", table, name, sev,
+                        "{}: and {} more row(s) with {}.".format(
+                            en, len(hits) - MAX_RENDERED_VIOLATIONS, flagged),
+                        "{}: و{} صف إضافي بالقيمة {}.".format(
+                            ar, len(hits) - MAX_RENDERED_VIOLATIONS, flagged),
+                        value=flagged,
+                    ))
+
     # --- Rule 8: required_when (structural, conditional) ------------------
     # Declarative {column, equals} only - never an expression string. A
     # contract is operator-supplied data and must never be executable.
