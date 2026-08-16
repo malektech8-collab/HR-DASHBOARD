@@ -438,6 +438,24 @@ def ingest(data_mode=None):
             pl.col("housing_allowance").cast(pl.Float64, strict=False),
             pl.col("transport_allowance").cast(pl.Float64, strict=False),
         ])
+        # Complete the canonical shape BEFORE silver is written.
+        #
+        # `required: true` used to guarantee both that a column was present in
+        # the file and that it existed downstream. Optional columns now break
+        # that second guarantee, and the failure is a crash rather than a
+        # rejection: pl.col('x') raises ColumnNotFoundError, and dbt raises a
+        # BinderException. An absent OPTIONAL column becomes a typed NULL; an
+        # absent REQUIRED column is untouched and was already rejected at the
+        # gate.
+        df, absent = _onb.complete_canonical_shape(df, "employees")
+        # Recorded while it is still knowable: after this, the column exists
+        # and is NULL whether the client omitted it or left it blank, and the
+        # difference is a coverage fact versus a data-quality exception.
+        _onb.record_provided_columns("employees", absent)
+        if absent:
+            print("[shape] employees: {} optional column(s) absent from the "
+                  "client's file, added as typed NULL: {}".format(
+                      len(absent), absent))
         df.write_parquet("data/silver/employees.parquet")
         print("Ingested employees to bronze/silver.")
 
