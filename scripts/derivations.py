@@ -54,6 +54,41 @@ _NON_SAUDI_ALIASES = {
     "emirati", "kuwaiti", "bahraini", "omani", "qatari",
     "مصري", "أردني", "سوري", "هندي", "باكستاني", "يمني", "سوداني",
     "فلبيني", "بنغلاديشي", "لبناني", "مغربي", "تونسي",
+
+    # Arabic forms met in a real KSA export (upload-mapping cycle B). Several
+    # already had an ENGLISH entry above - british, turkish, kenyan,
+    # bangladeshi, nepali - which did not help, because this table matches the
+    # value as the client WROTE it and they wrote it in Arabic.
+    #
+    # No padded variants. Two of these arrived with trailing whitespace and
+    # `_normalise` already strips and collapses it, so a padded entry here
+    # would be a second spelling of a rule that is already enforced once.
+    "الأوزبكستاني",       # Uzbek
+    "البوسنية",           # Bosnian
+    "البولندي",           # Polish
+    "الغاني",             # Ghanaian
+    "الكيني",             # Kenyan
+    "برتغالي",            # Portuguese
+    "بريطاني",            # British
+    "بنجلاديش",           # Bangladeshi
+    "تركي",               # Turkish
+    "جنوب افريقي",        # South African
+    "جيبوتي",             # Djiboutian
+    "دومينيكا",           # Dominican
+    "روسي",               # Russian
+    "صومالي",             # Somali
+    "غيانا",              # Guyanese
+    "غينيا",              # Guinean
+    "فلسطيني",            # Palestinian
+    "نيبالي",             # Nepali
+
+    # A CATEGORY, not a nationality. `False` is the right answer and is why it
+    # sits in this table - but the actual nationality is unrecorded, and
+    # Nitaqat reporting needs more than the Saudi/non-Saudi binary. The
+    # derivation cannot say so (it returns booleans), so the observation is
+    # raised where the client will read it: `flag_values` on `nationality` in
+    # the employees contract.
+    "غير سعودي",          # literally "non-Saudi"
 }
 
 # Normalisation moved to scripts/text.py so header and value matching can share
