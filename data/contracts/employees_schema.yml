@@ -73,9 +73,13 @@ columns:
   name_en: Company
   name_ar: الشركة
   type: VARCHAR
-  required: true
-  description_en: Legal entity employing the person.
-  description_ar: الكيان القانوني الموظف.
+  required: false
+  description_en: 'Legal entity employing the person. OPTIONAL since 2026-08: requiring it
+    assumed a MULTI-ENTITY client. A single-legal-entity client has no such column because
+    the whole file is one company, and that is the common case. Absent means one entity or
+    none recorded - it does not mean the employees have no employer.'
+  description_ar: 'الكيان القانوني الموظف. اختياري منذ ٢٠٢٦-٠٨: اشتراطه كان يفترض عميلاً متعدد
+    الكيانات، بينما العميل ذو الكيان الواحد لا يملك هذا العمود أصلاً لأن الملف كله لكيان واحد.'
   example: Company A
 - name: department
   name_en: Department
@@ -111,9 +115,13 @@ columns:
   name_en: Job Family
   name_ar: المجموعة الوظيفية
   type: VARCHAR
-  required: true
-  description_en: Broader job grouping used for analytics.
-  description_ar: التصنيف الوظيفي الأوسع المستخدم في التحليلات.
+  required: false
+  description_en: 'Broader job grouping used for analytics. OPTIONAL since 2026-08: this is
+    a DERIVED TAXONOMY, not a source field, and many HRIS deployments do not maintain one.
+    Recorded for completeness - measured 2026-08, it has NO consumer anywhere in this system:
+    no mart, no KPI, no endpoint, no frontend.'
+  description_ar: 'التصنيف الوظيفي الأوسع المستخدم في التحليلات. اختياري منذ ٢٠٢٦-٠٨: وهو
+    تصنيف مشتق وليس حقلاً مصدرياً، ولا تحتفظ به كثير من أنظمة الموارد البشرية.'
   example: Finance
 - name: grade
   name_en: Grade
@@ -135,9 +143,15 @@ columns:
   name_en: Cost Center
   name_ar: مركز التكلفة
   type: VARCHAR
-  required: true
-  description_en: Accounting cost center the cost is charged to.
-  description_ar: مركز التكلفة المحاسبي الذي تحمّل عليه التكلفة.
+  required: false
+  description_en: 'Accounting cost center the cost is charged to. OPTIONAL since 2026-08:
+    this typically lives in the FINANCE system, not the HR export. Absent is a coverage fact,
+    not a data-quality problem - the cost-centre exception checks are scoped to clients who
+    provide the column, so an absent column produces one coverage note rather than one exception
+    per employee.'
+  description_ar: 'مركز التكلفة المحاسبي الذي تحمّل عليه التكلفة. اختياري منذ ٢٠٢٦-٠٨: وهو
+    عادةً موجود في النظام المالي لا في تصدير الموارد البشرية. غيابه واقعة تغطية وليس مشكلة
+    جودة بيانات.'
   example: CC-100
 - name: employment_type
   name_en: Employment Type

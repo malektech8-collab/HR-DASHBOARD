@@ -189,6 +189,24 @@ def _validate_targets(table, version, contracted=None):
         if target not in known:
             raise MappingError(
                 "profile for '{}' derives unknown column '{}'.".format(table, target))
+    for target in (version.get("constants") or {}):
+        if target not in known:
+            raise MappingError(
+                "profile for '{}' sets a constant for unknown column '{}'."
+                .format(table, target))
+        if target in _cs.required_columns(table):
+            # A constant must be a CHOICE, not a workaround. Filling a required
+            # column to get a file past the gate is the failure mode this
+            # mechanism could become - the gate says the column is required,
+            # and a constant makes it stop complaining. company, job_family and
+            # cost_center were relaxed to optional precisely so that asserting
+            # one is a decision rather than a way around the rejection.
+            raise MappingError(
+                "profile for '{}' sets a constant for '{}', which is REQUIRED. "
+                "A constant must never be a way past the required-columns "
+                "gate: either the client supplies the column, or the contract "
+                "is wrong and relaxing it is a reviewed decision."
+                .format(table, target))
     for target in (version.get("values") or {}):
         if target not in known:
             raise MappingError(
@@ -361,6 +379,10 @@ class MappingReport(object):
         self.ignored = []            # source headers dropped, by declaration
         self.unmapped = []           # source headers with no decision - BLOCKS
         self.derived = []            # canonical columns produced by a rule
+        # canonical -> value ASSERTED by the operator for every row. Reported
+        # separately from `renamed` on purpose: the client supplied one and an
+        # operator asserted the other, and a reader must be able to tell.
+        self.constants = {}
         self.value_mapped = {}       # canonical -> {source value: canonical}
         self.unmapped_values = {}    # canonical -> [values with no mapping]
         self.row_count = 0
@@ -377,6 +399,7 @@ class MappingReport(object):
             "ignored": list(self.ignored),
             "unmapped": list(self.unmapped),
             "derived": list(self.derived),
+            "constants": dict(self.constants),
             "unmapped_values": {k: sorted(v) for k, v in self.unmapped_values.items()},
             "row_count": self.row_count,
             "back_map": self.back_map,
@@ -447,6 +470,30 @@ def apply_profile(frame, table, version):
         if unmapped:
             report.unmapped_values[canonical] = unmapped
 
+    # constants: a fact the OPERATOR asserts about every row.
+    #
+    # Applied after renaming and before derivation, so a derived column can
+    # read one. A constant is invisible afterwards - once written, the column
+    # looks exactly like one the client supplied, and nothing downstream can
+    # tell the difference. That is why it carries `asserted_by` and a `basis`
+    # (enforced at the write, see assert_constants_attributed) and why it is
+    # recorded in evidence.
+    #
+    # It NEVER overwrites a mapped column: a constant is a choice for a column
+    # the client does not have, not a way to override one they do.
+    for canonical, spec in (version.get("constants") or {}).items():
+        if canonical in mapped.columns:
+            raise MappingError(
+                "constants.{0}: that column is already mapped from the "
+                "client's file. A constant asserts a value for a column they "
+                "do NOT have; it must never silently replace real data. "
+                "Remove the constant, or remove {0} from `columns`."
+                .format(canonical))
+        value = spec["value"] if isinstance(spec, dict) else spec
+        mapped = mapped.with_columns(
+            pl.lit(value).alias(canonical))
+        report.constants[canonical] = value
+
     # derivations: the profile names a rule and a SOURCE header; the rule is
     # resolved from the registry, never evaluated
     for canonical, spec in (version.get("derive") or {}).items():
@@ -494,6 +541,89 @@ def reject_enum_columns(table):
 # --------------------------------------------------------------------------
 # writing a profile
 # --------------------------------------------------------------------------
+
+def constant_needs_affirmation(table, canonical):
+    """Does asserting a constant for this column need a human tick?
+
+    THE RULE, not a list: affirm wherever being wrong is NOT VISIBLE on the
+    screen the client looks at.
+
+      free text (company, cost_center, job_family)  -> NO
+          Wrong is loud. Every row reads the same wrong company name, on
+          screen, and the client says so immediately.
+
+      any column with allowed_values                -> YES
+          Same silence as a value mapping into a gated enum. A constant
+          `status: Active` marks every leaver active and nothing looks odd.
+
+      location                                      -> YES
+          Free text, and the exception that proves the rule is about
+          VISIBILITY rather than type. `location` feeds the locations join, so
+          a constant location for a multi-site client renders as a clean
+          single-site chart - confident, wrong, and indistinguishable from a
+          client who genuinely has one site.
+    """
+    if _allowed_values(table, canonical):
+        return True
+    return canonical == "location"
+
+
+def assert_constants_attributed(table, version):
+    """A constant is an ASSERTION about the client, so it is signed and based.
+
+    A value mapping asserts "this client's word means that canonical value". A
+    constant asserts "this fact is true of every employee in this file" - a
+    claim about their organisational structure, applied to every row, and
+    INVISIBLE afterwards: the column ends up looking exactly like one they
+    supplied.
+
+    So it takes the same controls as a value mapping, and one more:
+
+      asserted_by   who is making the claim. A record, not an authentication.
+      basis         WHY it is true. Enforced as non-empty, which is all that
+                    can be enforced - "single legal entity, confirmed with the
+                    HR manager" is reviewable; a constant with no stated basis
+                    is a guess someone will later mistake for data.
+      affirmation   for columns where being wrong is invisible - see
+                    constant_needs_affirmation().
+    """
+    problems = []
+    confirmations = version.get("confirmations") or {}
+    for canonical, spec in (version.get("constants") or {}).items():
+        if not isinstance(spec, dict):
+            problems.append(
+                "  {}: must be a mapping with value / asserted_by / basis, "
+                "not a bare value.".format(canonical))
+            continue
+        if not str(spec.get("asserted_by") or "").strip():
+            problems.append(
+                "  {}: no asserted_by. A constant is a claim about the "
+                "client's organisation; an unsigned one is not reviewable."
+                .format(canonical))
+        if not str(spec.get("basis") or "").strip():
+            problems.append(
+                "  {}: no basis. State WHY this is true of every row - "
+                "e.g. 'single legal entity, confirmed with the HR manager'. "
+                "A constant with no basis is a guess that will later be "
+                "mistaken for data.".format(canonical))
+        if constant_needs_affirmation(table, canonical):
+            record = confirmations.get(canonical) or {}
+            if not str(record.get("confirmed_by") or "").strip():
+                problems.append(
+                    "  {}: needs an affirmation. Being wrong here would NOT "
+                    "be visible on the client's screen - it renders as a "
+                    "confident figure rather than an obvious error.".format(
+                        canonical))
+    if problems:
+        raise MappingError(
+            "refusing this mapping: a constant asserts a fact about EVERY row "
+            "and is indistinguishable from client data once written."
+            + NEWLINE + NEWLINE.join(problems)
+            + NEWLINE +
+            "تعذّر قبول الربط: القيمة الثابتة تُثبت واقعة على كل صف ولا يمكن "
+            "تمييزها عن بيانات العميل بعد كتابتها.")
+    return True
+
 
 def assert_attributed(version):
     """Every version names who made it. Enforced at the write.
@@ -676,6 +806,7 @@ def save_version(table, version, path=None, contracted=None):
     _validate_targets(table, version, contracted=contracted)
     assert_attributed(version)
     assert_value_mappings_confirmed(table, version)
+    assert_constants_attributed(table, version)
     # PII is checked BEFORE completeness on purpose: "you tried to store a
     # client's names" must not be masked by "your evidence is incomplete".
     assert_no_pii(table, version)

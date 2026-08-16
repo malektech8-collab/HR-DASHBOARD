@@ -49,6 +49,11 @@ vars:
   weekend_days_sql: "'Friday'"
   has_gosi_source_sql: "TRUE"
   has_wps_source_sql: "TRUE"
+  # Compile-time default. build_warehouse.py always overrides it at runtime
+  # from the onboarding registry. TRUE is the safe default: it keeps the
+  # cost-centre checks firing for every deployment that has not been through
+  # an upload, which is every existing one.
+  has_cost_center_source_sql: "TRUE"
   critical_titles_sql: "'Chief Executive Officer', 'Engineering Director', 'Finance Director', 'HR Manager'"
   # The attendance window read by base_attendance_current and
   # base_expected_attendance. Overridden per run with report_month_start/end

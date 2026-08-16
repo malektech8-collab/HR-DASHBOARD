@@ -302,6 +302,125 @@ def empty_frame_schema(table):
     return schema
 
 
+def record_provided_columns(table, absent, path=None):
+    """Record which OPTIONAL canonical columns the client did not supply.
+
+    THE DISTINCTION THIS EXISTS FOR, and it is the whole point:
+
+      a missing VALUE in a column the client PROVIDED
+          -> a data-quality exception. This record is incomplete and someone
+             should fix it.
+
+      an entirely ABSENT COLUMN
+          -> a coverage fact. The client does not track that concept, and no
+             amount of HR work will change it.
+
+    Every check in this codebase currently conflates them, and was entitled
+    to: `required: true` meant the column was always there, so a NULL could
+    only ever be the first kind. Relaxing that makes the distinction real, and
+    makes the checks wrong unless they can tell the two apart.
+
+    Once complete_canonical_shape() has run, nullness cannot answer the
+    question - the column exists and is NULL either way. So it is recorded
+    here, at the moment it is still knowable.
+
+    Stored in the same registry as coverage and history, for the same reason:
+    it is a fact about what the client provided, not about what the data says.
+    """
+    path = path or registry_path()
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    spec = {}
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as f:
+            spec = yaml.safe_load(f) or {}
+    absent_map = spec.get("absent_columns") or {}
+    absent_map[table] = sorted(absent)
+    spec["absent_columns"] = absent_map
+    with open(path, "w", encoding="utf-8") as f:
+        yaml.safe_dump(spec, f, allow_unicode=True, sort_keys=False)
+    return sorted(absent)
+
+
+def absent_columns(table, path=None):
+    """Optional canonical columns the client did not supply, or []."""
+    path = path or registry_path()
+    if not os.path.exists(path):
+        return []
+    with open(path, "r", encoding="utf-8") as f:
+        spec = yaml.safe_load(f) or {}
+    return list((spec.get("absent_columns") or {}).get(table) or [])
+
+
+def provides_column(table, column, path=None):
+    """True unless the client's file was missing this column entirely.
+
+    Defaults to True, deliberately: demo supplies every column, and a
+    deployment with no registry entry has not been through an upload, so
+    assuming provision keeps existing behaviour unchanged.
+    """
+    return column not in absent_columns(table, path)
+
+
+def complete_canonical_shape(frame, table):
+    """Add every ABSENT OPTIONAL canonical column as a typed NULL column.
+
+    WHY THIS EXISTS. `required: true` guaranteed two different things at once:
+    the column is PRESENT in the client's file, and it therefore EXISTS in
+    every frame and table downstream. Relaxing a column to optional removes
+    the first. Nothing downstream was ever written for the second. Measured:
+
+        pl.col('cost_center') on a frame without it
+          -> ColumnNotFoundError
+        COALESCE(e.cost_center, ...) on a table without it
+          -> BinderException: Table "e" does not have a column named ...
+
+    So `required: false` on its own would accept a client's file at the gate
+    and then CRASH in validate_data or dbt - worse than an honest rejection.
+    Twelve dbt references to cost_center alone; guarding each is twelve places
+    to get right and one to forget.
+
+    Completing the shape here means silver ALWAYS carries the full canonical
+    column set, so everything downstream binds and reads NULL - a value those
+    consumers already had to handle, because NULL was always possible for an
+    optional column.
+
+    A REQUIRED column is NEVER completed. Its absence is still a REJECT at the
+    gate, and filling it silently would be the fabrication this whole phase
+    exists to remove.
+
+    Same reasoning as write_empty_table() one level up: an undeclared domain
+    must produce an EMPTY table rather than a MISSING one. This is that rule
+    at column grain.
+
+    Returns (frame, added) where `added` is the sorted list of column names
+    that were absent - which is what record_provided_columns() records, so
+    "the client did not supply this column" stays distinguishable from "the
+    client supplied it and left it blank".
+    """
+    import polars as pl
+
+    schema = empty_frame_schema(table)
+    required = set(_cs.required_columns(table))
+    # DERIVED columns are never completed. `is_saudi` is produced from
+    # nationality at ingest, and ingest derives it only when the column is
+    # ABSENT. Adding it as a typed NULL first would make the derivation skip
+    # itself, and every Saudization figure would be computed from nulls -
+    # a silent, favourable-looking zero. Completion runs after derivation
+    # today, so this is belt and braces; it is here because the ordering is
+    # not obvious and the failure would be quiet.
+    derived = {c["name"] for c in _cs.columns(table)
+               if c.get("derived_from") or c.get("derivation")}
+    present = set(frame.columns)
+    added = sorted(name for name in schema
+                   if name not in present
+                   and name not in required
+                   and name not in derived)
+    if added:
+        frame = frame.with_columns(
+            [pl.lit(None, dtype=schema[name]).alias(name) for name in added])
+    return frame, added
+
+
 def write_empty_table(table, silver_dir="data/silver"):
     """Write a typed zero-row silver parquet for an undeclared domain.
 

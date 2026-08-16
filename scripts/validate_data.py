@@ -1,6 +1,11 @@
 import os
 import polars as pl
 
+# Column-grain provision: which optional canonical columns the client actually
+# supplied. Recorded at ingest, because complete_canonical_shape() makes the
+# column exist-and-be-NULL either way afterwards.
+import onboarding as _onb
+
 CONTRACT_EXCEPTIONS_PATH = "data/gold/contract_exceptions.parquet"
 
 # Column order is the contract between this writer and stg_data_quality.
@@ -131,17 +136,36 @@ def validate():
                 "Update nationality field in employee record"
             )
 
-        # Missing Cost Center
-        missing_cc = df_emp.filter(pl.col("cost_center").is_null() | (pl.col("cost_center") == ""))
-        for r in missing_cc.iter_rows(named=True):
-            add_issue(
-                r["employee_id"],
-                r["employee_name"],
-                "Missing Cost Center",
-                "Employee has no cost center assigned.",
-                "Warning",
-                "Assign financial cost center code in master profile"
-            )
+        # Missing Cost Center.
+        #
+        # Scoped to clients who PROVIDE the column. A missing VALUE in a
+        # provided column is a data-quality exception - this record is
+        # incomplete and someone should fix it. An ABSENT COLUMN is a coverage
+        # fact: the client does not track cost centres, and no amount of HR
+        # work will change it. Firing per employee for the second case would
+        # put one row per person on the Data Quality page and bury every real
+        # finding.
+        #
+        # The check cannot ask the data, because complete_canonical_shape() has
+        # already added the column as typed NULL - by design, so nothing
+        # downstream crashes. onboarding.provides_column() is where the
+        # distinction was recorded, at ingest, while it was still knowable.
+        if _onb.provides_column("employees", "cost_center"):
+            missing_cc = df_emp.filter(
+                pl.col("cost_center").is_null() | (pl.col("cost_center") == ""))
+            for r in missing_cc.iter_rows(named=True):
+                add_issue(
+                    r["employee_id"],
+                    r["employee_name"],
+                    "Missing Cost Center",
+                    "Employee has no cost center assigned.",
+                    "Warning",
+                    "Assign financial cost center code in master profile"
+                )
+        else:
+            print("[coverage] employees: no cost_center column in the client's "
+                  "file. Cost-centre checks skipped - an absent column is a "
+                  "coverage fact, not one exception per employee.")
 
         # Active Employee with Missing Salary (0 or null basic salary)
         missing_sal = active_emps.filter(pl.col("basic_salary").is_null() | (pl.col("basic_salary") == 0))
