@@ -126,9 +126,15 @@ def test_corrupted_date_serial_is_rejected(tmp_path):
     v = [x for x in r.rejects if x.rule == "date-range"]
     assert len(v) == 1
     assert v[0].row == 2
-    assert "outside the plausible range" in v[0].message_en
+    # The wording changed when the message was split by BOUND (date-ceiling
+    # cycle): "outside the plausible range" said nothing about which end had
+    # been crossed, and the corrupted-serial text that followed it was right
+    # only for the floor. Below-floor keeps that diagnosis, which is this case.
+    assert "is before 1940-01-01" in v[0].message_en
+    assert "corrupted Excel date serial" in v[0].message_en
     assert "corrupted" in v[0].message_en
-    assert "خارج النطاق المعقول" in v[0].message_ar
+    assert "قبل 1940-01-01" in v[0].message_ar
+    assert "Excel" in v[0].message_ar
 
 
 def test_future_joining_date_is_accepted(tmp_path):

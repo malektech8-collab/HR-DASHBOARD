@@ -257,6 +257,17 @@ columns:
   description_en: Contract expiry date. Leave empty for unlimited contracts.
   description_ar: تاريخ انتهاء العقد. يترك فارغاً للعقود غير محددة المدة.
   example: '2027-03-14'
+  # The global date ceiling is today + 2 years, which is right for a joining
+  # date and wrong here. A multi-year fixed-term contract is ordinary in KSA,
+  # particularly for senior staff, so the global rule REJECTED real files and
+  # told the client to go find a corrupted Excel serial that was not there.
+  #
+  # Ten years is deliberately generous. The rule exists to catch CORRUPTION -
+  # a year like 0025, a stray serial - not to audit whether a contract term is
+  # sensible. That judgement is the client's and the Labour Law's, not a
+  # validator's. A ceiling tight enough to be interesting would be a ceiling
+  # that blocks honest files.
+  max_years_ahead: 10
 - name: status
   name_en: Employment Status
   name_ar: حالة الموظف
