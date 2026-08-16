@@ -406,12 +406,25 @@ def ingest(data_mode=None):
 
     # 1. Employees
     if os.path.exists(files["employees"]):
-        # Save raw to bronze
-        df_raw = pl.read_csv(files["employees"])
+        # infer_schema_length=0 -> every column is read as TEXT.
+        #
+        # The FIFTH site of the dtype-inference defect, and the one that
+        # mattered: the first real commit was rejected here with
+        #     ComputeError: could not parse `2264.15` as dtype `i64`
+        # on a salary column holding whole numbers for the first N rows and a
+        # decimal later. The API and the CLI were fixed a cycle earlier; the
+        # INGEST path - the one that actually loads a client - was not.
+        #
+        # It is also what the casts below already assume. `str.to_date` needs
+        # a Utf8 column, so a file polars happened to infer as Date would have
+        # broken them the other way. Typing is done explicitly, ten lines down,
+        # from the contract - never guessed from the first rows of the file.
+        df_raw = pl.read_csv(files["employees"], infer_schema_length=0)
         df_raw.write_parquet("data/bronze/employees.parquet")
-        
+
         # Clean and type cast for silver
-        df = pl.read_csv(files["employees"], null_values=[""])
+        df = pl.read_csv(files["employees"], infer_schema_length=0,
+                         null_values=[""])
         # Derived column (cycle 1b-i): real HRIS exports carry `nationality`,
         # not `is_saudi`. Derive ONLY when the column is absent — a file that
         # supplies it is taken at its word, which is also why demo (whose
@@ -430,7 +443,21 @@ def ingest(data_mode=None):
             print("[derive] employees.is_saudi derived from nationality "
                   f"({sum(1 for x in derived if x)} Saudi / {len(derived)} rows).")
         df = df.with_columns([
-            pl.col("is_saudi").cast(pl.Boolean, strict=False),
+            # Reading as TEXT means this column arrives as "true"/"false"
+            # rather than pre-inferred Boolean, and Utf8 -> Boolean is not a
+            # supported cast. Parsed explicitly, and NULL stays NULL: a
+            # missing nationality is a data-quality exception, never evidence
+            # of non-Saudi status.
+            #
+            # This branch is reached only by a file that SUPPLIES is_saudi. A
+            # real export carries `nationality`, so the value is produced by
+            # derive_column above as a genuine Boolean and passes through
+            # untouched - the Saudization path is not affected by this.
+            pl.when(pl.col("is_saudi").cast(pl.Utf8).str.to_lowercase()
+                    .is_in(["true", "1", "yes", "y", "t"])).then(True)
+              .when(pl.col("is_saudi").cast(pl.Utf8).str.to_lowercase()
+                    .is_in(["false", "0", "no", "n", "f"])).then(False)
+              .otherwise(None).cast(pl.Boolean).alias("is_saudi"),
             pl.col("joining_date").str.to_date("%Y-%m-%d", strict=False),
             pl.col("termination_date").str.to_date("%Y-%m-%d", strict=False),
             pl.col("contract_end_date").str.to_date("%Y-%m-%d", strict=False),
