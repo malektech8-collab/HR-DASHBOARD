@@ -58,9 +58,12 @@
     SELECT employee_id, employee_name, 'Missing Cost Center assignment' AS issue_type, 
            'Active employee is missing cost center assignment' AS description, 
            'Warning' AS severity, 'Update cost center in master file' AS recommended_action 
-    FROM {{ ref('base_active_workforce') }} 
-    WHERE cost_center IS NULL OR TRIM(cost_center) = ''
-    
+    FROM {{ ref('base_active_workforce') }}
+    -- Scoped to clients who PROVIDE the column; an absent column is a coverage
+    -- fact, not one exception per employee. See mart_workforce_exceptions.
+    WHERE {{ var('has_cost_center_source_sql') }}
+      AND (cost_center IS NULL OR TRIM(cost_center) = '')
+
     UNION ALL
     
     -- 8. Missing Qiwa Contract

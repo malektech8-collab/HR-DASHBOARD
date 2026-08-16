@@ -337,6 +337,10 @@ def build_warehouse():
     if not os.path.exists(dbt_bin):
         dbt_bin = "dbt"
 
+    # Column-grain provision, recorded at ingest. Imported here rather than at
+    # module scope to match how the declared-domain guard above reaches it.
+    import onboarding as _onb
+
     dbt_vars = {
         "data_mode": os.getenv("DATA_MODE", "demo"),
         "report_month": cc_report_month,
@@ -377,6 +381,15 @@ def build_warehouse():
         "weekend_days_sql": ", ".join(f"'{day}'" for day in rules.get("attendance_rules", {}).get("weekend_days", ["Friday"])),
         "has_gosi_source_sql": "TRUE" if rules.get("compliance_rules", {}).get("has_gosi_source_for_period", True) else "FALSE",
         "has_wps_source_sql": "TRUE" if rules.get("compliance_rules", {}).get("has_wps_source_for_period", True) else "FALSE",
+        # Column-grain provision, same idiom as the two above: does the CLIENT'S
+        # FILE carry this column at all? Not "is it populated" - after
+        # complete_canonical_shape() the column always exists and may be NULL,
+        # so the data can no longer answer the question. A missing VALUE is a
+        # data-quality exception; an ABSENT COLUMN is a coverage fact, and the
+        # four cost-centre surfaces must not fire per employee for the second.
+        "has_cost_center_source_sql": (
+            "TRUE" if _onb.provides_column("employees", "cost_center")
+            else "FALSE"),
         "critical_titles_sql": ", ".join(f"'{t}'" for t in rules.get("talent_rules", {}).get("critical_job_titles", []))
     }
 

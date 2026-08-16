@@ -26,7 +26,14 @@ WITH anchor AS (
             COUNT(DISTINCT CASE WHEN iqama_expiry >= (SELECT anchor_date FROM anchor) AND iqama_expiry <= (SELECT anchor_date FROM anchor) + INTERVAL 30 DAY THEN employee_id END) AS iqama_expiring_30,
             COUNT(DISTINCT CASE WHEN manager_id IS NULL OR manager_id = '' THEN employee_id END) AS missing_manager_count,
             COUNT(DISTINCT CASE WHEN project IS NULL OR project = '' THEN employee_id END) AS missing_project_count,
-            COUNT(DISTINCT CASE WHEN cost_center IS NULL OR cost_center = '' THEN employee_id END) AS missing_cost_center_count
+            -- NULL, not 0, when the client's export has no cost-centre column.
+            -- Zero would read as "nobody is missing one", which is the
+            -- fabricated-favourable answer; NULL is withheld and the API's
+            -- suppression layer renders it as not-provided. A client who DOES
+            -- supply the column still gets the real count.
+            CASE WHEN {{ var('has_cost_center_source_sql') }}
+                 THEN COUNT(DISTINCT CASE WHEN cost_center IS NULL OR cost_center = '' THEN employee_id END)
+            END AS missing_cost_center_count
         FROM emp_stats
     )
     SELECT 

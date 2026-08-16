@@ -59,7 +59,11 @@ WITH anchor AS (
         'Payroll record is missing a cost center code' AS description,
         'Warning' AS severity, 'Assign cost center in profile' AS recommended_action
     FROM {{ ref('base_payroll_current') }}
-    WHERE cost_center IS NULL OR cost_center = '' OR emp_cost_center = 'Missing Cost Center'
+    -- Scoped to clients who PROVIDE the column. `emp_cost_center` no longer
+    -- carries a 'Missing Cost Center' sentinel - base_payroll_current keeps the
+    -- NULL, because a sentinel renders an absence as a value.
+    WHERE {{ var('has_cost_center_source_sql') }}
+      AND (cost_center IS NULL OR cost_center = '' OR emp_cost_center IS NULL)
     UNION ALL
     -- 7. Missing project
     SELECT 

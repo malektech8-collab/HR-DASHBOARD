@@ -25,7 +25,13 @@ WITH anchor AS (
         'Active employee is missing a cost center' AS description, 'Warning' AS severity,
         'Assign financial cost center code in master profile' AS recommended_action
     FROM {{ ref('base_active_workforce') }}
-    WHERE cost_center IS NULL OR cost_center = ''
+    -- Scoped to clients who PROVIDE the column. A missing VALUE in a provided
+    -- column is a data-quality exception; an ABSENT COLUMN is a coverage fact,
+    -- and firing per employee for a client whose export has no cost-centre
+    -- column would bury every real finding under one row per person.
+    -- Same idiom as has_gosi_source_sql / has_wps_source_sql.
+    WHERE {{ var('has_cost_center_source_sql') }}
+      AND (cost_center IS NULL OR cost_center = '')
     UNION ALL
     -- 4. Missing Nationality
     SELECT 

@@ -4,7 +4,9 @@ SELECT
         p.*,
         COALESCE(e.project, 'Missing Project') AS emp_project,
         COALESCE(e.department, 'Missing Department') AS emp_department,
-        COALESCE(e.cost_center, 'Missing Cost Center') AS emp_cost_center,
+        -- NO COALESCE - see base_payroll_current. A sentinel would render an
+        -- absent column as a payroll category.
+        e.cost_center AS emp_cost_center,
         COALESCE(e.status, 'Inactive/Terminated/Unknown') AS emp_status,
         e.employee_name,
         e.is_saudi
