@@ -525,7 +525,7 @@ def preview_upload(upload_id: str,
     contracted = cs.column_names(table)
 
     try:
-        frame = pl.read_csv(path, null_values=[""])
+        frame = pl.read_csv(path, infer_schema_length=0, null_values=[""])
         present = list(frame.columns)
         row_count = frame.height
     except Exception as exc:
@@ -719,7 +719,8 @@ def mapping_workspace(upload_id: str,
     except Exception:
         raise HTTPException(status_code=404, detail="No such upload.")
     table = manifest["table"]
-    frame = pl.read_csv(staging.data_path(upload_id), null_values=[""])
+    frame = pl.read_csv(staging.data_path(upload_id), infer_schema_length=0,
+                        null_values=[""])
 
     profile = mapping_module.load_profile(table) or {}
     mapped = {mapping_module.normalise(k): v
@@ -799,7 +800,8 @@ def save_mapping(table: str, body: SaveMappingRequest = Body(...),
             detail="That upload is a {} file, not {}.".format(
                 manifest["table"], table_name))
 
-    frame = pl.read_csv(staging.data_path(body.upload_id), null_values=[""])
+    frame = pl.read_csv(staging.data_path(body.upload_id),
+                        infer_schema_length=0, null_values=[""])
     who = current_user.get("email") or current_user.get("username") or ""
     stamp = datetime.datetime.now().isoformat(timespec="seconds")
     confirmations = {

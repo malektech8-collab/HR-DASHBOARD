@@ -703,7 +703,8 @@ def assert_value_mappings_confirmed(table, version):
 
 
 def build_version(table, frame, decisions, created_by, values=None,
-                  derive=None, confirmations=None, alias_path=None):
+                  derive=None, confirmations=None, alias_path=None,
+                  constants=None):
     """THE constructor for a profile version. Evidence by construction.
 
     Cycle A left evidence to discipline: `build_evidence()` then
@@ -756,6 +757,11 @@ def build_version(table, frame, decisions, created_by, values=None,
         "ignored": ignored,
         "values": dict(values or {}),
         "derive": dict(derive or {}),
+        # Operator ASSERTIONS about every row. Carried through the constructor
+        # so the CLI can express one - without this a profile with a constant
+        # could only be hand-written, which is the state cycle A was in before
+        # the CLI existed.
+        "constants": dict(constants or {}),
         "confirmations": dict(confirmations or {}),
         "source_fingerprint": header_fingerprint(headers),
         "evidence": seed,

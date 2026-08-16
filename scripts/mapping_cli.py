@@ -72,7 +72,16 @@ def _read(path):
     import polars as pl
     if not os.path.exists(path):
         raise SystemExit("no such file: {}".format(path))
-    return pl.read_csv(path, null_values=[""])
+    # infer_schema_length=0 -> every column is read as TEXT.
+    #
+    # Mapping is a TEXT operation: it renames headers, replaces values and adds
+    # columns. Inferring dtypes is unnecessary and actively fragile - a real
+    # export raised
+    #     ComputeError: could not parse `1584.91` as dtype `i64`
+    # on a salary column holding whole numbers for the first N rows and a
+    # decimal later. The client's file was fine; the reader guessed. This is
+    # the idiom validate_schema.py already uses, for the same reason.
+    return pl.read_csv(path, infer_schema_length=0, null_values=[""])
 
 
 def _consequence_block(table, columns):
@@ -139,6 +148,15 @@ def cmd_suggest(args):
         "derive:",
         "  # is_saudi: {rule: nationality_is_saudi, from: \"<source header>\"}",
         "",
+        "constants:",
+        "  # A value you ASSERT for every row, for a column the client's file",
+        "  # does not carry. It is invisible once written - the column ends up",
+        "  # looking exactly like one they supplied - so `basis` is required",
+        "  # and must be YOUR words about why it is true.",
+        "  # company:",
+        "  #   value: \"<the client's legal entity>\"",
+        "  #   basis: \"Single legal entity, confirmed with <who>.\"",
+        "",
         "# ---------------------------------------------------------------",
         "# AFFIRMATION - deliberately empty. Nothing here is pre-filled.",
         "#",
@@ -200,10 +218,24 @@ def cmd_save(args):
             for source, target in sorted(pairs.items()):
                 print("   {!r} -> {!r}".format(source, target))
 
+    # A constant is an ASSERTION about every row, so the CLI stamps the
+    # operator's name on it exactly as it does for an affirmation. `basis` is
+    # the operator's own words and is never supplied here - a tool that wrote
+    # the justification would be recording nothing.
+    constants = {}
+    for column, record in (spec.get("constants") or {}).items():
+        entry = dict(record or {})
+        entry.setdefault("asserted_by", args.by)
+        constants[column] = entry
+        print("asserting {} = {!r} for every row".format(
+            column, entry.get("value")))
+        if entry.get("basis"):
+            print("   basis: {}".format(entry["basis"]))
+
     version = mapping.build_version(
         args.table, frame, decisions, created_by=args.by,
         values=spec.get("values"), derive=spec.get("derive"),
-        confirmations=confirmations)
+        confirmations=confirmations, constants=constants)
 
     undecided = [e["source_header"] for e in version["evidence"]
                  if e["decision"] == "undecided"]
