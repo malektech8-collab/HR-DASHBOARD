@@ -52,6 +52,30 @@ SEVERITY_EXCEPTION = "exception"
 DEFAULT_MIN_DATE = datetime.date(1940, 1, 1)
 DEFAULT_MAX_DATE_YEARS_AHEAD = 2
 
+# A column may raise its own ceiling with `max_years_ahead: <int>`.
+#
+# WHY A COUNT OF YEARS AND NOT A DATE. `max_date` already exists and takes an
+# absolute date, which is right for a fixed boundary and wrong for this one: a
+# literal written today silently becomes a tighter ceiling every year until it
+# is the bug it replaced. A count of years says what is actually meant and
+# does not age.
+#
+# It is an INTEGER, never an expression - the same rule that governs
+# `derivation` and `required_when`. A contract is operator-supplied data.
+
+
+def _years_ahead(today, years):
+    """`today` plus whole years, without falling over on 29 February.
+
+    datetime.date(today.year + n, today.month, today.day) raises on a leap day
+    because the target year has no 29 February. Rare, and a crash in a
+    validator on one day in four years is not a bug anyone would find twice.
+    """
+    try:
+        return datetime.date(today.year + years, today.month, today.day)
+    except ValueError:
+        return datetime.date(today.year + years, today.month, 28)
+
 # Header occupies row 1 in the client's spreadsheet, so the first data row is 2.
 FIRST_DATA_ROW = 2
 
@@ -194,8 +218,7 @@ def validate_csv(csv_path, table, contracts_dir="data/contracts", today=None):
     required = [c["name"] for c in columns if c.get("required")]
     by_name = {c["name"]: c for c in columns}
     today = today or datetime.date.today()
-    max_date = datetime.date(today.year + DEFAULT_MAX_DATE_YEARS_AHEAD,
-                             today.month, today.day)
+    max_date = _years_ahead(today, DEFAULT_MAX_DATE_YEARS_AHEAD)
 
     df = pl.read_csv(csv_path, infer_schema_length=0, null_values=[""])
     actual = list(df.columns)
@@ -261,7 +284,12 @@ def validate_csv(csv_path, table, contracts_dir="data/contracts", today=None):
         # PRODUCT-ARCHITECTURE.md §4 and present in real client exports.
         if str(ctype).upper() in ("DATE", "TIMESTAMP"):
             lo = spec.get("min_date") or DEFAULT_MIN_DATE
-            hi = spec.get("max_date") or max_date
+            # Precedence: an absolute date wins, then a per-column count of
+            # years, then the global default. Most columns declare neither.
+            hi = spec.get("max_date")
+            if not hi:
+                ahead = spec.get("max_years_ahead")
+                hi = (_years_ahead(today, int(ahead)) if ahead else max_date)
             if isinstance(lo, str):
                 lo = datetime.date.fromisoformat(lo)
             if isinstance(hi, str):
@@ -275,18 +303,48 @@ def validate_csv(csv_path, table, contracts_dir="data/contracts", today=None):
                     flags = df.select(out_mask.alias("m"))["m"].to_list()
                     rows = _rows_for(flags)
                     bad_vals = df.filter(out_mask).select(name).to_series().to_list()
+                    # BELOW the floor and ABOVE the ceiling are different
+                    # faults and get different messages. The corrupted-serial
+                    # text is right for a year like 0025 and WRONG for a date
+                    # in 2043 - there it sends a client hunting for a
+                    # corruption that is not in their file, which is worse
+                    # than saying nothing, because the rule REJECTS and they
+                    # cannot load until they find it.
                     for r, val in list(zip(rows, bad_vals))[:MAX_RENDERED_VIOLATIONS]:
+                        try:
+                            below = datetime.date.fromisoformat(
+                                str(val)[:10]) < lo
+                        except ValueError:
+                            below = True
+                        if below:
+                            en_msg = (
+                                "Row {}, {}: date {!r} is before {}. A year "
+                                "like 0025 usually means a corrupted Excel "
+                                "date serial - check the source export."
+                            ).format(r, en, val, lo.isoformat())
+                            ar_msg = (
+                                "الصف {}، {}: التاريخ {!r} قبل {}. سنة مثل "
+                                "0025 تعني عادةً تلفاً في تنسيق التاريخ في "
+                                "ملف Excel - يرجى مراجعة الملف المصدر."
+                            ).format(r, ar, val, lo.isoformat())
+                        else:
+                            en_msg = (
+                                "Row {}, {}: date {!r} is after {}, the "
+                                "furthest ahead this column is expected to "
+                                "reach. Check the source export; if the date "
+                                "is genuinely correct, this column's ceiling "
+                                "is too tight and the contract needs raising."
+                            ).format(r, en, val, hi.isoformat())
+                            ar_msg = (
+                                "الصف {}، {}: التاريخ {!r} بعد {}، وهو أقصى "
+                                "مدى متوقع لهذا العمود. يرجى مراجعة الملف "
+                                "المصدر؛ وإذا كان التاريخ صحيحاً فعلاً، فإن "
+                                "الحد الأعلى لهذا العمود ضيق ويحتاج التعاقد "
+                                "إلى توسعته."
+                            ).format(r, ar, val, hi.isoformat())
                         v.append(Violation(
                             "date-range", table, name, SEVERITY_REJECT,
-                            "Row {}, {}: date {!r} is outside the plausible range "
-                            "({} to {}). A year like 0025 usually means a corrupted "
-                            "Excel date serial - check the source export.".format(
-                                r, en, val, lo.isoformat(), hi.isoformat()),
-                            "الصف {}، {}: التاريخ {!r} خارج النطاق المعقول "
-                            "({} إلى {}). سنة مثل 0025 تعني عادةً تلفاً في تنسيق "
-                            "التاريخ في ملف Excel - يرجى مراجعة الملف المصدر.".format(
-                                r, ar, val, lo.isoformat(), hi.isoformat()),
-                            row=r, value=val,
+                            en_msg, ar_msg, row=r, value=val,
                         ))
 
         # --- Rule 6: min_value (EXCEPTION - row-level content) ------------

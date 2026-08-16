@@ -468,6 +468,44 @@ rewriting history.
   note naming the column and what it affects, with a test that a client
   who DOES provide it sees no such note.
 
+### TD-013 — The affirmation gate is narrower than the affirmation principle
+
+- **Status**: OPEN — **RULED, deferred to its own cycle after the first real
+  load.** Recorded 2026-08-16, nationality/vocabulary cycle.
+- **Category**: Upload mapping / evidence
+- **The principle** (chief architect's ruling, restated): *affirm wherever
+  being wrong is not visible on the screen the client looks at.*
+- **The implementation**: `mapping.reject_enum_columns()` gates value mappings
+  on whether an unmapped value would have **REJECTED** the file. Today that is
+  `status` and `end_of_service_type`. A value map on `employment_type` or
+  `contract_type` — both of which carry `allowed_values`, and both of which an
+  unmapped value merely raises an EXCEPTION for — requires no affirmation at
+  all.
+- **Why the gate is the wrong one**: severity describes what happens when you
+  **do not** map a value. The affirmation is about what happens when you map it
+  **wrongly**. Those are different questions, and the second does not depend on
+  the first: once a pair is applied, a wrong `contract_type` is exactly as
+  silent as a wrong `status`. The column reads as clean canonical data and
+  nothing downstream can tell it was ever anything else.
+- **The ruled scope**: **any column with `allowed_values`, regardless of
+  severity.** Not a wider list to maintain — the same one-line predicate the
+  affirmation rule for constants already uses.
+- **Why it is not being done now**: it changes what **every existing profile
+  must carry**. A profile saved before the change and reloaded after it would
+  be missing affirmations it was never asked for, so the cycle that widens the
+  gate must also decide what happens to profiles already in the field —
+  migrate, grandfather, or refuse. That is a design decision, not a predicate
+  change, and it must not ride along with a client load in flight.
+- **Seen, not predicted**: authoring the first real employees profile. Both
+  vocabularies were affirmed voluntarily and the machinery accepted the extra
+  affirmations without complaint, which is a useful signal that widening the
+  gate is additive on the write path.
+- **Closure criterion**: `constant_needs_affirmation` and the value-mapping
+  gate resolve from one predicate over `allowed_values`; a value map on any
+  vocabulary column is refused unaffirmed; a decision on pre-existing profiles
+  is implemented and tested, not merely documented.
+
+
 ## Standing practices
 
 These are not debt items. They are rules adopted after a defect class appeared
