@@ -207,11 +207,33 @@ def _validate_targets(table, version, contracted=None):
                 "gate: either the client supplies the column, or the contract "
                 "is wrong and relaxing it is a reviewed decision."
                 .format(table, target))
-    for target in (version.get("values") or {}):
+    for target, pairs in (version.get("values") or {}).items():
         if target not in known:
             raise MappingError(
                 "profile for '{}' maps values for unknown column '{}'."
                 .format(table, target))
+        # And the RIGHT-HAND side, where the column carries a vocabulary. A
+        # value map exists to turn a client's word into a canonical one, so a
+        # target outside the vocabulary produces the exact thing the mapping
+        # was meant to remove: an allowed-values violation, now wearing the
+        # operator's chosen spelling and looking deliberate.
+        #
+        # This earned its place in cycle B. Mapping the two Arabic contract
+        # types, the plain-English reading is Fixed-term / Indefinite; the
+        # contract says Limited / Unlimited. Nothing in the code would have
+        # said so - the profile would have saved, and the file would have
+        # loaded with a fresh exception per row.
+        allowed = _allowed_values(table, target)
+        if allowed:
+            bad = sorted(str(v) for v in (pairs or {}).values()
+                         if str(v) not in allowed)
+            if bad:
+                raise MappingError(
+                    "profile for '{}' maps values of '{}' to {}, which the "
+                    "contract does not allow. Allowed values are {}. A value "
+                    "map must produce a CANONICAL value; mapping to anything "
+                    "else only renames the violation."
+                    .format(table, target, bad, sorted(allowed)))
     for target, rule in (version.get("derive") or {}).items():
         # resolve() raises on anything not in the registry - no eval, and a new
         # rule is reviewed code rather than config
@@ -703,7 +725,8 @@ def assert_value_mappings_confirmed(table, version):
 
 
 def build_version(table, frame, decisions, created_by, values=None,
-                  derive=None, confirmations=None, alias_path=None):
+                  derive=None, confirmations=None, alias_path=None,
+                  constants=None):
     """THE constructor for a profile version. Evidence by construction.
 
     Cycle A left evidence to discipline: `build_evidence()` then
@@ -756,6 +779,11 @@ def build_version(table, frame, decisions, created_by, values=None,
         "ignored": ignored,
         "values": dict(values or {}),
         "derive": dict(derive or {}),
+        # Operator ASSERTIONS about every row. Carried through the constructor
+        # so the CLI can express one - without this a profile with a constant
+        # could only be hand-written, which is the state cycle A was in before
+        # the CLI existed.
+        "constants": dict(constants or {}),
         "confirmations": dict(confirmations or {}),
         "source_fingerprint": header_fingerprint(headers),
         "evidence": seed,

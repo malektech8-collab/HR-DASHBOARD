@@ -417,6 +417,57 @@ with a genuinely limited blast radius, a rewrite plus rotation would be the
 better trade, and this entry should not be cited as a general rule against
 rewriting history.
 
+### TD-011 — A `location` constant is unreachable while `location` is required
+
+- **Status**: OPEN — recorded 2026-08-13, contract-required-relax cycle
+- **Category**: Mapping / contracts
+- **Description**: `constant_needs_affirmation()` returns **True** for
+  `location`, and that is the rule working — `location` carries no
+  `allowed_values`, so a type-based rule would let it through, but it feeds the
+  `locations` join and a constant location for a multi-site client renders as a
+  clean single-site chart. Confident, wrong, and indistinguishable from a
+  client who genuinely has one site.
+- **Why it is debt**: `location` is still `required: true`, so
+  `_validate_targets`' required-column guard refuses a location constant
+  **before** the affirmation check is ever reached. The affirmation rule for it
+  is implemented and unit-tested but **cannot fire today**.
+- **Why it is not simply removed**: the rule is right and the trigger is
+  foreseeable. Two guards agreeing is not the same as one guard working, and
+  deleting the unreachable one would leave nothing when the reachable one moves.
+- **TRIGGER**: this becomes live the moment `location` is relaxed to optional —
+  which is plausible, since `company`, `job_family` and `cost_center` were
+  relaxed for exactly the reasons a small single-site client would produce.
+  Whoever relaxes it inherits a working affirmation and should verify it fires.
+- **Closure criterion**: either `location` is relaxed and a test proves the
+  affirmation fires, or a reviewed decision that `location` stays required
+  permanently, in which case the rule keeps its unit test and this item closes
+  as documentation.
+
+### TD-012 — Column-grain provision is consumed by the checks but not surfaced
+
+- **Status**: OPEN — recorded 2026-08-13, contract-required-relax cycle
+- **Category**: Onboarding / UI
+- **Description**: `onboarding.record_provided_columns()` records which optional
+  canonical columns a client's file did not carry, and the four cost-centre
+  surfaces correctly stop firing when the column is absent. Nothing renders
+  that fact to the client.
+- **The gap, stated as the honest half of ruling 2's intent**: the client gets
+  a **withheld breakdown without being told why**. Suppression is correct — an
+  absent column is a coverage fact, not thousands of per-row exceptions — but a
+  figure that is simply not there, with no note, is the same experience as a
+  figure that is broken. The suppression work of Phase 2 P0-3 established that
+  withholding must be *explained*, not merely performed; this withholds without
+  explaining.
+- **What is already there to build on**: `NotProvided` and `CoverageNote`
+  components exist and are used for domain-grain absence. This is the same
+  message at column grain, and should reuse them rather than invent a parallel
+  presentation.
+- **Impact**: first felt by the first real client, who will have no cost-centre
+  breakdown and no sentence saying their export does not carry the column.
+- **Closure criterion**: an absent optional column produces a visible coverage
+  note naming the column and what it affects, with a test that a client
+  who DOES provide it sees no such note.
+
 ## Standing practices
 
 These are not debt items. They are rules adopted after a defect class appeared

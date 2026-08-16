@@ -51,6 +51,28 @@ columns:
   description_en: Nationality as stated on the national ID or Iqama.
   description_ar: الجنسية كما وردت في الهوية الوطنية أو الإقامة.
   example: Saudi
+  # The second user of `flag_values`, and the first outside a closed
+  # vocabulary. `غير سعودي` means literally "non-Saudi": a CATEGORY recorded
+  # where a nationality belongs. It is not wrong — is_saudi resolves to false
+  # and every Saudization figure is correct — but Nitaqat reporting is not
+  # only the Saudi/non-Saudi binary, and for these employees the nationality
+  # needed for anything finer does not exist in the source.
+  #
+  # EXCEPTION, not REJECT: the file is well-formed and the value is legal.
+  # Refusing it would demand the client invent a nationality.
+  #
+  # Exact-match, like every `flag_values` rule: another client writing
+  # "غير سعودية" or "Non-Saudi" is not caught until that spelling is declared
+  # here. Stated rather than generalised — a fuzzy match on a free-text column
+  # would flag real nationalities.
+  flag_values:
+    غير سعودي:
+      severity: exception
+      reason_en: The source recorded a category ("non-Saudi") rather than a nationality.
+        Saudization is unaffected, but no nationality is available for any reporting
+        finer than the Saudi/non-Saudi split.
+      reason_ar: سجّل المصدر فئة ("غير سعودي") بدلاً من الجنسية. لا يتأثر احتساب السعودة،
+        لكن لا تتوفر جنسية لأي تقرير أدق من تقسيم سعودي/غير سعودي.
 - name: is_saudi
   name_en: Saudi National
   name_ar: سعودي

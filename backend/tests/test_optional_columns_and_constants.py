@@ -375,3 +375,30 @@ def test_job_family_has_no_consumer():
     assert hits == [], (
         "job_family gained a consumer - the relaxation note in the contract "
         "says it has none, and one of them is now wrong: " + str(hits))
+
+
+# --------------------------------------------------------------------------
+# the constructor and the CLI can express a constant
+# --------------------------------------------------------------------------
+
+def test_build_version_carries_constants():
+    """Without this a profile with a constant could only be hand-written -
+    the state cycle A was in before the CLI existed."""
+    frame = pl.DataFrame({"Emp No": ["E1", "E2"]})
+    version = mapping.build_version(
+        "employees", frame,
+        {"Emp No": {"decision": "mapped", "chosen": "employee_id"}},
+        created_by="op@x", constants={"company": SIGNED})
+    assert version["constants"]["company"]["value"] == "Acme"
+    assert version["constants"]["company"]["basis"]
+
+
+def test_the_cli_stamps_asserted_by_but_never_the_basis():
+    """`basis` is the operator's own words. A tool that wrote the
+    justification would be recording nothing - the same reason the CLI
+    supplies attribution for an affirmation but never the affirmation."""
+    source = os.path.join(_ROOT, "scripts", "mapping_cli.py")
+    with open(source, encoding="utf-8") as handle:
+        body = handle.read()
+    assert 'entry.setdefault("asserted_by", args.by)' in body
+    assert 'setdefault("basis"' not in body
