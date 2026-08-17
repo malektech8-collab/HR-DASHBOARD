@@ -413,6 +413,20 @@ def build_warehouse():
         "has_manager_id_source_sql": (
             "TRUE" if _onb.provides_column("employees", "manager_id")
             else "FALSE"),
+        # The three relaxed payroll money columns. Same column-grain question
+        # as cost_center, and the same answer: an ABSENT COLUMN is a coverage
+        # fact, so the figure is withheld rather than summed to zero. Zero
+        # would read as "no overtime was worked" / "nothing was deducted",
+        # which is a claim the client's file does not make.
+        "has_payroll_other_allowances_sql": (
+            "TRUE" if _onb.provides_column("payroll", "other_allowances")
+            else "FALSE"),
+        "has_payroll_overtime_sql": (
+            "TRUE" if _onb.provides_column("payroll", "overtime_amount")
+            else "FALSE"),
+        "has_payroll_deductions_sql": (
+            "TRUE" if _onb.provides_column("payroll", "deductions")
+            else "FALSE"),
         # DOMAIN grain, not column grain - `project` is resolved through the
         # client's locations FILE, so what is absent is a whole domain rather
         # than a column of employees. In demo everything is provided, matching
