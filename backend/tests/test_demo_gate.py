@@ -45,9 +45,26 @@ sys.path.insert(0, os.path.join(_ROOT, "scripts"))
 # Overridable so the gate itself can be tamper-tested: a probe points this at
 # a doctored copy and confirms each assertion goes red. A gate nobody has
 # watched fail is the thing this whole cycle exists to stop shipping.
+# SELF-SUFFICIENT AS OF THE TEST-ISOLATION CYCLE.
+#
+# This gate used to pass only because `test_data.py` sorts BEFORE
+# `test_demo_gate.py` and rebuilt the warehouse in demo mode as a side effect.
+# Nothing declared that dependency and nothing enforced it: -k filtering, a
+# file rename, or parallelisation already broke it, and it broke silently
+# because the guards below SKIPPED rather than failed.
+#
+# Measured against a real client load with that side effect absent:
+#     SKIPPED [5] warehouse is anchored at 2026-08, not the demo's 2026-06
+# Five pinned figures unasserted, and the gate reporting success.
+#
+# It now reads the isolated root that conftest.py builds, so it asserts the
+# demo fingerprint because it BUILT the demo - not because of run order.
+# HR_WAREHOUSE_PATH still wins, which is what the tamper probe points at a
+# doctored copy.
 WAREHOUSE = os.environ.get(
     "HR_WAREHOUSE_PATH",
-    os.path.join(_ROOT, "warehouse", "hr_analytics.duckdb"))
+    os.path.join(os.environ.get("HRDASH_DATA_ROOT", _ROOT),
+                 "warehouse", "hr_analytics.duckdb"))
 MANIFEST = os.path.join(_ROOT, "dbt_analytics", "target", "manifest.json")
 
 # The demo's fingerprint. Six cycles of regressions have been caught by
@@ -67,27 +84,37 @@ DBT_DATA_TESTS = 11
 
 @pytest.fixture(scope="module")
 def warehouse():
-    if not os.path.exists(WAREHOUSE):
-        pytest.skip("no warehouse built; run scripts/refresh_all.py "
-                    "(CI builds it before pytest)")
+    """FAILS rather than skips. conftest builds this warehouse, so anything
+    missing here is a broken build, not an environment the gate should excuse
+    itself from. A skipped test is green, which is how this gate spent a cycle
+    asserting nothing."""
+    assert os.path.exists(WAREHOUSE), (
+        "no warehouse at {} - conftest.py builds the isolated root before any "
+        "test runs, so its absence is a build failure, not a reason to skip"
+        .format(WAREHOUSE))
     conn = duckdb.connect(WAREHOUSE, read_only=True)
-    if conn.execute("SELECT COUNT(*) FROM information_schema.tables "
-                    "WHERE table_name = 'mart_exec_kpis'").fetchone()[0] == 0:
+    built = conn.execute("SELECT COUNT(*) FROM information_schema.tables "
+                         "WHERE table_name = 'mart_exec_kpis'").fetchone()[0]
+    if not built:
         conn.close()
-        pytest.skip("warehouse present but not built by dbt")
+        raise AssertionError("warehouse present but dbt never built it")
     yield conn
     conn.close()
 
 
 def _demo_only(conn):
-    """These figures describe the SAMPLE data. A real-mode warehouse is a
-    client's numbers and has nothing to do with them."""
-    if os.getenv("DATA_MODE", "demo") == "real":
-        pytest.skip("real mode: the demo fingerprint does not apply")
+    """The warehouse under test MUST be the demo one.
+
+    This was two skips. Both were reachable only because the gate read whatever
+    warehouse happened to be at the repo root - a client's, if one was loaded.
+    It now reads the root conftest built, so a non-demo warehouse here means
+    the isolation broke, and the gate must say so instead of standing down.
+    """
     month = conn.execute("SELECT report_month FROM mart_exec_kpis").fetchone()[0]
-    if month != REPORT_MONTH:
-        pytest.skip("warehouse is anchored at {}, not the demo's {}"
-                    .format(month, REPORT_MONTH))
+    assert month == REPORT_MONTH, (
+        "the isolated warehouse is anchored at {}, not the demo's {} - the "
+        "gate is pointed at something that is not the demo build"
+        .format(month, REPORT_MONTH))
 
 
 def test_active_headcount(warehouse):
@@ -131,8 +158,9 @@ def test_data_quality_rows(warehouse):
 
 @pytest.fixture(scope="module")
 def manifest():
-    if not os.path.exists(MANIFEST):
-        pytest.skip("no dbt manifest; run dbt (CI does, before pytest)")
+    assert os.path.exists(MANIFEST), (
+        "no dbt manifest at {} - conftest builds the isolated root, which runs "
+        "dbt, so this is a build failure rather than a skip".format(MANIFEST))
     with open(MANIFEST, encoding="utf-8") as handle:
         return json.load(handle)
 

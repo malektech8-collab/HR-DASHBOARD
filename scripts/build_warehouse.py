@@ -113,7 +113,11 @@ def _write_domain_provenance(conn, data_mode):
 
 def build_warehouse():
     os.makedirs("warehouse", exist_ok=True)
-    db_path = "warehouse/hr_analytics.duckdb"
+    # State, so it follows HRDASH_DATA_ROOT. A suite run must not rebuild the
+    # operator's warehouse in demo mode underneath their client load.
+    import paths as _p
+    db_path = _p.warehouse_path()
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
     
     print(f"Building DuckDB warehouse at {db_path}...")
     
@@ -122,9 +126,20 @@ def build_warehouse():
     configure_s3(conn)
     
     # Prepend DATA_PREFIX if configured
+    # DATA_PREFIX (S3 and friends) still wins where it is set. Otherwise the
+    # silver/gold parquets are read from the STATE ROOT rather than from the
+    # process cwd.
+    #
+    # This was the subtle half of the isolation defect: an isolated run wrote
+    # its own silver correctly and then loaded the OPERATOR's, because these
+    # paths were cwd-relative. The warehouse came out holding a client's rows
+    # under a demo label - the one failure shape worse than not isolating at
+    # all, because it looks like it worked.
     data_prefix = os.getenv("DATA_PREFIX", "").rstrip("/")
     if data_prefix:
         data_prefix = f"{data_prefix}/"
+    else:
+        data_prefix = os.path.dirname(_p.data_root()).replace("\\", "/").rstrip("/") + "/"
         
     # 1. Create source tables from Parquet files
     parquet_files = {
@@ -417,7 +432,13 @@ def build_warehouse():
         "--profiles-dir", ".",
         "--vars", json.dumps(dbt_vars)
     ]
-    subprocess.run(dbt_run_cmd, check=True, cwd=dbt_cwd)
+    # dbt resolves its output path from HRDASH_WAREHOUSE_PATH (profiles.yml).
+    # Without this the models would land in the repo warehouse while this
+    # process reads the redirected one - which is exactly how the first
+    # isolation attempt failed, silently and only under an override.
+    dbt_env = dict(os.environ)
+    dbt_env["HRDASH_WAREHOUSE_PATH"] = os.path.abspath(db_path)
+    subprocess.run(dbt_run_cmd, check=True, cwd=dbt_cwd, env=dbt_env)
     print("dbt run completed successfully.")
 
     # 3. Run dbt test (Data Quality Gates)
@@ -428,7 +449,7 @@ def build_warehouse():
         "--profiles-dir", ".",
         "--vars", json.dumps(dbt_vars)
     ]
-    subprocess.run(dbt_test_cmd, check=True, cwd=dbt_cwd)
+    subprocess.run(dbt_test_cmd, check=True, cwd=dbt_cwd, env=dbt_env)
     print("dbt test completed successfully.")
 
 

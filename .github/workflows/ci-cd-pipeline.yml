@@ -105,9 +105,32 @@ jobs:
         run: |
           python scripts/refresh_all.py
 
-      - name: Run Backend Tests (Pytest)
+      # Runs the suite AND asserts it wrote nothing to the repository's data
+      # root or warehouse.
+      #
+      # This is a job step rather than a test on purpose. "A full run leaves
+      # operator state untouched" is a statement ABOUT a run, so no test inside
+      # that run can make it - the writes it must observe happen in sibling
+      # tests, in arbitrary order, and some in subprocesses. It needs a second
+      # invocation, and this is it.
+      #
+      # CI's bytes here are synthetic, but the property is about PATHS, not
+      # data: "the suite does not write to data/ or warehouse/" is true or
+      # false regardless of whose rows are in them. That is what makes an
+      # operator-only failure visible to CI at all - GAP-002's family, recorded
+      # as GAP-003.
+      #
+      # The script forwards pytest's own exit code, so a red suite is still a
+      # red build.
+      - name: Run Backend Tests (Pytest) + isolation check
         run: |
-          pytest backend/tests
+          python scripts/check_test_isolation.py
+
+      # The guard, watched failing. A checker that cannot detect the write it
+      # exists to catch would make the step above meaningless green. SP-001.
+      - name: Prove the isolation check can fail
+        run: |
+          python scripts/check_test_isolation.py --verify-detects
 
   # Job 3: Docker Build Verification (Gate 3)
   docker-build:

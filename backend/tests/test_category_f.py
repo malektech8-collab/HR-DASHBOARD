@@ -293,9 +293,13 @@ def test_the_exec_trend_payroll_axis_is_not_coalesced():
 
 @pytest.fixture
 def registry(tmp_path, monkeypatch):
-    path = tmp_path / "declared_domains.yml"
-    monkeypatch.setattr(onb, "REGISTRY_PATH", str(path))
-    monkeypatch.setattr(onb, "CONTAINER_REGISTRY_PATH", str(path))
+    # Redirect the STATE ROOT rather than patching a private constant.
+    # registry_path() resolves through scripts/paths.py now, so this exercises
+    # the mechanism that actually ships instead of a bypass.
+    root = tmp_path / "root"
+    path = root / "data" / "onboarding" / "declared_domains.yml"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    monkeypatch.setenv("HRDASH_DATA_ROOT", str(root))
     return path
 
 

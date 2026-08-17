@@ -26,6 +26,22 @@ from app.api.dependencies.auth import get_current_user
 
 router = APIRouter()
 
+
+def _paths():
+    """scripts/paths.py, the single resolver for generated STATE.
+
+    Imported lazily: scripts/ is put on sys.path by _scripts(), and this module
+    is imported at app start before that has run.
+    """
+    scripts_dir = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                               "../../../scripts"))
+    if os.path.isdir("/app/scripts"):
+        scripts_dir = "/app/scripts"
+    if scripts_dir not in sys.path:
+        sys.path.insert(0, scripts_dir)
+    import paths
+    return paths
+
 # Directory definitions relative to backend app
 SAMPLE_DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../data/sample"))
 SILVER_DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../data/silver"))
@@ -40,15 +56,14 @@ CONTAINER_SCRIPTS_DIR = "/app/scripts"
 CONTAINER_CONTRACTS_DIR = "/app/data/contracts"
 
 def get_silver_dir() -> str:
-    if os.path.exists(CONTAINER_SILVER_DIR):
-        return CONTAINER_SILVER_DIR
-    os.makedirs(SILVER_DATA_DIR, exist_ok=True)
-    return SILVER_DATA_DIR
+    # State. Resolved through scripts/paths.py so HRDASH_DATA_ROOT reaches it.
+    _p = _paths()
+    path = _p.data("silver")
+    os.makedirs(path, exist_ok=True)
+    return path
 
 def get_sample_dir() -> str:
-    if os.path.exists(CONTAINER_SAMPLE_DIR):
-        return CONTAINER_SAMPLE_DIR
-    return SAMPLE_DATA_DIR
+    return _paths().data("sample")
 
 def get_scripts_dir() -> str:
     if os.path.exists(CONTAINER_SCRIPTS_DIR):
@@ -357,13 +372,10 @@ def _violation_out(v, back_map=None):
 
 
 def get_raw_dir() -> str:
-    container = "/app/data/raw"
-    if os.path.isdir(container):
-        return container
-    local = os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                         "../../../data/raw"))
-    os.makedirs(local, exist_ok=True)
-    return local
+    _p = _paths()
+    path = _p.data("raw")
+    os.makedirs(path, exist_ok=True)
+    return path
 
 
 class DomainStatus(BaseModel):

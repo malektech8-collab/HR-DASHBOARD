@@ -187,8 +187,11 @@ def test_the_var_defaults_TRUE_so_existing_deployments_are_unchanged():
 
 @pytest.fixture
 def profile(tmp_path, monkeypatch):
-    monkeypatch.setattr(mapping, "PROFILE_DIR", str(tmp_path))
-    monkeypatch.setattr(mapping, "CONTAINER_PROFILE_DIR", str(tmp_path))
+    # The state root, not a private constant: profile_dir() resolves through
+    # scripts/paths.py, so this exercises the shipped mechanism. It also keeps
+    # a profile written here out of the SHARED session root, where it leaked
+    # into an unrelated upload-flow test.
+    monkeypatch.setenv("HRDASH_DATA_ROOT", str(tmp_path))
     return str(tmp_path / "employees.yml")
 
 

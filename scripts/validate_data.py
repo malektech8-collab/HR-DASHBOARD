@@ -5,8 +5,9 @@ import polars as pl
 # supplied. Recorded at ingest, because complete_canonical_shape() makes the
 # column exist-and-be-NULL either way afterwards.
 import onboarding as _onb
+import paths as _p
 
-CONTRACT_EXCEPTIONS_PATH = "data/gold/contract_exceptions.parquet"
+CONTRACT_EXCEPTIONS_PATH = _p.gold("contract_exceptions.parquet")
 
 # Column order is the contract between this writer and stg_data_quality.
 GOLD_SCHEMA = {
@@ -37,15 +38,15 @@ GOLD_SCHEMA = {
 # scripts/onboarding.py IS grain-agnostic and was verified as such; this module
 # is not, and only escapes the question by not asking it.
 def validate():
-    os.makedirs("data/gold", exist_ok=True)
+    os.makedirs(_p.data("gold"), exist_ok=True)
     print("Starting data validation...")
     
     # Load silver files
-    employees_path = "data/silver/employees.parquet"
-    payroll_path = "data/silver/payroll.parquet"
-    attendance_path = "data/silver/attendance.parquet"
-    hr_requests_path = "data/silver/hr_requests.parquet"
-    compliance_path = "data/silver/compliance.parquet"
+    employees_path = _p.silver("employees.parquet")
+    payroll_path = _p.silver("payroll.parquet")
+    attendance_path = _p.silver("attendance.parquet")
+    hr_requests_path = _p.silver("hr_requests.parquet")
+    compliance_path = _p.silver("compliance.parquet")
 
     issues = []
 
@@ -307,7 +308,7 @@ def validate():
             df_gold = pl.concat([df_gold, df_contract.select(list(GOLD_SCHEMA))],
                                 how="vertical")
 
-    df_gold.write_parquet("data/gold/data_quality_report.parquet")
+    df_gold.write_parquet(_p.gold("data_quality_report.parquet"))
     total = len(issues) + n_contract
     suffix = f" (+{n_contract} from contract validation)" if n_contract else ""
     print(f"Validation complete. Generated {total} issues{suffix} in data/gold/data_quality_report.parquet")

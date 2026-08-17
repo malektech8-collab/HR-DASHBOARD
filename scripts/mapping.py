@@ -45,6 +45,7 @@ import yaml
 import canonical_schema as _cs
 import derivations as _der
 from text import normalise
+import paths as _p
 
 PROFILE_DIR = os.path.join("data", "mapping")
 CONTAINER_PROFILE_DIR = "/app/data/mapping"
@@ -111,9 +112,12 @@ class MappingError(ValueError):
 
 
 def profile_dir():
-    if os.path.isdir(os.path.dirname(CONTAINER_PROFILE_DIR)):
-        return CONTAINER_PROFILE_DIR
-    return PROFILE_DIR
+    """Where mapping profiles live.
+
+    State, not source: a live client profile here shadowed three upload-flow
+    tests' fixtures, which is how this surfaced.
+    """
+    return _p.data("mapping")
 
 
 def profile_path(table):
