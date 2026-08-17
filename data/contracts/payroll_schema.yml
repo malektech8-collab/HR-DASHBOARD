@@ -68,25 +68,31 @@ columns:
   name_en: Other Allowances
   name_ar: بدلات أخرى
   type: DECIMAL
-  required: true
-  description_en: Any further allowances paid this period, in SAR.
-  description_ar: أي بدلات أخرى مدفوعة في هذه الفترة بالريال السعودي.
+  required: false
+  description_en: >-
+    Any further allowances paid this period, in SAR. OPTIONAL: many payroll systems fold every allowance into gross rather than itemising this one. Absent, the allowances figure reports the components you DID supply (housing and transport) rather than silently dropping them.
+  description_ar: >-
+    أي بدلات أخرى مدفوعة في هذه الفترة بالريال السعودي. اختياري: تدمج كثير من أنظمة الرواتب البدلات ضمن الإجمالي بدلاً من إفرادها. عند غيابه يعرض مجموع البدلات المكوّنات المتوفرة (السكن والمواصلات) دون إسقاطها.
   example: '0'
 - name: overtime_amount
   name_en: Overtime Amount
   name_ar: مبلغ العمل الإضافي
   type: DECIMAL
-  required: true
-  description_en: Overtime paid this period, in SAR.
-  description_ar: مبلغ العمل الإضافي المدفوع في هذه الفترة بالريال السعودي.
+  required: false
+  description_en: >-
+    Overtime paid this period, in SAR. OPTIONAL: a payroll export that does not separate overtime is complete without it. Absent, the overtime figure is WITHHELD rather than reported as zero - zero would read as 'no overtime was worked', which is a claim the file does not make.
+  description_ar: >-
+    مبلغ العمل الإضافي المدفوع في هذه الفترة بالريال السعودي. اختياري: الملف الذي لا يفصل العمل الإضافي يظل مكتملاً. عند غيابه يُحجب الرقم ولا يُعرض صفراً، لأن الصفر يعني "لم يُعمل وقت إضافي" وهو ادعاء لا يقدمه الملف.
   example: '350'
 - name: deductions
   name_en: Deductions
   name_ar: الاستقطاعات
   type: DECIMAL
-  required: true
-  description_en: Total deductions this period, in SAR.
-  description_ar: إجمالي الاستقطاعات في هذه الفترة بالريال السعودي.
+  required: false
+  description_en: >-
+    Total deductions this period, in SAR. OPTIONAL. Absent, the deductions figure is WITHHELD rather than reported as zero - zero would read as 'nothing was deducted'.
+  description_ar: >-
+    إجمالي الاستقطاعات في هذه الفترة بالريال السعودي. اختياري. عند غيابه يُحجب الرقم ولا يُعرض صفراً، لأن الصفر يعني "لم تُستقطع أي مبالغ".
   example: '200'
 - name: gross_pay
   name_en: Gross Pay
@@ -110,23 +116,30 @@ columns:
   name_en: Location
   name_ar: الموقع
   type: VARCHAR
-  required: true
+  required: false
   description_en: 'The site, office or yard this row belongs to. Must match a `location` in
     your locations file - that file is what says which project each site belongs to. Renamed
     from `project` in 2026-08: this column always held the physical site (the employees contract
     said so in its own work_unit description), while nothing recorded the project above it.
-    A project is no longer an attribute of a row.'
+    A project is no longer an attribute of a row.
+    OPTIONAL: a payroll line is often costed to the employee rather than to a site, so this
+    may not appear on it at all. Absent, payroll breakdowns fall back to the EMPLOYEE''s
+    location through the join - the same route the project resolution already takes.'
   description_ar: 'الموقع أو المكتب الذي ينتمي إليه هذا الصف. يجب أن يطابق موقعاً في ملف المواقع،
     وهو الملف الذي يحدد المشروع التابع له كل موقع. أُعيدت تسميته من `project` في ٢٠٢٦-٠٨:
-    كان هذا العمود يحمل دائماً الموقع الفعلي، ولم يكن هناك ما يسجّل المشروع الأعلى منه.'
+    كان هذا العمود يحمل دائماً الموقع الفعلي، ولم يكن هناك ما يسجّل المشروع الأعلى منه.
+    اختياري: كثيراً ما تُحمّل مسيّرة الرواتب على الموظف لا على الموقع، فقد لا يظهر هنا إطلاقاً.
+    عند غيابه تعتمد تحليلات الرواتب على موقع الموظف عبر الربط.'
   example: RUH-TOWER-P1
 - name: cost_center
   name_en: Cost Center
   name_ar: مركز التكلفة
   type: VARCHAR
-  required: true
-  description_en: Accounting cost center the cost is charged to.
-  description_ar: مركز التكلفة المحاسبي الذي تحمّل عليه التكلفة.
+  required: false
+  description_en: >-
+    Accounting cost center the cost is charged to. OPTIONAL: this usually lives in the finance system rather than the HR export, exactly as on the employees contract. Payroll breakdowns use the EMPLOYEE's cost centre through the join, so absence here costs nothing that employees does not already cover.
+  description_ar: >-
+    مركز التكلفة المحاسبي الذي تحمّل عليه التكلفة. اختياري: يوجد عادةً في نظام المالية لا في ملف الموارد البشرية، كما في تعاقد الموظفين. تستخدم تحليلات الرواتب مركز تكلفة الموظف عبر الربط، فغيابه هنا لا يكلّف شيئاً إضافياً.
   example: CC-100
 - name: payroll_status
   name_en: Payroll Status

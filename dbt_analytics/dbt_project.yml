@@ -58,6 +58,11 @@ vars:
   # firing for every deployment that has not been through an upload.
   has_manager_id_source_sql: "TRUE"
   has_locations_source_sql: "TRUE"
+  # The relaxed payroll money columns. TRUE keeps every existing
+  # deployment behaving exactly as before.
+  has_payroll_other_allowances_sql: "TRUE"
+  has_payroll_overtime_sql: "TRUE"
+  has_payroll_deductions_sql: "TRUE"
   critical_titles_sql: "'Chief Executive Officer', 'Engineering Director', 'Finance Director', 'HR Manager'"
   # The attendance window read by base_attendance_current and
   # base_expected_attendance. Overridden per run with report_month_start/end

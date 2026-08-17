@@ -18,7 +18,8 @@ WITH hc AS (
     pay AS (
         SELECT
             COALESCE(SUM(gross_pay), 0.0) AS payroll_cost,
-            COALESCE(SUM(overtime_amount), 0.0) AS overtime_cost
+            CASE WHEN {{ var('has_payroll_overtime_sql') }}
+                 THEN COALESCE(SUM(overtime_amount), 0.0) END AS overtime_cost
         FROM {{ ref('stg_payroll') }}
         WHERE payroll_period = '{{ var('report_month') }}'
     ),

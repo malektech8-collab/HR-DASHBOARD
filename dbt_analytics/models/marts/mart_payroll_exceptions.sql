@@ -109,7 +109,17 @@ WITH anchor AS (
         'Gross pay (' || CAST(gross_pay AS VARCHAR) || ') does not equal sum of components (' || CAST(basic_salary + housing_allowance + transport_allowance + other_allowances + overtime_amount AS VARCHAR) || ')' AS description,
         'Critical' AS severity, 'Recalculate gross salary components' AS recommended_action
     FROM {{ ref('base_payroll_current') }}
-    WHERE ABS(gross_pay - (basic_salary + housing_allowance + transport_allowance + other_allowances + overtime_amount)) > 0.01
+    -- GATED, because with a component absent this check does not merely lose
+    -- precision - it STOPS FIRING. `gross - (a + b + NULL)` is NULL, NULL >
+    -- 0.01 is not true, and every row passes. Measured: 0 rows flagged on a
+    -- file that plainly did not reconcile.
+    --
+    -- Gross cannot be reconciled against components the client did not send,
+    -- so the honest answer is to withhold the check rather than to pass every
+    -- row. A client who supplies them gets it in full.
+    WHERE {{ var('has_payroll_other_allowances_sql') }}
+      AND {{ var('has_payroll_overtime_sql') }}
+      AND ABS(gross_pay - (basic_salary + housing_allowance + transport_allowance + other_allowances + overtime_amount)) > 0.01
     UNION ALL
     -- 12. Net pay mismatch
     SELECT 

@@ -11,13 +11,16 @@ WITH curr AS (
             'Transport Allowance' AS component, COALESCE(SUM(transport_allowance), 0.0) AS amount FROM {{ ref('base_payroll_current') }}
         UNION ALL
         SELECT 
-            'Other Allowances' AS component, COALESCE(SUM(other_allowances), 0.0) AS amount FROM {{ ref('base_payroll_current') }}
+            'Other Allowances' AS component, CASE WHEN {{ var('has_payroll_other_allowances_sql') }}
+             THEN COALESCE(SUM(other_allowances), 0.0) END AS amount FROM {{ ref('base_payroll_current') }}
         UNION ALL
         SELECT 
-            'Overtime' AS component, COALESCE(SUM(overtime_amount), 0.0) AS amount FROM {{ ref('base_payroll_current') }}
+            'Overtime' AS component, CASE WHEN {{ var('has_payroll_overtime_sql') }}
+             THEN COALESCE(SUM(overtime_amount), 0.0) END AS amount FROM {{ ref('base_payroll_current') }}
         UNION ALL
         SELECT 
-            'Deductions' AS component, COALESCE(SUM(deductions), 0.0) AS amount FROM {{ ref('base_payroll_current') }}
+            'Deductions' AS component, CASE WHEN {{ var('has_payroll_deductions_sql') }}
+             THEN COALESCE(SUM(deductions), 0.0) END AS amount FROM {{ ref('base_payroll_current') }}
     ),
     prev AS (
         SELECT 
@@ -30,13 +33,16 @@ WITH curr AS (
             'Transport Allowance' AS component, COALESCE(SUM(transport_allowance), 0.0) AS amount FROM {{ ref('base_payroll_previous') }}
         UNION ALL
         SELECT 
-            'Other Allowances' AS component, COALESCE(SUM(other_allowances), 0.0) AS amount FROM {{ ref('base_payroll_previous') }}
+            'Other Allowances' AS component, CASE WHEN {{ var('has_payroll_other_allowances_sql') }}
+             THEN COALESCE(SUM(other_allowances), 0.0) END AS amount FROM {{ ref('base_payroll_previous') }}
         UNION ALL
         SELECT 
-            'Overtime' AS component, COALESCE(SUM(overtime_amount), 0.0) AS amount FROM {{ ref('base_payroll_previous') }}
+            'Overtime' AS component, CASE WHEN {{ var('has_payroll_overtime_sql') }}
+             THEN COALESCE(SUM(overtime_amount), 0.0) END AS amount FROM {{ ref('base_payroll_previous') }}
         UNION ALL
         SELECT 
-            'Deductions' AS component, COALESCE(SUM(deductions), 0.0) AS amount FROM {{ ref('base_payroll_previous') }}
+            'Deductions' AS component, CASE WHEN {{ var('has_payroll_deductions_sql') }}
+             THEN COALESCE(SUM(deductions), 0.0) END AS amount FROM {{ ref('base_payroll_previous') }}
     )
     SELECT 
         curr.component,
