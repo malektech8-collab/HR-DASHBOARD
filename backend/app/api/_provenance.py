@@ -75,12 +75,18 @@ DOMAIN_LABELS_EN = {
     "compliance": "Compliance", "hr_requests": "HR Requests",
     "employee_relations": "Employee Relations", "recruitment": "Recruitment",
     "talent": "Talent",
+    # `locations` became reachable as a suppression reason when
+    # missing_project_count was corrected to depend on it. Until then no
+    # client-facing message named this domain, and it read as
+    # "Not yet provided: locations." - lowercase and, worse, untranslated.
+    "locations": "Locations",
 }
 DOMAIN_LABELS_AR = {
     "employees": "الموظفون", "payroll": "الرواتب", "attendance": "الحضور",
     "compliance": "الالتزام", "hr_requests": "طلبات الموارد البشرية",
     "employee_relations": "علاقات الموظفين", "recruitment": "التوظيف",
     "talent": "المواهب",
+    "locations": "المواقع",
 }
 
 # Where each date-grained domain's coverage comes from. The mart name appears

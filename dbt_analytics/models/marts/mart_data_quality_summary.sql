@@ -15,7 +15,9 @@ SELECT
         CASE WHEN {{ var('has_manager_id_source_sql') }}
              THEN COUNT(CASE WHEN issue_type = 'Missing Manager' THEN 1 END)
         END AS missing_manager_count,
-        COUNT(CASE WHEN issue_type = 'Missing Project' THEN 1 END) AS missing_project_count,
+        CASE WHEN {{ var('has_locations_source_sql') }}
+             THEN COUNT(CASE WHEN issue_type = 'Missing Project' THEN 1 END)
+        END AS missing_project_count,
         CASE WHEN {{ var('has_cost_center_source_sql') }}
              THEN COUNT(CASE WHEN issue_type = 'Missing Cost Center' THEN 1 END)
         END AS missing_cost_center_count,

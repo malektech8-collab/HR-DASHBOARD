@@ -32,7 +32,14 @@ WITH anchor AS (
             CASE WHEN {{ var('has_manager_id_source_sql') }}
                  THEN COUNT(DISTINCT CASE WHEN manager_id IS NULL OR manager_id = '' THEN employee_id END)
             END AS missing_manager_count,
-            COUNT(DISTINCT CASE WHEN project IS NULL OR project = '' THEN employee_id END) AS missing_project_count,
+            -- DOMAIN grain, not column grain: `project` is resolved through
+            -- the client's locations FILE, so with no such file every
+            -- employee resolves to NULL and this equalled headcount -
+            -- reporting a missing REFERENCE FILE as thousands of broken
+            -- employee records.
+            CASE WHEN {{ var('has_locations_source_sql') }}
+                 THEN COUNT(DISTINCT CASE WHEN project IS NULL OR project = '' THEN employee_id END)
+            END AS missing_project_count,
             -- NULL, not 0, when the client's export has no cost-centre column.
             -- Zero would read as "nobody is missing one", which is the
             -- fabricated-favourable answer; NULL is withheld and the API's

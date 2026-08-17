@@ -184,6 +184,7 @@ def test_the_gates_are_wired_from_the_onboarding_registry():
 @pytest.mark.parametrize("column,var", [
     ("missing_manager_count", "has_manager_id_source_sql"),
     ("missing_cost_center_count", "has_cost_center_source_sql"),
+    ("missing_project_count", "has_locations_source_sql"),
 ])
 def test_both_marts_withhold_the_same_counter(column, var):
     for model in ("mart_workforce_kpis.sql", "mart_data_quality_summary.sql"):
@@ -201,8 +202,8 @@ def test_neither_mart_counts_the_column_unconditionally():
             stripped = line.strip()
             if stripped.startswith("--"):
                 continue
-            if re.search(r"missing_(manager|cost_center)_count", stripped) \
-                    and stripped.upper().startswith("COUNT("):
+            if re.search(r"missing_(manager|cost_center|project)_count",
+                         stripped) and stripped.upper().startswith("COUNT("):
                 pytest.fail("{}: unguarded COUNT -> {}".format(model, stripped))
 
 
@@ -219,3 +220,26 @@ def test_the_provenance_registry_knows_project_needs_locations():
         domains = entry["domains"] if isinstance(entry, dict) else entry
         assert "locations" in domains, mart
         assert "employees" in domains, mart
+
+
+def test_every_contracted_domain_has_a_bilingual_label():
+    """`locations` became reachable as a suppression reason only when
+    missing_project_count was corrected to depend on it, and it had no label -
+    so the first client to see it would have read "Not yet provided:
+    locations.", lowercase in English and untranslated in Arabic.
+
+    Asserted for the whole set rather than that one name: the next domain to
+    become reachable should fail here, not on a client's screen.
+    """
+    import yaml
+    with open(os.path.join(_ROOT, "config", "metric_provenance.yml"),
+              encoding="utf-8") as handle:
+        registry = yaml.safe_load(handle)
+    contracted = set(registry["domains"]["contracted"])
+    assert contracted, "registry lists no contracted domains"
+    for domain in sorted(contracted):
+        assert domain in p.DOMAIN_LABELS_EN, domain
+        assert domain in p.DOMAIN_LABELS_AR, domain
+        # And the tamper: a label that is just the key is not a label.
+        assert p.DOMAIN_LABELS_EN[domain] != domain, domain
+        assert p.DOMAIN_LABELS_AR[domain] != domain, domain
