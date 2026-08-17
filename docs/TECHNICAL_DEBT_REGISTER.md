@@ -353,6 +353,8 @@ invoked twice in the Test Suite gate — once to run the suite and compare, once
 with `--verify-detects` to prove the checker itself can go red. Per SP-001 a
 guard nobody has watched fail is not a guard.
 
+**The companion rule**: [SP-004](#sp-004--state-follows-the-data-root-source-never-does) records WHAT is isolated - state follows the root, source never does - and carries the `profiles.yml` incident as its worked example.
+
 **The general rule this leaves behind**: when a property is about a *process*
 rather than a *value*, ask whether any test could observe it from inside. If
 not, it belongs in the pipeline beside the suite, not in it — and it must be
@@ -815,6 +817,67 @@ Same shape as SP-001's third instance: the check ran, it was watched, and it
 was scoped to the wrong input. *"Did I paste the numbers from this message"*
 reads exactly like *"does this repository contain client figures"* when you are
 the one who wrote the search.
+
+### SP-004 — STATE follows the data root; SOURCE never does
+
+**Recorded** 2026-08-17, test-isolation cycle. The companion rule to
+[GAP-003](#gap-003--ci-can-verify-a-mechanism-a-guarantee-about-a-run-needs-a-second-invocation):
+GAP-003 says how the guarantee is verified, this says what is being isolated.
+
+**The rule.**
+
+- **STATE** is generated or operator-owned and **follows `HRDASH_DATA_ROOT`**:
+  `raw`, `bronze`, `silver`, `gold`, `sample`, `staging`, mapping profiles, the
+  onboarding registry, and the warehouse. The pipeline writes it. A test must
+  never touch the operator's copy.
+- **SOURCE** is repository content and **never follows the root**:
+  `data/contracts`, `config/`. Humans edit it, git tracks it, the pipeline only
+  reads it.
+
+**Why SOURCE must not move.** A suite pointed at a temp root has to keep
+validating against the **real** contracts and config. Redirect those too and
+the suite validates a copy of its own fixtures — every contract test passes by
+construction, and a contract change ships unverified. The failure is total and
+silent: a green suite that has stopped checking the thing it exists to check.
+
+Stated as one line: **isolate WRITES, not reads.**
+
+**The worked example, and it is the reason this is a standing practice rather
+than a note.** During the isolation cycle itself, two paths were missed:
+
+1. `dbt_analytics/profiles.yml` hard-coded `../warehouse/hr_analytics.duckdb`.
+   The first redirected run had `build_warehouse` open the *redirected*
+   warehouse while **dbt built its models into the operator's**. That one
+   failed loudly — a missing table — which is the good case.
+2. `build_warehouse` composed its parquet paths cwd-relative. The second run
+   wrote its own silver correctly and then **loaded the operator's**. The
+   result was a warehouse holding **a real client's rows under a demo label**,
+   and it did not fail. It looked like a successful isolated build.
+
+The second is the shape to remember: **a half-applied isolation is worse than
+none**, because it produces a plausible artefact instead of an error. Nothing
+in the run said anything was wrong.
+
+**What caught it**: `test_demo_gate`, asserting the demo fingerprint — and only
+because that gate had been made **self-sufficient in the same change**. Before
+this cycle it read whatever warehouse sat at the repo root and *skipped* when
+the anchor month did not match, so it would have gone green. The gate that
+caught the bug was the one the same cycle had just stopped from being able to
+skip.
+
+**How to apply.** When adding any path that the pipeline writes, resolve it
+through [`scripts/paths.py`](../scripts/paths.py) — never a literal, and never
+a path composed against the process cwd. `test_no_script_hardcodes_a_state_path`
+enforces this mechanically, because an artefact stays isolated by being *under
+the root*, not by someone remembering it. When adding a path the pipeline only
+reads, leave it in the repository and say so where it is defined.
+
+**The generalisation worth carrying**: a partially-applied invariant is more
+dangerous than an unapplied one. Prefer mechanisms where the incomplete case
+*cannot* produce a plausible result — and pair every isolation change with an
+assertion about the CONTENT of what was built, not merely that it built.
+
+---
 
 ## Exclusions
 
