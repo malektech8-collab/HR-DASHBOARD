@@ -7,8 +7,11 @@ attendance_rules:
 
 compliance_rules:
   report_month_source: "max_compliance_period" # Dynamically find maximum period in compliance table
-  has_gosi_source_for_period: true
-  has_wps_source_for_period: true
+  # has_gosi_source_for_period / has_wps_source_for_period were DELETED in the
+  # compliance-provenance cycle. They were repository literals deciding a
+  # client fact: both defaulted true, so every deployment claimed a GOSI and a
+  # WPS source whether or not the client had one. build_warehouse now resolves
+  # both from what the client's file actually carried.
 
 er_rules:
   report_month_source: "max_case_date" # Dynamically find maximum date in employee_relations table

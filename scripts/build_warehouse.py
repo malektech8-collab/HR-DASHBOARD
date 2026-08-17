@@ -394,9 +394,28 @@ def build_warehouse():
         "min_rating": rules.get("talent_rules", {}).get("min_rating_value", 1.0),
         "max_rating": rules.get("talent_rules", {}).get("max_rating_value", 5.0),
         "weekend_days_sql": ", ".join(f"'{day}'" for day in rules.get("attendance_rules", {}).get("weekend_days", ["Friday"])),
-        "has_gosi_source_sql": "TRUE" if rules.get("compliance_rules", {}).get("has_gosi_source_for_period", True) else "FALSE",
-        "has_wps_source_sql": "TRUE" if rules.get("compliance_rules", {}).get("has_wps_source_for_period", True) else "FALSE",
-        # Column-grain provision, same idiom as the two above: does the CLIENT'S
+        # RESOLVED FROM PROVENANCE, not from config/business_rules.yml.
+        #
+        # These two read `has_gosi_source_for_period` / `has_wps_source_for_period`
+        # from a repository config file, defaulting True. That is a REPO LITERAL
+        # DECIDING A CLIENT FACT: every deployment got TRUE unless an operator
+        # remembered to edit a file nothing prompts them to open, so the two
+        # compliance arms these gate fired for clients with no GOSI or Mudad
+        # source at all.
+        #
+        # It is SP-009's shape - a default that preserves existing behaviour,
+        # correct when written and wrong once anything depended on it - and it
+        # escaped test_dbt_vars only because the values are booleans rather
+        # than date-shaped. The config keys are DELETED, not superseded, so the
+        # old path cannot silently win.
+        "has_gosi_source_sql": (
+            "TRUE" if _onb.provides_column("compliance", "gosi_status")
+            else "FALSE"),
+        "has_wps_source_sql": (
+            "TRUE" if _onb.provides_column("compliance", "mudad_status")
+            else "FALSE"),
+        # Column-grain provision, the same idiom as the two above - which it
+        # only genuinely is as of this cycle: does the CLIENT'S
         # FILE carry this column at all? Not "is it populated" - after
         # complete_canonical_shape() the column always exists and may be NULL,
         # so the data can no longer answer the question. A missing VALUE is a
