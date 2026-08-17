@@ -14,6 +14,45 @@ from app.api._provenance import Provenance, get_provenance
 
 router = APIRouter()
 
+def _count_card(prov, mart, row_dict, column, label):
+    """A "missing X" counter card, safe against a WITHHELD count.
+
+    THE BUG THIS REMOVES took the entire Workforce page down - HTTP 500 - for
+    the first real client, on the first real load:
+
+        TypeError: '>' not supported between instances of 'NoneType' and 'int'
+
+    The mart withholds these counts as NULL when the client's export has no
+    such column. That is deliberate and correct: with no cost-centre column
+    there is no number of records missing a cost centre, and 0 would read as
+    "nobody is missing one" - the fabricated-favourable answer. The mart was
+    changed to say NULL; this consumer was not, and went on comparing it.
+
+    DEMO CANNOT CATCH THIS. The sample data supplies every column these
+    counters read, so every count is a real integer and the comparison always
+    had two numbers. Only a client who does not supply one reaches the NULL,
+    which is why it survived a green suite and appeared on the first load.
+
+    prov.value() is the idiom data_quality.py already used - it is what keeps a
+    domain-suppressed column from being served at all. The None guard is the
+    part that was missing, and it is needed for BOTH reasons a value can be
+    absent: suppressed by domain, or withheld by the mart itself.
+
+    A withheld count renders as a card with no figure and NEUTRAL status. It is
+    deliberately not "healthy": healthy asserts that nothing is missing, which
+    is the claim the NULL exists to avoid making.
+    """
+    value = prov.value(mart, column, row_dict[column])
+    if value is None:
+        # No figure, and no colour that would imply one. The card carries no
+        # REASON yet - the provenance registry works at domain grain and this
+        # absence is column grain, which is TD-012 and its own cycle.
+        return KPIItem(key=column, label=label, value=None, unit="issues",
+                       status="neutral")
+    return KPIItem(key=column, label=label, value=value, unit="issues",
+                   status="warning" if value > 0 else "healthy")
+
+
 @router.get("/summary", response_model=WorkforceSummaryResponse)
 def get_workforce_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_connection), report_month: str = Depends(get_report_month), prov: Provenance = Depends(get_provenance)):
     # Column mode: @suppressible does not run here, so the coverage of
@@ -97,27 +136,15 @@ def get_workforce_summary(conn: duckdb.DuckDBPyConnection = Depends(get_db_conne
             unit="iqamas",
             status="warning" if row_dict["iqama_expiring_30"] > 0 else "healthy"
         )),
-        ("missing_manager_count", lambda: KPIItem(
-            key="missing_manager_count",
-            label="Missing Manager",
-            value=row_dict["missing_manager_count"],
-            unit="issues",
-            status="warning" if row_dict["missing_manager_count"] > 0 else "healthy"
-        )),
-        ("missing_project_count", lambda: KPIItem(
-            key="missing_project_count",
-            label="Missing Project",
-            value=row_dict["missing_project_count"],
-            unit="issues",
-            status="warning" if row_dict["missing_project_count"] > 0 else "healthy"
-        )),
-        ("missing_cost_center_count", lambda: KPIItem(
-            key="missing_cost_center_count",
-            label="Missing Cost Center",
-            value=row_dict["missing_cost_center_count"],
-            unit="issues",
-            status="warning" if row_dict["missing_cost_center_count"] > 0 else "healthy"
-        )),
+        ("missing_manager_count",
+         lambda: _count_card(prov, "mart_workforce_kpis", row_dict,
+                             "missing_manager_count", "Missing Manager")),
+        ("missing_project_count",
+         lambda: _count_card(prov, "mart_workforce_kpis", row_dict,
+                             "missing_project_count", "Missing Project")),
+        ("missing_cost_center_count",
+         lambda: _count_card(prov, "mart_workforce_kpis", row_dict,
+                             "missing_cost_center_count", "Missing Cost Center")),
     ])
 
     return WorkforceSummaryResponse(

@@ -91,17 +91,34 @@ def validate():
         # Check Active employees checks (manager, location, salary)
         active_emps = df_emp.filter(pl.col("status") == "Active")
         
-        # Missing Manager
-        missing_mgr = active_emps.filter(pl.col("manager_id").is_null() | (pl.col("manager_id") == ""))
-        for r in missing_mgr.iter_rows(named=True):
-            add_issue(
-                r["employee_id"],
-                r["employee_name"],
-                "Missing Manager",
-                "Active employee has no manager ID assigned.",
-                "Warning",
-                "Assign supervisor/manager in employee profile"
-            )
+        # Missing Manager.
+        #
+        # Scoped to clients who PROVIDE the column, exactly as Missing Cost
+        # Center is below and for the same reason - this one was simply left
+        # out when that gate was added.
+        #
+        # Measured on the first real load: with no manager column, this fired
+        # once per active employee and produced 85% of every row on the client's
+        # Data Quality page. Not one of them was actionable. "Assign
+        # supervisor/manager in employee profile" is advice a client cannot
+        # take when their export has no such field, and it buried the genuine
+        # findings - including several hundred Critical missing-salary records -
+        # under thousands of identical Warnings.
+        if _onb.provides_column("employees", "manager_id"):
+            missing_mgr = active_emps.filter(pl.col("manager_id").is_null() | (pl.col("manager_id") == ""))
+            for r in missing_mgr.iter_rows(named=True):
+                add_issue(
+                    r["employee_id"],
+                    r["employee_name"],
+                    "Missing Manager",
+                    "Active employee has no manager ID assigned.",
+                    "Warning",
+                    "Assign supervisor/manager in employee profile"
+                )
+        else:
+            print("[coverage] employees: no manager_id column in the client's "
+                  "file. Manager checks skipped - an absent column is a "
+                  "coverage fact, not one exception per employee.")
 
         # Missing Location.
         #
