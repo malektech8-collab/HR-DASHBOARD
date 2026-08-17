@@ -83,9 +83,9 @@ Remaining questions are narrow: `owner_id` (unassigned cases) and `escalated` (a
 
 ## 7. Recommended order
 
-1. **Convert the four derived columns to `derivation` entries** (§2). Not a relaxation — a correction, and it removes four required columns as a side effect.
+1. **Convert the four derived columns to `derivation` entries** (§2). **RULED NEXT, as its own cycle, 2026-08-17** — it outranks further relaxation. Requiring them asks the client to compute our metrics before uploading. It is a correction of what the column IS; dropping four required columns is a consequence, not the goal. **The two inversions (§3, §4) land in the same cycle** — they are the same species: a contract asking for the derived or the scheduled while treating the observed as optional.
 2. **Attendance**, before the client is asked for a file. It is next in the load order, it gates payroll reconciliation, and it is the worst of the four.
-3. **Compliance's shape** — one file or several. Decide before relaxing individual columns, because the answer changes which columns belong together at all.
+3. **Compliance's shape** — one file or several. **DEFERRED to A5, ruled 2026-08-17.** The reasoning, recorded because a deferral without one becomes a thing nobody remembers deciding: it decides which columns belong together at all, so it is a bigger question than a contract edit — and **it cannot be answered without a real compliance export, which we do not have.** Relaxing individual compliance columns before answering it would be guessing at the shape one column at a time, which is how payroll reached 13-of-13.
 4. **hr_requests and employee_relations** — narrow, and can follow the pattern once set.
 
 ## 8. What this audit does not do

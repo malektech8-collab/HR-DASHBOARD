@@ -58,14 +58,21 @@ Proposed shape, declarative and in the contract's idiom — the key is that a co
 
 with resolution done by the upload path, which already knows what else the client has.
 
-## 4. Severity is the ruling
+## 4. Severity — RULED
 
-**REJECT or EXCEPTION is not obvious, and the plan does not presume it.**
+**A few orphans is a data-quality EXCEPTION. A mostly-orphan file is a wrong-file REJECT.** Both, separated by a threshold — not one severity applied to every orphan identically.
 
-- **REJECT** is defensible: a payroll row for a non-existent employee is money attributed to nobody, and every total containing it is wrong.
-- **EXCEPTION** is defensible: a mis-keyed id in one row should not block a whole month's payroll, and the client can see and fix it on the Data Quality page.
+The reasoning behind the split, which is what the threshold has to encode:
 
-The distinction that may decide it: **a few orphans is a data-quality problem; a mostly-orphan file is a wrong-file problem** — a payroll export from a different company, or ids in a different format. A proportion threshold could separate them, but a threshold is a policy and needs a ruling of its own.
+- **A handful of orphans is a mis-keyed id.** The client can see it on the Data Quality page and fix it in their source system. Blocking a whole month's payroll for one bad reference would be the `manager_id` mistake in reverse — a real but small problem stopping everything.
+- **A mostly-orphan file is not a payroll file for this client.** A payroll export from a different company, or ids in a different format entirely — a leading zero stripped by Excel, a branch prefix, a different id scheme. Loading it produces payroll totals attributed to nobody, and every figure downstream is wrong. That must not load.
+
+**The threshold's basis must be stated in the code**, not merely chosen. It is a policy number and the next reader has to be able to see what it encodes: at what proportion does "some rows are wrong" become "this is the wrong file"? A value with no stated basis is a magic number, and the register already carries what happens to those.
+
+Two things the implementation must not do:
+
+- **Silently downgrade.** If the file rejects on proportion, the message must say *how many of how many* — not merely that it was refused.
+- **Fire at all when employees is not provided.** With no master file, every row is an orphan by construction, and the check must withhold rather than reject the file. That is the `manager_id` lesson: a check about the client's *export coverage* firing as if it were about their data.
 
 ## 5. What must be said on screen
 
@@ -92,4 +99,4 @@ Every domain except employees and locations carries `employee_id`. The same chec
 
 ---
 
-**Not built. Awaiting a ruling — on the mechanism, and separately on the severity.**
+**Not built. Severity is ruled (§4); the mechanism awaits a ruling.**
