@@ -99,7 +99,21 @@ columns:
   name_en: Late Minutes
   name_ar: دقائق التأخير
   type: INTEGER
-  required: true
+  required: false
+  # DERIVED WHEN ITS INPUTS EXIST, WITHHELD OTHERWISE - SP-006's boundary
+  # condition rather than an exception to it.
+  #
+  # The pipeline already computes this as `calculated_late_minutes`, from
+  # the punch against the schedule less the grace period. But the SCHEDULE
+  # is optional, so the derivation is only possible for a client who has a
+  # roster. Deriving unconditionally would reintroduce the zeroing one
+  # layer along: every client without a schedule would get 0 late minutes
+  # presented as a measurement.
+  #
+  # Supplied, it is kept as EVIDENCE and reconciled against ours - see
+  # net_late_minutes above and mart_attendance_exceptions.
+  derived_from: [actual_check_in, scheduled_start]
+  derivation: late_minutes
   min_value: 0
   description_en: Raw minutes late as recorded by the source system.
   description_ar: دقائق التأخير كما سجلها النظام المصدر.
@@ -108,7 +122,11 @@ columns:
   name_en: Excused Late Minutes
   name_ar: دقائق التأخير المعذورة
   type: INTEGER
-  required: true
+  required: false
+  # OPTIONAL: an ADJUDICATION, not a measurement. Someone decides that a
+  # given lateness is excused; a source system rarely exports that, and no
+  # pipeline can derive it. Absent, it contributes nothing to net lateness
+  # rather than being assumed zero-excused.
   description_en: Minutes of lateness formally excused.
   description_ar: دقائق التأخير المعذورة رسمياً.
   example: '0'
@@ -152,7 +170,11 @@ columns:
   name_en: Overtime Approved
   name_ar: العمل الإضافي معتمد
   type: BOOLEAN
-  required: true
+  required: false
+  # OPTIONAL: an approval-workflow flag, and a human decision like the
+  # above. Absent, approved-overtime figures are WITHHELD rather than
+  # treating every overtime hour as unapproved, which would understate
+  # cost, or as approved, which would overstate it.
   description_en: Whether the overtime was formally approved.
   description_ar: ما إذا كان العمل الإضافي معتمداً رسمياً.
   example: 'true'

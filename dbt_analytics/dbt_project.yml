@@ -60,6 +60,7 @@ vars:
   has_locations_source_sql: "TRUE"
   # The relaxed payroll money columns. TRUE keeps every existing
   # deployment behaving exactly as before.
+  has_attendance_schedule_source_sql: "TRUE"
   has_attendance_net_late_source_sql: "TRUE"
   has_qiwa_source_sql: "TRUE"
   has_health_insurance_source_sql: "TRUE"

@@ -416,6 +416,11 @@ def build_warehouse():
         # Derived-columns cycle. Each of these gates a check that would
         # otherwise fire on EVERY row when the column is absent - the
         # manager_id shape, measured again at 2 of 3 and 3 of 3.
+        # A punch with no SCHEDULE cannot be late. Gates every lateness figure
+        # together, because they measure the same unmeasurable thing.
+        "has_attendance_schedule_source_sql": (
+            "TRUE" if _onb.provides_column("attendance", "scheduled_start")
+            else "FALSE"),
         "has_attendance_net_late_source_sql": (
             "TRUE" if _onb.provides_column("attendance", "net_late_minutes")
             else "FALSE"),

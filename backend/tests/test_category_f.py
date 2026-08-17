@@ -64,6 +64,12 @@ VARS = {
     "trend_m1": "2026-06", "trend_m1_end": "2026-06-30",
     "trend_m2": "2026-07", "trend_m2_end": "2026-07-31",
     "employees_history_since": "1900-01-01",
+    # A schedule IS supplied in these fixtures, so lateness is measurable and
+    # Category F's arithmetic is exercised exactly as before. The FALSE case -
+    # lateness withheld for a client with no roster - is proved in
+    # test_attendance_schedule_optional.py, which is where that behaviour
+    # belongs.
+    "has_attendance_schedule_source_sql": "TRUE",
 }
 
 

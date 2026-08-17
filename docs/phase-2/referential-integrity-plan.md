@@ -108,7 +108,34 @@ What it inherits from §1–§6, and what it adds:
 
 **It stays required until the derivation lands here.** Relaxing it first would leave the maximal firer running on a column nothing produces, which is worse than the present state.
 
-## 8. Scope
+## 8. What ATTENDANCE exposes — recorded 2026-08-17, ahead of this cycle
+
+Verified during A4 planning and recorded now rather than rediscovered later.
+
+### 8.1 The cross-join drop — more dangerous than payroll's orphan
+
+Attendance has **two different behaviours for the same orphan**:
+
+| model | behaviour |
+|---|---|
+| `base_attendance_current` | classifies it: `'Unknown employee attendance'` |
+| `base_expected_attendance` | **drops it entirely** |
+
+`base_expected_attendance` builds its calendar from `CROSS JOIN base_employees_deduplicated` and LEFT JOINs the client's rows onto it. An attendance row whose `employee_id` matches no employee **is in neither the numerator nor the denominator** of any attendance metric.
+
+**Why this is worse than payroll's orphan.** Payroll's mislabels the row — bad, but the row is *there* and the total contains it. Attendance's is invisible: the exception list shows a handful of `'Unknown employee attendance'` rows and looks manageable, while every headline attendance figure was computed from a subset that silently excluded them. **The exceptions look small precisely because the figures dropped the evidence.**
+
+A client whose attendance export uses a different id scheme — a branch prefix, a leading zero stripped by Excel — would see a plausible compliance percentage computed from whichever employees happened to match.
+
+This is specific to the cross-join design, and it means §5's *"three cases need three messages"* is not sufficient for attendance: the rows must also be **countable**, not merely nameable.
+
+### 8.2 Copy `'Unknown employee attendance'`, do not invent (SP-007)
+
+`base_attendance_current` already separates the case correctly, with its own classification value. Payroll's `COALESCE(status, 'Inactive/Terminated/Unknown')` renders the same condition as a *status category*.
+
+**The correct pattern is already in the codebase, beside the defective one** — which is exactly [SP-007](../TECHNICAL_DEBT_REGISTER.md#sp-007--when-you-find-an-ungated-check-read-its-siblings). This cycle should adopt attendance's classification as the shape for every domain rather than design a new one, and the work on payroll is to bring it up to what attendance already does.
+
+## 9. Scope
 
 Every domain except employees and locations carries `employee_id`. The same check serves all of them, so this is one mechanism used six times rather than six checks — which is the argument for doing it as its own cycle rather than folding it into the payroll load.
 
