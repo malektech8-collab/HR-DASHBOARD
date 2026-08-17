@@ -1049,6 +1049,96 @@ beyond reading a file that was already open.
 
 ---
 
+### SP-008 — A threshold that is not a column has one source, read by every consumer
+
+**Recorded** 2026-08-17, attendance cycle. Found while parameterising
+`late_minutes`.
+
+**The rule.** When a calculation needs a number that does not come from the
+client's file — a grace period, an SLA target, a plausibility bound, a
+proportion threshold — every component that uses it reads it from **the same
+place**. Never a component-local default, never a literal repeated in two
+languages.
+
+**The instance.** `late_minutes` is computed twice: by dbt in
+`base_attendance_current`, which reads `grace_period_minutes` from
+`config/business_rules.yml` via `build_warehouse`; and now by ingest, when the
+client does not supply the column. A Python default of `0` beside a config
+value of `15` would have been the obvious shape and would have compiled.
+
+**Why it is worse than an ordinary wrong number.** The two figures meet in
+`mart_attendance_exceptions`, which compares the client's supplied lateness
+against ours and reports a disagreement as a finding — *"source net late
+minutes does not match calculated"*. So a disagreement between **our own two
+components** would have surfaced as:
+
+> **an accusation that the client's attendance system is wrong.**
+
+That is the specific harm, and it is not symmetrical with a plain miscalculation.
+A wrong number is discovered when someone checks it. A **false accusation** is
+acted on: the client goes and audits a system that was correct, finds nothing,
+and loses confidence in the product rather than in the figure. The defect
+consumes their time and their trust before anyone doubts our arithmetic.
+
+**How to apply.**
+
+1. A threshold used by more than one component gets **one** source. Prefer the
+   config file already read by whichever component is furthest downstream.
+2. A function taking such a threshold takes it as a **required parameter**, not
+   a defaulted one. A default is a second source wearing a different hat, and
+   it is silent.
+3. Test that the parameter **changes the answer**. A wiring that is read but
+   ignored passes every test about where the value comes from.
+
+**Its family**: this is [SP-006](#sp-006--derive-it-always-reconcile-against-it-when-offered)'s
+reconciliation seen from the other side. SP-006 says keep the client's value so
+disagreements are discoverable; SP-008 says make sure a discovered
+disagreement is *theirs* and not ours.
+
+---
+
+## Open questions
+
+Not debt, and not backlog. Questions whose answer is **not the engineer's to
+give**, recorded so they are asked of the right person rather than resolved by
+default.
+
+### OQ-001 — What counts as an absence day, and what makes an hour overtime?
+
+**Raised** 2026-08-17, attendance cycle. **Needs**: an HR practitioner familiar
+with KSA Labour Law, not an engineer.
+
+`absence_days` and `overtime_hours` stay **required** on the attendance
+contract. Both look derivable — the pipeline has the punches, the schedule and
+the calendar — and both were proposed for derivation and then held back.
+
+**Why they were held back.** There is no existing calculation for either;
+`base_attendance_current` passes them through unchanged. Deriving them means
+first deciding:
+
+- Is a day with no punches an absence, or an unreported day? Category F already
+  answers that at the *calendar* level; this is the row level, and the two are
+  not obviously the same question.
+- Do half-days exist? Does a late arrival past some threshold become a partial
+  absence?
+- Is overtime measured against `scheduled_end`, against eight hours, or against
+  the weekly limit? KSA Labour Law sets daily and weekly maxima and treats them
+  differently by contract type and by Ramadan.
+- Does unapproved overtime count as overtime hours, as cost, as neither?
+
+**These vary by contract type and shift pattern**, so there is not one answer
+even within a single client.
+
+**Why it is recorded here rather than as a TD item.** A backlog item implies
+the work is understood and merely unscheduled. This is not: **the engineering
+is trivial and the ruling is the whole difficulty.** Filing it as debt would
+invite someone to implement a plausible answer, and a plausible answer to this
+question produces figures that look right and are wrong in a way no test would
+catch.
+
+**Closure**: a practitioner states the rules; they become a derivation with the
+rules named in the registry, and the columns relax.
+
 ## Exclusions
 
 None of these legacy build warnings affect the functionality of the new `GovernanceWidget` or `/api/governance/status` API endpoint, both of which are fully compliant and bug-free.

@@ -43,7 +43,15 @@ columns:
   name_en: Shift Name
   name_ar: اسم الوردية
   type: VARCHAR
-  required: true
+  required: false
+  # OPTIONAL, and the same species as scheduled_start/_end: a shift NAME
+  # comes from a rostering system. A client running fixed hours, or
+  # exporting raw punches from a biometric terminal, has no shift to name.
+  # It was left required when the schedule was relaxed, which made it the
+  # odd one out rather than a considered decision.
+  #
+  # Nothing computes from it - it is a label carried through to
+  # breakdowns - so absence costs a grouping, not a figure.
   description_en: Name of the shift scheduled for this day.
   description_ar: اسم الوردية المجدولة لهذا اليوم.
   example: Day Shift
