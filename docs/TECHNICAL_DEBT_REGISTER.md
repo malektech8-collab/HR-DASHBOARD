@@ -1097,6 +1097,54 @@ disagreement is *theirs* and not ours.
 
 ---
 
+### SP-009 — A default chosen to preserve existing behaviour silently disables every future gate that depends on it
+
+**Recorded** 2026-08-17, attendance cycle. Distinct from
+[SP-007](#sp-007--when-you-find-an-ungated-check-read-its-siblings): that one is
+about a pattern *not carried to its siblings*; this is about a decision that was
+**correct when made** and became wrong without anything announcing it.
+
+**The instance.** `onboarding.provides_column()` returns `True` for any column
+whose table has recorded no absences. Its docstring says so — *"Defaults to
+True, deliberately"* — and the reasoning was right: only `employees` recorded
+absences, and defaulting False would have blacked out every figure for every
+other domain.
+
+The moment a second domain relaxed a column, that default became the wrong
+answer for it. **Nothing announced the transition.** Payroll, attendance,
+compliance and hr_requests were each relaxed without recording, so every
+`has_*_source_sql` gate reading them resolved `TRUE` — including the attendance
+schedule gate built one cycle earlier specifically to withhold lateness. It was
+present, correct, tested, and **unreachable**.
+
+**Why this class is hard to see.**
+
+1. **The default is documented, and the documentation is right** — about the
+   world at the time it was written. A reader checking the docstring finds a
+   justification, not a warning.
+2. **It fails safe in the direction of "carry on as before"**, so nothing
+   breaks, nothing logs, and no test fails. The gate's own unit tests pass:
+   they test the gate, not whether anything reaches it.
+3. **The transition is in a different file from the default.** Relaxing a
+   column in a contract is what invalidates a Python default three directories
+   away.
+
+**The rule.** When a default exists to preserve behaviour during a migration,
+it carries an **expiry condition** — the state of the world that made it
+correct. Write that condition down as a **test**, not a comment, so the day it
+stops holding is the day something goes red.
+
+**Its test here**: any contracted table with a relaxed column must record its
+absences, or the gates reading them are dark. It fails on the next table
+relaxed without wiring — which is exactly how this was found, one cycle late.
+
+**How to apply.** On writing a "safe" default, ask: *what would have to change
+for this to become wrong, and would anyone notice?* If the answer to the second
+is no, the default needs a test, not a comment. A default that cannot be wrong
+needs neither.
+
+---
+
 ## Open questions
 
 Not debt, and not backlog. Questions whose answer is **not the engineer's to
