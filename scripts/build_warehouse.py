@@ -390,6 +390,22 @@ def build_warehouse():
         "has_cost_center_source_sql": (
             "TRUE" if _onb.provides_column("employees", "cost_center")
             else "FALSE"),
+        # Same question, same answer, for the same reason - and the first real
+        # client did not supply this one either. `manager_id` was left ungated
+        # when cost_center was gated, so the Missing Manager check fired once
+        # per employee and filled 85% of their Data Quality page with a fact
+        # about their EXPORT FORMAT, burying every real finding underneath it.
+        "has_manager_id_source_sql": (
+            "TRUE" if _onb.provides_column("employees", "manager_id")
+            else "FALSE"),
+        # DOMAIN grain, not column grain - `project` is resolved through the
+        # client's locations FILE, so what is absent is a whole domain rather
+        # than a column of employees. In demo everything is provided, matching
+        # _write_domain_provenance.
+        "has_locations_source_sql": (
+            "TRUE" if (os.getenv("DATA_MODE", "demo") != "real"
+                       or "locations" in _onb.load_declared())
+            else "FALSE"),
         "critical_titles_sql": ", ".join(f"'{t}'" for t in rules.get("talent_rules", {}).get("critical_job_titles", []))
     }
 

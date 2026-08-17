@@ -24,8 +24,22 @@ WITH anchor AS (
             COUNT(DISTINCT CASE WHEN joining_date >= (SELECT anchor_date FROM anchor) - INTERVAL 90 DAY AND joining_date <= (SELECT anchor_date FROM anchor) THEN employee_id END) AS probation_count,
             COUNT(DISTINCT CASE WHEN contract_end_date >= (SELECT anchor_date FROM anchor) AND contract_end_date <= (SELECT anchor_date FROM anchor) + INTERVAL 30 DAY THEN employee_id END) AS contract_expiring_30,
             COUNT(DISTINCT CASE WHEN iqama_expiry >= (SELECT anchor_date FROM anchor) AND iqama_expiry <= (SELECT anchor_date FROM anchor) + INTERVAL 30 DAY THEN employee_id END) AS iqama_expiring_30,
-            COUNT(DISTINCT CASE WHEN manager_id IS NULL OR manager_id = '' THEN employee_id END) AS missing_manager_count,
-            COUNT(DISTINCT CASE WHEN project IS NULL OR project = '' THEN employee_id END) AS missing_project_count,
+            -- NULL, not 0, when the client's export has no manager column.
+            -- Identical reasoning to cost_center below, and it was left out
+            -- when cost_center was done: with no manager column there is no
+            -- number of employees missing a manager, and 0 asserts that
+            -- everybody has one.
+            CASE WHEN {{ var('has_manager_id_source_sql') }}
+                 THEN COUNT(DISTINCT CASE WHEN manager_id IS NULL OR manager_id = '' THEN employee_id END)
+            END AS missing_manager_count,
+            -- DOMAIN grain, not column grain: `project` is resolved through
+            -- the client's locations FILE, so with no such file every
+            -- employee resolves to NULL and this equalled headcount -
+            -- reporting a missing REFERENCE FILE as thousands of broken
+            -- employee records.
+            CASE WHEN {{ var('has_locations_source_sql') }}
+                 THEN COUNT(DISTINCT CASE WHEN project IS NULL OR project = '' THEN employee_id END)
+            END AS missing_project_count,
             -- NULL, not 0, when the client's export has no cost-centre column.
             -- Zero would read as "nobody is missing one", which is the
             -- fabricated-favourable answer; NULL is withheld and the API's

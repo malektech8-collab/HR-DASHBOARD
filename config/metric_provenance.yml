@@ -114,7 +114,12 @@ marts:
       contract_expiring_30: [employees]     # REVERTED in 2a.5 - see probation_count
       iqama_expiring_30: [employees, compliance]  # payroll REVERTED in 2a.5; compliance is REAL (LEFT JOINs stg_compliance)
       missing_manager_count: [employees]
-      missing_project_count: [employees]
+      # `project` is RESOLVED through the client's locations file, never read
+      # off an employee row (stg_employees). With no locations file every
+      # employee resolves to project = NULL, so this counter equalled headcount
+      # and reported a missing REFERENCE FILE as thousands of broken employee
+      # records. It depends on both domains because it always did.
+      missing_project_count: [employees, locations]
       missing_cost_center_count: [employees]
 
   mart_payroll_kpis:
@@ -212,7 +217,7 @@ marts:
         domains: [employees, payroll, attendance, compliance]
         scope_to_provided: true
       missing_manager_count: [employees]
-      missing_project_count: [employees]
+      missing_project_count: [employees, locations]   # see mart_workforce_kpis
       missing_cost_center_count: [employees]
       missing_nationality_count: [employees]
       duplicate_employee_count: [employees]
