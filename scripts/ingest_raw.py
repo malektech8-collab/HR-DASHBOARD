@@ -1,3 +1,4 @@
+import datetime
 import os
 import sys
 import polars as pl
@@ -6,6 +7,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from validate_schema import (validate_csv, SchemaValidationError, dq_severity, dq_recommended_action,
                              SEVERITY_EXCEPTION)
 from derivations import derive_column
+import derivations as _der
 import canonical_schema as _cs
 import onboarding as _onb
 import report_period as _rp
@@ -136,6 +138,42 @@ def _bool_col(name):
     return (pl.when(lowered.is_in(TRUE_WORDS)).then(True)
               .when(lowered.is_in(FALSE_WORDS)).then(False)
               .otherwise(None).cast(pl.Boolean).alias(name))
+
+
+def _derive_if_absent(df, table, column, parameter=None):
+    """Derive a declared column when the client's file does not carry it.
+
+    THE is_saudi RULE, generalised: derive ONLY when the column is ABSENT. A
+    file that supplies it is taken at its word - which is what keeps the
+    reconciliation checks meaningful, because comparing our derivation against
+    our derivation would agree by construction and say nothing.
+
+    THE ORDERING THIS ENFORCES. complete_canonical_shape() EXCLUDES anything
+    carrying `derivation:`, so the moment a column is declared derived it stops
+    being shape-completed. Without a branch like this it is neither completed
+    nor derived, and the first consumer raises ColumnNotFoundError. The
+    contract-relax cycle learned the same lesson in the other direction -
+    `required: false` alone accepts the file and then crashes. This is that
+    lesson with the steps reversed: the rule and this branch land BEFORE the
+    contract keys.
+    """
+    if column in df.columns:
+        return df, False
+    spec = next(c for c in _cs.columns(table) if c["name"] == column)
+    names = _der.source_columns(spec)
+    missing = [n for n in names if n not in df.columns]
+    if missing:
+        # Nothing to derive from. The column stays absent and the coverage
+        # gates downstream withhold the figures rather than inventing them.
+        print("[derive] {}.{} not derivable: source column(s) {} absent."
+              .format(table, column, missing))
+        return df, False
+    sources = {n: df[n].to_list() for n in names}
+    values = _der.derive_column(spec, sources, parameter=parameter)
+    df = df.with_columns(pl.Series(column, values))
+    print("[derive] {}.{} derived from {} ({} rows)."
+          .format(table, column, names, len(values)))
+    return df, True
 
 
 def _read_probe_column(path, column):
@@ -584,6 +622,9 @@ def ingest(data_mode=None):
         
         df = pl.read_csv(files["attendance"], infer_schema_length=0,
                          null_values=[""])
+        # Derived BEFORE the casts below, which name these columns.
+        df, _ = _derive_if_absent(df, "attendance", "net_late_minutes")
+        df, _ = _derive_if_absent(df, "attendance", "missing_punch_count")
         df = df.with_columns([
             pl.col("attendance_date").str.to_date("%Y-%m-%d", strict=False),
             pl.col("scheduled_start").str.to_datetime("%Y-%m-%d %H:%M:%S", strict=False),
@@ -592,11 +633,15 @@ def ingest(data_mode=None):
             pl.col("actual_check_out").str.to_datetime("%Y-%m-%d %H:%M:%S", strict=False),
             pl.col("late_minutes").cast(pl.Int64, strict=False),
             pl.col("excused_late_minutes").cast(pl.Int64, strict=False),
-            pl.col("net_late_minutes").cast(pl.Int64, strict=False),
+            (pl.col("net_late_minutes").cast(pl.Int64, strict=False)
+             if "net_late_minutes" in df.columns else
+             pl.lit(None, dtype=pl.Int64).alias("net_late_minutes")),
             pl.col("absence_days").cast(pl.Float64, strict=False),
             pl.col("overtime_hours").cast(pl.Float64, strict=False),
             _bool_col("overtime_approved"),
-            pl.col("missing_punch_count").cast(pl.Int64, strict=False),
+            (pl.col("missing_punch_count").cast(pl.Int64, strict=False)
+             if "missing_punch_count" in df.columns else
+             pl.lit(None, dtype=pl.Int64).alias("missing_punch_count")),
         ])
         df.write_parquet(_p.silver("attendance.parquet"))
         print("Ingested attendance to bronze/silver.")
@@ -608,12 +653,18 @@ def ingest(data_mode=None):
         
         df = pl.read_csv(files["hr_requests"], infer_schema_length=0,
                          null_values=[""])
+        # `sla_breached` is PARAMETERISED: an open request has breached when
+        # its deadline is behind us, and no column carries "now". The reference
+        # time is the run's, supplied here rather than read from the file.
+        df, _ = _derive_if_absent(df, "hr_requests", "sla_breached",
+                                  parameter=datetime.datetime.now())
         df = df.with_columns([
             pl.col("created_at").str.to_datetime("%Y-%m-%d %H:%M:%S", strict=False),
             pl.col("closed_at").str.to_datetime("%Y-%m-%d %H:%M:%S", strict=False),
             pl.col("sla_hours").cast(pl.Int64, strict=False),
             pl.col("actual_hours").cast(pl.Int64, strict=False),
-            _bool_col("sla_breached"),
+            (_bool_col("sla_breached") if "sla_breached" in df.columns else
+             pl.lit(None, dtype=pl.Boolean).alias("sla_breached")),
         ])
         df.write_parquet(_p.silver("hr_requests.parquet"))
         print("Ingested hr_requests to bronze/silver.")

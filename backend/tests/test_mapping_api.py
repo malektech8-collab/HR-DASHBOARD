@@ -82,7 +82,16 @@ def test_the_workspace_returns_their_columns_with_samples(staged_arabic):
     assert by_header["الجنسيه"]["candidates"][0]["matched_by"] == "label_normalised"
     assert by_header["ملاحظات"]["candidates"] == []
     assert body["reject_enum_consequences"]["end_of_service_type"]
-    assert body["derivation_rules"] == ["nationality_is_saudi"]
+    # The registry, exposed to the mapping workspace so an operator can see
+    # which columns the pipeline will produce rather than expect. Pinned
+    # EXHAUSTIVELY on purpose: a rule appearing here changes what the client is
+    # asked to upload, so it is a reviewed change, not an incidental one.
+    #
+    # Three were added by the derived-columns cycle, correcting contracts that
+    # required OUTPUTS of this pipeline as though they were inputs.
+    assert body["derivation_rules"] == [
+        "missing_punch_count", "nationality_is_saudi", "net_late_minutes",
+        "sla_breached"]
 
 
 def test_the_workspace_offers_every_canonical_target(staged_arabic):

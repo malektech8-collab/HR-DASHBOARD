@@ -137,10 +137,115 @@ def nationality_is_saudi(values):
     return out
 
 
+
+# --------------------------------------------------------------------------
+# Columns a source system is asked for but does not produce
+# --------------------------------------------------------------------------
+#
+# Four contracts required columns that are OUTPUTS of this pipeline rather than
+# inputs a client's system exports - asking the client to compute our metrics
+# before uploading. These rules are the correction; dropping the required flag
+# is the consequence.
+
+
+def sla_breached(created_at, sla_hours, closed_at, as_of):
+    """Whether a request missed its SLA target.
+
+    RANKED FIRST because its absent-column behaviour is SILENT. `validate_data`
+    filters `sla_breached == True`, and `NULL == True` is NULL, so with the
+    column missing every row is dropped and the file reports as having NO SLA
+    BREACHES - a clean bill of health for the domain whose entire purpose is
+    SLA tracking. A check that goes quiet is worse than one that gets noisy,
+    because noise gets noticed.
+
+    `as_of` is the run's reference time, and is why this rule is
+    parameterised: a request that is still OPEN is breached when the deadline
+    is already behind us, and no column in the file carries "now".
+
+    NULL, never False, when the answer is unknowable - an unknown SLA is not a
+    met SLA.
+    """
+    import datetime
+
+    def _parse(value):
+        if value is None or value == "":
+            return None
+        if isinstance(value, (datetime.datetime, datetime.date)):
+            return value if isinstance(value, datetime.datetime) else (
+                datetime.datetime.combine(value, datetime.time()))
+        try:
+            return datetime.datetime.fromisoformat(str(value)[:19])
+        except ValueError:
+            return None
+
+    out = []
+    for created, hours, closed in zip(created_at, sla_hours, closed_at):
+        start = _parse(created)
+        try:
+            budget = None if hours in (None, "") else float(hours)
+        except (TypeError, ValueError):
+            budget = None
+        if start is None or budget is None:
+            out.append(None)
+            continue
+        deadline = start + datetime.timedelta(hours=budget)
+        finished = _parse(closed)
+        # Closed: compare against when it actually closed. Still open: against
+        # the reference time, because an open request past its deadline has
+        # breached whether or not anyone has closed it.
+        out.append((finished if finished is not None else as_of) > deadline)
+    return out
+
+
+def net_late_minutes(late_minutes, excused_late_minutes):
+    """Raw lateness less the part formally excused, floored at zero.
+
+    DERIVED ALWAYS, and the supplied column is kept as EVIDENCE rather than
+    replaced by this: `mart_attendance_exceptions` compares a client's own
+    figure against `calculated_net_late_minutes` and reports a disagreement.
+    That reconciliation says whether their attendance engine agrees with our
+    arithmetic, and it is worth more than the required flag - so the column is
+    relaxed, not removed, and the check is gated on it being provided.
+    """
+    out = []
+    for raw, excused in zip(late_minutes, excused_late_minutes):
+        try:
+            base = None if raw in (None, "") else float(raw)
+        except (TypeError, ValueError):
+            base = None
+        try:
+            off = 0.0 if excused in (None, "") else float(excused)
+        except (TypeError, ValueError):
+            off = 0.0
+        out.append(None if base is None else int(max(base - off, 0)))
+    return out
+
+
+def missing_punch_count(actual_check_in, actual_check_out):
+    """How many of the two punches this record is missing: 0, 1 or 2.
+
+    Derived from the punches, which is why the attendance inversion is fixed in
+    the same cycle: the contract required this figure while treating the
+    columns it is computed from as optional.
+    """
+    out = []
+    for check_in, check_out in zip(actual_check_in, actual_check_out):
+        out.append(int(check_in in (None, "")) + int(check_out in (None, "")))
+    return out
+
+
 # name -> callable. A contract's `derivation:` key is resolved against this.
 REGISTRY = {
     "nationality_is_saudi": nationality_is_saudi,
+    "sla_breached": sla_breached,
+    "net_late_minutes": net_late_minutes,
+    "missing_punch_count": missing_punch_count,
 }
+
+# Rules needing a value from the RUN rather than from the file. Declared here,
+# in reviewed code, for the same reason the rules themselves are: a contract
+# names a rule and never carries an expression or a parameter.
+_PARAMETERISED = {"sla_breached"}
 
 
 def resolve(rule_name):
@@ -155,15 +260,66 @@ def resolve(rule_name):
         )
 
 
-def derive_column(column_spec, source_values):
+def source_columns(column_spec):
+    """The source column names a derivation reads, always as a list.
+
+    `derived_from` accepts a single name or a list. The single-name form is
+    what `is_saudi` uses and it keeps working untouched - the extension is
+    additive, because a contract that already parses must not change meaning.
+    """
+    declared = column_spec.get("derived_from")
+    if declared is None:
+        return []
+    if isinstance(declared, str):
+        return [declared]
+    return list(declared)
+
+
+def needs_parameter(rule_name):
+    """Rules that need something from the RUN, not from the file.
+
+    `sla_breached` is the case: "breached" for a still-open request means the
+    deadline is behind us, and no column carries "now". The reference time is
+    supplied by ingest.
+
+    It stays a REGISTRY lookup. A contract names a rule and never carries an
+    expression - that rule is unchanged by this extension, and is the reason
+    the parameter is declared here in code rather than in the YAML.
+    """
+    return rule_name in _PARAMETERISED
+
+
+def derive_column(column_spec, sources, parameter=None):
     """Apply the derivation declared on a column spec.
 
-    `column_spec` is a canonical-schema column dict carrying `derivation`
-    (rule name) and `derived_from` (source column name).
+    `column_spec` carries `derivation` (rule name) and `derived_from` (one
+    source column name, or a list of them).
+
+    `sources` is either a single sequence of values - the original single-source
+    form, kept so `is_saudi` and any caller of it are unaffected - or a mapping
+    of column name to sequence for a multi-source rule.
+
+    `parameter` is passed only to rules that declare they need one.
     """
     rule = column_spec.get("derivation")
     if not rule:
         raise DerivationError(
             "Column '{}' has no `derivation` key.".format(column_spec.get("name"))
         )
-    return resolve(rule)(source_values)
+    function = resolve(rule)
+    names = source_columns(column_spec)
+
+    if isinstance(sources, dict):
+        missing = [n for n in names if n not in sources]
+        if missing:
+            raise DerivationError(
+                "Column '{}' derives from {} but {} were not supplied to "
+                "derive_column.".format(column_spec.get("name"), names, missing))
+        ordered = [sources[n] for n in names]
+    else:
+        # Single-source form. One declared source or the rule takes one list.
+        ordered = [sources]
+
+    if needs_parameter(rule):
+        return function(*ordered, parameter)
+    return function(*ordered)

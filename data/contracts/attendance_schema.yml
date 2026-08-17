@@ -53,7 +53,10 @@ columns:
   name_en: Scheduled Start
   name_ar: بداية الدوام المجدولة
   type: TIMESTAMP
-  required: true
+  required: false
+  # OPTIONAL: needs a rostering system. Absent, lateness cannot be
+  # calculated against a schedule and the figure is WITHHELD rather
+  # than reported as zero.
   description_en: Scheduled shift start, YYYY-MM-DD HH:MM:SS.
   description_ar: بداية الوردية المجدولة بصيغة التاريخ والوقت.
   example: '2026-06-01 08:00:00'
@@ -61,7 +64,10 @@ columns:
   name_en: Scheduled End
   name_ar: نهاية الدوام المجدولة
   type: TIMESTAMP
-  required: true
+  required: false
+  # OPTIONAL: needs a rostering system. Absent, lateness cannot be
+  # calculated against a schedule and the figure is WITHHELD rather
+  # than reported as zero.
   description_en: Scheduled shift end, YYYY-MM-DD HH:MM:SS.
   description_ar: نهاية الوردية المجدولة بصيغة التاريخ والوقت.
   example: '2026-06-01 17:00:00'
@@ -69,7 +75,11 @@ columns:
   name_en: Actual Check-In
   name_ar: وقت الحضور الفعلي
   type: TIMESTAMP
-  required: false
+  required: true
+  # THE INVERSION, corrected. A biometric terminal certainly produces
+  # punches; a SCHEDULE needs a rostering system many clients do not
+  # export. Empty is still legitimate - a missing punch is the fact
+  # missing_punch_count exists to count - but the COLUMN must be there.
   description_en: Recorded check-in time. Empty if no punch was recorded.
   description_ar: وقت الحضور المسجل. يترك فارغاً إذا لم تسجل بصمة.
   example: '2026-06-01 08:05:00'
@@ -77,7 +87,11 @@ columns:
   name_en: Actual Check-Out
   name_ar: وقت الانصراف الفعلي
   type: TIMESTAMP
-  required: false
+  required: true
+  # THE INVERSION, corrected. A biometric terminal certainly produces
+  # punches; a SCHEDULE needs a rostering system many clients do not
+  # export. Empty is still legitimate - a missing punch is the fact
+  # missing_punch_count exists to count - but the COLUMN must be there.
   description_en: Recorded check-out time. Empty if no punch was recorded.
   description_ar: وقت الانصراف المسجل. يترك فارغاً إذا لم تسجل بصمة.
   example: '2026-06-01 17:02:00'
@@ -102,7 +116,18 @@ columns:
   name_en: Net Late Minutes
   name_ar: صافي دقائق التأخير
   type: INTEGER
-  required: true
+  required: false
+  # DERIVED, not required. This is an OUTPUT of the pipeline, and requiring
+  # it asked the client to compute our metric before uploading.
+  #
+  # Relaxed rather than removed, deliberately: the supplied value is
+  # EVIDENCE about the client's own attendance engine. mart_attendance_
+  # exceptions compares it against our calculation and reports a
+  # disagreement, which is worth more than the required flag. That check is
+  # gated on the column being provided, so a client who omits it gets the
+  # derived figure and no noise.
+  derived_from: [late_minutes, excused_late_minutes]
+  derivation: net_late_minutes
   min_value: 0
   description_en: Late minutes after deducting excused minutes.
   description_ar: دقائق التأخير بعد خصم الدقائق المعذورة.
@@ -135,7 +160,12 @@ columns:
   name_en: Missing Punch Count
   name_ar: عدد البصمات المفقودة
   type: INTEGER
-  required: true
+  required: false
+  # DERIVED from the punches - which is why the inversion below is fixed in
+  # the same change. The contract required this figure while treating the
+  # columns it is computed from as optional.
+  derived_from: [actual_check_in, actual_check_out]
+  derivation: missing_punch_count
   description_en: Number of missing check-in or check-out punches.
   description_ar: عدد بصمات الحضور أو الانصراف المفقودة.
   example: '0'
