@@ -977,8 +977,40 @@ exists to surface. Discarding the column discards the finding.
    must be **gated on the column being provided**, or it becomes a tautology
    the moment the derivation fills in.
 
-**Where it applies today**: `net_late_minutes`. **Where it will**: any figure a
-source system computes that we also compute — SLA clocks, overtime totals,
+### The boundary condition — derive when the inputs exist, withhold otherwise
+
+**Added 2026-08-17, attendance cycle. Part of the rule, not an exception to it.**
+
+*"Derive it always"* carries an assumption: **that the inputs are always
+there.** When a derivation reads a column that is itself optional, deriving
+unconditionally moves the fabrication one layer along instead of removing it.
+
+The instance. `late_minutes` is computable from the punch against the
+schedule, less the grace period — and the pipeline already computes it. But
+`scheduled_start` became optional in the same phase, because a biometric
+terminal produces punches while a roster needs a rostering system. Deriving
+`late_minutes` unconditionally would give every client without a roster **0
+late minutes presented as a measurement** — which is precisely the defect that
+cycle had just removed from `calculated_late_minutes`.
+
+So the rule reads in full:
+
+> **Derive it when its inputs exist. Withhold it when they do not. Reconcile
+> against it when offered.**
+
+And the test that separates the two absences: **0 means measured and on time;
+NULL means there was nothing to measure against.** A missing *punch* is still
+`0` lateness — it is a missing punch, counted elsewhere — while a missing
+*schedule* is NULL. Two absences, two meanings, and collapsing them is the
+whole family of defects this register keeps recording.
+
+**A derivation that reads an optional column must state what it does when that
+column is absent**, in the rule itself, or the answer defaults to whatever the
+arithmetic happens to produce.
+
+**Where it applies today**: `net_late_minutes`, and `late_minutes` for the
+boundary condition. **Where it will**: any figure a source system computes that
+we also compute — SLA clocks, overtime totals,
 gross-versus-components. The general shape is *two independent calculations of
 the same quantity*, and the value is in the disagreement.
 

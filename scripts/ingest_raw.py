@@ -140,6 +140,25 @@ def _bool_col(name):
               .otherwise(None).cast(pl.Boolean).alias(name))
 
 
+def _grace_period_minutes():
+    """The grace period, from the SAME config dbt reads.
+
+    build_warehouse passes config/business_rules.yml's value to dbt as
+    `grace_period_minutes`. If ingest derived lateness with a different figure
+    the two would disagree about the same quantity, and the disagreement would
+    look like a client's system being wrong.
+    """
+    try:
+        import yaml
+        with open(os.path.join(_p.repo_root(), "config", "business_rules.yml"),
+                  encoding="utf-8") as handle:
+            rules = yaml.safe_load(handle) or {}
+        return int((rules.get("attendance_rules") or {})
+                   .get("grace_period_minutes", 15))
+    except Exception:
+        return 15
+
+
 def _derive_if_absent(df, table, column, parameter=None):
     """Derive a declared column when the client's file does not carry it.
 
@@ -623,6 +642,9 @@ def ingest(data_mode=None):
         df = pl.read_csv(files["attendance"], infer_schema_length=0,
                          null_values=[""])
         # Derived BEFORE the casts below, which name these columns.
+        # late_minutes BEFORE net_late_minutes, which reads it.
+        df, _ = _derive_if_absent(df, "attendance", "late_minutes",
+                                  parameter=_grace_period_minutes())
         df, _ = _derive_if_absent(df, "attendance", "net_late_minutes")
         df, _ = _derive_if_absent(df, "attendance", "missing_punch_count")
         df = df.with_columns([
@@ -631,14 +653,20 @@ def ingest(data_mode=None):
             pl.col("scheduled_end").str.to_datetime("%Y-%m-%d %H:%M:%S", strict=False),
             pl.col("actual_check_in").str.to_datetime("%Y-%m-%d %H:%M:%S", strict=False),
             pl.col("actual_check_out").str.to_datetime("%Y-%m-%d %H:%M:%S", strict=False),
-            pl.col("late_minutes").cast(pl.Int64, strict=False),
-            pl.col("excused_late_minutes").cast(pl.Int64, strict=False),
+            (pl.col("late_minutes").cast(pl.Int64, strict=False)
+             if "late_minutes" in df.columns else
+             pl.lit(None, dtype=pl.Int64).alias("late_minutes")),
+            (pl.col("excused_late_minutes").cast(pl.Int64, strict=False)
+             if "excused_late_minutes" in df.columns else
+             pl.lit(None, dtype=pl.Int64).alias("excused_late_minutes")),
             (pl.col("net_late_minutes").cast(pl.Int64, strict=False)
              if "net_late_minutes" in df.columns else
              pl.lit(None, dtype=pl.Int64).alias("net_late_minutes")),
             pl.col("absence_days").cast(pl.Float64, strict=False),
             pl.col("overtime_hours").cast(pl.Float64, strict=False),
-            _bool_col("overtime_approved"),
+            (_bool_col("overtime_approved")
+             if "overtime_approved" in df.columns else
+             pl.lit(None, dtype=pl.Boolean).alias("overtime_approved")),
             (pl.col("missing_punch_count").cast(pl.Int64, strict=False)
              if "missing_punch_count" in df.columns else
              pl.lit(None, dtype=pl.Int64).alias("missing_punch_count")),

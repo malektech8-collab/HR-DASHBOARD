@@ -197,6 +197,51 @@ def sla_breached(created_at, sla_hours, closed_at, as_of):
     return out
 
 
+def late_minutes(actual_check_in, scheduled_start, grace_minutes):
+    """Minutes late against the schedule, less the grace period, floored at 0.
+
+    SP-006'S BOUNDARY CONDITION, not an exception to it. "Derive it always"
+    assumes the inputs are always there. Here one of them - the SCHEDULE - is
+    itself optional, because a biometric terminal produces punches and a
+    roster needs a rostering system.
+
+    So: derive when the inputs exist, and WITHHOLD when they do not. Deriving
+    unconditionally would put the zeroing one layer along - every client
+    without a roster getting 0 late minutes presented as a measurement, which
+    is exactly the defect this cycle removed from calculated_late_minutes.
+
+    NULL, never 0, when there is no schedule to be late against. 0 means
+    "measured, and on time".
+    """
+    import datetime
+
+    def _parse(value):
+        if value is None or value == "":
+            return None
+        if isinstance(value, datetime.datetime):
+            return value
+        if isinstance(value, datetime.date):
+            return datetime.datetime.combine(value, datetime.time())
+        try:
+            return datetime.datetime.fromisoformat(str(value)[:19])
+        except ValueError:
+            return None
+
+    out = []
+    for punch, scheduled in zip(actual_check_in, scheduled_start):
+        start = _parse(scheduled)
+        if start is None:
+            out.append(None)          # nothing to be late against
+            continue
+        arrived = _parse(punch)
+        if arrived is None:
+            out.append(0)             # no punch is a missing punch, not lateness
+            continue
+        minutes = (arrived - start).total_seconds() / 60.0
+        out.append(int(max(minutes - grace_minutes, 0)))
+    return out
+
+
 def net_late_minutes(late_minutes, excused_late_minutes):
     """Raw lateness less the part formally excused, floored at zero.
 
@@ -238,6 +283,7 @@ def missing_punch_count(actual_check_in, actual_check_out):
 REGISTRY = {
     "nationality_is_saudi": nationality_is_saudi,
     "sla_breached": sla_breached,
+    "late_minutes": late_minutes,
     "net_late_minutes": net_late_minutes,
     "missing_punch_count": missing_punch_count,
 }
@@ -245,7 +291,7 @@ REGISTRY = {
 # Rules needing a value from the RUN rather than from the file. Declared here,
 # in reviewed code, for the same reason the rules themselves are: a contract
 # names a rule and never carries an expression or a parameter.
-_PARAMETERISED = {"sla_breached"}
+_PARAMETERISED = {"sla_breached", "late_minutes"}
 
 
 def resolve(rule_name):

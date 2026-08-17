@@ -90,8 +90,8 @@ def test_the_workspace_returns_their_columns_with_samples(staged_arabic):
     # Three were added by the derived-columns cycle, correcting contracts that
     # required OUTPUTS of this pipeline as though they were inputs.
     assert body["derivation_rules"] == [
-        "missing_punch_count", "nationality_is_saudi", "net_late_minutes",
-        "sla_breached"]
+        "late_minutes", "missing_punch_count", "nationality_is_saudi",
+        "net_late_minutes", "sla_breached"]
 
 
 def test_the_workspace_offers_every_canonical_target(staged_arabic):
