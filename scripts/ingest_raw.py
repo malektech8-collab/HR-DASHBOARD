@@ -106,15 +106,78 @@ PERIOD_COLUMNS = {
 }
 
 
+TRUE_WORDS = ["true", "1", "yes", "y", "t"]
+FALSE_WORDS = ["false", "0", "no", "n", "f"]
+
+
+def _bool_col(name):
+    """A boolean column parsed from TEXT, with NULL preserved.
+
+    Every CSV is now read with `infer_schema_length=0`, so a boolean column
+    arrives as "true"/"false" rather than pre-inferred Boolean - and
+    `Utf8 -> Boolean` is NOT a supported cast in polars.
+
+    It fails LOUDLY: `.cast(pl.Boolean, strict=False)` raises
+    InvalidOperationError rather than quietly returning nulls, and `strict`
+    does not change that. Measured, because the opposite was assumed while
+    writing this. So the five domains carrying such a cast would have broken
+    the demo build immediately - which is the safe direction, and the reason
+    this half of the sweep was never the dangerous half.
+
+    It is a shared helper because the parse is identical in six places and a
+    sixth copy is where the vocabularies drift apart.
+
+    NULL STAYS NULL. `strict=False` would silently turn an unrecognised value
+    into null too, but the distinction that matters is the other one: an ABSENT
+    value must not become False. A missing `sla_breached` is not a met SLA, and
+    a missing `is_critical` is not a non-critical role.
+    """
+    lowered = pl.col(name).cast(pl.Utf8).str.to_lowercase()
+    return (pl.when(lowered.is_in(TRUE_WORDS)).then(True)
+              .when(lowered.is_in(FALSE_WORDS)).then(False)
+              .otherwise(None).cast(pl.Boolean).alias(name))
+
+
+def _read_probe_column(path, column):
+    """One column of a client CSV, as TEXT, for the period and coverage gates.
+
+    TWO DEFECTS IN ONE, and the second is the dangerous one.
+
+    These three probe reads had no `infer_schema_length=0`, so polars inferred
+    a dtype from the first N rows and could raise ComputeError on a later row -
+    the same defect that stopped the first real commit.
+
+    They were also wrapped in `except Exception: return None`, which made that
+    ComputeError INDISTINGUISHABLE FROM "column absent". Measured:
+
+        direct read of the column          -> raises ComputeError
+        the probe on the same column       -> returns None
+
+    A caller reading None concludes "no periods in this file" and the gate
+    stands down. That gate's own message says the alternative is every employee
+    absent on every working day. The 44 domain loaders fail loudly and roll
+    back, which is safe; these three failed quietly, which is not.
+
+    So: read as TEXT, and catch ONLY the absent column. Anything else - an
+    unreadable file, a malformed row, a dtype the reader cannot handle -
+    propagates and stops the run, because a probe that cannot read the file has
+    not discovered that the file is empty.
+    """
+    try:
+        frame = pl.read_csv(path, columns=[column], infer_schema_length=0)
+    except pl.exceptions.ColumnNotFoundError:
+        # Genuinely absent. In real mode the contract gate has already rejected
+        # the file; there is nothing to compare here.
+        return None
+    return frame
+
+
 def _periods_in_csv(path, column, exists):
-    """The period labels present in an uploaded file, or None if unreadable."""
+    """The period labels present in an uploaded file, or None if absent."""
     if not exists(path):
         return None
-    try:
-        frame = pl.read_csv(path, columns=[column])
-    except Exception:
-        # Column absent. In real mode the contract gate has already rejected
-        # the file; there is nothing to compare here.
+    frame = _read_probe_column(path, column)
+    if frame is None:
         return None
     return [v for v in frame[column].to_list() if v]
 
@@ -185,14 +248,13 @@ def check_payroll_period_matches_report_month(payroll_csv, exists=os.path.exists
     month = _rp.operator_report_month()
     if not month or not exists(payroll_csv):
         return None
-    try:
-        periods = pl.read_csv(payroll_csv, columns=["payroll_period"])
-    except Exception:
+    frame = _read_probe_column(payroll_csv, "payroll_period")
+    if frame is None:
         # No payroll_period column. In real mode the contract gate has already
         # rejected the file; there is nothing to compare here.
         return None
     return _rp.assert_payroll_period_matches(
-        periods["payroll_period"].to_list(), month=month)
+        frame["payroll_period"].to_list(), month=month)
 
 
 # Date-grained domains and the column that carries their grain. The coverage
@@ -220,9 +282,8 @@ def check_rows_within_declared_coverage(table, csv_path, coverage=None,
     if not window:
         return None
     start, end = window
-    try:
-        frame = pl.read_csv(csv_path, columns=[column])
-    except Exception:
+    frame = _read_probe_column(csv_path, column)
+    if frame is None:
         return None
     dates = [str(v)[:10] for v in frame[column].to_list() if v]
     outside = sorted({d for d in dates
@@ -454,11 +515,7 @@ def ingest(data_mode=None):
             # real export carries `nationality`, so the value is produced by
             # derive_column above as a genuine Boolean and passes through
             # untouched - the Saudization path is not affected by this.
-            pl.when(pl.col("is_saudi").cast(pl.Utf8).str.to_lowercase()
-                    .is_in(["true", "1", "yes", "y", "t"])).then(True)
-              .when(pl.col("is_saudi").cast(pl.Utf8).str.to_lowercase()
-                    .is_in(["false", "0", "no", "n", "f"])).then(False)
-              .otherwise(None).cast(pl.Boolean).alias("is_saudi"),
+            _bool_col("is_saudi"),
             pl.col("joining_date").str.to_date("%Y-%m-%d", strict=False),
             pl.col("termination_date").str.to_date("%Y-%m-%d", strict=False),
             pl.col("contract_end_date").str.to_date("%Y-%m-%d", strict=False),
@@ -494,19 +551,21 @@ def ingest(data_mode=None):
     # produced by joining through it rather than by reading a column off an
     # employee row that only ever meant "site".
     if os.path.exists(files["locations"]):
-        df_raw = pl.read_csv(files["locations"])
+        df_raw = pl.read_csv(files["locations"], infer_schema_length=0)
         df_raw.write_parquet(_p.bronze("locations.parquet"))
 
-        df = pl.read_csv(files["locations"], null_values=[""])
+        df = pl.read_csv(files["locations"], infer_schema_length=0,
+                         null_values=[""])
         df.write_parquet(_p.silver("locations.parquet"))
         print("Ingested locations to bronze/silver.")
 
     # 2. Payroll
     if os.path.exists(files["payroll"]):
-        df_raw = pl.read_csv(files["payroll"])
+        df_raw = pl.read_csv(files["payroll"], infer_schema_length=0)
         df_raw.write_parquet(_p.bronze("payroll.parquet"))
         
-        df = pl.read_csv(files["payroll"], null_values=[""])
+        df = pl.read_csv(files["payroll"], infer_schema_length=0,
+                         null_values=[""])
         numeric_cols = [
             "basic_salary", "housing_allowance", "transport_allowance", 
             "other_allowances", "overtime_amount", "deductions", 
@@ -520,10 +579,11 @@ def ingest(data_mode=None):
 
     # 3. Attendance
     if os.path.exists(files["attendance"]):
-        df_raw = pl.read_csv(files["attendance"])
+        df_raw = pl.read_csv(files["attendance"], infer_schema_length=0)
         df_raw.write_parquet(_p.bronze("attendance.parquet"))
         
-        df = pl.read_csv(files["attendance"], null_values=[""])
+        df = pl.read_csv(files["attendance"], infer_schema_length=0,
+                         null_values=[""])
         df = df.with_columns([
             pl.col("attendance_date").str.to_date("%Y-%m-%d", strict=False),
             pl.col("scheduled_start").str.to_datetime("%Y-%m-%d %H:%M:%S", strict=False),
@@ -535,7 +595,7 @@ def ingest(data_mode=None):
             pl.col("net_late_minutes").cast(pl.Int64, strict=False),
             pl.col("absence_days").cast(pl.Float64, strict=False),
             pl.col("overtime_hours").cast(pl.Float64, strict=False),
-            pl.col("overtime_approved").cast(pl.Boolean, strict=False),
+            _bool_col("overtime_approved"),
             pl.col("missing_punch_count").cast(pl.Int64, strict=False),
         ])
         df.write_parquet(_p.silver("attendance.parquet"))
@@ -543,28 +603,30 @@ def ingest(data_mode=None):
 
     # 4. HR Requests
     if os.path.exists(files["hr_requests"]):
-        df_raw = pl.read_csv(files["hr_requests"])
+        df_raw = pl.read_csv(files["hr_requests"], infer_schema_length=0)
         df_raw.write_parquet(_p.bronze("hr_requests.parquet"))
         
-        df = pl.read_csv(files["hr_requests"], null_values=[""])
+        df = pl.read_csv(files["hr_requests"], infer_schema_length=0,
+                         null_values=[""])
         df = df.with_columns([
             pl.col("created_at").str.to_datetime("%Y-%m-%d %H:%M:%S", strict=False),
             pl.col("closed_at").str.to_datetime("%Y-%m-%d %H:%M:%S", strict=False),
             pl.col("sla_hours").cast(pl.Int64, strict=False),
             pl.col("actual_hours").cast(pl.Int64, strict=False),
-            pl.col("sla_breached").cast(pl.Boolean, strict=False),
+            _bool_col("sla_breached"),
         ])
         df.write_parquet(_p.silver("hr_requests.parquet"))
         print("Ingested hr_requests to bronze/silver.")
 
     # 5. Compliance
     if os.path.exists(files["compliance"]):
-        df_raw = pl.read_csv(files["compliance"])
+        df_raw = pl.read_csv(files["compliance"], infer_schema_length=0)
         df_raw.write_parquet(_p.bronze("compliance.parquet"))
         
-        df = pl.read_csv(files["compliance"], null_values=[""])
+        df = pl.read_csv(files["compliance"], infer_schema_length=0,
+                         null_values=[""])
         df = df.with_columns([
-            pl.col("contract_authenticated").cast(pl.Boolean, strict=False),
+            _bool_col("contract_authenticated"),
             pl.col("gosi_salary").cast(pl.Float64, strict=False),
             pl.col("payroll_basic_salary").cast(pl.Float64, strict=False),
             pl.col("work_permit_expiry").str.to_date("%Y-%m-%d", strict=False),
@@ -575,15 +637,16 @@ def ingest(data_mode=None):
         
     # 6. Employee Relations
     if "employee_relations" in files and os.path.exists(files["employee_relations"]):
-        df_raw = pl.read_csv(files["employee_relations"])
+        df_raw = pl.read_csv(files["employee_relations"], infer_schema_length=0)
         df_raw.write_parquet(_p.bronze("employee_relations.parquet"))
         
-        df = pl.read_csv(files["employee_relations"], null_values=[""])
+        df = pl.read_csv(files["employee_relations"], infer_schema_length=0,
+                         null_values=[""])
         df = df.with_columns([
             pl.col("created_date").str.to_date("%Y-%m-%d", strict=False),
             pl.col("target_due_date").str.to_date("%Y-%m-%d", strict=False),
             pl.col("closed_date").str.to_date("%Y-%m-%d", strict=False),
-            pl.col("escalated").cast(pl.Boolean, strict=False),
+            _bool_col("escalated"),
         ])
         df.write_parquet(_p.silver("employee_relations.parquet"))
         print("Ingested employee_relations to bronze/silver.")
@@ -613,9 +676,10 @@ def ingest(data_mode=None):
     # 8. Ingest Recruitment tables
     # Requisitions
     if os.path.exists(files["recruitment_requisitions"]):
-        df_raw = pl.read_csv(files["recruitment_requisitions"])
+        df_raw = pl.read_csv(files["recruitment_requisitions"], infer_schema_length=0)
         df_raw.write_parquet(_p.bronze("recruitment_requisitions.parquet"))
-        df = pl.read_csv(files["recruitment_requisitions"], null_values=[""])
+        df = pl.read_csv(files["recruitment_requisitions"], infer_schema_length=0,
+                         null_values=[""])
         df = df.with_columns([
             pl.col("approval_date").str.to_date("%Y-%m-%d", strict=False),
             pl.col("target_hire_date").str.to_date("%Y-%m-%d", strict=False),
@@ -626,9 +690,10 @@ def ingest(data_mode=None):
 
     # Candidates
     if os.path.exists(files["candidates"]):
-        df_raw = pl.read_csv(files["candidates"])
+        df_raw = pl.read_csv(files["candidates"], infer_schema_length=0)
         df_raw.write_parquet(_p.bronze("candidates.parquet"))
-        df = pl.read_csv(files["candidates"], null_values=[""])
+        df = pl.read_csv(files["candidates"], infer_schema_length=0,
+                         null_values=[""])
         df = df.with_columns([
             pl.col("applied_date").str.to_date("%Y-%m-%d", strict=False)
         ])
@@ -637,9 +702,10 @@ def ingest(data_mode=None):
 
     # Interviews
     if os.path.exists(files["interviews"]):
-        df_raw = pl.read_csv(files["interviews"])
+        df_raw = pl.read_csv(files["interviews"], infer_schema_length=0)
         df_raw.write_parquet(_p.bronze("interviews.parquet"))
-        df = pl.read_csv(files["interviews"], null_values=[""])
+        df = pl.read_csv(files["interviews"], infer_schema_length=0,
+                         null_values=[""])
         df = df.with_columns([
             pl.col("interview_date").str.to_datetime("%Y-%m-%d %H:%M:%S", strict=False)
         ])
@@ -648,9 +714,10 @@ def ingest(data_mode=None):
 
     # Offers
     if os.path.exists(files["offers"]):
-        df_raw = pl.read_csv(files["offers"])
+        df_raw = pl.read_csv(files["offers"], infer_schema_length=0)
         df_raw.write_parquet(_p.bronze("offers.parquet"))
-        df = pl.read_csv(files["offers"], null_values=[""])
+        df = pl.read_csv(files["offers"], infer_schema_length=0,
+                         null_values=[""])
         df = df.with_columns([
             pl.col("offer_date").str.to_date("%Y-%m-%d", strict=False),
             pl.col("salary").cast(pl.Float64, strict=False),
@@ -661,9 +728,10 @@ def ingest(data_mode=None):
 
     # Onboarding
     if os.path.exists(files["onboarding"]):
-        df_raw = pl.read_csv(files["onboarding"])
+        df_raw = pl.read_csv(files["onboarding"], infer_schema_length=0)
         df_raw.write_parquet(_p.bronze("onboarding.parquet"))
-        df = pl.read_csv(files["onboarding"], null_values=[""])
+        df = pl.read_csv(files["onboarding"], infer_schema_length=0,
+                         null_values=[""])
         df = df.with_columns([
             pl.col("start_date").str.to_date("%Y-%m-%d", strict=False)
         ])
@@ -672,9 +740,10 @@ def ingest(data_mode=None):
 
     # Workforce Plan
     if os.path.exists(files["workforce_plan"]):
-        df_raw = pl.read_csv(files["workforce_plan"])
+        df_raw = pl.read_csv(files["workforce_plan"], infer_schema_length=0)
         df_raw.write_parquet(_p.bronze("workforce_plan.parquet"))
-        df = pl.read_csv(files["workforce_plan"], null_values=[""])
+        df = pl.read_csv(files["workforce_plan"], infer_schema_length=0,
+                         null_values=[""])
         df = df.with_columns([
             pl.col("planned_headcount").cast(pl.Int64, strict=False)
         ])
@@ -683,9 +752,10 @@ def ingest(data_mode=None):
 
     # Vacancy Requests
     if os.path.exists(files["vacancy_requests"]):
-        df_raw = pl.read_csv(files["vacancy_requests"])
+        df_raw = pl.read_csv(files["vacancy_requests"], infer_schema_length=0)
         df_raw.write_parquet(_p.bronze("vacancy_requests.parquet"))
-        df = pl.read_csv(files["vacancy_requests"], null_values=[""])
+        df = pl.read_csv(files["vacancy_requests"], infer_schema_length=0,
+                         null_values=[""])
         df = df.with_columns([
             pl.col("quantity").cast(pl.Int64, strict=False),
             pl.col("approved_date").str.to_date("%Y-%m-%d", strict=False)
@@ -696,9 +766,10 @@ def ingest(data_mode=None):
     # Ingest Talent tables
     # Performance Reviews
     if os.path.exists(files["performance_reviews"]):
-        df_raw = pl.read_csv(files["performance_reviews"])
+        df_raw = pl.read_csv(files["performance_reviews"], infer_schema_length=0)
         df_raw.write_parquet(_p.bronze("performance_reviews.parquet"))
-        df = pl.read_csv(files["performance_reviews"], null_values=[""])
+        df = pl.read_csv(files["performance_reviews"], infer_schema_length=0,
+                         null_values=[""])
         df = df.with_columns([
             pl.col("rating").cast(pl.Float64, strict=False),
             pl.col("completed_date").str.to_date("%Y-%m-%d", strict=False)
@@ -708,9 +779,10 @@ def ingest(data_mode=None):
 
     # Performance Goals
     if os.path.exists(files["performance_goals"]):
-        df_raw = pl.read_csv(files["performance_goals"])
+        df_raw = pl.read_csv(files["performance_goals"], infer_schema_length=0)
         df_raw.write_parquet(_p.bronze("performance_goals.parquet"))
-        df = pl.read_csv(files["performance_goals"], null_values=[""])
+        df = pl.read_csv(files["performance_goals"], infer_schema_length=0,
+                         null_values=[""])
         df = df.with_columns([
             pl.col("due_date").str.to_date("%Y-%m-%d", strict=False),
             pl.col("completed_date").str.to_date("%Y-%m-%d", strict=False)
@@ -720,9 +792,10 @@ def ingest(data_mode=None):
 
     # Competency Assessments
     if os.path.exists(files["competency_assessments"]):
-        df_raw = pl.read_csv(files["competency_assessments"])
+        df_raw = pl.read_csv(files["competency_assessments"], infer_schema_length=0)
         df_raw.write_parquet(_p.bronze("competency_assessments.parquet"))
-        df = pl.read_csv(files["competency_assessments"], null_values=[""])
+        df = pl.read_csv(files["competency_assessments"], infer_schema_length=0,
+                         null_values=[""])
         df = df.with_columns([
             pl.col("required_score").cast(pl.Float64, strict=False),
             pl.col("actual_score").cast(pl.Float64, strict=False),
@@ -733,9 +806,10 @@ def ingest(data_mode=None):
 
     # Learning Enrollments
     if os.path.exists(files["learning_enrollments"]):
-        df_raw = pl.read_csv(files["learning_enrollments"])
+        df_raw = pl.read_csv(files["learning_enrollments"], infer_schema_length=0)
         df_raw.write_parquet(_p.bronze("learning_enrollments.parquet"))
-        df = pl.read_csv(files["learning_enrollments"], null_values=[""])
+        df = pl.read_csv(files["learning_enrollments"], infer_schema_length=0,
+                         null_values=[""])
         df = df.with_columns([
             pl.col("enrollment_date").str.to_date("%Y-%m-%d", strict=False),
             pl.col("completion_date").str.to_date("%Y-%m-%d", strict=False)
@@ -745,9 +819,10 @@ def ingest(data_mode=None):
 
     # Training Catalog
     if os.path.exists(files["training_catalog"]):
-        df_raw = pl.read_csv(files["training_catalog"])
+        df_raw = pl.read_csv(files["training_catalog"], infer_schema_length=0)
         df_raw.write_parquet(_p.bronze("training_catalog.parquet"))
-        df = pl.read_csv(files["training_catalog"], null_values=[""])
+        df = pl.read_csv(files["training_catalog"], infer_schema_length=0,
+                         null_values=[""])
         df = df.with_columns([
             pl.col("duration_hours").cast(pl.Float64, strict=False)
         ])
@@ -756,20 +831,22 @@ def ingest(data_mode=None):
 
     # Succession Plans
     if os.path.exists(files["succession_plans"]):
-        df_raw = pl.read_csv(files["succession_plans"])
+        df_raw = pl.read_csv(files["succession_plans"], infer_schema_length=0)
         df_raw.write_parquet(_p.bronze("succession_plans.parquet"))
-        df = pl.read_csv(files["succession_plans"], null_values=[""])
+        df = pl.read_csv(files["succession_plans"], infer_schema_length=0,
+                         null_values=[""])
         df = df.with_columns([
-            pl.col("is_critical").cast(pl.Boolean, strict=False)
+            _bool_col("is_critical")
         ])
         df.write_parquet(_p.silver("succession_plans.parquet"))
         print("Ingested succession_plans to bronze/silver.")
 
     # Talent Reviews
     if os.path.exists(files["talent_reviews"]):
-        df_raw = pl.read_csv(files["talent_reviews"])
+        df_raw = pl.read_csv(files["talent_reviews"], infer_schema_length=0)
         df_raw.write_parquet(_p.bronze("talent_reviews.parquet"))
-        df = pl.read_csv(files["talent_reviews"], null_values=[""])
+        df = pl.read_csv(files["talent_reviews"], infer_schema_length=0,
+                         null_values=[""])
         df = df.with_columns([
             pl.col("performance_rating").cast(pl.Float64, strict=False)
         ])
@@ -778,17 +855,19 @@ def ingest(data_mode=None):
 
     # Employee Skills
     if os.path.exists(files["employee_skills"]):
-        df_raw = pl.read_csv(files["employee_skills"])
+        df_raw = pl.read_csv(files["employee_skills"], infer_schema_length=0)
         df_raw.write_parquet(_p.bronze("employee_skills.parquet"))
-        df = pl.read_csv(files["employee_skills"], null_values=[""])
+        df = pl.read_csv(files["employee_skills"], infer_schema_length=0,
+                         null_values=[""])
         df.write_parquet(_p.silver("employee_skills.parquet"))
         print("Ingested employee_skills to bronze/silver.")
 
     # Career Paths
     if os.path.exists(files["career_paths"]):
-        df_raw = pl.read_csv(files["career_paths"])
+        df_raw = pl.read_csv(files["career_paths"], infer_schema_length=0)
         df_raw.write_parquet(_p.bronze("career_paths.parquet"))
-        df = pl.read_csv(files["career_paths"], null_values=[""])
+        df = pl.read_csv(files["career_paths"], infer_schema_length=0,
+                         null_values=[""])
         df = df.with_columns([
             pl.col("readiness_months").cast(pl.Int64, strict=False)
         ])
