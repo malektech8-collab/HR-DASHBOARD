@@ -879,6 +879,62 @@ assertion about the CONTENT of what was built, not merely that it built.
 
 ---
 
+### SP-005 — A correct conclusion from a wrong premise is still a defect
+
+**Recorded** 2026-08-17, ingest-read-sweep cycle. The companion to
+[SP-002](#sp-002--a-correction-records-the-wording-of-a-claim-not-the-data-it-was-about):
+SP-002 governs a claim whose **wording** was wrong; this governs a claim that
+was **right for the wrong reason**.
+
+**The instance.** The ingest-read-sweep plan argued that the boolean casts were
+the dangerous half, because *"a blanket replace would pass CI — demo supplies
+well-formed data for every domain — and break on the first real file."* It
+recommended sequencing the three swallowed period probes first.
+
+The sequencing was correct and was executed. The premise was false:
+`Utf8 → Boolean` **raises** `InvalidOperationError` immediately, `strict=False`
+does not change it, and demo supplies all six boolean columns — so a blanket
+replace would have broken the demo build **loudly, in CI, on the first run**.
+Those casts could never have reached a client.
+
+The probes still deserved to go first, but for a reason the plan never gave:
+they were not the smallest silent defect among several, they were **the only
+silent defect in the file**.
+
+**Why it is recorded rather than quietly amended.** *The outcome concealed the
+error.* The work was ordered correctly, every gate went green, and nothing in
+the result would have prompted anyone to re-read the argument. A wrong premise
+that yields a right answer is not self-correcting — it survives review, it gets
+cited, and next time it may carry the decision rather than merely accompany it.
+The failure is invisible precisely because the result was good.
+
+**The residue, stated concretely**: *"a blanket change would pass CI and break
+on real data"* was **assumed, not measured**. It was measurable in one line, and
+the one line disagreed:
+
+```
+naive .cast(pl.Boolean, strict=False) on TEXT:  raises InvalidOperationError
+```
+
+**How to apply.**
+
+1. When a plan's recommendation rests on a claim about **how something fails** —
+   loudly or silently, in CI or in production — that claim is a measurement, not
+   a judgement. Measure it. It is usually one line.
+2. When the work is done, check the recommendation against what was **learned**,
+   not only against what was **delivered**. A green result is not evidence that
+   the reasoning was sound.
+3. Record the divergence even when nothing needs re-doing. That is the whole
+   point: there is no other moment at which this class of error becomes visible.
+
+**The general form**: a mechanism whose incorrect case still produces an
+acceptable outcome will not be corrected by outcomes. It has to be checked
+directly, or not at all — the same shape as
+[SP-004](#sp-004--state-follows-the-data-root-source-never-does)'s
+half-applied isolation, and of a skipped test reporting green.
+
+---
+
 ## Exclusions
 
 None of these legacy build warnings affect the functionality of the new `GovernanceWidget` or `/api/governance/status` API endpoint, both of which are fully compliant and bug-free.

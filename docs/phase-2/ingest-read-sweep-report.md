@@ -67,7 +67,19 @@ naive .cast(pl.Boolean, strict=False) on TEXT:
 
 `Utf8 → Boolean` raises; `strict=False` does not change it. Demo supplies all six columns, so a blanket replace would have **broken the demo build immediately** — the safe direction. The boolean half was never the silent half.
 
-That makes the architect's reordering the load-bearing decision rather than a preference: **the genuinely silent defect was the three probes**, and they went first.
+### 3.2 The premise was wrong in a way the outcome concealed
+
+Worth stating plainly, because the shape of this mistake is the dangerous kind.
+
+**The plan's argument was:** the boolean casts are the risk, because a blanket replace passes CI and breaks later on real data.
+
+**The premise was false.** `Utf8 → Boolean` raises immediately, and demo supplies all six boolean columns — so a blanket replace would have broken the demo build **loudly, in CI, on the first run**. The boolean casts were never able to reach a client.
+
+**The conclusion was still right.** Sequencing the three probes first was correct — but for a reason the plan did not give. They were not the *smallest* silent defect among several; they were **the only genuinely silent defect in the file**. Everything else fails loudly and rolls back.
+
+**Why this is recorded rather than quietly amended.** The outcome concealed the error: the work was ordered correctly, every gate went green, and nothing in the result would have prompted anyone to re-examine the reasoning. A wrong premise that produces a right answer is not self-correcting — it survives, and it gets reused. Next time it may carry the decision rather than accompany it.
+
+The concrete residue: **"a blanket change would pass CI and break on real data" was assumed, not measured.** It was measurable in one line, and the one line disagreed. Recorded as [SP-005](../TECHNICAL_DEBT_REGISTER.md#sp-005--a-correct-conclusion-from-a-wrong-premise-is-still-a-defect).
 
 ## 4. (c) The structural test — ruling 3
 
