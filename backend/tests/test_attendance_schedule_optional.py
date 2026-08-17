@@ -264,3 +264,37 @@ def test_a_schedule_less_attendance_file_survives_ingest(tmp_path, monkeypatch):
     assert onb.provides_column("attendance", "scheduled_start") is False
     # and the tamper: a column the file DID supply is still reported provided
     assert onb.provides_column("attendance", "actual_check_in") is True
+
+
+# --------------------------------------------------------------------------
+# SP-009 - the expiry condition of a "safe" default, as a test
+# --------------------------------------------------------------------------
+
+def test_any_table_with_a_relaxed_column_records_its_absences():
+    """SP-009's expiry condition, written as a test rather than a comment.
+
+    `provides_column()` defaults to True. That was correct while only employees
+    recorded absences, and became wrong the moment a second domain relaxed a
+    column - with nothing announcing the transition. Every has_*_source_sql
+    gate reading an unrecorded table resolves TRUE, so the gate is present,
+    correct, and unreachable.
+
+    This is the day-it-stops-holding alarm: a table that has optional columns
+    must be wired for recording, or the gates that read them are dark.
+    """
+    source = open(os.path.join(_ROOT, "scripts", "ingest_raw.py"),
+                  encoding="utf-8").read()
+    dark = []
+    for table in cs.available_tables():
+        optional = [c["name"] for c in cs.columns(table)
+                    if c["name"] not in cs.required_columns(table)]
+        if not optional:
+            continue
+        wired = ('_complete_and_record(df, "{}")'.format(table) in source
+                 or 'record_provided_columns("{}"'.format(table) in source)
+        if not wired:
+            dark.append("{} ({} optional column(s))".format(table, len(optional)))
+    assert not dark, (
+        "these tables have relaxed columns but never record absences, so "
+        "provides_column() answers True and every gate reading them is "
+        "dark:\n  " + "\n  ".join(dark))
