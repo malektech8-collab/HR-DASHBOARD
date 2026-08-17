@@ -111,7 +111,17 @@
         'Warning' AS severity,
         'Verify source system net lateness calculations' AS recommended_action
     FROM {{ ref('base_attendance_current') }}
-    WHERE COALESCE(net_late_minutes, 0) != calculated_net_late_minutes
+    -- GATED. Measured: with the column absent, COALESCE(net_late_minutes, 0)
+    -- reads it as the source system claiming zero, so EVERY row with any
+    -- lateness became a "mismatch" - 2 of 3 in the probe. The manager_id
+    -- shape: one exception per row about a fact of the client's export.
+    --
+    -- The check exists to ask whether their attendance engine agrees with our
+    -- arithmetic. With nothing supplied there is nothing to disagree with, and
+    -- comparing our derivation against our derivation would agree by
+    -- construction and say nothing.
+    WHERE {{ var('has_attendance_net_late_source_sql') }}
+      AND COALESCE(net_late_minutes, 0) != calculated_net_late_minutes
 
     UNION ALL
 

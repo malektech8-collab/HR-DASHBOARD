@@ -413,6 +413,19 @@ def build_warehouse():
         "has_manager_id_source_sql": (
             "TRUE" if _onb.provides_column("employees", "manager_id")
             else "FALSE"),
+        # Derived-columns cycle. Each of these gates a check that would
+        # otherwise fire on EVERY row when the column is absent - the
+        # manager_id shape, measured again at 2 of 3 and 3 of 3.
+        "has_attendance_net_late_source_sql": (
+            "TRUE" if _onb.provides_column("attendance", "net_late_minutes")
+            else "FALSE"),
+        "has_qiwa_source_sql": (
+            "TRUE" if _onb.provides_column("compliance", "qiwa_status")
+            else "FALSE"),
+        "has_health_insurance_source_sql": (
+            "TRUE" if _onb.provides_column("compliance",
+                                           "health_insurance_status")
+            else "FALSE"),
         # The three relaxed payroll money columns. Same column-grain question
         # as cost_center, and the same answer: an ABSENT COLUMN is a coverage
         # fact, so the figure is withheld rather than summed to zero. Zero

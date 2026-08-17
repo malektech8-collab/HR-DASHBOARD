@@ -71,7 +71,13 @@
            'Active employee has no contract registered in Qiwa' AS description, 
            'Critical' AS severity, 'Register digital contract in Qiwa portal' AS recommended_action 
     FROM {{ ref('base_compliance_current') }} 
-    WHERE qiwa_status IS NULL OR qiwa_status != 'Active'
+    -- GATED, like the mudad arm above. The IS NULL arm makes this fire on
+    -- EVERY row when the column is absent - measured at 3 of 3. Each of
+    -- these is a separate government platform; a client not using one
+    -- has no status to report, which is a coverage fact rather than a
+    -- compliance failure per employee.
+    WHERE {{ var('has_qiwa_source_sql') }}
+      AND (qiwa_status IS NULL OR qiwa_status != 'Active')
     
     UNION ALL
     
@@ -116,7 +122,13 @@
            'CCHI health insurance coverage status is not active' AS description, 
            'Critical' AS severity, 'Activate insurance profile in provider database' AS recommended_action 
     FROM {{ ref('base_compliance_current') }} 
-    WHERE health_insurance_status IS NULL OR health_insurance_status != 'Active'
+    -- GATED, like the mudad arm above. The IS NULL arm makes this fire on
+    -- EVERY row when the column is absent - measured at 3 of 3. Each of
+    -- these is a separate government platform; a client not using one
+    -- has no status to report, which is a coverage fact rather than a
+    -- compliance failure per employee.
+    WHERE {{ var('has_health_insurance_source_sql') }}
+      AND (health_insurance_status IS NULL OR health_insurance_status != 'Active')
     
     UNION ALL
     

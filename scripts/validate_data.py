@@ -277,7 +277,24 @@ def validate():
         df_emp_unique = df_emp.unique(subset=["employee_id"])
         
         # Check: SLA breached
-        sla_breach = df_req.filter(pl.col("sla_breached") == True)
+        # NULL-SAFE, and gated. Ranked first of the three absent-column
+        # behaviours because this one was SILENT: `NULL == True` is NULL, so
+        # with the column absent the filter dropped every row and the file
+        # reported as having NO SLA BREACHES - a clean bill of health for the
+        # domain whose whole purpose is SLA tracking. A check that goes quiet
+        # is worse than one that gets noisy, because noise gets noticed.
+        #
+        # `sla_breached` is derived at ingest now, so it is normally present.
+        # This still guards the case where it is neither supplied NOR
+        # derivable, and it uses eq_missing so a sparse PROVIDED column still
+        # yields its real breaches.
+        if _onb.provides_column("hr_requests", "sla_breached") or                 "sla_breached" in df_req.columns:
+            sla_breach = df_req.filter(
+                pl.col("sla_breached").eq_missing(True))
+        else:
+            sla_breach = df_req.clear()
+            print("[coverage] hr_requests: no sla_breached column and none "
+                  "derivable. SLA checks skipped rather than reported clean.")
         for r in sla_breach.iter_rows(named=True):
             emp_name = df_emp_unique.filter(pl.col("employee_id") == r["employee_id"]).select("employee_name").to_series().to_list()
             name = emp_name[0] if emp_name else "Unknown"

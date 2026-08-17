@@ -93,7 +93,22 @@ The third row is the trap. Without it this becomes `manager_id` again: a check f
 3. `emp_status` no longer renders a broken reference as a status category — an orphan is distinguishable from an inactive employee downstream, not only in the message.
 4. The proportion case, once ruled: a mostly-orphan file behaves differently from a few-orphan one.
 
-## 7. Scope
+## 7. `occupation_match_status` belongs to this cycle — MOVED HERE 2026-08-17
+
+The derived-columns cycle corrected four contracts that required **outputs** of this pipeline as though they were inputs. Three were done there. **This one was moved here, ruled**, and the reason is the same one this plan exists for.
+
+`occupation_match_status` is *"whether the platform occupation matches the actual job title"* — a comparison between `occupation_code` in the **compliance** file and `job_title` in the **employees** file. Deriving it at ingest would mean ingest reading a second domain's silver table, which is precisely the cross-domain boundary designed above. Settling that boundary as a side effect of a contract edit is how payroll reached 13-of-13.
+
+What it inherits from §1–§6, and what it adds:
+
+- **It is a comparison, not a lookup.** The orphan check asks *does this key exist*; this asks *do two files agree about the same person*. Same join, different question — and a mismatch is a finding rather than an error.
+- **It must not fire when employees is not provided** (§5, ruled). With no master file there is no job title to compare against, so every row would "mismatch" — the `manager_id` shape, and this plan's third case.
+- **Its current absent-column behaviour is already the maximal firer.** `WHERE occupation_match_status IS NULL OR != 'Matched'` flags **every row** when the column is absent — measured at 3 of 3. That arm was left in place deliberately: gating it is meaningless until the derivation exists, because there is then nothing to fall back to.
+- **It is enum-valued**, so the derivation produces a vocabulary rather than a boolean or a number — the first rule in the registry to do so.
+
+**It stays required until the derivation lands here.** Relaxing it first would leave the maximal firer running on a column nothing produces, which is worse than the present state.
+
+## 8. Scope
 
 Every domain except employees and locations carries `employee_id`. The same check serves all of them, so this is one mechanism used six times rather than six checks — which is the argument for doing it as its own cycle rather than folding it into the payroll load.
 

@@ -123,7 +123,17 @@ columns:
   name_en: SLA Breached
   name_ar: تجاوز المدة المستهدفة
   type: BOOLEAN
-  required: true
+  required: false
+  # DERIVED from created_at + sla_hours against closed_at, or against the
+  # run's reference time when the request is still open - which is why the
+  # rule is parameterised: no column carries "now".
+  #
+  # Fixed FIRST of the four because its absence was SILENT. validate_data
+  # filters `sla_breached == True`, and NULL == True is NULL, so an absent
+  # column produced a clean bill of health for the domain whose entire
+  # purpose is SLA tracking.
+  derived_from: [created_at, sla_hours, closed_at]
+  derivation: sla_breached
   description_en: Whether the SLA target was exceeded.
   description_ar: ما إذا تم تجاوز المستهدف.
   example: 'true'

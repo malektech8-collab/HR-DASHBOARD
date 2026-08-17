@@ -43,7 +43,11 @@ columns:
   name_en: Qiwa Status
   name_ar: حالة قوى
   type: VARCHAR
-  required: true
+  required: false
+  # OPTIONAL: each of these is a SEPARATE government platform, and a
+  # client using only some of them cannot supply the others whatever
+  # file it arrives in. Absent, the figure is withheld rather than
+  # counted as a compliance failure.
   description_en: Employee status on the Qiwa platform.
   description_ar: حالة الموظف في منصة قوى.
   example: Active
@@ -97,7 +101,11 @@ columns:
   name_en: Mudad Status
   name_ar: حالة مدد
   type: VARCHAR
-  required: true
+  required: false
+  # OPTIONAL: each of these is a SEPARATE government platform, and a
+  # client using only some of them cannot supply the others whatever
+  # file it arrives in. Absent, the figure is withheld rather than
+  # counted as a compliance failure.
   description_en: Wage protection status on the Mudad platform.
   description_ar: حالة حماية الأجور في منصة مدد.
   example: Compliant
@@ -195,7 +203,11 @@ columns:
   name_en: Health Insurance Status
   name_ar: حالة التأمين الصحي
   type: VARCHAR
-  required: true
+  required: false
+  # OPTIONAL: each of these is a SEPARATE government platform, and a
+  # client using only some of them cannot supply the others whatever
+  # file it arrives in. Absent, the figure is withheld rather than
+  # counted as a compliance failure.
   description_en: CCHI health insurance coverage status. Distinct from gosi_status, which carries the GOSI social-insurance side.
   description_ar: حالة تغطية التأمين الصحي (مجلس الضمان الصحي). تختلف عن حالة التأمينات الاجتماعية.
   example: Active
