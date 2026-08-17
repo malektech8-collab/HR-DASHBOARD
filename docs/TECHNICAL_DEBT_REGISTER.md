@@ -935,6 +935,88 @@ half-applied isolation, and of a skipped test reporting green.
 
 ---
 
+### SP-006 — Derive it always; reconcile against it when offered
+
+**Recorded** 2026-08-17, derived-columns cycle. The rule for a column that this
+pipeline can compute AND a client's system may also supply.
+
+**The rule.** Compute the value regardless. When the client's file supplies the
+column, keep their value as **evidence** and compare the two — do not overwrite
+it and do not skip the computation.
+
+**Why it beats both patterns it came from.**
+
+- **`is_saudi`'s derive-when-absent alone would delete a reconciliation.**
+  `net_late_minutes` is computed by `base_attendance_current` as
+  `calculated_net_late_minutes`, and `mart_attendance_exceptions` compares the
+  client's figure against it. Treating the column as "derive it if missing,
+  otherwise take it" is correct for `is_saudi`, which has nothing to compare
+  against — but here it silently discards a working check.
+- **A plain relaxation leaves a check comparing our derivation to our own.**
+  If the column is relaxed and then filled by our derivation, the mismatch
+  check reads *our* number on both sides. It agrees by construction and says
+  nothing, while continuing to look like a check.
+
+The combination is the only arrangement that keeps both properties: **the
+figure always exists downstream, and a disagreement with the client's system
+is still discoverable.**
+
+**What the supplied column is FOR.** Not the number — we can compute that. It
+is evidence about *their* system: whether their attendance engine, their SLA
+clock, their payroll calculator agrees with our arithmetic. A disagreement is a
+finding about the client's tooling, and it is the kind of finding this product
+exists to surface. Discarding the column discards the finding.
+
+**How to apply.** Ask two questions of any column being relaxed:
+
+1. *Can we compute it?* If yes, derive it when absent so nothing downstream
+   breaks — and see [SP-004](#sp-004--state-follows-the-data-root-source-never-does)'s
+   ordering trap, because a column declared `derivation:` stops being
+   shape-completed.
+2. *Does anything compare it against our own value?* If yes, the comparison
+   must be **gated on the column being provided**, or it becomes a tautology
+   the moment the derivation fills in.
+
+**Where it applies today**: `net_late_minutes`. **Where it will**: any figure a
+source system computes that we also compute — SLA clocks, overtime totals,
+gross-versus-components. The general shape is *two independent calculations of
+the same quantity*, and the value is in the disagreement.
+
+---
+
+### SP-007 — When you find an ungated check, read its siblings
+
+**Recorded** 2026-08-17, derived-columns cycle. A search heuristic, not a
+design rule — cheap enough that not doing it is the mistake.
+
+**The instance.** `mart_compliance_exceptions` has three arms testing
+government-platform statuses. The `mudad` arm was **already correctly gated**
+on `has_wps_source_sql`. The `qiwa` and `health_insurance` arms beside it were
+not, and each flagged **every row** when its column was absent — measured 3 of
+3. The correct pattern was sitting in the same file, a few lines away, written
+by whoever did the first one and not carried to the other two.
+
+**Why it works.** Guards are added in response to a specific incident, and the
+person adding one is thinking about the case in front of them. The sibling
+cases — same file, same shape, same failure mode — are the ones most likely to
+be missed and the cheapest to find. **A correct example nearby is evidence that
+the pattern is known and evidence that it was not applied uniformly.**
+
+**How to apply.** On finding an ungated check, before fixing it:
+
+1. Read the whole file, not the failing arm. Look for the same shape.
+2. Grep for the guard you are about to add — if it already exists elsewhere,
+   the question is not *what should this be* but *why did it stop here*.
+3. Check the reverse too: a file that gates one column and reads three is
+   telling you about the other two.
+
+**Its record so far**: it found the two ungated compliance arms. Earlier the
+same reflex found `manager_id` ungated where `cost_center` was gated, and
+`missing_project_count` disagreeing across two marts. Three finds, no cost
+beyond reading a file that was already open.
+
+---
+
 ## Exclusions
 
 None of these legacy build warnings affect the functionality of the new `GovernanceWidget` or `/api/governance/status` API endpoint, both of which are fully compliant and bug-free.

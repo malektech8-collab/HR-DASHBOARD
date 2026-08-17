@@ -142,7 +142,7 @@ Demo supplies every column touched here, so no derivation fires and every gate i
 
 ## 11. Open
 
-1. **`scheduled_start` / `scheduled_end` are now optional, and `calculated_net_late_minutes` falls to `0` when they are absent** — its expression already guards `scheduled_start IS NOT NULL`. That is the zeroing shape and wants the withheld treatment, but it is a new consequence of this change rather than a pre-existing defect, and it is not client-visible until an attendance file loads.
+1. **CARRIED INTO A4 (attendance load), ruled 2026-08-17.** `scheduled_start` / `scheduled_end` are now optional, and `calculated_net_late_minutes` falls to `0` when they are absent — its expression already guards `scheduled_start IS NOT NULL`. That is the zeroing shape and wants the withheld treatment. It is a consequence of this change rather than a pre-existing defect, and it is not client-visible until an attendance file loads — so it is **tested against a real file rather than reasoned about**, which is why it belongs to A4 and not here.
 2. **`occupation_match_status` remains required** until the referential-integrity cycle.
 3. **The A5 compliance shape question** stays deferred with its recorded reasoning.
 
