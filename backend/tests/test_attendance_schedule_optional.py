@@ -194,3 +194,73 @@ def test_late_minutes_is_derived_BEFORE_net_late_minutes_reads_it():
                   encoding="utf-8").read()
     assert source.index('"attendance", "late_minutes"') < \
         source.index('"attendance", "net_late_minutes"')
+
+
+# --------------------------------------------------------------------------
+# shape completion and provision recording - both halves, every contracted table
+# --------------------------------------------------------------------------
+
+CONTRACTED_WITH_OPTIONALS = [
+    "employees", "payroll", "attendance", "compliance",
+    "employee_relations", "hr_requests",
+]
+
+
+@pytest.mark.parametrize("table", CONTRACTED_WITH_OPTIONALS)
+def test_every_relaxed_table_is_shape_completed(table):
+    """`required: false` alone accepts the file and then crashes downstream.
+    complete_canonical_shape was wired for employees ONLY, so every relaxation
+    after it was a latent ColumnNotFoundError. Measured on a schedule-less
+    attendance file before this was fixed:
+
+        scheduled_start cast RAISES: ColumnNotFoundError
+    """
+    source = open(os.path.join(_ROOT, "scripts", "ingest_raw.py"),
+                  encoding="utf-8").read()
+    completed = ('_complete_and_record(df, "{}")'.format(table) in source
+                 or 'complete_canonical_shape(df, "{}")'.format(table) in source)
+    assert completed, "{} has optional columns and is never shape-completed".format(table)
+
+
+@pytest.mark.parametrize("table", CONTRACTED_WITH_OPTIONALS)
+def test_every_relaxed_table_records_what_was_absent(table):
+    """THE SILENT HALF. provides_column() defaults to TRUE, so a domain that
+    never records its absences makes every has_*_source_sql gate resolve TRUE -
+    and the withheld figures those gates protect get served anyway. The gate is
+    present, correct and unreachable."""
+    source = open(os.path.join(_ROOT, "scripts", "ingest_raw.py"),
+                  encoding="utf-8").read()
+    recorded = ('_complete_and_record(df, "{}")'.format(table) in source
+                or 'record_provided_columns("{}"'.format(table) in source)
+    assert recorded, "{} never records absences; its gates cannot fire".format(table)
+
+
+def test_completion_and_recording_land_together():
+    """The tamper. Recording without completing leaves the crash; completing
+    without recording leaves the gates dark. One helper does both so they
+    cannot drift apart."""
+    source = open(os.path.join(_ROOT, "scripts", "ingest_raw.py"),
+                  encoding="utf-8").read()
+    body = source[source.index("def _complete_and_record("):]
+    body = body[:body.index("\ndef ")]
+    assert "complete_canonical_shape" in body
+    assert "record_provided_columns" in body
+
+
+def test_a_schedule_less_attendance_file_survives_ingest(tmp_path, monkeypatch):
+    """End to end: the file a biometric terminal produces. It must complete,
+    record, and leave the schedule gate resolving FALSE."""
+    import polars as pl
+    import onboarding as onb
+    monkeypatch.setenv("HRDASH_DATA_ROOT", str(tmp_path))
+    frame = pl.DataFrame({
+        "attendance_date": ["2026-06-01"], "employee_id": ["E1"],
+        "actual_check_in": ["2026-06-01 08:20:00"],
+        "actual_check_out": ["2026-06-01 17:00:00"],
+        "absence_days": ["0"], "overtime_hours": ["0"], "location": ["RUH"],
+    })
+    completed = ingest_raw._complete_and_record(frame, "attendance")
+    assert "scheduled_start" in completed.columns      # no ColumnNotFoundError
+    assert onb.provides_column("attendance", "scheduled_start") is False
+    # and the tamper: a column the file DID supply is still reported provided
+    assert onb.provides_column("attendance", "actual_check_in") is True

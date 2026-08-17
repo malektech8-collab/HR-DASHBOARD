@@ -140,6 +140,38 @@ def _bool_col(name):
               .otherwise(None).cast(pl.Boolean).alias(name))
 
 
+def _complete_and_record(df, table):
+    """Shape-complete a CONTRACTED table and record what the client omitted.
+
+    Two things, and both were employees-only until the attendance cycle - which
+    made every later relaxation a latent crash and every column gate a no-op.
+
+    THE CRASH. `required: false` alone accepts the file and then fails
+    downstream: an absent optional column simply is not there, and the first
+    `pl.col(...)` or dbt model naming it raises. That is why
+    complete_canonical_shape exists, and it was wired for employees only. By
+    the attendance cycle, payroll, attendance, compliance and hr_requests had
+    all been relaxed without it - measured on a schedule-less attendance file:
+
+        scheduled_start cast RAISES: ColumnNotFoundError
+
+    THE SILENT HALF, which is worse. `provides_column()` defaults to TRUE, so
+    every `has_*_source_sql` gate for a domain that never recorded its absences
+    resolves TRUE - and the withheld figures those gates protect are served
+    anyway. The gate is present, correct, and unreachable.
+
+    So the two must land together, for every contracted table. Recording
+    without completing leaves the crash; completing without recording leaves
+    the gates dark.
+    """
+    df, absent = _onb.complete_canonical_shape(df, table)
+    _onb.record_provided_columns(table, absent)
+    if absent:
+        print("[shape] {}: {} optional column(s) absent from the client's "
+              "file, added as typed NULL: {}".format(table, len(absent), absent))
+    return df
+
+
 def _grace_period_minutes():
     """The grace period, from the SAME config dbt reads.
 
@@ -613,6 +645,7 @@ def ingest(data_mode=None):
 
         df = pl.read_csv(files["locations"], infer_schema_length=0,
                          null_values=[""])
+        df = _complete_and_record(df, "locations")
         df.write_parquet(_p.silver("locations.parquet"))
         print("Ingested locations to bronze/silver.")
 
@@ -631,6 +664,7 @@ def ingest(data_mode=None):
         df = df.with_columns([
             pl.col(c).cast(pl.Float64, strict=False) for c in numeric_cols
         ])
+        df = _complete_and_record(df, "payroll")
         df.write_parquet(_p.silver("payroll.parquet"))
         print("Ingested payroll to bronze/silver.")
 
@@ -671,6 +705,7 @@ def ingest(data_mode=None):
              if "missing_punch_count" in df.columns else
              pl.lit(None, dtype=pl.Int64).alias("missing_punch_count")),
         ])
+        df = _complete_and_record(df, "attendance")
         df.write_parquet(_p.silver("attendance.parquet"))
         print("Ingested attendance to bronze/silver.")
 
@@ -694,6 +729,7 @@ def ingest(data_mode=None):
             (_bool_col("sla_breached") if "sla_breached" in df.columns else
              pl.lit(None, dtype=pl.Boolean).alias("sla_breached")),
         ])
+        df = _complete_and_record(df, "hr_requests")
         df.write_parquet(_p.silver("hr_requests.parquet"))
         print("Ingested hr_requests to bronze/silver.")
 
@@ -711,6 +747,7 @@ def ingest(data_mode=None):
             pl.col("work_permit_expiry").str.to_date("%Y-%m-%d", strict=False),
             pl.col("iqama_expiry").str.to_date("%Y-%m-%d", strict=False),
         ])
+        df = _complete_and_record(df, "compliance")
         df.write_parquet(_p.silver("compliance.parquet"))
         print("Ingested compliance to bronze/silver.")
         
@@ -727,6 +764,7 @@ def ingest(data_mode=None):
             pl.col("closed_date").str.to_date("%Y-%m-%d", strict=False),
             _bool_col("escalated"),
         ])
+        df = _complete_and_record(df, "employee_relations")
         df.write_parquet(_p.silver("employee_relations.parquet"))
         print("Ingested employee_relations to bronze/silver.")
 
