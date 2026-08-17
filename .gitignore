@@ -70,3 +70,7 @@ scratch/
 backend/data/
 frontend/test-results/
 tracked_files.txt
+
+# The suite's isolated data root (backend/tests/conftest.py). Generated
+# demo state; never the operator's, never committed.
+.pytest-data-root/

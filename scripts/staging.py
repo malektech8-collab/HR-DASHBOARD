@@ -32,9 +32,10 @@ import json
 import os
 import shutil
 import uuid
+import paths as _p
 
 STAGING_DIR = os.path.join("data", "staging")
-CONTAINER_STAGING_DIR = "/app/data/staging"
+CONTAINER_STAGING_DIR = "/app/data/staging"   # see paths.py; state root wins
 
 DATA_FILENAME = "data.csv"
 # The canonical form, produced by applying a mapping profile. The
@@ -49,9 +50,7 @@ class StagingError(RuntimeError):
 
 
 def staging_root():
-    if os.path.isdir(os.path.dirname(CONTAINER_STAGING_DIR)):
-        return CONTAINER_STAGING_DIR
-    return STAGING_DIR
+    return _p.data("staging")
 
 
 def _upload_dir(upload_id):

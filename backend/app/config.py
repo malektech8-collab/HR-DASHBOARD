@@ -2,9 +2,15 @@ import os
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
+    # HRDASH_DATA_ROOT wins over the repo default, so a test run reads and
+    # writes its own warehouse rather than the operator's. DATABASE_PATH still
+    # overrides both - deployments set it explicitly.
     DATABASE_PATH: str = os.getenv(
-        "DATABASE_PATH", 
-        os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "warehouse", "hr_analytics.duckdb"))
+        "DATABASE_PATH",
+        (os.path.abspath(os.path.join(os.environ["HRDASH_DATA_ROOT"],
+                                      "warehouse", "hr_analytics.duckdb"))
+         if os.environ.get("HRDASH_DATA_ROOT") else
+         os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "warehouse", "hr_analytics.duckdb")))
     )
     HOST: str = "127.0.0.1"
     PORT: int = 8000

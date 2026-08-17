@@ -2,6 +2,14 @@ hr_analytics:
   outputs:
     dev:
       type: duckdb
-      path: "../warehouse/hr_analytics.duckdb"
+      # The warehouse is generated STATE. build_warehouse.py exports
+      # HRDASH_WAREHOUSE_PATH (absolute) when HRDASH_DATA_ROOT redirects the
+      # state root, so a test run builds its own warehouse instead of dbt
+      # writing into the operator's underneath a live client load.
+      #
+      # The default is the previous literal, unchanged: dbt runs with
+      # cwd=dbt_analytics, so every existing deployment resolves exactly as
+      # before.
+      path: "{{ env_var('HRDASH_WAREHOUSE_PATH', '../warehouse/hr_analytics.duckdb') }}"
       threads: 1
   target: dev

@@ -15,6 +15,7 @@ _ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, os.path.join(_ROOT, "scripts"))
 
 import ingest_raw  # noqa: E402
+import paths as _p  # noqa: E402
 import validate_data  # noqa: E402
 from validate_schema import (  # noqa: E402
     DQ_SEVERITIES,
@@ -135,12 +136,14 @@ def test_validate_merges_contract_exceptions_into_gold(monkeypatch):
     os.makedirs(os.path.dirname(path), exist_ok=True)
 
     validate_data.validate()
-    before = pl.read_parquet("data/gold/data_quality_report.parquet").height
+    # Through the state root, not the cwd: read cwd-relative this counted the
+    # OPERATOR's gold report while the run under test wrote the isolated one.
+    before = pl.read_parquet(_p.gold("data_quality_report.parquet")).height
 
     ingest_raw._write_contract_exceptions([_violation(), _violation(row=9)])
     try:
         validate_data.validate()
-        after = pl.read_parquet("data/gold/data_quality_report.parquet")
+        after = pl.read_parquet(_p.gold("data_quality_report.parquet"))
         assert after.height == before + 2
         contract_rows = after.filter(pl.col("source") == "contract")
         assert contract_rows.height == 2

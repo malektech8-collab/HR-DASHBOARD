@@ -315,6 +315,51 @@ general class named here.
   proof per SP-001. Until then this gap is why "CI is green" says nothing about
   whether a new contributor can start the stack.
 
+### GAP-003 — CI can verify a MECHANISM; a GUARANTEE about a run needs a second invocation
+
+- **Status**: CLOSED for test isolation, 2026-08-17 — recorded because the
+  *distinction* is general and will recur.
+- **Category**: CI / verification
+- **Sibling of**: [GAP-002](#gap-002--a-defect-in-envexample-is-invisible-to-ci-by-construction).
+  Same family: a defect that can only bite where real operator state exists,
+  and is therefore invisible to a CI run built from synthetic data.
+
+**The defect that produced it.** A `pytest` run rebuilt the operator's
+warehouse in demo mode and rewrote `data/onboarding/declared_domains.yml`,
+leaving the registry internally inconsistent — a real client's `declared` and
+`history_since` beside demo's `absent_columns`. `provides_column()` then
+returns True and thousands of suppressed warnings come back. CI never saw it:
+CI has no profile, no client load and no declared registry, so clobbering
+those is indistinguishable from correct behaviour.
+
+**The distinction, which is the reusable part.**
+
+- **The MECHANISM is CI-verifiable.** That paths resolve through the state
+  root; that a redirected run writes only inside it; that no module writes to
+  a hard-coded repo-relative data path. These are ordinary tests.
+- **The GUARANTEE is not, from inside the suite.** *"A full run leaves
+  operator state untouched"* is a statement **about** a run. No test within
+  that run can assert it: the writes it must observe happen in sibling tests,
+  in arbitrary order, and some in subprocesses. It requires a **second
+  invocation** — snapshot, run, compare — which is a **job step, not a test**.
+
+**Why the CI step is worth having even though CI has no real data.** The bytes
+are synthetic but the property is about **paths**: *"the suite does not write
+to `data/` or `warehouse/`"* is true or false regardless of whose rows are in
+them. That is what converts an operator-only failure into a CI-visible one.
+
+**Implemented as**: [`scripts/check_test_isolation.py`](../scripts/check_test_isolation.py),
+invoked twice in the Test Suite gate — once to run the suite and compare, once
+with `--verify-detects` to prove the checker itself can go red. Per SP-001 a
+guard nobody has watched fail is not a guard.
+
+**The general rule this leaves behind**: when a property is about a *process*
+rather than a *value*, ask whether any test could observe it from inside. If
+not, it belongs in the pipeline beside the suite, not in it — and it must be
+watched failing, because a comparison that cannot detect a change is green
+forever.
+
+
 ### INC-001 — A committed secret, reintroduced by the cycle that removed committed secrets
 
 - **Status**: CONTAINED 2026-08-13. Value permanently burned. Guarded by test.

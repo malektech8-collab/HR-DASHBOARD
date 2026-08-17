@@ -9,6 +9,7 @@ from derivations import derive_column
 import canonical_schema as _cs
 import onboarding as _onb
 import report_period as _rp
+import paths as _p
 
 # Transport for EXCEPTION-severity contract violations: written here, merged
 # into the gold DQ report by validate_data.py so they reach the Data Quality
@@ -29,14 +30,14 @@ NEWLINE = chr(10)
 # constant plus a test asserting the directory's absence makes this an
 # invariant rather than a coincidence. If this directory is ever created, every
 # undeclared domain would silently ingest whatever it contains.
-UNDECLARED_SENTINEL_DIR = "data/raw/__undeclared__"
+UNDECLARED_SENTINEL_DIR = _p.raw("__undeclared__")
 
 
 class OnboardingIncompleteError(RuntimeError):
     """Real mode cannot proceed: contracted domains are missing or undeclared."""
 
 
-CONTRACT_EXCEPTIONS_PATH = "data/gold/contract_exceptions.parquet"
+CONTRACT_EXCEPTIONS_PATH = _p.gold("contract_exceptions.parquet")
 CONTRACT_EXCEPTION_SCHEMA = {
     "employee_id": pl.Utf8, "employee_name": pl.Utf8, "issue_type": pl.Utf8,
     "description": pl.Utf8, "severity": pl.Utf8, "recommended_action": pl.Utf8,
@@ -259,36 +260,36 @@ def ingest(data_mode=None):
     # a registry rather than inferred from what happens to be on disk.
     original_exists = os.path.exists
 
-    os.makedirs("data/bronze", exist_ok=True)
-    os.makedirs("data/silver", exist_ok=True)
+    os.makedirs(_p.data("bronze"), exist_ok=True)
+    os.makedirs(_p.data("silver"), exist_ok=True)
     
     print("Starting data ingestion...")
 
     # Define paths
     files = {
-        "employees": "data/sample/employees_sample.csv",
-        "locations": "data/sample/locations_sample.csv",
-        "payroll": "data/sample/payroll_sample.csv",
-        "attendance": "data/sample/attendance_sample.csv",
-        "hr_requests": "data/sample/hr_requests_sample.csv",
-        "compliance": "data/sample/compliance_sample.csv",
-        "employee_relations": "data/sample/employee_relations_sample.csv",
-        "recruitment_requisitions": "data/sample/recruitment_requisitions_sample.csv",
-        "candidates": "data/sample/candidates_sample.csv",
-        "interviews": "data/sample/interviews_sample.csv",
-        "offers": "data/sample/offers_sample.csv",
-        "onboarding": "data/sample/onboarding_sample.csv",
-        "workforce_plan": "data/sample/workforce_plan_sample.csv",
-        "vacancy_requests": "data/sample/vacancy_requests_sample.csv",
-        "performance_reviews": "data/sample/performance_reviews_sample.csv",
-        "performance_goals": "data/sample/performance_goals_sample.csv",
-        "competency_assessments": "data/sample/competency_assessments_sample.csv",
-        "learning_enrollments": "data/sample/learning_enrollments_sample.csv",
-        "training_catalog": "data/sample/training_catalog_sample.csv",
-        "succession_plans": "data/sample/succession_plans_sample.csv",
-        "talent_reviews": "data/sample/talent_reviews_sample.csv",
-        "employee_skills": "data/sample/employee_skills_sample.csv",
-        "career_paths": "data/sample/career_paths_sample.csv"
+        "employees": _p.sample("employees_sample.csv"),
+        "locations": _p.sample("locations_sample.csv"),
+        "payroll": _p.sample("payroll_sample.csv"),
+        "attendance": _p.sample("attendance_sample.csv"),
+        "hr_requests": _p.sample("hr_requests_sample.csv"),
+        "compliance": _p.sample("compliance_sample.csv"),
+        "employee_relations": _p.sample("employee_relations_sample.csv"),
+        "recruitment_requisitions": _p.sample("recruitment_requisitions_sample.csv"),
+        "candidates": _p.sample("candidates_sample.csv"),
+        "interviews": _p.sample("interviews_sample.csv"),
+        "offers": _p.sample("offers_sample.csv"),
+        "onboarding": _p.sample("onboarding_sample.csv"),
+        "workforce_plan": _p.sample("workforce_plan_sample.csv"),
+        "vacancy_requests": _p.sample("vacancy_requests_sample.csv"),
+        "performance_reviews": _p.sample("performance_reviews_sample.csv"),
+        "performance_goals": _p.sample("performance_goals_sample.csv"),
+        "competency_assessments": _p.sample("competency_assessments_sample.csv"),
+        "learning_enrollments": _p.sample("learning_enrollments_sample.csv"),
+        "training_catalog": _p.sample("training_catalog_sample.csv"),
+        "succession_plans": _p.sample("succession_plans_sample.csv"),
+        "talent_reviews": _p.sample("talent_reviews_sample.csv"),
+        "employee_skills": _p.sample("employee_skills_sample.csv"),
+        "career_paths": _p.sample("career_paths_sample.csv")
     }
 
     # --- Real-data resolver (Phase 0): prefer data/raw/{table}.csv in real mode ---
@@ -298,7 +299,7 @@ def ingest(data_mode=None):
     #
     # Marker immunity is BY CONSTRUCTION, not an explicit bypass: the .uploaded
     # freeze in custom_exists() below only special-cases paths that both start
-    # with "data/sample/" and end with "_sample.csv". A data/raw/{table}.csv path
+    # with _p.sample("") and end with "_sample.csv". A data/raw/{table}.csv path
     # matches neither, so os.path.exists() on it never consults a marker and the
     # raw file is always (re)ingested on every run.
     # STALENESS GUARD — unconditional, every run, every mode.
@@ -307,7 +308,7 @@ def ingest(data_mode=None):
     # run's exceptions. This is the .uploaded marker bug in a new costume: that
     # marker froze a table's ingest indefinitely and zeroed four Attendance
     # widgets. Clear first, then decide whether to write.
-    os.makedirs("data/gold", exist_ok=True)
+    os.makedirs(_p.data("gold"), exist_ok=True)
     if original_exists(CONTRACT_EXCEPTIONS_PATH):
         os.remove(CONTRACT_EXCEPTIONS_PATH)
         print(f"[contract] cleared stale {CONTRACT_EXCEPTIONS_PATH}")
@@ -326,7 +327,7 @@ def ingest(data_mode=None):
         # serves sample data for a contracted domain.
         declared = _onb.load_declared(contracted=set(real_sourceable))
         present = [t for t in real_sourceable
-                   if original_exists(f"data/raw/{t}.csv")]
+                   if original_exists(_p.raw("{}.csv".format(t)))]
 
         if not declared:
             # No declaration: every contracted domain is required. Report ALL
@@ -365,7 +366,7 @@ def ingest(data_mode=None):
             _onb.assert_coverage_declared(declared)
 
         for table in targets:
-            raw_path = f"data/raw/{table}.csv"
+            raw_path = _p.raw("{}.csv".format(table))
             # Hard schema gate. Any REJECT-severity violation raises and aborts
             # the whole run (fail-closed) — no partial load. EXCEPTION-severity
             # violations do not block: the file loads and the rows are routed to
@@ -420,7 +421,7 @@ def ingest(data_mode=None):
         # broken them the other way. Typing is done explicitly, ten lines down,
         # from the contract - never guessed from the first rows of the file.
         df_raw = pl.read_csv(files["employees"], infer_schema_length=0)
-        df_raw.write_parquet("data/bronze/employees.parquet")
+        df_raw.write_parquet(_p.bronze("employees.parquet"))
 
         # Clean and type cast for silver
         df = pl.read_csv(files["employees"], infer_schema_length=0,
@@ -483,7 +484,7 @@ def ingest(data_mode=None):
             print("[shape] employees: {} optional column(s) absent from the "
                   "client's file, added as typed NULL: {}".format(
                       len(absent), absent))
-        df.write_parquet("data/silver/employees.parquet")
+        df.write_parquet(_p.silver("employees.parquet"))
         print("Ingested employees to bronze/silver.")
 
     # 1b. Locations - the reference dimension.
@@ -494,16 +495,16 @@ def ingest(data_mode=None):
     # employee row that only ever meant "site".
     if os.path.exists(files["locations"]):
         df_raw = pl.read_csv(files["locations"])
-        df_raw.write_parquet("data/bronze/locations.parquet")
+        df_raw.write_parquet(_p.bronze("locations.parquet"))
 
         df = pl.read_csv(files["locations"], null_values=[""])
-        df.write_parquet("data/silver/locations.parquet")
+        df.write_parquet(_p.silver("locations.parquet"))
         print("Ingested locations to bronze/silver.")
 
     # 2. Payroll
     if os.path.exists(files["payroll"]):
         df_raw = pl.read_csv(files["payroll"])
-        df_raw.write_parquet("data/bronze/payroll.parquet")
+        df_raw.write_parquet(_p.bronze("payroll.parquet"))
         
         df = pl.read_csv(files["payroll"], null_values=[""])
         numeric_cols = [
@@ -514,13 +515,13 @@ def ingest(data_mode=None):
         df = df.with_columns([
             pl.col(c).cast(pl.Float64, strict=False) for c in numeric_cols
         ])
-        df.write_parquet("data/silver/payroll.parquet")
+        df.write_parquet(_p.silver("payroll.parquet"))
         print("Ingested payroll to bronze/silver.")
 
     # 3. Attendance
     if os.path.exists(files["attendance"]):
         df_raw = pl.read_csv(files["attendance"])
-        df_raw.write_parquet("data/bronze/attendance.parquet")
+        df_raw.write_parquet(_p.bronze("attendance.parquet"))
         
         df = pl.read_csv(files["attendance"], null_values=[""])
         df = df.with_columns([
@@ -537,13 +538,13 @@ def ingest(data_mode=None):
             pl.col("overtime_approved").cast(pl.Boolean, strict=False),
             pl.col("missing_punch_count").cast(pl.Int64, strict=False),
         ])
-        df.write_parquet("data/silver/attendance.parquet")
+        df.write_parquet(_p.silver("attendance.parquet"))
         print("Ingested attendance to bronze/silver.")
 
     # 4. HR Requests
     if os.path.exists(files["hr_requests"]):
         df_raw = pl.read_csv(files["hr_requests"])
-        df_raw.write_parquet("data/bronze/hr_requests.parquet")
+        df_raw.write_parquet(_p.bronze("hr_requests.parquet"))
         
         df = pl.read_csv(files["hr_requests"], null_values=[""])
         df = df.with_columns([
@@ -553,13 +554,13 @@ def ingest(data_mode=None):
             pl.col("actual_hours").cast(pl.Int64, strict=False),
             pl.col("sla_breached").cast(pl.Boolean, strict=False),
         ])
-        df.write_parquet("data/silver/hr_requests.parquet")
+        df.write_parquet(_p.silver("hr_requests.parquet"))
         print("Ingested hr_requests to bronze/silver.")
 
     # 5. Compliance
     if os.path.exists(files["compliance"]):
         df_raw = pl.read_csv(files["compliance"])
-        df_raw.write_parquet("data/bronze/compliance.parquet")
+        df_raw.write_parquet(_p.bronze("compliance.parquet"))
         
         df = pl.read_csv(files["compliance"], null_values=[""])
         df = df.with_columns([
@@ -569,13 +570,13 @@ def ingest(data_mode=None):
             pl.col("work_permit_expiry").str.to_date("%Y-%m-%d", strict=False),
             pl.col("iqama_expiry").str.to_date("%Y-%m-%d", strict=False),
         ])
-        df.write_parquet("data/silver/compliance.parquet")
+        df.write_parquet(_p.silver("compliance.parquet"))
         print("Ingested compliance to bronze/silver.")
         
     # 6. Employee Relations
     if "employee_relations" in files and os.path.exists(files["employee_relations"]):
         df_raw = pl.read_csv(files["employee_relations"])
-        df_raw.write_parquet("data/bronze/employee_relations.parquet")
+        df_raw.write_parquet(_p.bronze("employee_relations.parquet"))
         
         df = pl.read_csv(files["employee_relations"], null_values=[""])
         df = df.with_columns([
@@ -584,7 +585,7 @@ def ingest(data_mode=None):
             pl.col("closed_date").str.to_date("%Y-%m-%d", strict=False),
             pl.col("escalated").cast(pl.Boolean, strict=False),
         ])
-        df.write_parquet("data/silver/employee_relations.parquet")
+        df.write_parquet(_p.silver("employee_relations.parquet"))
         print("Ingested employee_relations to bronze/silver.")
 
     # 7. Production mode source check
@@ -613,185 +614,185 @@ def ingest(data_mode=None):
     # Requisitions
     if os.path.exists(files["recruitment_requisitions"]):
         df_raw = pl.read_csv(files["recruitment_requisitions"])
-        df_raw.write_parquet("data/bronze/recruitment_requisitions.parquet")
+        df_raw.write_parquet(_p.bronze("recruitment_requisitions.parquet"))
         df = pl.read_csv(files["recruitment_requisitions"], null_values=[""])
         df = df.with_columns([
             pl.col("approval_date").str.to_date("%Y-%m-%d", strict=False),
             pl.col("target_hire_date").str.to_date("%Y-%m-%d", strict=False),
             pl.col("closed_date").str.to_date("%Y-%m-%d", strict=False)
         ])
-        df.write_parquet("data/silver/recruitment_requisitions.parquet")
+        df.write_parquet(_p.silver("recruitment_requisitions.parquet"))
         print("Ingested recruitment_requisitions to bronze/silver.")
 
     # Candidates
     if os.path.exists(files["candidates"]):
         df_raw = pl.read_csv(files["candidates"])
-        df_raw.write_parquet("data/bronze/candidates.parquet")
+        df_raw.write_parquet(_p.bronze("candidates.parquet"))
         df = pl.read_csv(files["candidates"], null_values=[""])
         df = df.with_columns([
             pl.col("applied_date").str.to_date("%Y-%m-%d", strict=False)
         ])
-        df.write_parquet("data/silver/candidates.parquet")
+        df.write_parquet(_p.silver("candidates.parquet"))
         print("Ingested candidates to bronze/silver.")
 
     # Interviews
     if os.path.exists(files["interviews"]):
         df_raw = pl.read_csv(files["interviews"])
-        df_raw.write_parquet("data/bronze/interviews.parquet")
+        df_raw.write_parquet(_p.bronze("interviews.parquet"))
         df = pl.read_csv(files["interviews"], null_values=[""])
         df = df.with_columns([
             pl.col("interview_date").str.to_datetime("%Y-%m-%d %H:%M:%S", strict=False)
         ])
-        df.write_parquet("data/silver/interviews.parquet")
+        df.write_parquet(_p.silver("interviews.parquet"))
         print("Ingested interviews to bronze/silver.")
 
     # Offers
     if os.path.exists(files["offers"]):
         df_raw = pl.read_csv(files["offers"])
-        df_raw.write_parquet("data/bronze/offers.parquet")
+        df_raw.write_parquet(_p.bronze("offers.parquet"))
         df = pl.read_csv(files["offers"], null_values=[""])
         df = df.with_columns([
             pl.col("offer_date").str.to_date("%Y-%m-%d", strict=False),
             pl.col("salary").cast(pl.Float64, strict=False),
             pl.col("outcome_date").str.to_date("%Y-%m-%d", strict=False)
         ])
-        df.write_parquet("data/silver/offers.parquet")
+        df.write_parquet(_p.silver("offers.parquet"))
         print("Ingested offers to bronze/silver.")
 
     # Onboarding
     if os.path.exists(files["onboarding"]):
         df_raw = pl.read_csv(files["onboarding"])
-        df_raw.write_parquet("data/bronze/onboarding.parquet")
+        df_raw.write_parquet(_p.bronze("onboarding.parquet"))
         df = pl.read_csv(files["onboarding"], null_values=[""])
         df = df.with_columns([
             pl.col("start_date").str.to_date("%Y-%m-%d", strict=False)
         ])
-        df.write_parquet("data/silver/onboarding.parquet")
+        df.write_parquet(_p.silver("onboarding.parquet"))
         print("Ingested onboarding to bronze/silver.")
 
     # Workforce Plan
     if os.path.exists(files["workforce_plan"]):
         df_raw = pl.read_csv(files["workforce_plan"])
-        df_raw.write_parquet("data/bronze/workforce_plan.parquet")
+        df_raw.write_parquet(_p.bronze("workforce_plan.parquet"))
         df = pl.read_csv(files["workforce_plan"], null_values=[""])
         df = df.with_columns([
             pl.col("planned_headcount").cast(pl.Int64, strict=False)
         ])
-        df.write_parquet("data/silver/workforce_plan.parquet")
+        df.write_parquet(_p.silver("workforce_plan.parquet"))
         print("Ingested workforce_plan to bronze/silver.")
 
     # Vacancy Requests
     if os.path.exists(files["vacancy_requests"]):
         df_raw = pl.read_csv(files["vacancy_requests"])
-        df_raw.write_parquet("data/bronze/vacancy_requests.parquet")
+        df_raw.write_parquet(_p.bronze("vacancy_requests.parquet"))
         df = pl.read_csv(files["vacancy_requests"], null_values=[""])
         df = df.with_columns([
             pl.col("quantity").cast(pl.Int64, strict=False),
             pl.col("approved_date").str.to_date("%Y-%m-%d", strict=False)
         ])
-        df.write_parquet("data/silver/vacancy_requests.parquet")
+        df.write_parquet(_p.silver("vacancy_requests.parquet"))
         print("Ingested vacancy_requests to bronze/silver.")
 
     # Ingest Talent tables
     # Performance Reviews
     if os.path.exists(files["performance_reviews"]):
         df_raw = pl.read_csv(files["performance_reviews"])
-        df_raw.write_parquet("data/bronze/performance_reviews.parquet")
+        df_raw.write_parquet(_p.bronze("performance_reviews.parquet"))
         df = pl.read_csv(files["performance_reviews"], null_values=[""])
         df = df.with_columns([
             pl.col("rating").cast(pl.Float64, strict=False),
             pl.col("completed_date").str.to_date("%Y-%m-%d", strict=False)
         ])
-        df.write_parquet("data/silver/performance_reviews.parquet")
+        df.write_parquet(_p.silver("performance_reviews.parquet"))
         print("Ingested performance_reviews to bronze/silver.")
 
     # Performance Goals
     if os.path.exists(files["performance_goals"]):
         df_raw = pl.read_csv(files["performance_goals"])
-        df_raw.write_parquet("data/bronze/performance_goals.parquet")
+        df_raw.write_parquet(_p.bronze("performance_goals.parquet"))
         df = pl.read_csv(files["performance_goals"], null_values=[""])
         df = df.with_columns([
             pl.col("due_date").str.to_date("%Y-%m-%d", strict=False),
             pl.col("completed_date").str.to_date("%Y-%m-%d", strict=False)
         ])
-        df.write_parquet("data/silver/performance_goals.parquet")
+        df.write_parquet(_p.silver("performance_goals.parquet"))
         print("Ingested performance_goals to bronze/silver.")
 
     # Competency Assessments
     if os.path.exists(files["competency_assessments"]):
         df_raw = pl.read_csv(files["competency_assessments"])
-        df_raw.write_parquet("data/bronze/competency_assessments.parquet")
+        df_raw.write_parquet(_p.bronze("competency_assessments.parquet"))
         df = pl.read_csv(files["competency_assessments"], null_values=[""])
         df = df.with_columns([
             pl.col("required_score").cast(pl.Float64, strict=False),
             pl.col("actual_score").cast(pl.Float64, strict=False),
             pl.col("assessed_date").str.to_date("%Y-%m-%d", strict=False)
         ])
-        df.write_parquet("data/silver/competency_assessments.parquet")
+        df.write_parquet(_p.silver("competency_assessments.parquet"))
         print("Ingested competency_assessments to bronze/silver.")
 
     # Learning Enrollments
     if os.path.exists(files["learning_enrollments"]):
         df_raw = pl.read_csv(files["learning_enrollments"])
-        df_raw.write_parquet("data/bronze/learning_enrollments.parquet")
+        df_raw.write_parquet(_p.bronze("learning_enrollments.parquet"))
         df = pl.read_csv(files["learning_enrollments"], null_values=[""])
         df = df.with_columns([
             pl.col("enrollment_date").str.to_date("%Y-%m-%d", strict=False),
             pl.col("completion_date").str.to_date("%Y-%m-%d", strict=False)
         ])
-        df.write_parquet("data/silver/learning_enrollments.parquet")
+        df.write_parquet(_p.silver("learning_enrollments.parquet"))
         print("Ingested learning_enrollments to bronze/silver.")
 
     # Training Catalog
     if os.path.exists(files["training_catalog"]):
         df_raw = pl.read_csv(files["training_catalog"])
-        df_raw.write_parquet("data/bronze/training_catalog.parquet")
+        df_raw.write_parquet(_p.bronze("training_catalog.parquet"))
         df = pl.read_csv(files["training_catalog"], null_values=[""])
         df = df.with_columns([
             pl.col("duration_hours").cast(pl.Float64, strict=False)
         ])
-        df.write_parquet("data/silver/training_catalog.parquet")
+        df.write_parquet(_p.silver("training_catalog.parquet"))
         print("Ingested training_catalog to bronze/silver.")
 
     # Succession Plans
     if os.path.exists(files["succession_plans"]):
         df_raw = pl.read_csv(files["succession_plans"])
-        df_raw.write_parquet("data/bronze/succession_plans.parquet")
+        df_raw.write_parquet(_p.bronze("succession_plans.parquet"))
         df = pl.read_csv(files["succession_plans"], null_values=[""])
         df = df.with_columns([
             pl.col("is_critical").cast(pl.Boolean, strict=False)
         ])
-        df.write_parquet("data/silver/succession_plans.parquet")
+        df.write_parquet(_p.silver("succession_plans.parquet"))
         print("Ingested succession_plans to bronze/silver.")
 
     # Talent Reviews
     if os.path.exists(files["talent_reviews"]):
         df_raw = pl.read_csv(files["talent_reviews"])
-        df_raw.write_parquet("data/bronze/talent_reviews.parquet")
+        df_raw.write_parquet(_p.bronze("talent_reviews.parquet"))
         df = pl.read_csv(files["talent_reviews"], null_values=[""])
         df = df.with_columns([
             pl.col("performance_rating").cast(pl.Float64, strict=False)
         ])
-        df.write_parquet("data/silver/talent_reviews.parquet")
+        df.write_parquet(_p.silver("talent_reviews.parquet"))
         print("Ingested talent_reviews to bronze/silver.")
 
     # Employee Skills
     if os.path.exists(files["employee_skills"]):
         df_raw = pl.read_csv(files["employee_skills"])
-        df_raw.write_parquet("data/bronze/employee_skills.parquet")
+        df_raw.write_parquet(_p.bronze("employee_skills.parquet"))
         df = pl.read_csv(files["employee_skills"], null_values=[""])
-        df.write_parquet("data/silver/employee_skills.parquet")
+        df.write_parquet(_p.silver("employee_skills.parquet"))
         print("Ingested employee_skills to bronze/silver.")
 
     # Career Paths
     if os.path.exists(files["career_paths"]):
         df_raw = pl.read_csv(files["career_paths"])
-        df_raw.write_parquet("data/bronze/career_paths.parquet")
+        df_raw.write_parquet(_p.bronze("career_paths.parquet"))
         df = pl.read_csv(files["career_paths"], null_values=[""])
         df = df.with_columns([
             pl.col("readiness_months").cast(pl.Int64, strict=False)
         ])
-        df.write_parquet("data/silver/career_paths.parquet")
+        df.write_parquet(_p.silver("career_paths.parquet"))
         print("Ingested career_paths to bronze/silver.")
 
     print("Ingestion complete.")

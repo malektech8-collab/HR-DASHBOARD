@@ -2,6 +2,7 @@ import csv
 import os
 import random
 from datetime import datetime, timedelta
+import paths as _p
 
 def create_sample_data():
     # The `.uploaded` freeze marker is GONE (P0-2). This function used to
@@ -9,7 +10,7 @@ def create_sample_data():
     # manual upload had landed in data/silver. Nothing uploads into silver any
     # more, and refresh_all no longer calls this at all in real mode, so the
     # only thing the patch could still do is surprise someone.
-    os.makedirs("data/sample", exist_ok=True)
+    os.makedirs(_p.data("sample"), exist_ok=True)
     
     # 1. Employees data
     # We will generate about 20 employees, including the required data quality issues:
@@ -59,7 +60,7 @@ def create_sample_data():
         ["EMP020", "Omar Al-Masri", "Syrian", "False", "Company B", "Operations", "PROJ-GAMMA", "Operations Admin", "Operations", "G1", "EMP014", "CC-OPS", "Full-time", "Limited", "2025-04-01", "", "2026-04-01", "Active", "5500", "1375", "500"]
     ]
 
-    with open("data/sample/employees_sample.csv", "w", newline="", encoding="utf-8") as f:
+    with open(_p.sample("employees_sample.csv"), "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow([
             "employee_id", "employee_name", "nationality", "is_saudi", "company", "department", "location", 
@@ -84,7 +85,7 @@ def create_sample_data():
         ["PROJ-BETA", "PROJ-BETA", "Central", "Phase 1"],
         ["PROJ-GAMMA", "PROJ-GAMMA", "Eastern", "Phase 1"],
     ]
-    with open("data/sample/locations_sample.csv", "w", newline="",
+    with open(_p.sample("locations_sample.csv"), "w", newline="",
               encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["location", "project", "region", "phase"])
@@ -153,7 +154,7 @@ def create_sample_data():
             
     payroll_records.extend(historical_records)
 
-    with open("data/sample/payroll_sample.csv", "w", newline="", encoding="utf-8") as f:
+    with open(_p.sample("payroll_sample.csv"), "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow([
             "payroll_period", "employee_id", "basic_salary", "housing_allowance", "transport_allowance", 
@@ -231,7 +232,7 @@ def create_sample_data():
             
         curr += timedelta(days=1)
 
-    with open("data/sample/attendance_sample.csv", "w", newline="", encoding="utf-8") as f:
+    with open(_p.sample("attendance_sample.csv"), "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow([
             "attendance_date", "employee_id", "shift_name", "scheduled_start", "scheduled_end", 
@@ -253,7 +254,7 @@ def create_sample_data():
         ["REQ004", "EMP004", "Business Card Request", "Open", "2026-06-05 13:00:00", "", "HR Operations", "72", "12", "False", "PROJ-ALPHA"]
     ]
 
-    with open("data/sample/hr_requests_sample.csv", "w", newline="", encoding="utf-8") as f:
+    with open(_p.sample("hr_requests_sample.csv"), "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow([
             "request_id", "employee_id", "request_type", "request_status", "created_at", "closed_at", 
@@ -272,7 +273,7 @@ def create_sample_data():
         ["EMP004", "2026-06", "Active", "Registered", "Compliant", "False", "18000", "18000", "456789", "Mismatch", "2026-11-01", "2026-11-01", "Active"]
     ]
 
-    with open("data/sample/compliance_sample.csv", "w", newline="", encoding="utf-8") as f:
+    with open(_p.sample("compliance_sample.csv"), "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow([
             "employee_id", "period", "qiwa_status", "gosi_status", "mudad_status", 
@@ -298,7 +299,7 @@ def create_sample_data():
         ["ER010", "EMP999", "Grievance", "Open", "Medium", "2026-06-02", "2026-06-12", "", "EMP003", "False", "", "", "", "Unknown employee grievance log entry"]
     ]
 
-    with open("data/sample/employee_relations_sample.csv", "w", newline="", encoding="utf-8") as f:
+    with open(_p.sample("employee_relations_sample.csv"), "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow([
             "case_id", "employee_id", "case_type", "case_status", "priority", 
@@ -320,7 +321,7 @@ def create_sample_data():
         ["REQ006", "QA Engineer", "Engineering", "PROJ-BETA", "CC-ENG", "EMP011", "2026-06-01", "2026-06-15", "2026-06-10", "Closed"]
     ]
 
-    with open("data/sample/recruitment_requisitions_sample.csv", "w", newline="", encoding="utf-8") as f:
+    with open(_p.sample("recruitment_requisitions_sample.csv"), "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["requisition_id", "job_title", "department", "location", "cost_center", "owner_id", "approval_date", "target_hire_date", "closed_date", "status"])
         writer.writerows(requisitions)
@@ -337,7 +338,7 @@ def create_sample_data():
         ["CAN007", "George Costanza", "LinkedIn", "Offer Accepted", "REQ006", "2026-06-02"]
     ]
 
-    with open("data/sample/candidates_sample.csv", "w", newline="", encoding="utf-8") as f:
+    with open(_p.sample("candidates_sample.csv"), "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["candidate_id", "candidate_name", "source", "pipeline_stage", "requisition_id", "applied_date"])
         writer.writerows(candidates)
@@ -349,7 +350,7 @@ def create_sample_data():
         ["INT003", "CAN005", "", "EMP001", "", "Pending"]
     ]
 
-    with open("data/sample/interviews_sample.csv", "w", newline="", encoding="utf-8") as f:
+    with open(_p.sample("interviews_sample.csv"), "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["interview_id", "candidate_id", "interview_date", "recruiter_id", "rating", "outcome"])
         writer.writerows(interviews)
@@ -361,7 +362,7 @@ def create_sample_data():
         ["OFF003", "CAN007", "2026-06-05", "12000", "Accepted", "2026-06-08"]
     ]
 
-    with open("data/sample/offers_sample.csv", "w", newline="", encoding="utf-8") as f:
+    with open(_p.sample("offers_sample.csv"), "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["offer_id", "candidate_id", "offer_date", "salary", "outcome_status", "outcome_date"])
         writer.writerows(offers)
@@ -372,7 +373,7 @@ def create_sample_data():
         ["ONB002", "CAN002", "2026-07-01", "In Progress", "EMP999"]
     ]
 
-    with open("data/sample/onboarding_sample.csv", "w", newline="", encoding="utf-8") as f:
+    with open(_p.sample("onboarding_sample.csv"), "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["onboarding_id", "candidate_id", "start_date", "status", "employee_id"])
         writer.writerows(onboarding)
@@ -387,7 +388,7 @@ def create_sample_data():
         ["2026-06", "PROJ-ALPHA", "Marketing", "0"]
     ]
 
-    with open("data/sample/workforce_plan_sample.csv", "w", newline="", encoding="utf-8") as f:
+    with open(_p.sample("workforce_plan_sample.csv"), "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["period", "location", "department", "planned_headcount"])
         writer.writerows(workforce_plan)
@@ -399,7 +400,7 @@ def create_sample_data():
         ["VAC003", "Operations", "PROJ-GAMMA", "Operations Coordinator", "-1", "Approved", "2026-06-03"]
     ]
 
-    with open("data/sample/vacancy_requests_sample.csv", "w", newline="", encoding="utf-8") as f:
+    with open(_p.sample("vacancy_requests_sample.csv"), "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["request_id", "department", "location", "job_title", "quantity", "status", "approved_date"])
         writer.writerows(vacancy_requests)
@@ -428,7 +429,7 @@ def create_sample_data():
         ["REV018", "EMP020", "EMP014", "2026-06", "1.2", "Completed", "2026-06-26"],
         ["REV099", "EMP999", "EMP011", "2026-06", "3.0", "Completed", "2026-06-15"] # Linked to unknown employee
     ]
-    with open("data/sample/performance_reviews_sample.csv", "w", newline="", encoding="utf-8") as f:
+    with open(_p.sample("performance_reviews_sample.csv"), "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["review_id", "employee_id", "reviewer_id", "review_period", "rating", "status", "completed_date"])
         writer.writerows(perf_reviews)
@@ -443,7 +444,7 @@ def create_sample_data():
         ["GOL005", "EMP999", "Unknown goal", "Completed", "2026-06-15", "2026-06-15"], # Goal linked to unknown employee
         ["GOL006", "EMP005", "No status goal", "", "2026-06-25", ""] # Goal missing status
     ]
-    with open("data/sample/performance_goals_sample.csv", "w", newline="", encoding="utf-8") as f:
+    with open(_p.sample("performance_goals_sample.csv"), "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["goal_id", "employee_id", "title", "status", "due_date", "completed_date"])
         writer.writerows(perf_goals)
@@ -456,7 +457,7 @@ def create_sample_data():
         ["COM003", "EMP999", "Unknown competency", "3.0", "3.0", "2026-06-12"], # Linked to unknown employee
         ["COM004", "EMP004", "Marketing Strategy", "4.0", "6.0", "2026-06-13"] # Score outside range (6.0)
     ]
-    with open("data/sample/competency_assessments_sample.csv", "w", newline="", encoding="utf-8") as f:
+    with open(_p.sample("competency_assessments_sample.csv"), "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["assessment_id", "employee_id", "competency_name", "required_score", "actual_score", "assessed_date"])
         writer.writerows(competencies)
@@ -470,7 +471,7 @@ def create_sample_data():
         ["ENR004", "EMP004", "CRS003", "In Progress", "2026-06-05", ""],
         ["ENR005", "EMP005", "CRS004", "Cancelled", "2026-06-01", ""]
     ]
-    with open("data/sample/learning_enrollments_sample.csv", "w", newline="", encoding="utf-8") as f:
+    with open(_p.sample("learning_enrollments_sample.csv"), "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["enrollment_id", "employee_id", "course_id", "status", "enrollment_date", "completion_date"])
         writer.writerows(learning_enrollments)
@@ -483,7 +484,7 @@ def create_sample_data():
         ["CRS003", "Strategic Marketing 101", "Marketing", "0.0"], # Invalid hours
         ["CRS004", "Effective HR Management", "Management", "10.0"]
     ]
-    with open("data/sample/training_catalog_sample.csv", "w", newline="", encoding="utf-8") as f:
+    with open(_p.sample("training_catalog_sample.csv"), "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["course_id", "course_name", "category", "duration_hours"])
         writer.writerows(training_catalog)
@@ -498,7 +499,7 @@ def create_sample_data():
         ["PLN005", "ROLE001", "HR Manager", "EMP011", "EMP006", "Ready in 2+ Years", "Low", "True"], # Successor assigned to inactive employee
         ["PLN006", "ROLE002", "Engineering Director", "EMP012", "EMP017", "", "Low", "True"] # Successor readiness missing
     ]
-    with open("data/sample/succession_plans_sample.csv", "w", newline="", encoding="utf-8") as f:
+    with open(_p.sample("succession_plans_sample.csv"), "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["plan_id", "critical_role_id", "role_title", "current_employee_id", "successor_employee_id", "readiness", "flight_risk", "is_critical"])
         writer.writerows(succession_plans)
@@ -512,7 +513,7 @@ def create_sample_data():
         ["TLR004", "EMP011", "4.8", "High", "Low", "Low"],
         ["TLR005", "EMP012", "3.8", "Medium", "Low", "Low"]
     ]
-    with open("data/sample/talent_reviews_sample.csv", "w", newline="", encoding="utf-8") as f:
+    with open(_p.sample("talent_reviews_sample.csv"), "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["review_id", "employee_id", "performance_rating", "potential_rating", "flight_risk", "retention_risk"])
         writer.writerows(talent_reviews)
@@ -524,7 +525,7 @@ def create_sample_data():
         ["SKL001", "EMP001", "SQL", "Expert"], # Duplicate skill record
         ["SKL002", "EMP002", "React", "Intermediate"]
     ]
-    with open("data/sample/employee_skills_sample.csv", "w", newline="", encoding="utf-8") as f:
+    with open(_p.sample("employee_skills_sample.csv"), "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["skill_id", "employee_id", "skill_name", "proficiency"])
         writer.writerows(employee_skills)
@@ -535,7 +536,7 @@ def create_sample_data():
         ["PTH001", "EMP001", "HR Specialist", "HR Specialist Senior", "12"],
         ["PTH002", "EMP002", "Software Engineer", "", "24"] # Career path missing next role
     ]
-    with open("data/sample/career_paths_sample.csv", "w", newline="", encoding="utf-8") as f:
+    with open(_p.sample("career_paths_sample.csv"), "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["path_id", "employee_id", "current_role", "next_role", "readiness_months"])
         writer.writerows(career_paths)

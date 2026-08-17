@@ -29,10 +29,14 @@ def _at_root(monkeypatch):
 
 
 def _registry(tmp_path, monkeypatch, body):
-    p = tmp_path / "declared_domains.yml"
+    root = tmp_path / "root"
+    p = root / "data" / "onboarding" / "declared_domains.yml"
+    p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(body, encoding="utf-8")
-    monkeypatch.setattr(onb, "REGISTRY_PATH", str(p))
-    monkeypatch.setattr(onb, "CONTAINER_REGISTRY_PATH", str(p))
+    # Redirect the STATE ROOT rather than patching a private constant.
+    # registry_path() resolves through scripts/paths.py now, so this
+    # exercises the mechanism that actually ships instead of a bypass.
+    monkeypatch.setenv("HRDASH_DATA_ROOT", str(root))
     return p
 
 
@@ -86,8 +90,8 @@ def test_both_arms_reported_together():
 # --------------------------------------------------------------------------
 
 def test_absent_registry_declares_nothing(tmp_path, monkeypatch):
-    monkeypatch.setattr(onb, "REGISTRY_PATH", str(tmp_path / "nope.yml"))
-    monkeypatch.setattr(onb, "CONTAINER_REGISTRY_PATH", str(tmp_path / "nope.yml"))
+    # An empty root: the registry file simply is not there.
+    monkeypatch.setenv("HRDASH_DATA_ROOT", str(tmp_path / "empty"))
     assert onb.load_declared() == set()
 
 
@@ -166,7 +170,11 @@ def test_undeclared_sentinel_directory_must_not_exist():
 def test_undeclared_sentinel_is_a_named_constant():
     """Not an inline literal, so it cannot drift between the two use sites."""
     import ingest_raw
-    assert ingest_raw.UNDECLARED_SENTINEL_DIR == "data/raw/__undeclared__"
+    # Resolved through the state root now, so assert the SHAPE rather than a
+    # literal - the point of the constant is that it has one definition, and
+    # that is what still needs pinning.
+    assert ingest_raw.UNDECLARED_SENTINEL_DIR.replace("\\", "/").endswith(
+        "data/raw/__undeclared__")
     src = open(os.path.join(_ROOT, "scripts", "ingest_raw.py"),
                encoding="utf-8").read()
-    assert src.count('"data/raw/__undeclared__"') == 1,         "the sentinel path should appear once, as the constant definition"
+    assert src.count('_p.raw("__undeclared__")') == 1,         "the sentinel path should appear once, as the constant definition"

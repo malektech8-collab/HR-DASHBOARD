@@ -29,10 +29,13 @@ import os
 import yaml
 
 import canonical_schema as _cs
+import paths as _p
 
 NEWLINE = chr(10)
 
 REGISTRY_PATH = os.path.join("data", "onboarding", "declared_domains.yml")
+# Resolution now goes through paths.py so an override reaches it. The
+# constant is kept because tests and messages name it.
 CONTAINER_REGISTRY_PATH = "/app/data/onboarding/declared_domains.yml"
 
 # Contract type -> the polars dtype ingest produces in silver.
@@ -68,9 +71,13 @@ class OnboardingError(RuntimeError):
 
 
 def registry_path():
-    if os.path.exists(os.path.dirname(CONTAINER_REGISTRY_PATH)):
-        return CONTAINER_REGISTRY_PATH
-    return REGISTRY_PATH
+    """The onboarding registry.
+
+    THE ARTEFACT THIS WHOLE ISOLATION CYCLE IS ABOUT. A demo run rewriting a
+    real client's absent_columns leaves the file internally inconsistent and
+    silently re-fires every suppressed check. It follows the state root.
+    """
+    return _p.data("onboarding", "declared_domains.yml")
 
 
 def registry_exists():
@@ -421,13 +428,14 @@ def complete_canonical_shape(frame, table):
     return frame, added
 
 
-def write_empty_table(table, silver_dir="data/silver"):
+def write_empty_table(table, silver_dir=None):
     """Write a typed zero-row silver parquet for an undeclared domain.
 
     Overwrites any file left by a previous run — otherwise yesterday's real or
     sample rows would survive as this client's data.
     """
     import polars as pl
+    silver_dir = silver_dir or _p.data("silver")
     os.makedirs(silver_dir, exist_ok=True)
     path = os.path.join(silver_dir, "{}.parquet".format(table))
     pl.DataFrame(schema=empty_frame_schema(table)).write_parquet(path)
