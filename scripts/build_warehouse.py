@@ -450,6 +450,13 @@ def build_warehouse():
             "TRUE" if _onb.provides_column("compliance",
                                            "health_insurance_status")
             else "FALSE"),
+        # DOMAIN grain: did the client send a payroll file at all? The
+        # GOSI-versus-payroll comparison needs both sides, and with one absent
+        # its guards produced nothing - which reads as "GOSI and payroll agree".
+        "has_payroll_domain_sql": (
+            "TRUE" if (os.getenv("DATA_MODE", "demo") != "real"
+                       or "payroll" in _onb.load_declared())
+            else "FALSE"),
         # The three relaxed payroll money columns. Same column-grain question
         # as cost_center, and the same answer: an ABSENT COLUMN is a coverage
         # fact, so the figure is withheld rather than summed to zero. Zero

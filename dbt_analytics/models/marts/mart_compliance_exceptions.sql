@@ -95,7 +95,21 @@
            'Registered GOSI salary (' || gosi_salary || ') differs from basic salary (' || payroll_basic_salary || ')' AS description, 
            'Critical' AS severity, 'Update GOSI salary records to match payroll basic' AS recommended_action 
     FROM {{ ref('base_compliance_current') }} 
-    WHERE gosi_salary IS NOT NULL AND payroll_basic_salary IS NOT NULL AND gosi_salary != payroll_basic_salary
+    -- NEEDS BOTH SIDES. The comparison is between two independent systems, so
+    -- it is only meaningful when the client sent both.
+    --
+    --   GOSI export but no payroll  -> nothing to compare against. WITHHELD.
+    --   payroll but no GOSI export  -> nothing to compare with.    WITHHELD.
+    --   both                        -> the real finding.
+    --   neither                     -> withheld, and the compliance page is
+    --                                  suppressed for want of the domain anyway.
+    --
+    -- Withheld rather than silent: with one side absent the IS NOT NULL guards
+    -- already made this arm produce nothing, which reads as "GOSI and payroll
+    -- agree" - a fabricated-favourable answer about a regulatory figure.
+    WHERE {{ var('has_gosi_source_sql') }}
+      AND {{ var('has_payroll_domain_sql') }}
+      AND gosi_salary IS NOT NULL AND payroll_basic_salary IS NOT NULL AND gosi_salary != payroll_basic_salary
     
     UNION ALL
     
@@ -104,7 +118,16 @@
            'Active employee has null salary values in GOSI or payroll base' AS description, 
            'Warning' AS severity, 'Update salary values in GOSI/payroll database' AS recommended_action 
     FROM {{ ref('base_compliance_current') }} 
-    WHERE gosi_salary IS NULL OR payroll_basic_salary IS NULL
+    -- GATED, and this arm is the dangerous one. It fires when EITHER value is
+    -- null, so a client with no GOSI export - every gosi_salary null - got one
+    -- Critical row per employee about a file they never sent. The manager_id
+    -- shape, on the highest-stakes page in the product.
+    --
+    -- With both sources present it does its real job: an employee missing a
+    -- salary on one side or the other.
+    WHERE {{ var('has_gosi_source_sql') }}
+      AND {{ var('has_payroll_domain_sql') }}
+      AND (gosi_salary IS NULL OR payroll_basic_salary IS NULL)
     
     UNION ALL
     

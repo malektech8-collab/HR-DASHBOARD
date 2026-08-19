@@ -557,7 +557,7 @@ DQ_SEVERITIES = ("Critical", "Warning", "Info")
 # Pay columns: a negative amount is a payroll defect, not a nuance.
 _PAY_COLUMNS = {"basic_salary", "gross_pay", "net_pay", "housing_allowance",
                 "transport_allowance", "other_allowances", "overtime_amount",
-                "deductions", "gosi_salary", "payroll_basic_salary"}
+                "deductions", "gosi_salary"}
 
 
 def dq_severity(violation):

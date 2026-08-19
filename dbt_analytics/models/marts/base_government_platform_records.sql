@@ -8,7 +8,9 @@ SELECT
         c.mudad_status,
         c.contract_authenticated,
         c.gosi_salary,
-        c.payroll_basic_salary,
+        -- From the PAYROLL domain now, via base_compliance_current. The
+        -- name is unchanged because the meaning is.
+        pay.basic_salary AS payroll_basic_salary,
         c.occupation_code,
         c.occupation_match_status,
         c.work_permit_expiry,
@@ -30,4 +32,14 @@ SELECT
         END AS record_classification
     FROM {{ ref('stg_compliance') }} c
     LEFT JOIN {{ ref('base_employees_deduplicated') }} e ON c.employee_id = e.employee_id
+    -- Payroll joined directly rather than through base_compliance_current:
+    -- this model is COMPLIANCE-FIRST on purpose, so a compliance row for an
+    -- unknown employee keeps its row and its 'Unknown Employee' classification.
+    -- Reading through the employees-first view would silently drop exactly the
+    -- rows this model exists to surface.
+    LEFT JOIN (
+        SELECT employee_id, MAX(basic_salary) AS basic_salary
+        FROM {{ ref('base_payroll_current') }}
+        GROUP BY employee_id
+    ) pay ON c.employee_id = pay.employee_id
     WHERE c.period = '{{ var('report_month') }}'

@@ -64,6 +64,15 @@ def prov(*provided):
                         data_mode="real", coverage={})
 
 
+def _strip_sql_comments(sql):
+    """SQL with `--` comment text removed, so a rule reads code not prose."""
+    out = []
+    for line in sql.splitlines():
+        index = line.find("--")
+        out.append(line if index == -1 else line[:index])
+    return "\n".join(out)
+
+
 def _sql(name):
     with open(os.path.join(_MODELS, name), encoding="utf-8") as handle:
         return handle.read()
@@ -145,14 +154,20 @@ def test_the_manager_gate_reaches_every_surface_cost_center_reaches():
     instance of this defect."""
     for name in os.listdir(_MODELS):
         sql = _sql(name)
-        if "has_cost_center_source_sql" not in sql:
+        # COMMENTS STRIPPED before deciding what a model READS. The rule is
+        # about SQL, not prose - and it tripped on a comment that mentioned
+        # `manager_id` while explaining a different gate, which is a false
+        # positive of exactly the kind that gets a rule weakened rather than
+        # narrowed.
+        code = _strip_sql_comments(sql)
+        if "has_cost_center_source_sql" not in code:
             continue
         # mart_recruitment_exceptions reads the REQUISITION's cost centre,
         # from the recruitment domain - a different column of a different
         # file, which this employees-file var must not gate.
-        if "manager_id" not in sql:
+        if "manager_id" not in code:
             continue
-        assert "has_manager_id_source_sql" in sql, name
+        assert "has_manager_id_source_sql" in code, name
 
 
 def test_validate_data_gates_the_manager_check():
