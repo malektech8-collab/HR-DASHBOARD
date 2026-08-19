@@ -85,7 +85,11 @@ WITH anchor AS (
     -- employee with an expiring iqama and no compliance row was not flagged -
     -- a real finding suppressed by where the column happened to live.
     FROM {{ ref('base_active_workforce') }} e, anchor
-    WHERE e.is_saudi = FALSE AND e.iqama_expiry BETWEEN anchor_date AND anchor_date + INTERVAL 30 DAY
+    -- No iqama column, no expiry risk to assess. The arm is withheld rather
+    -- than passing every row, which is the payroll-reconciliation rule at
+    -- exception grain.
+    WHERE {{ var('has_iqama_expiry_source_sql') }}
+      AND e.is_saudi = FALSE AND e.iqama_expiry BETWEEN anchor_date AND anchor_date + INTERVAL 30 DAY
     UNION ALL
     -- 8. Inactive employee appearing in payroll
     SELECT 
@@ -118,4 +122,10 @@ WITH anchor AS (
         'Active non-Saudi employee has no Iqama expiry date set' AS description, 'Warning' AS severity,
         'Update compliance records with Iqama expiry date' AS recommended_action
     FROM {{ ref('base_active_workforce') }} e
-    WHERE e.is_saudi = FALSE AND e.iqama_expiry IS NULL
+    -- THE ONE THAT FIRED. Ungated, this asked every non-Saudi employee of a
+    -- client with no iqama column to "update compliance records" - 2,047 of
+    -- 2,047 on the first real client, one exception per employee about their
+    -- EXPORT FORMAT. An absent column is a coverage fact; a blank value in a
+    -- column the client does record is this exception, and it still fires.
+    WHERE {{ var('has_iqama_expiry_source_sql') }}
+      AND e.is_saudi = FALSE AND e.iqama_expiry IS NULL

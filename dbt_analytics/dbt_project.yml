@@ -62,6 +62,9 @@ vars:
   # deployment behaving exactly as before.
   has_attendance_schedule_source_sql: "TRUE"
   has_attendance_net_late_source_sql: "TRUE"
+  # Compile-time default only; build_warehouse always passes the resolved
+  # value. TRUE keeps demo - which supplies the column - unchanged.
+  has_iqama_expiry_source_sql: "TRUE"
   has_qiwa_source_sql: "TRUE"
   has_health_insurance_source_sql: "TRUE"
   has_payroll_domain_sql: "TRUE"

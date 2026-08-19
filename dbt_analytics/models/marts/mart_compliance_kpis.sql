@@ -9,8 +9,15 @@ WITH counts AS (
     ),
     expiries AS (
         SELECT 
-            COUNT(CASE WHEN iqama_bucket = '0_30' THEN 1 END) AS iqamas_expiring_30,
-            COUNT(CASE WHEN iqama_bucket = 'expired' THEN 1 END) AS iqamas_expired,
+            -- Withheld, not zero. 0 reads as "nobody's iqama has expired",
+            -- which is a claim an absent column does not make - and the one
+            -- claim in this product a client must never be given falsely.
+            CASE WHEN {{ var('has_iqama_expiry_source_sql') }}
+                 THEN COUNT(CASE WHEN iqama_bucket = '0_30' THEN 1 END)
+            END AS iqamas_expiring_30,
+            CASE WHEN {{ var('has_iqama_expiry_source_sql') }}
+                 THEN COUNT(CASE WHEN iqama_bucket = 'expired' THEN 1 END)
+            END AS iqamas_expired,
             COUNT(CASE WHEN work_permit_bucket = '0_30' THEN 1 END) AS work_permits_expiring_30,
             COUNT(CASE WHEN work_permit_bucket = 'expired' THEN 1 END) AS work_permits_expired
         FROM {{ ref('base_document_expiry') }}

@@ -637,15 +637,38 @@ def ingest(data_mode=None):
             pl.col("joining_date").str.to_date("%Y-%m-%d", strict=False),
             pl.col("termination_date").str.to_date("%Y-%m-%d", strict=False),
             pl.col("contract_end_date").str.to_date("%Y-%m-%d", strict=False),
-            # Optional, so tolerate its absence: the cast runs before
-            # complete_canonical_shape adds it as a typed NULL.
-            (pl.col("iqama_expiry").str.to_date("%Y-%m-%d", strict=False)
-             if "iqama_expiry" in df.columns else
-             pl.lit(None, dtype=pl.Date).alias("iqama_expiry")),
             pl.col("basic_salary").cast(pl.Float64, strict=False),
             pl.col("housing_allowance").cast(pl.Float64, strict=False),
             pl.col("transport_allowance").cast(pl.Float64, strict=False),
         ])
+        # THE OPTIONAL DATE IS CAST ONLY IF THE CLIENT SENT IT, and it is cast
+        # OUT HERE rather than in the list above for a reason worth stating.
+        #
+        # It used to sit inside that list as a tolerate-absence branch:
+        #
+        #     (pl.col("iqama_expiry").str.to_date(...)
+        #      if "iqama_expiry" in df.columns else
+        #      pl.lit(None, dtype=pl.Date).alias("iqama_expiry"))
+        #
+        # The else arm MATERIALISED THE COLUMN, three lines before
+        # complete_canonical_shape() is asked which columns were absent. So the
+        # fact was ERASED BEFORE IT WAS RECORDED: `absent` never contained
+        # iqama_expiry, provides_column("employees", "iqama_expiry") answered
+        # TRUE for a client whose file has no such column, and every iqama
+        # figure was computed from nulls and served as 0.
+        #
+        # The branch was written to stop a crash and it did stop the crash. It
+        # also answered a question it was never asked - "was this supplied?" -
+        # with the wrong answer, silently, because completing the shape is the
+        # ONE place that distinguishes an absent column from a blank value and
+        # this ran first.
+        #
+        # A tolerate-absence branch must not FILL what it tolerates. Filling is
+        # complete_canonical_shape's job, and it is the only caller that tells
+        # record_provided_columns what it did.
+        if "iqama_expiry" in df.columns:
+            df = df.with_columns(
+                pl.col("iqama_expiry").str.to_date("%Y-%m-%d", strict=False))
         # Complete the canonical shape BEFORE silver is written.
         #
         # `required: true` used to guarantee both that a column was present in

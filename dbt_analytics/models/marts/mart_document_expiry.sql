@@ -2,7 +2,11 @@
 
 SELECT 
         b.expiry_bucket,
-        COALESCE(i.cnt, 0) AS iqama_count,
+        -- The bucket spine is a UNION of literals, so every bucket exists as a
+        -- row whether or not anything joins to it. COALESCE(..., 0) would turn
+        -- "unmeasurable" into a confident zero on all six rows.
+        CASE WHEN {{ var('has_iqama_expiry_source_sql') }}
+             THEN COALESCE(i.cnt, 0) END AS iqama_count,
         COALESCE(w.cnt, 0) AS work_permit_count
     FROM (
         SELECT 'expired' AS expiry_bucket
