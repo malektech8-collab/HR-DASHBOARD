@@ -112,7 +112,10 @@ marts:
       saudization_rate: [employees]
       probation_count: [employees]          # REVERTED in 2a.5: the payroll term was the ANCHOR, now var('report_month')
       contract_expiring_30: [employees]     # REVERTED in 2a.5 - see probation_count
-      iqama_expiring_30: [employees, compliance]  # payroll REVERTED in 2a.5; compliance is REAL (LEFT JOINs stg_compliance)
+      # WAS [employees, compliance]. The compliance LEFT JOIN survived step 2
+      # but reads no column from it - a dead join keeping a false
+      # dependency alive. Both are removed.
+      iqama_expiring_30: [employees]
       missing_manager_count: [employees]
       # `project` is RESOLVED through the client's locations file, never read
       # off an employee row (stg_employees). With no locations file every
@@ -523,7 +526,11 @@ marts:
 
   mart_workforce_exceptions:
     mode: payload
-    domains: [compliance, employees, payroll]
+    # WAS [compliance, employees, payroll]. Same step-2 leftover: its two iqama
+    # arms joined stg_compliance, both now read the employees column, and the
+    # model has no compliance ref at all. Found by the structural check rather
+    # than by reading - which is the point of having one.
+    domains: [employees, payroll]
     # ANCHOR from MAX(payroll_period)
 
   mart_workforce_headcount_trend:
@@ -532,7 +539,12 @@ marts:
 
   mart_workforce_iqama_expiry:
     mode: payload
-    domains: [compliance, employees]
+    # WAS [compliance, employees]. Step 2 moved iqama_expiry onto the employees
+    # contract and removed this model's compliance join - it now reads
+    # base_active_workforce and nothing else - but the declaration did not
+    # follow. A client with no compliance file had the whole mart suppressed
+    # for a dependency that no longer existed.
+    domains: [employees]
     # ANCHOR from MAX(payroll_period)
 
   mart_workforce_plan_vs_actual:

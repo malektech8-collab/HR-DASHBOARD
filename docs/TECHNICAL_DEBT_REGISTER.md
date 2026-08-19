@@ -1209,6 +1209,83 @@ first is not.
 
 ---
 
+### SP-011 — Withheld-when-it-can-serve: the mirror defect, and why review does not catch it
+
+**Recorded** 2026-08-19, compliance split step 3.5. A **new species**, and the
+first of its kind in this register.
+
+**Every defect this phase has chased was SERVED-WHEN-IT-SHOULD-WITHHOLD.** A
+sentinel rendering an absence as a category. A count of `0` reading as *nobody
+is missing one*. A variance of `0.0%` reading as *unchanged since last month*. A
+compliance percentage computed from two of its three terms. Thirty cycles of
+finding figures that were shown when they should not have been.
+
+**These two were the opposite.** After `iqama_expiry` moved onto the employees
+contract, `mart_workforce_iqama_expiry` read `base_active_workforce` and nothing
+else — yet the registry still declared `[compliance]`, so a client with no
+compliance file had the whole mart **suppressed for a dependency that no longer
+existed**. `mart_workforce_exceptions` and `mart_workforce_kpis.iqama_expiring_30`
+carried the same stale claim, the latter kept alive by a **dead LEFT JOIN**
+reading no column from the table it joined.
+
+**Why the inversion is dangerous, and this is the whole entry.**
+
+The review posture is tuned to catch fabrication. A wrongly-withheld figure
+**looks exactly like the correct behaviour thirty cycles were spent building**:
+
+- Nothing on the page is wrong. There is no bad number to spot.
+- It **cites a reason** — *"Not yet provided: Compliance"* — and the reason is
+  the very sentence this phase worked to make appear.
+- It is **invisible to demo**, which provides every domain, so nothing ever
+  suppresses.
+- It is invisible to a reader of the page, who cannot know the figure was
+  computable.
+
+A fabricated figure is discovered by anyone who checks it. **A wrongly-withheld
+one is discovered by nobody**, because the only person who would notice is the
+client, and what they see is a product that politely declines to answer.
+
+**And it is produced by doing the right thing.** Both instances were created by
+a cycle that correctly moved a column to where it belonged, passed every gate,
+and left a declaration behind. **Success is the mechanism.** Nothing about the
+change looked like a defect, which is why it needed a structural check rather
+than a review.
+
+**The check** — [`test_registry_matches_refs.py`](../backend/tests/test_registry_matches_refs.py).
+It builds the dbt ref graph, resolves each mart's reachable domains through the
+registry's own domain→table mapping, and flags any **declared** domain that is
+not **reachable**. It found a third instance nobody had noticed.
+
+**What it deliberately does not do**, because a rule that over-reaches gets
+switched off:
+
+- It does not flag **under**-declaration. Reaching is not using: a model may ref
+  a base touching six domains and read a column from one. That needs
+  column-level analysis and would be mostly noise.
+- It **abstains** where it cannot see — anything reading a warehouse table dbt
+  does not build, and anything downstream of `data_quality`, which
+  `validate_data` assembles from every domain at once. Abstention is paired
+  with a guard asserting most of the registry is still inspected, so it cannot
+  quietly abstain on everything.
+- **Topical declarations are listed explicitly with a reason each.** A payload
+  that is *about* modules without reading their tables is legitimately
+  declared; the exemption is written down so it is a decision someone can
+  re-examine rather than a silent hole.
+
+**The general rule.** A declared dependency is a **claim about the code**, and
+claims about code can be checked against the code. When a registry, a manifest
+or an annotation says a thing depends on something, prefer a test that resolves
+the actual dependency over a convention that it be kept in step — because the
+day it stops being true, nothing else will say so.
+
+**A third-order note worth keeping**: prose has now tripped three structural
+rules in this repository — a comment mentioning `manager_id`, a comment naming
+`base_compliance_current`, and the words *"from the"* parsed as a table. **A
+rule about code must read code**, comments stripped, or its false positives
+will get it weakened instead of narrowed.
+
+---
+
 ## Open questions
 
 Not debt, and not backlog. Questions whose answer is **not the engineer's to

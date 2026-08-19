@@ -14,7 +14,9 @@ WITH anchor AS (
             e.cost_center,
             e.iqama_expiry
         FROM {{ ref('base_active_workforce') }} e
-        LEFT JOIN {{ ref('stg_compliance') }} c ON e.employee_id = c.employee_id
+        -- The compliance LEFT JOIN is gone. It survived step 2 reading no
+        -- column from `c` - a dead join, and one that kept a false
+        -- compliance dependency alive in the provenance registry.
     ),
     kpi_calc AS (
         SELECT
