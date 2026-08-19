@@ -376,7 +376,17 @@ marts:
 
   mart_er_exceptions:
     mode: payload
-    domains: [compliance, employee_relations, employees, hr_requests]
+    # WAS [compliance, employee_relations, employees, hr_requests]. It reads
+    # base_er_case_parties and base_er_case_population and reaches employee
+    # relations, employees and hr_requests - never compliance. An ER-only
+    # client had their exceptions suppressed for a domain those exceptions do
+    # not need.
+    #
+    # Older than the two step-2 leftovers and found the same way, by the
+    # structural check rather than by reading. Predating a cycle is not a
+    # reason to leave a false declaration standing - it is the same defect,
+    # with more time to have misled someone.
+    domains: [employee_relations, employees, hr_requests]
 
   mart_er_sla_performance:
     mode: payload

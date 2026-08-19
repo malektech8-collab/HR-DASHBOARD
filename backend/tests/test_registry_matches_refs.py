@@ -75,10 +75,6 @@ _TOPICAL = {
         "navigation over the same module list; same reason",
     ("mart_command_center_filter_options", "(payload)"):
         "filter options offered for modules it does not itself read",
-    ("mart_er_exceptions", "(payload)"):
-        "PRE-EXISTING and unreviewed: declares compliance while reading only ER "
-        "models. Flagged for a ruling rather than changed in a cycle scoped to "
-        "the step-2 leftovers",
 }
 
 
