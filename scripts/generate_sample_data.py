@@ -271,17 +271,21 @@ def create_sample_data():
         # iqama_expiry MOVED to the employees sample below. The VALUES and the
         # employees carrying them are unchanged, so the joined result - and the
         # demo fingerprint - is identical.
-        ["EMP001", "2026-06", "Active", "Registered", "Compliant", "True", "12000", "12000", "123456", "Matched", "2027-06-01", "Active"],
-        ["EMP002", "2026-06", "Active", "Registered", "Compliant", "True", "15000", "15000", "234567", "Matched", "2026-12-31", "Active"],
-        ["EMP003", "2026-06", "Active", "Registered", "Compliant", "True", "11000", "11000", "345678", "Matched", "2027-05-01", "Active"],
-        ["EMP004", "2026-06", "Active", "Registered", "Compliant", "False", "18000", "18000", "456789", "Mismatch", "2026-11-01", "Active"]
+        # payroll_basic_salary dropped - it now comes from the PAYROLL domain.
+        # The values it held (12000/15000/11000/18000) are the same figures the
+        # payroll sample already carries for these employees, which is why the
+        # comparison result is unchanged.
+        ["EMP001", "2026-06", "Active", "Registered", "Compliant", "True", "12000", "123456", "Matched", "2027-06-01", "Active"],
+        ["EMP002", "2026-06", "Active", "Registered", "Compliant", "True", "15000", "234567", "Matched", "2026-12-31", "Active"],
+        ["EMP003", "2026-06", "Active", "Registered", "Compliant", "True", "11000", "345678", "Matched", "2027-05-01", "Active"],
+        ["EMP004", "2026-06", "Active", "Registered", "Compliant", "False", "18000", "456789", "Mismatch", "2026-11-01", "Active"]
     ]
 
     with open(_p.sample("compliance_sample.csv"), "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow([
             "employee_id", "period", "qiwa_status", "gosi_status", "mudad_status", 
-            "contract_authenticated", "gosi_salary", "payroll_basic_salary", 
+            "contract_authenticated", "gosi_salary",
             "occupation_code", "occupation_match_status", "work_permit_expiry", 
             "health_insurance_status"
         ])

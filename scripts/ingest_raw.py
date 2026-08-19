@@ -748,7 +748,6 @@ def ingest(data_mode=None):
         df = df.with_columns([
             _bool_col("contract_authenticated"),
             pl.col("gosi_salary").cast(pl.Float64, strict=False),
-            pl.col("payroll_basic_salary").cast(pl.Float64, strict=False),
             pl.col("work_permit_expiry").str.to_date("%Y-%m-%d", strict=False),
         ])
         df = _complete_and_record(df, "compliance")

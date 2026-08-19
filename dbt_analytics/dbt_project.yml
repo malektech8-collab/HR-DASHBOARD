@@ -64,6 +64,7 @@ vars:
   has_attendance_net_late_source_sql: "TRUE"
   has_qiwa_source_sql: "TRUE"
   has_health_insurance_source_sql: "TRUE"
+  has_payroll_domain_sql: "TRUE"
   has_payroll_other_allowances_sql: "TRUE"
   has_payroll_overtime_sql: "TRUE"
   has_payroll_deductions_sql: "TRUE"

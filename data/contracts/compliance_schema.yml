@@ -144,14 +144,12 @@ columns:
   description_en: Salary registered with GOSI, in SAR.
   description_ar: الراتب المسجل لدى التأمينات الاجتماعية بالريال السعودي.
   example: '10000'
-- name: payroll_basic_salary
-  name_en: Payroll Basic Salary
-  name_ar: الراتب الأساسي في مسير الرواتب
-  type: DECIMAL
-  required: true
-  description_en: Basic salary per payroll, for comparison against the GOSI figure.
-  description_ar: الراتب الأساسي حسب مسير الرواتب للمقارنة مع رقم التأمينات.
-  example: '8000'
+# payroll_basic_salary REMOVED in the compliance-split cycle.
+# It existed so gosi_salary could be compared against what payroll actually
+# paid - a real finding - but it asked the CLIENT to copy payroll figures into
+# a compliance export so that we could compare two numbers we already hold, and
+# rejected their file when they could not. The comparison now joins the payroll
+# domain in base_compliance_current, and is withheld unless BOTH sides arrived.
 - name: occupation_code
   name_en: Occupation Code
   name_ar: رمز المهنة
