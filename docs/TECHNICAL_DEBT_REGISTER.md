@@ -1145,6 +1145,70 @@ needs neither.
 
 ---
 
+### SP-010 — An authoritative query and a cached one disagree silently, and the cache never announces its age
+
+**Recorded** 2026-08-19, compliance-split step 2. Both parties contributed; both
+halves are recorded, because a one-sided entry would teach the wrong lesson.
+
+**What happened.** A completed step was reported as pushed with three green
+gates. The reviewer ran `git branch -r`, saw no branch for it, and raised a
+blocker: *work existing in one place while the report says otherwise.*
+
+`git ls-remote` — which queries the server rather than a local cache — showed
+the branch present at the reported SHA, the file content present on the
+server's copy, the PR open against that SHA, and the CI run bound to it. The
+branch had never been missing. The reviewer had run `git fetch` without
+`--prune` and read `refs/remotes/origin/*` as the server.
+
+**Two modes, and they need different countermeasures.** This is the distinction
+worth keeping:
+
+| | STATE divergence | OBSERVATION divergence |
+|---|---|---|
+| what is wrong | the artefact genuinely is not there | one authoritative state, two readers, one stale |
+| example | Phase 0's unpushed branch — thirteen days | this |
+| fix | push, then verify | prefer the authoritative query |
+| detection | the artefact is absent everywhere | the readers disagree |
+
+Treating the second as the first produces a re-push that changes nothing and
+leaves the real cause — a stale cache — in place to mislead again.
+
+**THE INVERSION IS THE DIAGNOSTIC, and it is cheap.** The branch list showed a
+branch that had been **deleted** on merge, and omitted the **live** one. That
+combination cannot come from a failure to push:
+
+- A genuinely unpushed branch would be absent — but the deleted branch would
+  *also* be absent, because the server no longer has it.
+- Seeing the dead one and missing the live one places the reader's view at a
+  point in time **between** the two events. That is a cache, not a state.
+
+So: **when a listing disagrees with a report, check whether it also contains
+something that should be gone.** If it does, the listing is old.
+
+**Both contributions, recorded.**
+
+1. **The report quoted gate results without the SHA that binds them.** A PR
+   number and three green rows cannot be reconciled against anyone else's copy
+   — the only remaining way to check is to list branches, which is precisely
+   the unreliable move. A gate result without its commit is unverifiable by
+   construction.
+2. **The reviewer read `git branch -r` as authoritative.** It reads a local
+   cache refreshed only by `git fetch`, and it will list a deleted branch
+   indefinitely without ever indicating that it is out of date.
+
+**Convention adopted**: **gate reports carry the head SHA.** It costs seven
+characters and converts an assertion into something the reader can verify
+against the server themselves.
+
+**The general rule.** Prefer the query that crosses the network over the one
+that reads a cache — `git ls-remote` over `git branch -r`, `gh pr view` over
+local refs. And when two readers disagree about whether something exists, the
+first question is not *"was it done?"* but *"are we looking at the same
+copy?"* — because the second question is answerable in one command and the
+first is not.
+
+---
+
 ## Open questions
 
 Not debt, and not backlog. Questions whose answer is **not the engineer's to
