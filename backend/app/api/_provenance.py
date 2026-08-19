@@ -80,6 +80,12 @@ DOMAIN_LABELS_EN = {
     # client-facing message named this domain, and it read as
     # "Not yet provided: locations." - lowercase and, worse, untranslated.
     "locations": "Locations",
+    # One per government platform. `compliance` stays as the alias over
+    # the four, so a metric still declaring it reads sensibly.
+    "compliance_gosi": "GOSI",
+    "compliance_qiwa": "Qiwa",
+    "compliance_wps": "Wage Protection (Mudad)",
+    "compliance_health": "Health Insurance",
 }
 DOMAIN_LABELS_AR = {
     "employees": "الموظفون", "payroll": "الرواتب", "attendance": "الحضور",
@@ -87,6 +93,10 @@ DOMAIN_LABELS_AR = {
     "employee_relations": "علاقات الموظفين", "recruitment": "التوظيف",
     "talent": "المواهب",
     "locations": "المواقع",
+    "compliance_gosi": "التأمينات الاجتماعية",
+    "compliance_qiwa": "قوى",
+    "compliance_wps": "حماية الأجور (مدد)",
+    "compliance_health": "الضمان الصحي",
 }
 
 # Where each date-grained domain's coverage comes from. The mart name appears

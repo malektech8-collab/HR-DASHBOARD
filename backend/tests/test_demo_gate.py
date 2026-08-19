@@ -78,7 +78,10 @@ REPORT_MONTH = "2026-06"
 
 # dbt counts. 158 for the life of the project until the org-dimensions cycle
 # added stg_locations, base_row_project and mart_unmatched_locations.
-DBT_MODELS = 161
+# 164 since the compliance split: stg_compliance became four staging
+# models, one per government platform. Updated in the same commit that
+# changed it, which is the whole mechanism of this gate.
+DBT_MODELS = 164
 DBT_DATA_TESTS = 11
 
 

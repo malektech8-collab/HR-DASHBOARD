@@ -75,10 +75,6 @@ _TOPICAL = {
         "navigation over the same module list; same reason",
     ("mart_command_center_filter_options", "(payload)"):
         "filter options offered for modules it does not itself read",
-    ("mart_er_exceptions", "(payload)"):
-        "PRE-EXISTING and unreviewed: declares compliance while reading only ER "
-        "models. Flagged for a ruling rather than changed in a cycle scoped to "
-        "the step-2 leftovers",
 }
 
 
@@ -143,6 +139,22 @@ def _reachable(model, models, table_to_domain, seen=None):
     return domains, resolvable
 
 
+def _is_satisfied(domain, reachable, registry):
+    """Is a declared domain reachable - directly, or through an ALIAS?
+
+    `compliance` is an alias over the four government-platform tables, kept so
+    the 27 mart entries naming it keep working while the split lands. A mart
+    reaching any one platform satisfies the alias, which is exactly what a
+    single compliance file used to mean.
+    """
+    if domain in reachable:
+        return True
+    members = (registry["domains"].get("contracted") or {}).get(domain) or []
+    if members == [domain]:
+        return False
+    return any(m in reachable for m in members)
+
+
 def _declared_entries(spec):
     if spec.get("mode") == "column":
         return [(column, set((entry["domains"] if isinstance(entry, dict)
@@ -164,7 +176,8 @@ def _findings():
             abstained.append(mart)
             continue
         for column, declared in _declared_entries(spec):
-            unreachable = declared - reachable
+            unreachable = {d for d in declared
+                           if not _is_satisfied(d, reachable, registry)}
             if unreachable and (mart, column) not in _TOPICAL:
                 findings.append((mart, column, sorted(unreachable)))
     return findings, abstained

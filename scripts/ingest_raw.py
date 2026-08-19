@@ -103,7 +103,10 @@ def _write_contract_exceptions(violations):
 # loses when its file does not cover that period.
 PERIOD_COLUMNS = {
     "payroll": "payroll_period",
-    "compliance": "period",
+    "compliance_gosi": "period",
+    "compliance_qiwa": "period",
+    "compliance_wps": "period",
+    "compliance_health": "period",
     "attendance": "attendance_date",
 }
 
@@ -227,6 +230,22 @@ def _derive_if_absent(df, table, column, parameter=None):
     return df, True
 
 
+# The four government-platform tables, and the casts each needs. A MODULE
+# CONSTANT rather than an inline tuple so a source-scanning test can see what
+# the loop below covers - a loop is invisible to a rule that greps for
+# `_complete_and_record(df, "<table>")`, and that rule is the SP-009 guard
+# keeping every relaxed table's absences recorded.
+COMPLIANCE_PLATFORMS = (
+    ("compliance_gosi", lambda: [
+        pl.col("gosi_salary").cast(pl.Float64, strict=False)]),
+    ("compliance_qiwa", lambda: [
+        _bool_col("contract_authenticated"),
+        pl.col("work_permit_expiry").str.to_date("%Y-%m-%d", strict=False)]),
+    ("compliance_wps", lambda: []),
+    ("compliance_health", lambda: []),
+)
+
+
 def _read_probe_column(path, column):
     """One column of a client CSV, as TEXT, for the period and coverage gates.
 
@@ -284,7 +303,8 @@ def resolve_ingest_report_month(files, exists=os.path.exists):
     operator = _rp.operator_report_month()
     if operator:
         return operator, _rp.SOURCE_OPERATOR
-    for table, column in (("payroll", "payroll_period"), ("compliance", "period")):
+    for table, column in (("payroll", "payroll_period"),
+                          ("compliance_gosi", "period")):
         values = _periods_in_csv(files[table], column, exists) or []
         months = sorted({m for m in (_rp.normalise_month(v) for v in values) if m})
         if months:
@@ -310,7 +330,13 @@ def check_period_coverage(files, exists=os.path.exists):
         return None, None, []
     checked = []
     for table in sorted(PERIOD_COLUMNS):
-        values = _periods_in_csv(files[table], PERIOD_COLUMNS[table], exists)
+        # .get, not [] - a caller may pass a subset of the tables, and a
+        # period-bearing table nobody mentioned is simply not there to check.
+        # Indexing raised KeyError the moment `compliance` became four.
+        path = files.get(table)
+        if path is None:
+            continue
+        values = _periods_in_csv(path, PERIOD_COLUMNS[table], exists)
         if values is None:
             continue
         _rp.assert_period_is_covered(values, month=month, source=table)
@@ -422,7 +448,10 @@ def ingest(data_mode=None):
         "payroll": _p.sample("payroll_sample.csv"),
         "attendance": _p.sample("attendance_sample.csv"),
         "hr_requests": _p.sample("hr_requests_sample.csv"),
-        "compliance": _p.sample("compliance_sample.csv"),
+        "compliance_gosi": _p.sample("compliance_gosi_sample.csv"),
+        "compliance_qiwa": _p.sample("compliance_qiwa_sample.csv"),
+        "compliance_wps": _p.sample("compliance_wps_sample.csv"),
+        "compliance_health": _p.sample("compliance_health_sample.csv"),
         "employee_relations": _p.sample("employee_relations_sample.csv"),
         "recruitment_requisitions": _p.sample("recruitment_requisitions_sample.csv"),
         "candidates": _p.sample("candidates_sample.csv"),
@@ -738,21 +767,28 @@ def ingest(data_mode=None):
         df.write_parquet(_p.silver("hr_requests.parquet"))
         print("Ingested hr_requests to bronze/silver.")
 
-    # 5. Compliance
-    if os.path.exists(files["compliance"]):
-        df_raw = pl.read_csv(files["compliance"], infer_schema_length=0)
-        df_raw.write_parquet(_p.bronze("compliance.parquet"))
-        
-        df = pl.read_csv(files["compliance"], infer_schema_length=0,
-                         null_values=[""])
-        df = df.with_columns([
-            _bool_col("contract_authenticated"),
-            pl.col("gosi_salary").cast(pl.Float64, strict=False),
-            pl.col("work_permit_expiry").str.to_date("%Y-%m-%d", strict=False),
-        ])
-        df = _complete_and_record(df, "compliance")
-        df.write_parquet(_p.silver("compliance.parquet"))
-        print("Ingested compliance to bronze/silver.")
+    # 5. Compliance - ONE FILE PER GOVERNMENT PLATFORM.
+    #
+    # A client declares the platforms they actually use. Each file is typed by
+    # its own contract, and a platform that did not arrive suppresses only its
+    # own figures.
+    for _table, _casts in COMPLIANCE_PLATFORMS:
+        if not os.path.exists(files.get(_table, "")):
+            continue
+        df_raw = pl.read_csv(files[_table], infer_schema_length=0)
+        df_raw.write_parquet(_p.bronze("%s.parquet" % _table))
+
+        df = pl.read_csv(files[_table], infer_schema_length=0, null_values=[""])
+        # Cast only what the file actually carries - every column but
+        # employee_id and period is optional, so a cast on an absent column
+        # would be the accept-then-crash defect one platform along.
+        casts = [c for c in _casts()
+                 if str(c.meta.output_name()) in df.columns]
+        if casts:
+            df = df.with_columns(casts)
+        df = _complete_and_record(df, _table)
+        df.write_parquet(_p.silver("%s.parquet" % _table))
+        print("Ingested %s to bronze/silver." % _table)
         
     # 6. Employee Relations
     if "employee_relations" in files and os.path.exists(files["employee_relations"]):

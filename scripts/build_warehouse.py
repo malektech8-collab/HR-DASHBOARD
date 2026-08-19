@@ -79,10 +79,20 @@ def _write_domain_provenance(conn, data_mode):
     rows = []
     for domain, tables in sorted(contracted.items()):
         window = coverage.get(domain)
+        # An ALIAS domain maps to member tables rather than to itself - today
+        # `compliance` over the four platform contracts. It is provided when
+        # ANY member was declared, which is what a single compliance file used
+        # to mean. Without this the 27 mart entries naming `compliance` would
+        # suppress the moment the split landed, which is step 5's decision to
+        # make deliberately rather than step 4's to make by accident.
+        is_alias = tables != [domain]
+        provided = (data_mode != "real"
+                    or (any(t in declared for t in tables) if is_alias
+                        else domain in declared))
         rows.append((domain, "contracted",
-                     data_mode != "real" or domain in declared,
+                     provided,
                      sum(count(t) for t in tables),
-                     data_mode != "real" or domain in declared,
+                     provided,
                      window[0] if window else None,
                      window[1] if window else None,
                      history.get(domain)))
@@ -148,7 +158,10 @@ def build_warehouse():
         "payroll": f"{data_prefix}data/silver/payroll.parquet",
         "attendance": f"{data_prefix}data/silver/attendance.parquet",
         "hr_requests": f"{data_prefix}data/silver/hr_requests.parquet",
-        "compliance": f"{data_prefix}data/silver/compliance.parquet",
+        "compliance_gosi": f"{data_prefix}data/silver/compliance_gosi.parquet",
+        "compliance_qiwa": f"{data_prefix}data/silver/compliance_qiwa.parquet",
+        "compliance_wps": f"{data_prefix}data/silver/compliance_wps.parquet",
+        "compliance_health": f"{data_prefix}data/silver/compliance_health.parquet",
         "employee_relations": f"{data_prefix}data/silver/employee_relations.parquet",
         "recruitment_requisitions": f"{data_prefix}data/silver/recruitment_requisitions.parquet",
         "candidates": f"{data_prefix}data/silver/candidates.parquet",
@@ -409,10 +422,10 @@ def build_warehouse():
         # than date-shaped. The config keys are DELETED, not superseded, so the
         # old path cannot silently win.
         "has_gosi_source_sql": (
-            "TRUE" if _onb.provides_column("compliance", "gosi_status")
+            "TRUE" if _onb.provides_column("compliance_gosi", "gosi_status")
             else "FALSE"),
         "has_wps_source_sql": (
-            "TRUE" if _onb.provides_column("compliance", "mudad_status")
+            "TRUE" if _onb.provides_column("compliance_wps", "mudad_status")
             else "FALSE"),
         # Column-grain provision, the same idiom as the two above - which it
         # only genuinely is as of this cycle: does the CLIENT'S
@@ -444,10 +457,10 @@ def build_warehouse():
             "TRUE" if _onb.provides_column("attendance", "net_late_minutes")
             else "FALSE"),
         "has_qiwa_source_sql": (
-            "TRUE" if _onb.provides_column("compliance", "qiwa_status")
+            "TRUE" if _onb.provides_column("compliance_qiwa", "qiwa_status")
             else "FALSE"),
         "has_health_insurance_source_sql": (
-            "TRUE" if _onb.provides_column("compliance",
+            "TRUE" if _onb.provides_column("compliance_health",
                                            "health_insurance_status")
             else "FALSE"),
         # DOMAIN grain: did the client send a payroll file at all? The

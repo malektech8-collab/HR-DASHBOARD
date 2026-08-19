@@ -255,14 +255,18 @@ def test_the_punches_are_required_BECAUSE_a_derivation_reads_them():
 
 
 def test_compliance_platform_statuses_are_optional():
-    required = cs.required_columns("compliance")
-    for column in ("qiwa_status", "mudad_status", "health_insurance_status"):
-        assert column not in required, column
+    # Each now lives on its own platform contract, and is optional there.
+    for column, table in (("qiwa_status", "compliance_qiwa"),
+                          ("mudad_status", "compliance_wps"),
+                          ("health_insurance_status", "compliance_health")):
+        assert column not in cs.required_columns(table), column
 
 
 def test_iqama_expiry_stays_optional_and_the_shape_question_is_untouched():
     """Relaxing three statuses does not pre-empt A5: a client using only Qiwa
     cannot supply Mudad status whatever file it arrives in."""
-    assert "iqama_expiry" not in cs.required_columns("compliance")
-    assert "employee_id" in cs.required_columns("compliance")
-    assert "period" in cs.required_columns("compliance")
+    for table in ("compliance_gosi", "compliance_qiwa", "compliance_wps",
+                  "compliance_health"):
+        assert "iqama_expiry" not in cs.required_columns(table)
+        assert "employee_id" in cs.required_columns(table)
+        assert "period" in cs.required_columns(table)

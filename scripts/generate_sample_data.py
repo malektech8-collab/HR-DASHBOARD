@@ -263,33 +263,53 @@ def create_sample_data():
         ])
         writer.writerows(hr_requests)
 
-    # 5. Compliance data
-    # We will generate compliance logs for active employees.
-    
-    compliance = [
-        # employee_id, period, qiwa_status, gosi_status, mudad_status, contract_authenticated, gosi_salary, payroll_basic_salary, occupation_code, occupation_match_status, work_permit_expiry, iqama_expiry, health_insurance_status
-        # iqama_expiry MOVED to the employees sample below. The VALUES and the
-        # employees carrying them are unchanged, so the joined result - and the
-        # demo fingerprint - is identical.
-        # payroll_basic_salary dropped - it now comes from the PAYROLL domain.
-        # The values it held (12000/15000/11000/18000) are the same figures the
-        # payroll sample already carries for these employees, which is why the
-        # comparison result is unchanged.
-        ["EMP001", "2026-06", "Active", "Registered", "Compliant", "True", "12000", "123456", "Matched", "2027-06-01", "Active"],
-        ["EMP002", "2026-06", "Active", "Registered", "Compliant", "True", "15000", "234567", "Matched", "2026-12-31", "Active"],
-        ["EMP003", "2026-06", "Active", "Registered", "Compliant", "True", "11000", "345678", "Matched", "2027-05-01", "Active"],
-        ["EMP004", "2026-06", "Active", "Registered", "Compliant", "False", "18000", "456789", "Mismatch", "2026-11-01", "Active"]
+    # 5. Compliance data - ONE FILE PER PLATFORM.
+    #
+    # The SAME four employees and the SAME period in each, so the four LEFT
+    # JOINs downstream reproduce exactly the row set the single file produced.
+    # Splitting the columns four ways must not change which employees have a
+    # platform record.
+    compliance_gosi = [
+        ["EMP001", "2026-06", "Registered", "12000", "123456", "Matched"],
+        ["EMP002", "2026-06", "Registered", "15000", "234567", "Matched"],
+        ["EMP003", "2026-06", "Registered", "11000", "345678", "Matched"],
+        ["EMP004", "2026-06", "Registered", "18000", "456789", "Mismatch"],
     ]
-
-    with open(_p.sample("compliance_sample.csv"), "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerow([
-            "employee_id", "period", "qiwa_status", "gosi_status", "mudad_status", 
-            "contract_authenticated", "gosi_salary",
-            "occupation_code", "occupation_match_status", "work_permit_expiry", 
-            "health_insurance_status"
-        ])
-        writer.writerows(compliance)
+    compliance_qiwa = [
+        ["EMP001", "2026-06", "Active", "True", "2027-06-01"],
+        ["EMP002", "2026-06", "Active", "True", "2026-12-31"],
+        ["EMP003", "2026-06", "Active", "True", "2027-05-01"],
+        ["EMP004", "2026-06", "Active", "False", "2026-11-01"],
+    ]
+    compliance_wps = [
+        ["EMP001", "2026-06", "Compliant"],
+        ["EMP002", "2026-06", "Compliant"],
+        ["EMP003", "2026-06", "Compliant"],
+        ["EMP004", "2026-06", "Compliant"],
+    ]
+    compliance_health = [
+        ["EMP001", "2026-06", "Active"],
+        ["EMP002", "2026-06", "Active"],
+        ["EMP003", "2026-06", "Active"],
+        ["EMP004", "2026-06", "Active"],
+    ]
+    for name, header, rows in (
+        ("compliance_gosi", ["employee_id", "period", "gosi_status",
+                             "gosi_salary", "occupation_code",
+                             "occupation_match_status"], compliance_gosi),
+        ("compliance_qiwa", ["employee_id", "period", "qiwa_status",
+                             "contract_authenticated", "work_permit_expiry"],
+         compliance_qiwa),
+        ("compliance_wps", ["employee_id", "period", "mudad_status"],
+         compliance_wps),
+        ("compliance_health", ["employee_id", "period",
+                               "health_insurance_status"], compliance_health),
+    ):
+        with open(_p.sample("%s_sample.csv" % name), "w", newline="",
+                  encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(header)
+            writer.writerows(rows)
 
     # 6. Employee Relations & Labor Cases data
     er_cases = [

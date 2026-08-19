@@ -1,0 +1,87 @@
+# Canonical bilingual schema - compliance_health
+#
+# ONE CONTRACT PER PLATFORM.
+#
+# `compliance` was a single contract whose columns came from at least three
+# government platforms plus payroll - five portals with five logins. No client
+# has one file containing all of them, and a client using Qiwa but not Mudad
+# could not produce a row satisfying both.
+#
+# Splitting by platform means a client declares what they actually have, and a
+# missing platform suppresses only its own figures. Before this, a missing
+# compliance file darkened all eleven compliance metrics - including iqama
+# expiry, which needs no platform export whatsoever.
+#
+# employee_id and period are required in each. Everything else is optional, so
+# an export listing only one status still loads.
+#
+# Single source of truth for: the downloadable template, the validation rules,
+# the UI labels, and the error messages. See docs/PRODUCT-ARCHITECTURE.md section 4.
+#
+# BACKWARD COMPATIBILITY: scripts/validate_schema.py reads only `columns` and,
+# per column, `name` / `required` / `type` / `allowed_values`. Every other key
+# here is additive and ignored by the validator.
+#
+# allowed_values MUST stay a flat list of strings - the validator compares raw
+# cell values against set(allowed_values). Bilingual display lives in the
+# parallel `value_labels` map.
+#
+# NOT YET ENFORCED (scheduled for cycle 1b, before Phase 2 real data):
+#   `unique`, `min_value` - declared below but inert in the current validator.
+# `observed_values` is sample-derived documentation only. It is NOT a
+# vocabulary, is never validated against, and is not exhaustive.
+
+version: 1
+table: compliance_health
+label_en: "Health Insurance"
+label_ar: "الضمان الصحي"
+description_en: "Cooperative health insurance cover, from the insurer or the CCHI portal - commonly a spreadsheet carrying policy numbers alongside, which the mapping profile should ignore with a reason."
+description_ar: "سجلات منصة الضمان الصحي لكل موظف في كل فترة."
+columns:
+- name: employee_id
+  name_en: Employee ID
+  name_ar: الرقم الوظيفي
+  type: VARCHAR
+  required: true
+  description_en: Unique identifier of the employee within the company.
+  description_ar: المعرّف الفريد للموظف داخل الشركة.
+  example: EMP001
+- name: period
+  name_en: Period
+  name_ar: الفترة
+  type: VARCHAR
+  required: true
+  description_en: Reporting month in YYYY-MM format.
+  description_ar: شهر التقرير بصيغة سنة-شهر.
+  example: 2026-06
+- name: health_insurance_status
+  name_en: Health Insurance Status
+  name_ar: حالة التأمين الصحي
+  type: VARCHAR
+  required: false
+  # OPTIONAL: each of these is a SEPARATE government platform, and a
+  # client using only some of them cannot supply the others whatever
+  # file it arrives in. Absent, the figure is withheld rather than
+  # counted as a compliance failure.
+  description_en: CCHI health insurance coverage status. Distinct from gosi_status, which carries the GOSI social-insurance side.
+  description_ar: حالة تغطية التأمين الصحي (مجلس الضمان الصحي). تختلف عن حالة التأمينات الاجتماعية.
+  example: Active
+  # Vocabulary authored by the practitioner, not derived from samples.
+  # EXCEPTION severity: an unexpected value surfaces as a data quality
+  # exception rather than refusing the client's whole file. Tighten to
+  # REJECT once real files confirm the list.
+  on_violation: exception
+  allowed_values:
+  - Active
+  - Inactive
+  - Expired
+  value_labels:
+    Active:
+      en: Active
+      ar: نشط
+    Inactive:
+      en: Inactive
+      ar: غير نشط
+    Expired:
+      en: Expired
+      ar: منتهي

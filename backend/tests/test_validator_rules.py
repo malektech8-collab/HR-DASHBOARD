@@ -218,7 +218,13 @@ def test_structural_failure_short_circuits_per_cell_checks(tmp_path):
 
 
 def test_health_insurance_status_is_the_canonical_name():
-    names = cs.column_names("compliance", CONTRACTS)
-    assert "health_insurance_status" in names
-    assert "insurance_status" not in names
-    assert "gosi_status" in names, "the GOSI side must remain distinct"
+    """The two must stay distinguishable. They are now on SEPARATE contracts,
+    which makes the point structurally rather than by naming: health cover and
+    GOSI registration come from different platforms and cannot be confused for
+    one another even by accident."""
+    health = cs.column_names("compliance_health", CONTRACTS)
+    gosi = cs.column_names("compliance_gosi", CONTRACTS)
+    assert "health_insurance_status" in health
+    assert "insurance_status" not in health
+    assert "gosi_status" in gosi, "the GOSI side must remain distinct"
+    assert "gosi_status" not in health and "health_insurance_status" not in gosi

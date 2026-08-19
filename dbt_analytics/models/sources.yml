@@ -9,7 +9,10 @@ sources:
       - name: payroll
       - name: attendance
       - name: hr_requests
-      - name: compliance
+      - name: compliance_gosi
+      - name: compliance_qiwa
+      - name: compliance_wps
+      - name: compliance_health
       - name: employee_relations
       - name: recruitment_requisitions
       - name: candidates

@@ -237,10 +237,15 @@ def test_ingest_still_types_every_table_it_did_before():
     source = open(os.path.join(_ROOT, "scripts", "ingest_raw.py"),
                   encoding="utf-8").read()
     typed = re.findall(r'if os\.path\.exists\(files\["(\w+)"\]\):', source)
-    # 22 since 2026-08: `locations` is the first REFERENCE dimension, and
-    # the first contracted table with no employee_id. It is typed by the
-    # same one path as the other 21 - which is the property this pins.
-    assert len(typed) == 22, sorted(typed)
+    # The four government-platform tables are typed by a LOOP over
+    # COMPLIANCE_PLATFORMS rather than by a literal branch each, so they are
+    # counted from the constant. A loop is invisible to the pattern above, and
+    # the property being pinned is that every table is typed by the ONE path -
+    # not that each has its own `if`.
+    import ingest_raw
+    typed = sorted(set(typed) | {t for t, _casts in ingest_raw.COMPLIANCE_PLATFORMS})
+    # 25 since the compliance split: `compliance` became four platform tables.
+    assert len(typed) == 25, sorted(typed)
     assert "hr_requests" in typed, (
         "hr_requests is contracted and was one of the 17 the upload path "
         "never typed")
