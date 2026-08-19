@@ -1286,6 +1286,55 @@ will get it weakened instead of narrowed.
 
 ---
 
+### SP-012 — A source-scanning rule cannot see a loop: make the CODE legible, not the guard looser
+
+**Recorded** 2026-08-19, compliance split step 4. The companion to
+[SP-009](#sp-009--a-default-chosen-to-preserve-existing-behaviour-silently-disables-every-future-gate-that-depends-on-it),
+whose guard is the one that went blind.
+
+**What happened.** SP-009's guard asserts that every contracted table with a
+relaxed column is shape-completed and records its absences at ingest. It works
+by scanning `ingest_raw.py` for `_complete_and_record(df, "<table>")`.
+
+The compliance split ingested four government-platform tables **in a loop**.
+The code was correct — all four were completed and recorded — but the literal
+string no longer appeared, so the guard went red on working code.
+
+**The two ways out, and why one is wrong.**
+
+- **Relax the guard** — drop the four from its list, or soften the pattern.
+  Cheap, and it removes exactly the protection SP-009 exists to give, for the
+  four newest tables, at the moment they are least proven.
+- **Make the code legible** — have the loop iterate a **module constant the
+  test imports**. The guard keeps its teeth; the loop stops being invisible.
+
+The second is a few lines and leaves the invariant intact. **When a guard
+cannot see correct code, the defect is in the code's legibility, not in the
+guard's strictness.**
+
+**THIS IS THE FOURTH "WEAKEN OR NARROW" DECISION IN THIS PROJECT, AND THE
+FOURTH TIME NARROWING WAS RIGHT.** Recorded as a pattern so the fifth is easy:
+
+| # | the guard | the false alarm | what was done |
+|---|---|---|---|
+| 1 | `test_the_manager_gate_reaches_every_surface` | a **comment** mentioning `manager_id` | strip comments — read SQL, not prose |
+| 2 | `test_registry_matches_refs` | a **comment** naming `base_compliance_current`; the words *"from the"* parsed as a table | strip comments; **abstain** where the graph cannot see, with a guard that most of it still is |
+| 3 | `test_no_mart_declares_a_domain_it_cannot_reach` | payloads legitimately **about** modules they do not read | an explicit allowlist, **with a written reason each** |
+| 4 | SP-009's ingest guard | a **loop** replacing four literals | iterate a module constant the test imports |
+
+**The pattern.** Every one was a rule reading a proxy for the thing it cared
+about — text where it meant code, a name where it meant a dependency, a literal
+where it meant an action. The fix each time was to **narrow the proxy or teach
+the code to expose the fact**, never to shrink what the rule covers.
+
+**The test for the fifth.** When a guard fires on code you believe is correct,
+ask: *is the rule wrong, or is it looking at the wrong evidence?* If the code is
+genuinely right, the answer is almost always the second — and the repair
+belongs on the side that made the fact hard to see. **A guard relaxed once is
+relaxed permanently, and nothing records what it stopped covering.**
+
+---
+
 ## Open questions
 
 Not debt, and not backlog. Questions whose answer is **not the engineer's to

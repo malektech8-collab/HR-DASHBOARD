@@ -172,12 +172,18 @@ marts:
       non_saudi_headcount: [employees]
       employees_missing_nationality: [employees]
       saudization_pct: [employees]
-      iqamas_expiring_30: [compliance]
-      work_permits_expiring_30: [compliance]
-      iqamas_expired: [compliance]
-      work_permits_expired: [compliance]
-      gosi_missing_count: [compliance]              # Category B: read 19 at declared:[employees] - a false regulatory finding delivered to a Saudi employer
-      wps_exception_count: [compliance]
+      # as iqamas_expired
+      iqamas_expiring_30: [employees]
+      # as work_permits_expired
+      work_permits_expiring_30: [compliance_qiwa]
+      # iqama_bucket <- iqama_expiry, an EMPLOYEES column since step 2. No platform export needed at all
+      iqamas_expired: [employees]
+      # work_permit_bucket <- work_permit_expiry, which arrives with Qiwa
+      work_permits_expired: [compliance_qiwa]
+      # reads gosi_status - GOSI only
+      gosi_missing_count: [compliance_gosi]              # Category B: read 19 at declared:[employees] - a false regulatory finding delivered to a Saudi employer
+      # reads mudad_status - WPS only
+      wps_exception_count: [compliance_wps]
       compliance_exception_count: [compliance, employees]
 
   mart_er_kpis:
@@ -360,7 +366,10 @@ marts:
 
   mart_document_expiry:
     mode: payload
-    domains: [compliance, employees]
+    # Two documents, two sources. The iqama bucket comes from employees; the
+    # work-permit bucket from the Qiwa export. Declared on both, so a client
+    # with no Qiwa file still gets their iqama ageing.
+    domains: [compliance_qiwa, employees]
 
   mart_er_aging_buckets:
     mode: payload
@@ -414,7 +423,8 @@ marts:
 
   mart_gosi_status:
     mode: payload
-    domains: [compliance, employees]
+    # Names gosi_status and gosi_salary and nothing from the other three.
+    domains: [compliance_gosi, employees]
 
   mart_learning_by_project:
     mode: payload
@@ -515,7 +525,17 @@ marts:
 
   mart_saudization_summary:
     mode: payload
-    domains: [compliance, employees, payroll]
+    # WAS [compliance, employees, payroll]. It selects saudi_headcount,
+    # non_saudi_headcount, employees_missing_nationality and saudization_pct
+    # from mart_compliance_kpis - every one of them from the `counts` CTE,
+    # which reads base_active_workforce. It touches neither compliance nor
+    # payroll.
+    #
+    # The SP-011 species again, and the most consequential instance found:
+    # SAUDIZATION was suppressed for want of two files it never reads, and
+    # Saudization is the Nitaqat figure - hiring permits, visa quotas,
+    # government-contract eligibility.
+    domains: [employees]
 
   mart_succession_coverage:
     mode: payload
