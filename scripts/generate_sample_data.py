@@ -28,36 +28,36 @@ def create_sample_data():
     
     employees = [
         # employee_id, employee_name, nationality, is_saudi, company, department, project, job_title, job_family, grade, manager_id, cost_center, employment_type, contract_type, joining_date, termination_date, contract_end_date, status, basic_salary, housing_allowance, transport_allowance
-        ["EMP001", "Ahmad Al-Sudairy", "Saudi", "True", "Company A", "HR", "PROJ-ALPHA", "HR Specialist", "HR", "G3", "EMP011", "CC-HR", "Full-time", "Unlimited", "2024-01-15", "", "", "Active", "12000", "3000", "1000"],
-        ["EMP002", "John Doe", "British", "False", "Company A", "Engineering", "PROJ-BETA", "Software Engineer", "IT", "G4", "EMP012", "CC-ENG", "Full-time", "Limited", "2024-03-01", "", "2026-03-01", "Active", "15000", "3750", "1000"],
+        ["EMP001", "Ahmad Al-Sudairy", "Saudi", "True", "Company A", "HR", "PROJ-ALPHA", "HR Specialist", "HR", "G3", "EMP011", "CC-HR", "Full-time", "Unlimited", "2024-01-15", "", "", "Active", "12000", "3000", "1000", "", ""],
+        ["EMP002", "John Doe", "British", "False", "Company A", "Engineering", "PROJ-BETA", "Software Engineer", "IT", "G4", "EMP012", "CC-ENG", "Full-time", "Limited", "2024-03-01", "", "2026-03-01", "Active", "15000", "3750", "1000", "2026-12-31", "Software Engineer"],
         # Issue 1: Missing manager_id
-        ["EMP003", "Fahad Al-Otaibi", "Saudi", "True", "Company A", "Finance", "PROJ-ALPHA", "Financial Analyst", "Finance", "G3", "", "CC-FIN", "Full-time", "Unlimited", "2024-05-10", "", "", "Active", "11000", "2750", "1000"],
+        ["EMP003", "Fahad Al-Otaibi", "Saudi", "True", "Company A", "Finance", "PROJ-ALPHA", "Financial Analyst", "Finance", "G3", "", "CC-FIN", "Full-time", "Unlimited", "2024-05-10", "", "", "Active", "11000", "2750", "1000", "", ""],
         # Issue 2: Missing project
-        ["EMP004", "Jane Smith", "American", "False", "Company A", "Marketing", "", "Marketing Manager", "Marketing", "G5", "EMP013", "CC-MKT", "Full-time", "Limited", "2023-11-01", "", "2025-11-01", "Active", "18000", "4500", "1500"],
+        ["EMP004", "Jane Smith", "American", "False", "Company A", "Marketing", "", "Marketing Manager", "Marketing", "G5", "EMP013", "CC-MKT", "Full-time", "Limited", "2023-11-01", "", "2025-11-01", "Active", "18000", "4500", "1500", "2026-11-01", "Accountant"],
         # Issue 3: Duplicate employee ID
-        ["EMP005", "Khalid Al-Ghamdi", "Saudi", "True", "Company B", "Operations", "PROJ-GAMMA", "Operations Supervisor", "Operations", "G4", "EMP014", "CC-OPS", "Full-time", "Unlimited", "2024-02-01", "", "", "Active", "14000", "3500", "1000"],
-        ["EMP005", "Khalid Al-Ghamdi Duplicate", "Saudi", "True", "Company B", "Operations", "PROJ-GAMMA", "Operations Supervisor", "Operations", "G4", "EMP014", "CC-OPS", "Full-time", "Unlimited", "2024-02-01", "", "", "Active", "14000", "3500", "1000"],
+        ["EMP005", "Khalid Al-Ghamdi", "Saudi", "True", "Company B", "Operations", "PROJ-GAMMA", "Operations Supervisor", "Operations", "G4", "EMP014", "CC-OPS", "Full-time", "Unlimited", "2024-02-01", "", "", "Active", "14000", "3500", "1000", "", ""],
+        ["EMP005", "Khalid Al-Ghamdi Duplicate", "Saudi", "True", "Company B", "Operations", "PROJ-GAMMA", "Operations Supervisor", "Operations", "G4", "EMP014", "CC-OPS", "Full-time", "Unlimited", "2024-02-01", "", "", "Active", "14000", "3500", "1000", "", ""],
         # Issue 4: Inactive/Terminated status (will have a payroll record)
-        ["EMP006", "Youssef Mansour", "Egyptian", "False", "Company A", "Engineering", "PROJ-BETA", "QA Engineer", "IT", "G2", "EMP012", "CC-ENG", "Full-time", "Limited", "2023-01-01", "2026-05-31", "2025-01-01", "Terminated", "8000", "2000", "1000"],
+        ["EMP006", "Youssef Mansour", "Egyptian", "False", "Company A", "Engineering", "PROJ-BETA", "QA Engineer", "IT", "G2", "EMP012", "CC-ENG", "Full-time", "Limited", "2023-01-01", "2026-05-31", "2025-01-01", "Terminated", "8000", "2000", "1000", "", ""],
         # Issue 5: Active with missing salary (0 basic salary)
-        ["EMP007", "Sarah Jenkins", "Canadian", "False", "Company B", "HR", "PROJ-GAMMA", "Recruiter", "HR", "G2", "EMP011", "CC-HR", "Full-time", "Limited", "2025-02-15", "", "2027-02-15", "Active", "0", "2000", "1000"],
+        ["EMP007", "Sarah Jenkins", "Canadian", "False", "Company B", "HR", "PROJ-GAMMA", "Recruiter", "HR", "G2", "EMP011", "CC-HR", "Full-time", "Limited", "2025-02-15", "", "2027-02-15", "Active", "0", "2000", "1000", "", ""],
         # Issue 6: Negative/abnormal salary
-        ["EMP008", "Mohammed Al-Qahtani", "Saudi", "True", "Company A", "Operations", "PROJ-ALPHA", "Operations Specialist", "Operations", "G3", "EMP014", "CC-OPS", "Full-time", "Unlimited", "2024-06-01", "", "", "Active", "-5000", "-1250", "1000"],
+        ["EMP008", "Mohammed Al-Qahtani", "Saudi", "True", "Company A", "Operations", "PROJ-ALPHA", "Operations Specialist", "Operations", "G3", "EMP014", "CC-OPS", "Full-time", "Unlimited", "2024-06-01", "", "", "Active", "-5000", "-1250", "1000", "", ""],
         # Issue 7: Missing nationality
-        ["EMP009", "Ali Al-Harbi", "", "True", "Company A", "Finance", "PROJ-ALPHA", "Accountant", "Finance", "G2", "EMP003", "CC-FIN", "Full-time", "Unlimited", "2025-01-10", "", "", "Active", "9000", "2250", "1000"],
+        ["EMP009", "Ali Al-Harbi", "", "True", "Company A", "Finance", "PROJ-ALPHA", "Accountant", "Finance", "G2", "EMP003", "CC-FIN", "Full-time", "Unlimited", "2025-01-10", "", "", "Active", "9000", "2250", "1000", "", ""],
         # Issue 8: Missing cost center
-        ["EMP010", "David Vance", "Australian", "False", "Company B", "Engineering", "PROJ-GAMMA", "Solutions Architect", "IT", "G6", "EMP012", "", "Full-time", "Limited", "2024-08-01", "", "2026-08-01", "Active", "25000", "6250", "2000"],
+        ["EMP010", "David Vance", "Australian", "False", "Company B", "Engineering", "PROJ-GAMMA", "Solutions Architect", "IT", "G6", "EMP012", "", "Full-time", "Limited", "2024-08-01", "", "2026-08-01", "Active", "25000", "6250", "2000", "", ""],
         # Normal reference managers / employees
-        ["EMP011", "Sultan Al-Otaibi", "Saudi", "True", "Company A", "HR", "PROJ-ALPHA", "HR Manager", "HR", "G6", "EMP015", "CC-HR", "Full-time", "Unlimited", "2020-01-01", "", "", "Active", "25000", "6250", "2000"],
-        ["EMP012", "Robert Martin", "American", "False", "Company A", "Engineering", "PROJ-BETA", "Engineering Director", "IT", "G7", "EMP015", "CC-ENG", "Full-time", "Limited", "2021-06-01", "", "2026-06-01", "Active", "35000", "8750", "2500"],
-        ["EMP013", "Clara Oswald", "British", "False", "Company A", "Marketing", "PROJ-ALPHA", "Marketing Director", "Marketing", "G6", "EMP015", "CC-MKT", "Full-time", "Limited", "2022-03-15", "", "2026-03-15", "Active", "22000", "5500", "2000"],
-        ["EMP014", "Faisal Al-Jabre", "Saudi", "True", "Company B", "Operations", "PROJ-GAMMA", "Operations Director", "Operations", "G7", "EMP015", "CC-OPS", "Full-time", "Unlimited", "2019-05-01", "", "", "Active", "32000", "8000", "2500"],
-        ["EMP015", "CEO Office", "Saudi", "True", "Company A", "Executive", "PROJ-ALPHA", "CEO", "Executive", "G8", "", "CC-EXEC", "Full-time", "Unlimited", "2015-01-01", "", "", "Active", "60000", "15000", "3000"],
-        ["EMP016", "Noura Al-Dosari", "Saudi", "True", "Company A", "HR", "PROJ-ALPHA", "HR Assistant", "HR", "G1", "EMP011", "CC-HR", "Full-time", "Unlimited", "2025-03-01", "", "", "Active", "6000", "1500", "500"],
-        ["EMP017", "Thomas Miller", "German", "False", "Company A", "Engineering", "PROJ-BETA", "Backend Developer", "IT", "G3", "EMP012", "CC-ENG", "Full-time", "Limited", "2024-10-01", "", "2026-10-01", "Active", "13000", "3250", "1000"],
-        ["EMP018", "Laila Hassan", "Jordanian", "False", "Company A", "Marketing", "PROJ-ALPHA", "Content Writer", "Marketing", "G2", "EMP013", "CC-MKT", "Full-time", "Limited", "2024-12-01", "", "2025-12-01", "Active", "8500", "2125", "1000"],
-        ["EMP019", "Bandar Al-Harbi", "Saudi", "True", "Company B", "Operations", "PROJ-GAMMA", "Logistics Coordinator", "Operations", "G2", "EMP014", "CC-OPS", "Full-time", "Unlimited", "2025-01-15", "", "", "Active", "9500", "2375", "1000"],
-        ["EMP020", "Omar Al-Masri", "Syrian", "False", "Company B", "Operations", "PROJ-GAMMA", "Operations Admin", "Operations", "G1", "EMP014", "CC-OPS", "Full-time", "Limited", "2025-04-01", "", "2026-04-01", "Active", "5500", "1375", "500"]
+        ["EMP011", "Sultan Al-Otaibi", "Saudi", "True", "Company A", "HR", "PROJ-ALPHA", "HR Manager", "HR", "G6", "EMP015", "CC-HR", "Full-time", "Unlimited", "2020-01-01", "", "", "Active", "25000", "6250", "2000", "", ""],
+        ["EMP012", "Robert Martin", "American", "False", "Company A", "Engineering", "PROJ-BETA", "Engineering Director", "IT", "G7", "EMP015", "CC-ENG", "Full-time", "Limited", "2021-06-01", "", "2026-06-01", "Active", "35000", "8750", "2500", "", ""],
+        ["EMP013", "Clara Oswald", "British", "False", "Company A", "Marketing", "PROJ-ALPHA", "Marketing Director", "Marketing", "G6", "EMP015", "CC-MKT", "Full-time", "Limited", "2022-03-15", "", "2026-03-15", "Active", "22000", "5500", "2000", "", ""],
+        ["EMP014", "Faisal Al-Jabre", "Saudi", "True", "Company B", "Operations", "PROJ-GAMMA", "Operations Director", "Operations", "G7", "EMP015", "CC-OPS", "Full-time", "Unlimited", "2019-05-01", "", "", "Active", "32000", "8000", "2500", "", ""],
+        ["EMP015", "CEO Office", "Saudi", "True", "Company A", "Executive", "PROJ-ALPHA", "CEO", "Executive", "G8", "", "CC-EXEC", "Full-time", "Unlimited", "2015-01-01", "", "", "Active", "60000", "15000", "3000", "", ""],
+        ["EMP016", "Noura Al-Dosari", "Saudi", "True", "Company A", "HR", "PROJ-ALPHA", "HR Assistant", "HR", "G1", "EMP011", "CC-HR", "Full-time", "Unlimited", "2025-03-01", "", "", "Active", "6000", "1500", "500", "", ""],
+        ["EMP017", "Thomas Miller", "German", "False", "Company A", "Engineering", "PROJ-BETA", "Backend Developer", "IT", "G3", "EMP012", "CC-ENG", "Full-time", "Limited", "2024-10-01", "", "2026-10-01", "Active", "13000", "3250", "1000", "", ""],
+        ["EMP018", "Laila Hassan", "Jordanian", "False", "Company A", "Marketing", "PROJ-ALPHA", "Content Writer", "Marketing", "G2", "EMP013", "CC-MKT", "Full-time", "Limited", "2024-12-01", "", "2025-12-01", "Active", "8500", "2125", "1000", "", ""],
+        ["EMP019", "Bandar Al-Harbi", "Saudi", "True", "Company B", "Operations", "PROJ-GAMMA", "Logistics Coordinator", "Operations", "G2", "EMP014", "CC-OPS", "Full-time", "Unlimited", "2025-01-15", "", "", "Active", "9500", "2375", "1000", "", ""],
+        ["EMP020", "Omar Al-Masri", "Syrian", "False", "Company B", "Operations", "PROJ-GAMMA", "Operations Admin", "Operations", "G1", "EMP014", "CC-OPS", "Full-time", "Limited", "2025-04-01", "", "2026-04-01", "Active", "5500", "1375", "500", "", ""]
     ]
 
     with open(_p.sample("employees_sample.csv"), "w", newline="", encoding="utf-8") as f:
@@ -66,7 +66,8 @@ def create_sample_data():
             "employee_id", "employee_name", "nationality", "is_saudi", "company", "department", "location", 
             "job_title", "job_family", "grade", "manager_id", "cost_center", "employment_type", 
             "contract_type", "joining_date", "termination_date", "contract_end_date", "status", 
-            "basic_salary", "housing_allowance", "transport_allowance"
+            "basic_salary", "housing_allowance", "transport_allowance",
+            "iqama_expiry", "iqama_occupation"
         ])
         writer.writerows(employees)
 
@@ -267,10 +268,13 @@ def create_sample_data():
     
     compliance = [
         # employee_id, period, qiwa_status, gosi_status, mudad_status, contract_authenticated, gosi_salary, payroll_basic_salary, occupation_code, occupation_match_status, work_permit_expiry, iqama_expiry, health_insurance_status
-        ["EMP001", "2026-06", "Active", "Registered", "Compliant", "True", "12000", "12000", "123456", "Matched", "2027-06-01", "", "Active"],
-        ["EMP002", "2026-06", "Active", "Registered", "Compliant", "True", "15000", "15000", "234567", "Matched", "2026-12-31", "2026-12-31", "Active"],
-        ["EMP003", "2026-06", "Active", "Registered", "Compliant", "True", "11000", "11000", "345678", "Matched", "2027-05-01", "", "Active"],
-        ["EMP004", "2026-06", "Active", "Registered", "Compliant", "False", "18000", "18000", "456789", "Mismatch", "2026-11-01", "2026-11-01", "Active"]
+        # iqama_expiry MOVED to the employees sample below. The VALUES and the
+        # employees carrying them are unchanged, so the joined result - and the
+        # demo fingerprint - is identical.
+        ["EMP001", "2026-06", "Active", "Registered", "Compliant", "True", "12000", "12000", "123456", "Matched", "2027-06-01", "Active"],
+        ["EMP002", "2026-06", "Active", "Registered", "Compliant", "True", "15000", "15000", "234567", "Matched", "2026-12-31", "Active"],
+        ["EMP003", "2026-06", "Active", "Registered", "Compliant", "True", "11000", "11000", "345678", "Matched", "2027-05-01", "Active"],
+        ["EMP004", "2026-06", "Active", "Registered", "Compliant", "False", "18000", "18000", "456789", "Mismatch", "2026-11-01", "Active"]
     ]
 
     with open(_p.sample("compliance_sample.csv"), "w", newline="", encoding="utf-8") as f:
@@ -279,7 +283,7 @@ def create_sample_data():
             "employee_id", "period", "qiwa_status", "gosi_status", "mudad_status", 
             "contract_authenticated", "gosi_salary", "payroll_basic_salary", 
             "occupation_code", "occupation_match_status", "work_permit_expiry", 
-            "iqama_expiry", "health_insurance_status"
+            "health_insurance_status"
         ])
         writer.writerows(compliance)
 

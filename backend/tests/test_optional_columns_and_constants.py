@@ -45,6 +45,11 @@ def _employees(omit=()):
             frame[name] = ["2027-01-01"] * 2
         elif spec.get("allowed_values"):
             frame[name] = [spec["allowed_values"][0]] * 2
+        elif str(spec.get("type", "")).upper() in ("DATE", "TIMESTAMP"):
+            # Generic, after the named dates above: a DATE column reaching the
+            # `else` gets "X1" and fails type-conformance. iqama_expiry moving
+            # onto this contract is what found it.
+            frame[name] = ["2026-01-01"] * 2
         elif str(spec.get("type", "")).upper() == "DECIMAL":
             frame[name] = ["5000", "5000"]
         else:

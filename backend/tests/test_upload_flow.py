@@ -30,9 +30,9 @@ EMPLOYEES_CSV = (
     "job_title,job_family,grade,manager_id,cost_center,employment_type,"
     "contract_type,joining_date,termination_date,contract_end_date,status,"
     "basic_salary,housing_allowance,transport_allowance,work_unit,"
-    "end_of_service_type\n"
+    "end_of_service_type,iqama_expiry,iqama_occupation\n"
     "EMP001,Ahmad,Saudi,true,ACME,Ops,P1,Analyst,HR,G5,,CC1,Full-time,"
-    "Unlimited,2024-01-15,,2027-01-01,Active,12000,3000,1000,,\n"
+    "Unlimited,2024-01-15,,2027-01-01,Active,12000,3000,1000,,,,\n"
 )
 
 

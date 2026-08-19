@@ -12,7 +12,7 @@ WITH anchor AS (
             e.manager_id,
             e.project,
             e.cost_center,
-            c.iqama_expiry
+            e.iqama_expiry
         FROM {{ ref('base_active_workforce') }} e
         LEFT JOIN {{ ref('stg_compliance') }} c ON e.employee_id = c.employee_id
     ),

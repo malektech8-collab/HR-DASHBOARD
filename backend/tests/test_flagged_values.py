@@ -50,6 +50,12 @@ def _row(employee_id, eos_type, status="Terminated"):
             row[name] = "2026-01-31"
         elif spec.get("allowed_values"):
             row[name] = spec["allowed_values"][0]
+        elif str(spec.get("type", "")).upper() in ("DATE", "TIMESTAMP"):
+            # A DATE column cannot take "PLACEHOLDER" - it fails
+            # type-conformance. Added when iqama_expiry moved onto the
+            # employees contract and every generic fixture in the suite went
+            # red at once.
+            row[name] = "2026-01-01"
         elif str(spec.get("type", "")).upper() == "DECIMAL":
             row[name] = "5000"
         else:

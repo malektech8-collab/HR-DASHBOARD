@@ -84,10 +84,6 @@ compliance:
   - التأمين الصحي
   - الضمان الصحي
   - CCHI
-  iqama_expiry:
-  - انتهاء الإقامة
-  - تاريخ انتهاء الاقامة
-  - Iqama Expiry
   mudad_status:
   - مدد
   - حالة مدد
@@ -137,6 +133,17 @@ employee_relations:
   - الأهمية
   - Priority
 employees:
+  iqama_expiry:
+  # MOVED from the compliance section with the column. The client's employees
+  # export already carries this header, which is the point.
+  - انتهاء الإقامة
+  - تاريخ انتهاء الاقامة
+  - تاريخ إنتهاء الهوية / الإقامة
+  - Iqama Expiry
+  iqama_occupation:
+  - المسمى الوظيفي في الاقامة
+  - المهنة في الإقامة
+  - Iqama Occupation
   basic_salary:
   - الراتب الأساسي
   - الراتب

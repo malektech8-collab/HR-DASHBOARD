@@ -318,6 +318,52 @@ columns:
   description_en: Monthly transport allowance in SAR.
   description_ar: بدل النقل الشهري بالريال السعودي.
   example: '500'
+- name: iqama_expiry
+  name_en: Iqama Expiry
+  name_ar: تاريخ انتهاء الإقامة
+  type: DATE
+  required: false
+  # MOVED HERE FROM THE COMPLIANCE CONTRACT.
+  #
+  # THE PERIOD TEST decides where a column belongs: does the value change with
+  # the REPORTING PERIOD? An iqama expiry does not - it changes when the iqama
+  # is reissued. It is an attribute of the employee, not a fact about a month,
+  # and it was in a period-grained contract only because that is where the
+  # other compliance columns happened to live.
+  #
+  # It is also demonstrably where it already is: a real KSA HRIS export carries
+  # the iqama expiry on the employee master. Asking for it in a separate
+  # compliance file asked the client to re-supply what they had already sent.
+  description_en: >-
+    Iqama expiry date. Empty for Saudi nationals. OPTIONAL: a client whose HR
+    system does not record it will have expiry figures withheld rather than
+    reported as none expiring.
+  description_ar: >-
+    تاريخ انتهاء الإقامة. يترك فارغاً للسعوديين. اختياري: إذا لم يسجّله نظام
+    الموارد البشرية، تُحجب أرقام الانتهاء بدلاً من عرضها كعدم وجود انتهاءات.
+  example: '2026-12-31'
+- name: iqama_occupation
+  name_en: Occupation on Iqama
+  name_ar: المهنة في الإقامة
+  type: VARCHAR
+  required: false
+  # The occupation as printed on the iqama, which is frequently NOT the job the
+  # employee actually does - and that divergence is a Qiwa audit finding.
+  #
+  # Same period test, same answer: it changes when the iqama is reissued, not
+  # when the month turns. So it is an employee attribute whichever system
+  # exports it, which makes the job-title comparison a SAME-FILE derivation for
+  # every client rather than a cross-domain one.
+  #
+  # The occupation registered with GOSI stays a separate fact in the GOSI
+  # contract. The two genuinely can differ, and where they do that divergence
+  # is itself worth surfacing - arguably more valuable than either alone.
+  description_en: >-
+    The occupation recorded on the employee's iqama, for comparison against
+    their actual job title. OPTIONAL.
+  description_ar: >-
+    المهنة المسجّلة في إقامة الموظف، لمقارنتها بمسماه الوظيفي الفعلي. اختياري.
+  example: Accountant
 - name: work_unit
   name_en: Work Unit
   name_ar: وحدة عمل

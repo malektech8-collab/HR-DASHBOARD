@@ -12,7 +12,7 @@ SELECT
         c.occupation_code,
         c.occupation_match_status,
         c.work_permit_expiry,
-        c.iqama_expiry,
+        e.iqama_expiry,   -- employees now, see base_compliance_current
         c.health_insurance_status,
         e.employee_name,
         e.status AS employee_status,

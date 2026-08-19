@@ -57,7 +57,12 @@ def test_the_cli_proposes_the_contract_matches_and_leaves_the_rest(client_csv, t
                   "--file", str(client_csv), "--out", str(out))
     assert result.returncode == 0, result.stderr
     spec = yaml.safe_load(out.read_text(encoding="utf-8"))
-    assert len(spec["columns"]) == 22
+    # 24, not 22: iqama_expiry and iqama_occupation moved onto the employees
+    # contract, and this fixture carries every contract column under its Arabic
+    # label - so the ladder now MAPS two columns a client was previously asked
+    # to supply in a separate compliance file. That is the intended effect of
+    # the move, not a drift.
+    assert len(spec["columns"]) == 24
     assert spec["confirmations"] == {}, "the affirmation is never pre-filled"
     text = out.read_text(encoding="utf-8")
     assert "ملاحظات" in text, "the undecided ones are listed for the operator"
@@ -98,7 +103,8 @@ def test_the_cli_writes_a_complete_profile_with_no_browser(client_csv, tmp_path)
 
     version = mapping.load_profile("employees", path=str(profile))
     assert version["created_by"] == "operator@synthetic.local"
-    assert len(version["evidence"]) == 24, "evidence by construction, not by memory"
+    assert len(version["evidence"]) == 26, \
+        "evidence by construction, not by memory"
     assert version["confirmations"]["status"]["confirmed_by"] == \
         "operator@synthetic.local"
     written = io.open(profile, encoding="utf-8").read()

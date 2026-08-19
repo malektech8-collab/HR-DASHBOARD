@@ -79,11 +79,13 @@ WITH anchor AS (
     -- 7. Iqama expiring within 30 days
     SELECT 
         e.employee_id, e.employee_name, 'Iqama Expiry Risk' AS issue_type,
-        'Iqama is expiring within 30 days: ' || COALESCE(CAST(c.iqama_expiry AS VARCHAR), 'N/A') AS description, 'Warning' AS severity,
+        'Iqama is expiring within 30 days: ' || COALESCE(CAST(e.iqama_expiry AS VARCHAR), 'N/A') AS description, 'Warning' AS severity,
         'Renew Iqama and update labor permit' AS recommended_action
-    FROM {{ ref('base_active_workforce') }} e
-    JOIN {{ ref('stg_compliance') }} c ON e.employee_id = c.employee_id, anchor
-    WHERE e.is_saudi = FALSE AND c.iqama_expiry BETWEEN anchor_date AND anchor_date + INTERVAL 30 DAY
+    -- The compliance JOIN is gone with the column. It was an INNER join, so an
+    -- employee with an expiring iqama and no compliance row was not flagged -
+    -- a real finding suppressed by where the column happened to live.
+    FROM {{ ref('base_active_workforce') }} e, anchor
+    WHERE e.is_saudi = FALSE AND e.iqama_expiry BETWEEN anchor_date AND anchor_date + INTERVAL 30 DAY
     UNION ALL
     -- 8. Inactive employee appearing in payroll
     SELECT 
@@ -116,5 +118,4 @@ WITH anchor AS (
         'Active non-Saudi employee has no Iqama expiry date set' AS description, 'Warning' AS severity,
         'Update compliance records with Iqama expiry date' AS recommended_action
     FROM {{ ref('base_active_workforce') }} e
-    LEFT JOIN {{ ref('stg_compliance') }} c ON e.employee_id = c.employee_id
-    WHERE e.is_saudi = FALSE AND c.iqama_expiry IS NULL
+    WHERE e.is_saudi = FALSE AND e.iqama_expiry IS NULL
