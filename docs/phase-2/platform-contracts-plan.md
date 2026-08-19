@@ -153,3 +153,21 @@ The largest cycle of the phase, on its highest-stakes domain. Two things reduce 
 ---
 
 **Not built. Awaiting a ruling — in particular on §7's two-step split and on §1 going first.**
+
+---
+
+## Where things landed (added after the split shipped)
+
+`data/contracts/compliance_schema.yml` no longer exists — a reader searching
+that filename finds nothing. The four replacing it are
+`compliance_gosi_schema.yml`, `compliance_qiwa_schema.yml`,
+`compliance_wps_schema.yml` and `compliance_health_schema.yml`.
+
+**The two tombstones travelled with their columns**, so each sits where a
+reader looking for that column would land:
+
+| tombstone | now on | because |
+|---|---|---|
+| `iqama_expiry MOVED to the employees contract` | **Qiwa** | it sat beside `work_permit_expiry`, the other expiry a platform export carries |
+| `payroll_basic_salary REMOVED` | **GOSI** | it existed to be compared against `gosi_salary` |
+
