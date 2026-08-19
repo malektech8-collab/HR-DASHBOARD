@@ -456,6 +456,26 @@ def build_warehouse():
         "has_attendance_net_late_source_sql": (
             "TRUE" if _onb.provides_column("attendance", "net_late_minutes")
             else "FALSE"),
+        # P0. Same column-grain question, and the highest-stakes answer in the
+        # product: an EXPIRED IQAMA MEANS AN EMPLOYEE CANNOT LEGALLY WORK and
+        # the penalty lands on the employer. Every iqama figure was a COUNT
+        # over an absent column, so a client who does not record iqama expiry
+        # was shown "0 expired, 0 expiring within 30 days" - a clean bill of
+        # health on a document class they never supplied.
+        #
+        # It survived because TWO DEFECTS CANCELLED. The registry wrongly
+        # withheld mart_saudization_summary and mart_workforce_iqama_expiry on
+        # a compliance file they never read (SP-011), which kept these zeros
+        # off the screen; correcting that suppression is what exposed them. See
+        # SP-013 - a fix does not inherit the old behaviour's correctness.
+        #
+        # The fact this reads did not exist until this cycle either: the
+        # tolerate-absence branch in ingest_raw materialised the column before
+        # the absence could be recorded, so the gate would have read TRUE. Both
+        # halves were needed.
+        "has_iqama_expiry_source_sql": (
+            "TRUE" if _onb.provides_column("employees", "iqama_expiry")
+            else "FALSE"),
         "has_qiwa_source_sql": (
             "TRUE" if _onb.provides_column("compliance_qiwa", "qiwa_status")
             else "FALSE"),

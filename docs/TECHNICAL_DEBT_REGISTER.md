@@ -1377,6 +1377,73 @@ catch.
 **Closure**: a practitioner states the rules; they become a derivation with the
 rules named in the registry, and the columns relax.
 
+### SP-013 — Two defects can cancel, and fixing either one alone exposes the other
+
+**Recorded** 2026-08-19, after the compliance split. The one that turns a
+*correction* into a *regression* — and the reason a fix must be re-examined
+rather than trusted.
+
+**What happened.** `mart_workforce_iqama_expiry` and the two `iqamas_*` KPIs
+were suppressed by the registry on a compliance file they never read — the
+[SP-011](#sp-011--the-mirror-species-a-figure-withheld-for-a-reason-that-is-false)
+species, a figure withheld for a false reason. Correcting that declaration was
+right. It was also the act that put the figures on screen for the first time,
+and **underneath the wrong suppression sat a second defect of the opposite
+species**: every iqama figure is a `COUNT` over `employees.iqama_expiry`, a
+column the first real client does not supply, so the counts were 0 and the
+screen would read *"0 expired, 0 expiring within 30 days"* — a clean bill of
+health on a document class the client never sent. An expired iqama means an
+employee cannot legally work and the penalty lands on the employer.
+
+**The two defects cancelled.** Wrong suppression hid a wrong figure, so the
+screen was accidentally right. Neither defect was visible while the other was
+live:
+
+| | what it did | why it was invisible |
+|---|---|---|
+| SP-011 instance | withheld the mart on a domain it never reads | the withholding looks exactly like correct behaviour |
+| the fabrication underneath | counted an absent column and served 0 | never reached a screen — the first defect suppressed it |
+
+**And a third sat under both.** The gate could not have been wired even if
+someone had thought to: `provides_column("employees", "iqama_expiry")` answered
+TRUE for a client with no such column, because a tolerate-absence branch in
+`ingest_raw` materialised the column as a typed NULL *before*
+`complete_canonical_shape()` was asked which columns were absent. **The fact was
+erased before it was recorded.** Three defects, stacked, each masking the next.
+
+**The general form.**
+
+> Two defects of opposite sign can cancel, leaving output that is correct by
+> accident. Fixing either one alone makes the other visible for the first time
+> — as a regression, in the commit that corrected something.
+
+**The implication for review, which is the point of this entry.**
+
+> **After correcting a suppression, re-examine what it was hiding. A fix does
+> not inherit the correctness of the behaviour it replaces.**
+
+The old behaviour's output was right. The new behaviour's output is right only
+if the figure underneath was right, and nothing about correcting the
+declaration establishes that. The reviewer's instinct — *this makes the product
+more honest, and honest is the direction we have been travelling* — is exactly
+what carries the second defect through.
+
+**What it costs to apply.** For every un-suppressed figure, ask what it
+computes from and whether that source is present for the client who will now
+see it. That is one question per figure, and the answer for `iqamas_expired`
+took a single query against the client's silver layer.
+
+**Where this differs from SP-011.** SP-011 says a withheld figure may be
+wrongly withheld. This says the *correction itself* is a moment of exposure,
+and the highest-risk one, because it converts a dormant defect into a served
+one and does so inside a change everyone is reading as an improvement.
+
+**Related**: [SP-004](#sp-004--absent-column-versus-missing-value) — the
+absent-column-versus-missing-value distinction the fabrication violated;
+[SP-009](#sp-009--a-default-chosen-to-preserve-existing-behaviour-silently-disables-every-future-gate-that-depends-on-it)
+— the erasure is that shape, a branch written to prevent a crash that answered
+a question it was never asked.
+
 ## Exclusions
 
 None of these legacy build warnings affect the functionality of the new `GovernanceWidget` or `/api/governance/status` API endpoint, both of which are fully compliant and bug-free.

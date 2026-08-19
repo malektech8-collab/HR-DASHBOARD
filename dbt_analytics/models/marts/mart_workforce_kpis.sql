@@ -25,7 +25,13 @@ WITH anchor AS (
             COUNT(DISTINCT CASE WHEN is_saudi = FALSE THEN employee_id END) AS non_saudi_headcount,
             COUNT(DISTINCT CASE WHEN joining_date >= (SELECT anchor_date FROM anchor) - INTERVAL 90 DAY AND joining_date <= (SELECT anchor_date FROM anchor) THEN employee_id END) AS probation_count,
             COUNT(DISTINCT CASE WHEN contract_end_date >= (SELECT anchor_date FROM anchor) AND contract_end_date <= (SELECT anchor_date FROM anchor) + INTERVAL 30 DAY THEN employee_id END) AS contract_expiring_30,
-            COUNT(DISTINCT CASE WHEN iqama_expiry >= (SELECT anchor_date FROM anchor) AND iqama_expiry <= (SELECT anchor_date FROM anchor) + INTERVAL 30 DAY THEN employee_id END) AS iqama_expiring_30,
+            -- Same gate, same reason as the compliance KPI of the same name.
+            -- The two marts must not drift apart: they answer one question and
+            -- a client reading both must not see a figure on one card and an
+            -- em dash on the other.
+            CASE WHEN {{ var('has_iqama_expiry_source_sql') }}
+                 THEN COUNT(DISTINCT CASE WHEN iqama_expiry >= (SELECT anchor_date FROM anchor) AND iqama_expiry <= (SELECT anchor_date FROM anchor) + INTERVAL 30 DAY THEN employee_id END)
+            END AS iqama_expiring_30,
             -- NULL, not 0, when the client's export has no manager column.
             -- Identical reasoning to cost_center below, and it was left out
             -- when cost_center was done: with no manager column there is no
