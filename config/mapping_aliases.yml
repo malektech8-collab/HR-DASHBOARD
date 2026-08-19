@@ -1,30 +1,6 @@
-# Alias table - rung 4 of the header suggestion ladder.
-#
-# Real Arabic HR exports do not use the contract's own labels. These are the
-# spellings seen in practice, mapped to the canonical column they mean.
-# Matching happens AFTER normalisation (scripts/text.py), so alef/ya/ta-marbuta
-# variants, tatweel, diacritics and stray whitespace need no entry here.
-#
-# This file is repo content, reviewed like code - not operator-supplied data -
-# which is why it is not subject to the no-expression guard that profiles are.
-#
-# It is seeded by hand and will be wrong somewhere. That is why rung 4 is
-# SUGGESTED rather than pre-selected, and why a rejected alias is recorded in
-# the profile evidence: the table gets better from what a human rejects, which
-# is the only signal that says an alias was plausible AND wrong.
-#
-# It deliberately does NOT auto-grow from accumulated profiles. That needs
-# mappings from more than one client; single-tenant accumulation would relearn
-# one client's habits and call it knowledge.
-#
-# NOTE the deliberate collisions, and one that is now load-bearing: "الحالة" is
-# status on employees, request_status on hr_requests and case_status on
-# employee_relations. "المشروع" maps to `location` on the fact tables and to
-# `project` ONLY on `locations` - because on a fact row that column always held
-# the site, and the project a site belongs to now lives in the reference file.
-# A client whose employee export is headed "project" is exactly the migration
-# case: map it to `location` and supply a locations file.
-# Aliases are scoped per table for exactly these reasons.
+# Curated header aliases, one section per contract table.
+# `compliance` became four sections when the contract split by
+# government platform - the aliases follow the columns.
 attendance:
   absence_days:
   - أيام الغياب
@@ -68,8 +44,8 @@ attendance:
   - الوردية
   - المناوبة
   - Shift
-compliance:
-  employee_id:
+compliance_gosi:
+  employee_id: &id001
   - الرقم الوظيفي
   - رقم الموظف
   gosi_salary:
@@ -80,22 +56,24 @@ compliance:
   - التأمينات
   - حالة التأمينات
   - GOSI
-  health_insurance_status:
-  - التأمين الصحي
-  - الضمان الصحي
-  - CCHI
-  mudad_status:
-  - مدد
-  - حالة مدد
-  - Mudad
   occupation_code:
   - رمز المهنة
   - كود المهنة
   - Occupation Code
-  period:
+  period: &id002
   - الشهر
   - الفترة
   - Month
+compliance_health:
+  employee_id: *id001
+  health_insurance_status:
+  - التأمين الصحي
+  - الضمان الصحي
+  - CCHI
+  period: *id002
+compliance_qiwa:
+  employee_id: *id001
+  period: *id002
   qiwa_status:
   - قوى
   - حالة قوى
@@ -104,6 +82,13 @@ compliance:
   - انتهاء رخصة العمل
   - رخصة العمل
   - Work Permit Expiry
+compliance_wps:
+  employee_id: *id001
+  mudad_status:
+  - مدد
+  - حالة مدد
+  - Mudad
+  period: *id002
 employee_relations:
   case_id:
   - رقم القضية
@@ -133,17 +118,6 @@ employee_relations:
   - الأهمية
   - Priority
 employees:
-  iqama_expiry:
-  # MOVED from the compliance section with the column. The client's employees
-  # export already carries this header, which is the point.
-  - انتهاء الإقامة
-  - تاريخ انتهاء الاقامة
-  - تاريخ إنتهاء الهوية / الإقامة
-  - Iqama Expiry
-  iqama_occupation:
-  - المسمى الوظيفي في الاقامة
-  - المهنة في الإقامة
-  - Iqama Occupation
   basic_salary:
   - الراتب الأساسي
   - الراتب
@@ -195,6 +169,15 @@ employees:
   - بدل السكن
   - السكن
   - Housing
+  iqama_expiry:
+  - انتهاء الإقامة
+  - تاريخ انتهاء الاقامة
+  - تاريخ إنتهاء الهوية / الإقامة
+  - Iqama Expiry
+  iqama_occupation:
+  - المسمى الوظيفي في الاقامة
+  - المهنة في الإقامة
+  - Iqama Occupation
   job_title:
   - المسمى الوظيفي
   - الوظيفة

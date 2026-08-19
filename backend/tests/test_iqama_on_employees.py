@@ -51,13 +51,18 @@ def test_it_is_on_employees_and_optional(column):
 
 
 def test_iqama_expiry_has_left_compliance():
-    assert "iqama_expiry" not in [c["name"] for c in cs.columns("compliance")]
+    # Checked across all four platform contracts - `compliance` split into
+    # one per government platform, so "not on compliance" now means "on none
+    # of them".
+    for table in ("compliance_gosi", "compliance_qiwa", "compliance_wps",
+                  "compliance_health"):
+        assert "iqama_expiry" not in [c["name"] for c in cs.columns(table)]
 
 
 def test_compliance_keeps_what_IS_period_grained():
     """The tamper. Moving the attributes must not empty the contract of the
     facts that genuinely belong to a month."""
-    names = [c["name"] for c in cs.columns("compliance")]
+    names = [c["name"] for c in cs.columns("compliance_gosi")]
     for column in ("gosi_salary", "gosi_status", "period", "employee_id"):
         assert column in names, column
 
@@ -65,8 +70,12 @@ def test_compliance_keeps_what_IS_period_grained():
 def test_the_move_is_recorded_where_the_column_used_to_be():
     """A column that vanishes from a contract leaves a reader guessing. The
     tombstone says where it went and why."""
+    # The tombstone travelled with the split. It sits on the QIWA contract,
+    # where it was adjacent to work_permit_expiry - the other expiry a platform
+    # export carries - which is where a reader looking for it will land.
     text = io.open(os.path.join(_ROOT, "data", "contracts",
-                                "compliance_schema.yml"), encoding="utf-8").read()
+                                "compliance_qiwa_schema.yml"),
+                   encoding="utf-8").read()
     assert "iqama_expiry MOVED to the employees contract" in text
     assert "period test" in text
 
@@ -127,10 +136,12 @@ def test_the_sample_moved_the_values_to_the_same_employees():
     employees = employees[:employees.index("\n    ]")]
     assert '"2026-12-31", "Software Engineer"' in employees
     assert '"2026-11-01", "Accountant"' in employees
-    # and the compliance sample no longer carries the column
-    compliance = source[source.index("    compliance = ["):]
-    compliance = compliance[:compliance.index("\n    ]")]
-    assert "iqama_expiry" not in compliance or "MOVED" in compliance
+    # and none of the four platform samples carries the column
+    for name in ("compliance_gosi", "compliance_qiwa", "compliance_wps",
+                 "compliance_health"):
+        block = source[source.index("    {} = [".format(name)):]
+        block = block[:block.index("\n    ]")]
+        assert "iqama_expiry" not in block, name
 
 
 def test_the_sample_header_and_rows_agree():

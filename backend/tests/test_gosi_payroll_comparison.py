@@ -49,12 +49,15 @@ def _sql(name):
 # --------------------------------------------------------------------------
 
 def test_payroll_basic_salary_has_left_the_compliance_contract():
-    assert "payroll_basic_salary" not in [c["name"] for c in cs.columns("compliance")]
+    for table in ("compliance_gosi", "compliance_qiwa", "compliance_wps",
+                  "compliance_health"):
+        assert "payroll_basic_salary" not in [c["name"] for c in cs.columns(table)]
 
 
 def test_the_removal_is_recorded_where_the_column_used_to_be():
     text = io.open(os.path.join(_ROOT, "data", "contracts",
-                                "compliance_schema.yml"), encoding="utf-8").read()
+                                "compliance_gosi_schema.yml"),
+                   encoding="utf-8").read()
     assert "payroll_basic_salary REMOVED" in text
     assert "already hold" in text
 
@@ -63,7 +66,9 @@ def test_gosi_salary_stays_because_only_GOSI_can_supply_it():
     """The tamper. Removing the copied column must not remove the fact it was
     compared against - gosi_salary comes from the GOSI platform and nothing
     else in the pipeline can produce it."""
-    assert "gosi_salary" in cs.required_columns("compliance")
+    # It lives on the GOSI contract now, and is OPTIONAL there like every
+    # column but the two keys - a GOSI export listing only status still loads.
+    assert "gosi_salary" in [c["name"] for c in cs.columns("compliance_gosi")]
 
 
 def test_the_pay_column_set_no_longer_names_it():
@@ -102,7 +107,10 @@ def test_the_compliance_first_model_joins_payroll_DIRECTLY():
     classification. Reading through the employees-first view would silently
     drop exactly the rows it exists to surface."""
     sql = _sql("base_government_platform_records.sql")
-    assert "FROM {{ ref('stg_compliance') }} c" in sql
+    # The spine is now the UNION of the four platforms' keys, still
+    # compliance-first: a row present in any one platform must survive.
+    assert "SELECT employee_id, period FROM {{ ref('stg_compliance_gosi') }}" in sql
+    assert "UNION" in sql
     # not the ref - the NAME appears in the comment explaining why it is not
     # used, which is exactly the text a cruder assertion would trip over.
     assert "ref('base_compliance_current')" not in sql

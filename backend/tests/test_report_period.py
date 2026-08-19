@@ -356,10 +356,13 @@ def _csv(tmp_path, name, column, values, extra="employee_id"):
 
 
 def _files(tmp_path, payroll=None, compliance=None, attendance=None):
+    # `compliance` is the GOSI platform table now - the period-bearing one
+    # ingest reads for derivation. The split renamed the source; the
+    # period logic is unchanged.
     missing = str(tmp_path / "__absent__.csv")
     return {
         "payroll": payroll or missing,
-        "compliance": compliance or missing,
+        "compliance_gosi": compliance or missing,
         "attendance": attendance or missing,
     }
 
@@ -452,7 +455,9 @@ def test_all_three_domains_agreeing_passes(tmp_path):
     )
     month, _, checked = ingest_raw.check_period_coverage(files)
     assert month == "2026-08"
-    assert checked == ["attendance", "compliance", "payroll"]
+    # `compliance_gosi` since the split: the GOSI export is the
+    # period-bearing compliance file, and the one derivation reads.
+    assert checked == ["attendance", "compliance_gosi", "payroll"]
 
 
 def test_no_resolvable_period_means_no_gate(tmp_path):

@@ -57,7 +57,19 @@ domains:
     employees: [employees]
     payroll: [payroll]
     attendance: [attendance]
-    compliance: [compliance]
+    # ONE DOMAIN PER PLATFORM, plus `compliance` retained as an ALIAS over the
+    # four. The alias exists so the 27 mart entries that name `compliance`
+    # keep working while the split lands: re-pointing each of them at the
+    # platform it actually depends on is a SEMANTIC judgement demo cannot
+    # prove, and it is step 5.
+    #
+    # An alias is provided when ANY of its members was declared, which is what
+    # a single compliance file used to mean.
+    compliance: [compliance_gosi, compliance_qiwa, compliance_wps, compliance_health]
+    compliance_gosi: [compliance_gosi]
+    compliance_qiwa: [compliance_qiwa]
+    compliance_wps: [compliance_wps]
+    compliance_health: [compliance_health]
     hr_requests: [hr_requests]
     employee_relations: [employee_relations]
     # A REFERENCE DIMENSION, not a fact domain. It carries no measures of its

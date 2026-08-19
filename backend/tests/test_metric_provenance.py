@@ -343,8 +343,30 @@ def test_registry_shape(registry):
 
 
 def test_contracted_domains_match_the_contracts_directory(registry):
+    """Every contracted domain is either a CONTRACT or an ALIAS over contracts.
+
+    `compliance` became an alias when the contract split by government
+    platform - it maps to the four rather than to a file of its own, so the 27
+    mart entries naming it keep working while step 5 re-points them one at a
+    time. An alias is legitimate; an alias whose members do not exist is not.
+    """
     import canonical_schema as cs
-    assert set(registry["domains"]["contracted"]) == set(cs.available_tables())
+
+    tables = set(cs.available_tables())
+    contracted = registry["domains"]["contracted"]
+    aliases = {}
+    for domain, members in contracted.items():
+        if domain in tables:
+            assert members == [domain], (
+                "{} is a contract; it must map to itself".format(domain))
+        else:
+            aliases[domain] = members
+    # every contract is declared
+    assert tables <= set(contracted), sorted(tables - set(contracted))
+    # and every alias resolves to real contracts, never to nothing
+    for domain, members in aliases.items():
+        assert members, domain
+        assert set(members) <= tables, (domain, sorted(set(members) - tables))
 
 
 # --------------------------------------------------------------------------
