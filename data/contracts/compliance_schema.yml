@@ -191,14 +191,11 @@ columns:
   description_en: Work permit expiry date. Empty for Saudi nationals.
   description_ar: تاريخ انتهاء رخصة العمل. يترك فارغاً للسعوديين.
   example: '2027-01-15'
-- name: iqama_expiry
-  name_en: Iqama Expiry
-  name_ar: تاريخ انتهاء الإقامة
-  type: DATE
-  required: false
-  description_en: Iqama expiry date. Empty for Saudi nationals.
-  description_ar: تاريخ انتهاء الإقامة. يترك فارغاً للسعوديين.
-  example: '2027-02-20'
+# iqama_expiry MOVED to the employees contract in the compliance-split cycle.
+# The period test decides where a column belongs: an iqama expiry changes when
+# the iqama is reissued, not when the reporting period turns, so it is an
+# employee attribute. It is also already on a real HRIS export, which meant
+# asking for it here asked the client to re-supply what they had sent.
 - name: health_insurance_status
   name_en: Health Insurance Status
   name_ar: حالة التأمين الصحي

@@ -608,6 +608,11 @@ def ingest(data_mode=None):
             pl.col("joining_date").str.to_date("%Y-%m-%d", strict=False),
             pl.col("termination_date").str.to_date("%Y-%m-%d", strict=False),
             pl.col("contract_end_date").str.to_date("%Y-%m-%d", strict=False),
+            # Optional, so tolerate its absence: the cast runs before
+            # complete_canonical_shape adds it as a typed NULL.
+            (pl.col("iqama_expiry").str.to_date("%Y-%m-%d", strict=False)
+             if "iqama_expiry" in df.columns else
+             pl.lit(None, dtype=pl.Date).alias("iqama_expiry")),
             pl.col("basic_salary").cast(pl.Float64, strict=False),
             pl.col("housing_allowance").cast(pl.Float64, strict=False),
             pl.col("transport_allowance").cast(pl.Float64, strict=False),
@@ -745,7 +750,6 @@ def ingest(data_mode=None):
             pl.col("gosi_salary").cast(pl.Float64, strict=False),
             pl.col("payroll_basic_salary").cast(pl.Float64, strict=False),
             pl.col("work_permit_expiry").str.to_date("%Y-%m-%d", strict=False),
-            pl.col("iqama_expiry").str.to_date("%Y-%m-%d", strict=False),
         ])
         df = _complete_and_record(df, "compliance")
         df.write_parquet(_p.silver("compliance.parquet"))

@@ -75,7 +75,10 @@ def test_the_workspace_returns_their_columns_with_samples(staged_arabic):
     body = api.get("/api/data/uploads/{}/columns".format(staged_arabic),
                    headers=_auth()).json()
     assert body["table"] == "employees"
-    assert len(body["source_columns"]) == 24
+    # 26, not 24: the fixture carries every contract column under its
+    # Arabic label, and employees gained iqama_expiry and
+    # iqama_occupation when the period test moved them off compliance.
+    assert len(body["source_columns"]) == 26
     by_header = {c["header"]: c for c in body["source_columns"]}
     # their own values, so a human can recognise the column
     assert by_header["الجنسيه"]["samples"], "a header alone often will not settle it"
@@ -119,11 +122,16 @@ def test_saving_from_the_screen_writes_an_attributed_profile(staged_arabic, tmp_
         headers=_auth())
     assert response.status_code == 200, response.text
     body = response.json()
-    assert (body["mapped"], body["ignored"], body["undecided"]) == (22, 2, 0)
+    # Two more MAPPED for the same reason - columns a client used to be
+    # asked for in a separate compliance file are now recognised on the
+    # employees export they already send.
+    assert (body["mapped"], body["ignored"], body["undecided"]) == (24, 2, 0)
     assert body["created_by"], "taken from the session, not the body"
 
     version = mapping.load_profile("employees")
-    assert len(version["evidence"]) == 24
+    # 26, same two columns. Evidence is one entry per source header, so it
+    # moves with the fixture rather than with the decision.
+    assert len(version["evidence"]) == 26
     assert version["confirmations"]["status"]["confirmed_by"] == body["created_by"]
 
 

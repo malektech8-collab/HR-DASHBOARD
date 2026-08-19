@@ -20,7 +20,13 @@ SELECT
         c.occupation_code,
         c.occupation_match_status,
         c.work_permit_expiry,
-        c.iqama_expiry,
+        -- FROM THE EMPLOYEES SIDE. iqama_expiry moved to the employees
+        -- contract (the period test: it changes when the iqama is
+        -- reissued, not when the month turns). Taking it here means the
+        -- seven models reading it through this view need no edit - the
+        -- same reason stg_employees resolves `project` in one place.
+        e.iqama_expiry,
+        e.iqama_occupation,
         c.health_insurance_status
     FROM {{ ref('base_active_workforce') }} e
     LEFT JOIN {{ ref('stg_compliance') }} c ON e.employee_id = c.employee_id AND c.period = '{{ var('report_month') }}'
